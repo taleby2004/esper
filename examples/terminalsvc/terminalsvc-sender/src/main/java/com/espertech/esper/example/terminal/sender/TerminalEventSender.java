@@ -48,7 +48,7 @@ public class TerminalEventSender
     public static void main(String args[])
         throws Exception
     {
-        String providerURL = "localhost:1099";
+        String providerURL = "remote://localhost:4447";
         if (args.length > 0)
         {
             providerURL = args[0];

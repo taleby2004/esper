@@ -55,6 +55,8 @@ public class TestDataFlowOpEPStatementSource extends TestCase {
                 .operatorProvider(new DefaultSupportGraphOpProvider(captureOp));
 
         EPDataFlowInstance df = epService.getEPRuntime().getDataFlowRuntime().instantiate("MyDataFlowOne", options);
+        assertNull(df.getUserObject());
+        assertNull(df.getInstanceId());
         df.start();
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));

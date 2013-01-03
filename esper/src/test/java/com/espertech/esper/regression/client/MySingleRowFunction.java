@@ -27,6 +27,10 @@ public class MySingleRowFunction
         return new InnerSingleRow();
     }
 
+    public static void throwexception() {
+        throw new RuntimeException("This is a 'throwexception' generated exception");
+    }
+
     public static class InnerSingleRow {
         public int chainValue(int i, int j) {
             return i*j;

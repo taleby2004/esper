@@ -20,6 +20,8 @@ import com.espertech.esper.util.JavaClassHelper;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 public class DotMethodUtil {
@@ -37,11 +39,13 @@ public class DotMethodUtil {
         return new DotMethodFPProvided(paramsList.toArray(new DotMethodFPProvidedParam[paramsList.size()]));
     }
 
-    public static DotMethodFP validateParameters(DotMethodFP[] footprints, DotMethodTypeEnum methodType, String methodUsedName, DotMethodFPProvided providedFootprint)
+    public static DotMethodFP validateParametersDetermineFootprint(DotMethodFP[] footprints, DotMethodTypeEnum methodType, String methodUsedName, DotMethodFPProvided providedFootprint, DotMethodInputTypeMatcher inputTypeMatcher)
         throws ExprValidationException
     {
         boolean isLambdaApplies = DotMethodTypeEnum.ENUM == methodType;
-        DotMethodFP found = null;
+
+        // determine footprint candidates strictly based on parameters
+        List<DotMethodFP> candidates = null;
         DotMethodFP bestMatch = null;
         for (DotMethodFP footprint : footprints) {
 
@@ -65,14 +69,51 @@ public class DotMethodUtil {
             }
 
             if (paramMatch) {
-                found = footprint;
-                break;
+                if (candidates == null) {
+                    candidates = new ArrayList<DotMethodFP>(2);
+                }
+                candidates.add(footprint);
             }
         }
 
-        if (found != null) {
+        // if there are multiple candidates, eliminate by input (event bean collection or component collection)
+        if (candidates != null && candidates.size() > 1) {
+            Iterator<DotMethodFP> candidateIt = candidates.iterator();
+            for (;candidateIt.hasNext();) {
+                DotMethodFP fp = candidateIt.next();
+                if (!inputTypeMatcher.matches(fp)) {
+                    candidateIt.remove();
+                }
+            }
+        }
+
+        // handle single remaining candidate
+        if (candidates != null && candidates.size() == 1) {
+            DotMethodFP found = candidates.get(0);
             validateSpecificTypes(methodUsedName, methodType, found.getParameters(), providedFootprint.getParameters());
             return found;
+        }
+
+        // check all candidates in detail to see which one matches, take first one
+        if (candidates != null && !candidates.isEmpty()) {
+            bestMatch = candidates.get(0);
+            Iterator<DotMethodFP> candidateIt = candidates.iterator();
+            ExprValidationException firstException = null;
+            for (;candidateIt.hasNext();) {
+                DotMethodFP fp = candidateIt.next();
+                try {
+                    validateSpecificTypes(methodUsedName, methodType, fp.getParameters(), providedFootprint.getParameters());
+                    return fp;
+                }
+                catch (ExprValidationException ex) {
+                    if (firstException == null) {
+                        firstException = ex;
+                    }
+                }
+            }
+            if (firstException != null) {
+                throw firstException;
+            }
         }
 
         String message = "Parameters mismatch for " + methodType.getTypeName() + " method '" + methodUsedName + "', the method ";

@@ -8,11 +8,11 @@
  **************************************************************************************/
 package com.espertech.esper.epl.join.base;
 
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.collection.MultiKey;
 import com.espertech.esper.collection.UniformPair;
-import com.espertech.esper.epl.join.table.EventTable;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
-import com.espertech.esper.client.EventBean;
+import com.espertech.esper.epl.join.table.EventTable;
 
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -25,15 +25,15 @@ import java.util.Set;
  */
 public class JoinSetComposerImpl implements JoinSetComposer
 {
-    private final EventTable[][] repositories;
-    private final QueryStrategy[] queryStrategies;
+    protected final EventTable[][] repositories;
+    protected final QueryStrategy[] queryStrategies;
     private final boolean isPureSelfJoin;
     private final ExprEvaluatorContext exprEvaluatorContext;
     private final boolean joinRemoveStream;
 
     // Set semantic eliminates duplicates in result set, use Linked set to preserve order
-    private Set<MultiKey<EventBean>> oldResults = new LinkedHashSet<MultiKey<EventBean>>();
-    private Set<MultiKey<EventBean>> newResults = new LinkedHashSet<MultiKey<EventBean>>();
+    protected Set<MultiKey<EventBean>> oldResults = new LinkedHashSet<MultiKey<EventBean>>();
+    protected Set<MultiKey<EventBean>> newResults = new LinkedHashSet<MultiKey<EventBean>>();
 
     /**
      * Ctor.
@@ -96,28 +96,13 @@ public class JoinSetComposerImpl implements JoinSetComposer
             }
         }
 
-        // add new data to indexes
-        for (int i = 0; i < newDataPerStream.length; i++)
-        {
-            if (newDataPerStream[i] != null)
+        // We add and remove data in one call to each index.
+        // Most indexes will add first then remove as newdata and olddata may contain the same event.
+        // Unique indexes may remove then add.
+        for (int stream = 0; stream < newDataPerStream.length; stream++) {
+            for (int j = 0; j < repositories[stream].length; j++)
             {
-                for (int j = 0; j < repositories[i].length; j++)
-                {
-                    repositories[i][j].add((newDataPerStream[i]));
-                }
-            }
-        }
-
-        // remove old data from indexes
-        // adding first and then removing as the events added may be remove right away
-        for (int i = 0; i < oldDataPerStream.length; i++)
-        {
-            if (oldDataPerStream[i] != null)
-            {
-                for (int j = 0; j < repositories[i].length; j++)
-                {
-                    repositories[i][j].remove(oldDataPerStream[i]);
-                }
+                repositories[stream][j].addRemove(newDataPerStream[stream], oldDataPerStream[stream]);
             }
         }
 

@@ -55,7 +55,7 @@ public class JoinSetComposerPrototypeHistorical2StreamImpl implements JoinSetCom
         this.outerJoinDescList = outerJoinDescList;
     }
 
-    public JoinSetComposerDesc create(Viewable[] streamViews) {
+    public JoinSetComposerDesc create(Viewable[] streamViews, boolean isFireAndForget) {
         QueryStrategy[] queryStrategies = new QueryStrategy[streamTypes.length];
 
         HistoricalEventViewable viewable = (HistoricalEventViewable) streamViews[polledViewNum];

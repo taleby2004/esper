@@ -14,6 +14,7 @@ package com.espertech.esper.epl.enummethod.dot;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.util.JavaClassHelper;
 
+import java.lang.reflect.Method;
 import java.util.Collection;
 
 public class ExprDotEvalTypeInfo {
@@ -47,6 +48,15 @@ public class ExprDotEvalTypeInfo {
 
     public boolean isScalar() {
         return scalar != null;
+    }
+
+    public static ExprDotEvalTypeInfo fromMethod(Method method) {
+        Class returnType = method.getReturnType();
+        if (JavaClassHelper.isImplementsInterface(returnType, Collection.class)) {
+            Class componentType = JavaClassHelper.getGenericReturnType(method, true);
+            return ExprDotEvalTypeInfo.componentColl(componentType);
+        }
+        return ExprDotEvalTypeInfo.scalarOrUnderlying(method.getReturnType());
     }
 
     public static ExprDotEvalTypeInfo scalarOrUnderlying(Class scalar) {

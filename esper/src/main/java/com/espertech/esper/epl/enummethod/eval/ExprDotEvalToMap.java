@@ -17,7 +17,9 @@ import com.espertech.esper.epl.enummethod.dot.ExprDotEvalEnumMethodBase;
 import com.espertech.esper.epl.enummethod.dot.ExprDotEvalParam;
 import com.espertech.esper.epl.enummethod.dot.ExprDotEvalParamLambda;
 import com.espertech.esper.epl.enummethod.dot.ExprDotEvalTypeInfo;
+import com.espertech.esper.epl.expression.ExprDotNodeUtility;
 import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.event.arr.ObjectArrayEventType;
 
 import java.util.List;
 import java.util.Map;
@@ -25,13 +27,17 @@ import java.util.Map;
 public class ExprDotEvalToMap extends ExprDotEvalEnumMethodBase {
 
     public EventType[] getAddStreamTypes(String enumMethodUsedName, List<String> goesToNames, EventType inputEventType, Class collectionComponentType, List<ExprDotEvalParam> bodiesAndParameters) {
-        return new EventType[] {inputEventType};
+        return ExprDotNodeUtility.getSingleLambdaParamEventType(enumMethodUsedName, goesToNames, inputEventType, collectionComponentType);
     }
 
     public EnumEval getEnumEval(EventAdapterService eventAdapterService, StreamTypeService streamTypeService, String statementId, String enumMethodUsedName, List<ExprDotEvalParam> bodiesAndParameters, EventType inputEventType, Class collectionComponentType, int numStreamsIncoming) {
         super.setTypeInfo(ExprDotEvalTypeInfo.scalarOrUnderlying(Map.class));
         ExprDotEvalParamLambda first = (ExprDotEvalParamLambda) bodiesAndParameters.get(0);
         ExprDotEvalParamLambda second = (ExprDotEvalParamLambda) bodiesAndParameters.get(1);
-        return new EnumEvalToMap(first.getBodyEvaluator(), first.getStreamCountIncoming(), second.getBodyEvaluator());
+        if (inputEventType == null) {
+            return new EnumEvalToMapScalarLambda(first.getBodyEvaluator(), first.getStreamCountIncoming(), second.getBodyEvaluator(),
+                    (ObjectArrayEventType) first.getGoesToTypes()[0]);
+        }
+        return new EnumEvalToMapEvents(first.getBodyEvaluator(), first.getStreamCountIncoming(), second.getBodyEvaluator());
     }
 }

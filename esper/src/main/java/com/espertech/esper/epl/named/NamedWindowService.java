@@ -19,6 +19,7 @@ import com.espertech.esper.view.ViewProcessingException;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Service to manage named window dispatches, locks and processors on an engine level.
@@ -60,7 +61,20 @@ public interface NamedWindowService
      * @return processor for the named window
      * @throws ViewProcessingException if the named window already exists
      */
-    public NamedWindowProcessor addProcessor(String name, String contextName, boolean singleInstanceContext, EventType eventType, StatementResultService statementResultService, ValueAddEventProcessor revisionProcessor, String eplExpression, String statementName, boolean isPrioritized, boolean isEnableSubqueryIndexShare, boolean isBatchingDataWindow, boolean isVirtualDataWindow, StatementMetricHandle statementMetricHandle) throws ViewProcessingException;
+    public NamedWindowProcessor addProcessor(String name,
+                                             String contextName,
+                                             boolean singleInstanceContext,
+                                             EventType eventType,
+                                             StatementResultService statementResultService,
+                                             ValueAddEventProcessor revisionProcessor,
+                                             String eplExpression,
+                                             String statementName,
+                                             boolean isPrioritized,
+                                             boolean isEnableSubqueryIndexShare,
+                                             boolean isBatchingDataWindow,
+                                             boolean isVirtualDataWindow,
+                                             StatementMetricHandle statementMetricHandle,
+                                             Set<String> optionalUniqueKeyProps) throws ViewProcessingException;
 
     /**
      * Returns the processing instance for a given named window.

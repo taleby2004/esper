@@ -45,15 +45,15 @@ public class NamedWindowTailViewInstance extends ViewSupport implements Iterable
 
     public void update(EventBean[] newData, EventBean[] oldData)
     {
-        if ((newData != null) && (!tailView.isParentBatchWindow())) {
-            rootViewInstance.addNewData(newData);
-        }
-
         // Only old data (remove stream) needs to be removed from indexes (kept by root view), if any
         if (oldData != null)
         {
             rootViewInstance.removeOldData(oldData);
             numberOfEvents -= oldData.length;
+        }
+
+        if ((newData != null) && (!tailView.isParentBatchWindow())) {
+            rootViewInstance.addNewData(newData);
         }
 
         if (newData != null)
@@ -195,26 +195,33 @@ public class NamedWindowTailViewInstance extends ViewSupport implements Iterable
         agentInstanceContext.getEpStatementAgentInstanceHandle().getStatementAgentInstanceLock().acquireReadLock();
         try
         {
-            Collection<EventBean> indexedResult = rootViewInstance.snapshot(filter, annotations);
-            if (indexedResult != null) {
-                return indexedResult;
-            }
-            Iterator<EventBean> it = parent.iterator();
-            if (!it.hasNext())
-            {
-                return Collections.EMPTY_LIST;
-            }
-            ArrayDeque<EventBean> list = new ArrayDeque<EventBean>();
-            while (it.hasNext())
-            {
-                list.add(it.next());
-            }
-            return list;
+            return snapshotNoLock(filter, annotations);
         }
         finally
         {
             agentInstanceContext.getEpStatementAgentInstanceHandle().getStatementAgentInstanceLock().releaseReadLock();
         }
+    }
+
+    public Collection<EventBean> snapshotNoLock(FilterSpecCompiled filter, Annotation[] annotations)
+    {
+        if (tailView.getRevisionProcessor() != null) {
+            return tailView.getRevisionProcessor().getSnapshot(agentInstanceContext.getEpStatementAgentInstanceHandle(), parent);
+        }
+
+        Collection<EventBean> indexedResult = rootViewInstance.snapshot(filter, annotations);
+        if (indexedResult != null) {
+            return indexedResult;
+        }
+        Iterator<EventBean> it = parent.iterator();
+        if (!it.hasNext()) {
+            return Collections.EMPTY_LIST;
+        }
+        ArrayDeque<EventBean> list = new ArrayDeque<EventBean>();
+        while (it.hasNext()) {
+            list.add(it.next());
+        }
+        return list;
     }
 
     public AgentInstanceContext getAgentInstanceContext() {

@@ -15,6 +15,7 @@ public class OnTriggerWindowDesc extends OnTriggerDesc
 {
     private String windowName;
     private String optionalAsName;
+    private boolean deleteAndSelect;
     private static final long serialVersionUID = 4146264160256741899L;
 
     /**
@@ -23,11 +24,12 @@ public class OnTriggerWindowDesc extends OnTriggerDesc
      * @param optionalAsName the optional name
      * @param onTriggerType for indicationg on-delete, on-select or on-update
      */
-    public OnTriggerWindowDesc(String windowName, String optionalAsName, OnTriggerType onTriggerType)
+    public OnTriggerWindowDesc(String windowName, String optionalAsName, OnTriggerType onTriggerType, boolean deleteAndSelect)
     {
         super(onTriggerType);
         this.windowName = windowName;
         this.optionalAsName = optionalAsName;
+        this.deleteAndSelect = deleteAndSelect;
     }
 
     /**
@@ -46,5 +48,9 @@ public class OnTriggerWindowDesc extends OnTriggerDesc
     public String getOptionalAsName()
     {
         return optionalAsName;
+    }
+
+    public boolean isDeleteAndSelect() {
+        return deleteAndSelect;
     }
 }

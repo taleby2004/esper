@@ -42,6 +42,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.io.StringWriter;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -164,11 +165,7 @@ public final class FilterSpecCompiler
             }
             else
             {
-                ExprAndNode andNode = new ExprAndNodeImpl();
-                for (ExprNode unoptimized : remainingExprNodes)
-                {
-                    andNode.addChildNode(unoptimized);
-                }
+                ExprAndNode andNode = ExprNodeUtility.connectExpressionsByLogicalAnd(remainingExprNodes);
                 ExprValidationContext validationContext = new ExprValidationContext(streamTypeService, methodResolutionService, null, timeProvider, variableService, exprEvaluatorContext, eventAdapterService, statementName, statementId, annotations, contextDescriptor);
                 andNode.validate(validationContext);
                 exprNode = andNode;
@@ -662,6 +659,7 @@ public final class FilterSpecCompiler
             op = FilterOperator.NOT_IN_LIST_OF_VALUES;
         }
 
+        int expectedNumberOfConstants = constituent.getChildNodes().size() - 1;
         List<FilterSpecParamInValue> listofValues = new ArrayList<FilterSpecParamInValue>();
         Iterator<ExprNode> it = constituent.getChildNodes().iterator();
         it.next();  // ignore the first node as it's the identifier
@@ -679,10 +677,19 @@ public final class FilterSpecCompiler
                     return null;
                 }
                 if ((constant != null) && (constant.getClass().isArray())) {
-                    return null;
+                    for (int i = 0; i < Array.getLength(constant); i++) {
+                        Object arrayElement = Array.get(constant, i);
+                        Object arrayElementCoerced = handleConstantsCoercion(lookupable, arrayElement);
+                        listofValues.add(new InSetOfValuesConstant(arrayElementCoerced));
+                        if (i > 0) {
+                            expectedNumberOfConstants++;
+                        }
+                    }
                 }
-                constant = handleConstantsCoercion(lookupable, constant);
-                listofValues.add(new InSetOfValuesConstant(constant));
+                else {
+                    constant = handleConstantsCoercion(lookupable, constant);
+                    listofValues.add(new InSetOfValuesConstant(constant));
+                }
             }
             if (subNode instanceof ExprContextPropertyNode)
             {
@@ -741,7 +748,7 @@ public final class FilterSpecCompiler
         }
 
         // Fallback if not all values in the in-node can be resolved to properties or constants
-        if (listofValues.size() == constituent.getChildNodes().size() - 1)
+        if (listofValues.size() == expectedNumberOfConstants)
         {
             return new FilterSpecParamIn(lookupable, op, listofValues);
         }
@@ -828,11 +835,11 @@ public final class FilterSpecCompiler
             ExprIdentNode identNodeLeft = (ExprIdentNode) left;
             ExprIdentNode identNodeRight = (ExprIdentNode) right;
 
-            if ((identNodeLeft.getStreamId() == 0) && (identNodeRight.getStreamId() != 0))
+            if ((identNodeLeft.getStreamId() == 0) && (identNodeLeft.getFilterLookupEligible()) && (identNodeRight.getStreamId() != 0))
             {
                 return handleProperty(op, identNodeLeft, identNodeRight, arrayEventTypes, statementName);
             }
-            if ((identNodeRight.getStreamId() == 0) && (identNodeLeft.getStreamId() != 0))
+            if ((identNodeRight.getStreamId() == 0) && (identNodeRight.getFilterLookupEligible()) && (identNodeLeft.getStreamId() != 0))
             {
                 op = getReversedOperator(constituent, op); // reverse operators, as the expression is "stream1.prop xyz stream0.prop"
                 return handleProperty(op, identNodeRight, identNodeLeft, arrayEventTypes, statementName);

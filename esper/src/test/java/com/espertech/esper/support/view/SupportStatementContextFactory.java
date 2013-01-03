@@ -17,20 +17,17 @@ import com.espertech.esper.client.hook.ConditionHandler;
 import com.espertech.esper.client.hook.ExceptionHandler;
 import com.espertech.esper.core.context.util.AgentInstanceContext;
 import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
-import com.espertech.esper.core.service.ExceptionHandlingService;
-import com.espertech.esper.core.service.ExprEvaluatorContextStatement;
-import com.espertech.esper.core.service.StatementContext;
-import com.espertech.esper.core.service.StatementResultServiceImpl;
+import com.espertech.esper.core.service.*;
 import com.espertech.esper.core.thread.ThreadingServiceImpl;
 import com.espertech.esper.epl.agg.service.AggregationServiceFactoryServiceImpl;
 import com.espertech.esper.epl.core.EngineImportServiceImpl;
+import com.espertech.esper.epl.core.EngineSettingsService;
 import com.espertech.esper.epl.core.MethodResolutionServiceImpl;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.named.NamedWindowServiceImpl;
 import com.espertech.esper.epl.spec.PluggableObjectCollection;
 import com.espertech.esper.epl.spec.PluggableObjectRegistryImpl;
 import com.espertech.esper.epl.variable.VariableServiceImpl;
-import com.espertech.esper.event.EventTypeIdGeneratorImpl;
 import com.espertech.esper.event.vaevent.ValueAddEventServiceImpl;
 import com.espertech.esper.pattern.PatternObjectResolutionServiceImpl;
 import com.espertech.esper.schedule.ScheduleBucket;
@@ -42,6 +39,7 @@ import com.espertech.esper.view.ViewEnumHelper;
 import com.espertech.esper.view.ViewFactoryContext;
 import com.espertech.esper.view.ViewResolutionServiceImpl;
 
+import java.net.URI;
 import java.util.Collections;
 
 public class SupportStatementContextFactory
@@ -86,15 +84,25 @@ public class SupportStatementContextFactory
         Configuration config = new Configuration();
         config.getEngineDefaults().getViewResources().setAllowMultipleExpiryPolicies(true);
 
-        return new StatementContext("engURI",
-                "engInstId",
+        StatementContextEngineServices stmtEngineServices = new StatementContextEngineServices("engURI",
+                SupportEventAdapterService.getService(),
+                new NamedWindowServiceImpl(null, variableService, false, new ManagedReadWriteLock("dummyeplock", true), new ExceptionHandlingService("engURI", Collections.<ExceptionHandler>emptyList(), Collections.<ConditionHandler>emptyList()), false, null),
+                null,
+                new EngineSettingsService(new Configuration().getEngineDefaults(), new URI[0]),
+                new ValueAddEventServiceImpl(),
+                config,
+                null,
+                null,
+                null,
+                null);
+
+        return new StatementContext(stmtEngineServices,
                 "stmtId",
                 null,
                 "stmtName",
                 "exprHere",
                 stub,
                 new ScheduleBucket(1),
-                SupportEventAdapterService.getService(),
                 null,
                 new ViewResolutionServiceImpl(new PluggableObjectRegistryImpl(new PluggableObjectCollection[] {ViewEnumHelper.getBuiltinViews()}), null, null),
                 new PatternObjectResolutionServiceImpl(null),
@@ -103,17 +111,16 @@ public class SupportStatementContextFactory
                 new MethodResolutionServiceImpl(new EngineImportServiceImpl(true, true, true), null),
                 null,
                 null,
-                new NamedWindowServiceImpl(null, variableService, false, new ManagedReadWriteLock("dummyeplock", true), new ExceptionHandlingService("engURI", Collections.<ExceptionHandler>emptyList(), Collections.<ConditionHandler>emptyList()), false, null),
-                null,
                 new StatementResultServiceImpl("name", null, null, new ThreadingServiceImpl(new ConfigurationEngineDefaults.Threading())), // statement result svc
-                null, // resolution URIs
-                new ValueAddEventServiceImpl(), // revison svc
-                config,
                 null,
                 null,
                 null,
                 null,
                 null,
-                null, new EventTypeIdGeneratorImpl(), null, null, null, null, false, null, null, AggregationServiceFactoryServiceImpl.DEFAULT_FACTORY);
+                null,
+                false,
+                null,
+                null,
+                AggregationServiceFactoryServiceImpl.DEFAULT_FACTORY);
     }
 }

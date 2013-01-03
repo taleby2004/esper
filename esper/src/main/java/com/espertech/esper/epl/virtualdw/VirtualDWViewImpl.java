@@ -58,7 +58,7 @@ public class VirtualDWViewImpl extends ViewSupport implements VirtualDWView {
         return dataExternal;
     }
 
-    public Pair<IndexMultiKey, EventTable> getSubordinateQueryDesc(List<IndexedPropDesc> hashedProps, List<IndexedPropDesc> btreeProps) {
+    public Pair<IndexMultiKey, EventTable> getSubordinateQueryDesc(boolean unique, List<IndexedPropDesc> hashedProps, List<IndexedPropDesc> btreeProps) {
         List<VirtualDataWindowLookupFieldDesc> hashFields = new ArrayList<VirtualDataWindowLookupFieldDesc>();
         for (IndexedPropDesc hashprop : hashedProps) {
             hashFields.add(new VirtualDataWindowLookupFieldDesc(hashprop.getIndexPropName(), VirtualDataWindowLookupOp.EQUALS, hashprop.getCoercionType()));
@@ -67,8 +67,8 @@ public class VirtualDWViewImpl extends ViewSupport implements VirtualDWView {
         for (IndexedPropDesc btreeprop : btreeProps) {
             btreeFields.add(new VirtualDataWindowLookupFieldDesc(btreeprop.getIndexPropName(), null, btreeprop.getCoercionType()));
         }
-        VirtualDWEventTable eventTable = new VirtualDWEventTable(hashFields, btreeFields); 
-        IndexMultiKey imk = new IndexMultiKey(hashedProps, btreeProps);
+        VirtualDWEventTable eventTable = new VirtualDWEventTable(unique, hashFields, btreeFields);
+        IndexMultiKey imk = new IndexMultiKey(unique, hashedProps, btreeProps);
         return new Pair<IndexMultiKey, EventTable>(imk, eventTable);
     }
 
@@ -113,7 +113,7 @@ public class VirtualDWViewImpl extends ViewSupport implements VirtualDWView {
             }
         }
 
-        return new VirtualDWEventTable(hashFields, btreeFields);
+        return new VirtualDWEventTable(false, hashFields, btreeFields);
     }
 
     public JoinExecTableLookupStrategy getJoinLookupStrategy(String accessedByStmtName, String accessedByStmtId, Annotation[] accessedByStmtAnnotations, EventTable eventTable, TableLookupKeyDesc keyDescriptor, int lookupStreamNum) {
@@ -155,8 +155,8 @@ public class VirtualDWViewImpl extends ViewSupport implements VirtualDWView {
             btreeIndexedFields.add(new IndexedPropDesc(btreeprop, null));
         }
 
-        VirtualDWEventTable noopTable = new VirtualDWEventTable(hashFields, btreeFields);
-        IndexMultiKey imk = new IndexMultiKey(hashIndexedFields, btreeIndexedFields);
+        VirtualDWEventTable noopTable = new VirtualDWEventTable(false, hashFields, btreeFields);
+        IndexMultiKey imk = new IndexMultiKey(false, hashIndexedFields, btreeIndexedFields);
 
         return new Pair<IndexMultiKey, EventTable>(imk, noopTable);
     }
@@ -232,7 +232,7 @@ public class VirtualDWViewImpl extends ViewSupport implements VirtualDWView {
             for (CreateIndexItem col : spec.getColumns()) {
                 fields.add(new VirtualDataWindowEventStartIndex.VDWCreateIndexField(col.getName(), col.getType() == CreateIndexType.HASH));
             }
-            VirtualDataWindowEventStartIndex create = new VirtualDataWindowEventStartIndex(spec.getWindowName(), spec.getIndexName(), fields);
+            VirtualDataWindowEventStartIndex create = new VirtualDataWindowEventStartIndex(spec.getWindowName(), spec.getIndexName(), fields, spec.isUnique());
             dataExternal.handleEvent(create);
         }
         catch (Exception ex) {

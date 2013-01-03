@@ -9,7 +9,7 @@
 package com.espertech.esper.event;
 
 import com.espertech.esper.client.*;
-import com.espertech.esper.epl.core.MethodResolutionService;
+import com.espertech.esper.epl.core.EngineImportService;
 import com.espertech.esper.event.arr.ObjectArrayEventBean;
 import com.espertech.esper.event.arr.ObjectArrayEventType;
 import com.espertech.esper.event.bean.BeanEventBean;
@@ -21,7 +21,6 @@ import com.espertech.esper.event.map.MapEventType;
 import com.espertech.esper.event.xml.BaseXMLEventType;
 import com.espertech.esper.event.xml.XMLEventBean;
 import com.espertech.esper.util.JavaClassHelper;
-import net.sf.cglib.reflect.FastClass;
 import org.w3c.dom.Node;
 
 import java.util.*;
@@ -67,8 +66,7 @@ public class EventAdapterServiceHelper
         if (eventType instanceof BeanEventType)
         {
             BeanEventType beanEventType = (BeanEventType) eventType;
-            FastClass fastClass = beanEventType.getFastClass();
-            return PropertyHelper.getWritableProperties(fastClass.getJavaClass());
+            return PropertyHelper.getWritableProperties(beanEventType.getUnderlyingType());
         }
         EventTypeSPI typeSPI = (EventTypeSPI) eventType;
         if (!typeSPI.getMetadata().isApplicationConfigured() && typeSPI.getMetadata().getTypeClass() != EventTypeMetadata.TypeClass.ANONYMOUS)
@@ -141,12 +139,12 @@ public class EventAdapterServiceHelper
      * Returns a factory for creating and populating event object instances for the given type.
      * @param eventType to create underlying objects for
      * @param properties to write
-     * @param methodResolutionService for resolving methods
+     * @param engineImportService for resolving methods
      * @param eventAdapterService fatory for event
      * @return factory
      * @throws EventBeanManufactureException if a factory cannot be created for the type
      */
-    public static EventBeanManufacturer getManufacturer(EventAdapterService eventAdapterService, EventType eventType, WriteablePropertyDescriptor[] properties, MethodResolutionService methodResolutionService)
+    public static EventBeanManufacturer getManufacturer(EventAdapterService eventAdapterService, EventType eventType, WriteablePropertyDescriptor[] properties, EngineImportService engineImportService)
             throws EventBeanManufactureException
     {
         if (!(eventType instanceof EventTypeSPI))
@@ -156,7 +154,7 @@ public class EventAdapterServiceHelper
         if (eventType instanceof BeanEventType)
         {
             BeanEventType beanEventType = (BeanEventType) eventType;
-            return new EventBeanManufacturerBean(beanEventType, eventAdapterService, properties, methodResolutionService);
+            return new EventBeanManufacturerBean(beanEventType, eventAdapterService, properties, engineImportService);
         }
         EventTypeSPI typeSPI = (EventTypeSPI) eventType;
         if (!typeSPI.getMetadata().isApplicationConfigured() && typeSPI.getMetadata().getTypeClass() != EventTypeMetadata.TypeClass.ANONYMOUS)

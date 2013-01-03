@@ -84,9 +84,14 @@ public class InternalEventRouterImpl implements InternalEventRouter
         if (!hasPreprocessing)
         {
             if (insertIntoListener != null) {
-                insertIntoListener.inserted(theEvent, statementHandle);
+                boolean route = insertIntoListener.inserted(theEvent, statementHandle);
+                if (route) {
+                    routeDest.route(theEvent, statementHandle, addToFront);
+                }
             }
-            routeDest.route(theEvent, statementHandle, addToFront);
+            else {
+                routeDest.route(theEvent, statementHandle, addToFront);
+            }
             return;
         }
 
@@ -94,9 +99,14 @@ public class InternalEventRouterImpl implements InternalEventRouter
         if (preprocessed != null)
         {
             if (insertIntoListener != null) {
-                insertIntoListener.inserted(theEvent, statementHandle);
+                boolean route = insertIntoListener.inserted(theEvent, statementHandle);
+                if (route) {
+                    routeDest.route(preprocessed, statementHandle, addToFront);
+                }
             }
-            routeDest.route(preprocessed, statementHandle, addToFront);
+            else {
+                routeDest.route(preprocessed, statementHandle, addToFront);
+            }
         }
     }
 

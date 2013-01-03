@@ -16,7 +16,7 @@ import com.espertech.esper.epl.join.base.HistoricalIndexLookupStrategy;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.view.HistoricalEventViewable;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
@@ -58,7 +58,7 @@ public class HistoricalDataExecNode extends ExecNode
         lookupRows1Event[0] = new EventBean[numStreams];
     }
 
-    public void process(EventBean lookupEvent, EventBean[] prefillPath, List<EventBean[]> result, ExprEvaluatorContext exprEvaluatorContext)
+    public void process(EventBean lookupEvent, EventBean[] prefillPath, Collection<EventBean[]> result, ExprEvaluatorContext exprEvaluatorContext)
     {
         lookupRows1Event[0] = prefillPath;
         EventTable[] indexPerLookupRow = historicalEventViewable.poll(lookupRows1Event, indexingStrategy, exprEvaluatorContext);

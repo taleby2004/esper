@@ -9,11 +9,12 @@
 package com.espertech.esper.epl.join.exec.base;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.util.IndentWriter;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
+import com.espertech.esper.util.IndentWriter;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Execution node that performs a nested iteration over all child nodes.
@@ -48,7 +49,7 @@ public class NestedIterationExecNode extends ExecNode
         childNodes.add(childNode);
     }
 
-    public void process(EventBean lookupEvent, EventBean[] prefillPath, List<EventBean[]> result, ExprEvaluatorContext exprEvaluatorContext)
+    public void process(EventBean lookupEvent, EventBean[] prefillPath, Collection<EventBean[]> result, ExprEvaluatorContext exprEvaluatorContext)
     {
         nestingOrderLength = childNodes.size();
         recursiveNestedJoin(lookupEvent, 0, prefillPath, result, exprEvaluatorContext);
@@ -63,7 +64,7 @@ public class NestedIterationExecNode extends ExecNode
      * @param result - result tuple rows to be populated
      * @param exprEvaluatorContext context for expression evalauation
      */
-    protected void recursiveNestedJoin(EventBean lookupEvent, int nestingOrderIndex, EventBean[] currentPath, List<EventBean[]> result, ExprEvaluatorContext exprEvaluatorContext)
+    protected void recursiveNestedJoin(EventBean lookupEvent, int nestingOrderIndex, EventBean[] currentPath, Collection<EventBean[]> result, ExprEvaluatorContext exprEvaluatorContext)
     {
         List<EventBean[]> nestedResult = new LinkedList<EventBean[]>();
         ExecNode nestedExecNode = childNodes.get(nestingOrderIndex);

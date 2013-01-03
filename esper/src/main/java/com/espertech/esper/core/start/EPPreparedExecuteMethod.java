@@ -161,12 +161,14 @@ public class EPPreparedExecuteMethod
                 if (processors[i].isVirtualDataWindow()) {
                     streamJoinAnalysisResult.getViewExternal()[i] = processorInstance.getRootViewInstance().getVirtualDataWindow();
                 }
+                String[][] uniqueIndexes = processors[i].getUniqueIndexes(processorInstance);
+                streamJoinAnalysisResult.getUniqueKeys()[i] = uniqueIndexes;
             }
 
             boolean hasAggregations = !resultSetProcessorPrototype.getAggregationServiceFactoryDesc().getExpressions().isEmpty();
             joinSetComposerPrototype = JoinSetComposerPrototypeFactory.makeComposerPrototype(null, null,
                     statementSpec.getOuterJoinDescList(), statementSpec.getFilterRootNode(), typesPerStream, namesPerStream,
-                    streamJoinAnalysisResult, queryPlanLogging, null, new HistoricalViewableDesc(numStreams), agentInstanceContext, false, hasAggregations);
+                    streamJoinAnalysisResult, queryPlanLogging, statementContext.getAnnotations(), new HistoricalViewableDesc(numStreams), agentInstanceContext, false, hasAggregations);
         }
 
         // check context partition use
@@ -317,7 +319,7 @@ public class EPPreparedExecuteMethod
                 viewablePerStream[i] = instance.getTailViewInstance();
             }
 
-            JoinSetComposerDesc joinSetComposerDesc = joinSetComposerPrototype.create(viewablePerStream);
+            JoinSetComposerDesc joinSetComposerDesc = joinSetComposerPrototype.create(viewablePerStream, true);
             JoinSetComposer joinComposer = joinSetComposerDesc.getJoinSetComposer();
             JoinSetFilter joinFilter;
             if (joinSetComposerDesc.getPostJoinFilterEvaluator() != null) {

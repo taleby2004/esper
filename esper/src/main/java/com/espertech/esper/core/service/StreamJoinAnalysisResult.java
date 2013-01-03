@@ -12,6 +12,10 @@
 package com.espertech.esper.core.service;
 
 import com.espertech.esper.epl.virtualdw.VirtualDWView;
+import com.espertech.esper.view.ViewFactoryChain;
+import com.espertech.esper.view.ViewServiceHelper;
+
+import java.util.Set;
 
 /**
  * Analysis result for joins. 
@@ -26,6 +30,7 @@ public class StreamJoinAnalysisResult
     private boolean[] hasChildViews;
     private boolean[] isNamedWindow;
     private VirtualDWView[] viewExternal;
+    private String[][][] uniqueKeys;
 
     /**
      * Ctor.
@@ -41,6 +46,7 @@ public class StreamJoinAnalysisResult
         hasChildViews = new boolean[numStreams];
         isNamedWindow = new boolean[numStreams];
         viewExternal = new VirtualDWView[numStreams];
+        uniqueKeys = new String[numStreams][][];
     }
 
     /**
@@ -171,5 +177,21 @@ public class StreamJoinAnalysisResult
 
     public VirtualDWView[] getViewExternal() {
         return viewExternal;
+    }
+
+    public String[][][] getUniqueKeys() {
+        return uniqueKeys;
+    }
+
+    public void addUniquenessInfo(ViewFactoryChain[] unmaterializedViewChain) {
+        for (int i = 0; i < unmaterializedViewChain.length; i++) {
+            if (unmaterializedViewChain[i].getDataWindowViewFactoryCount() > 0) {
+                Set<String> uniquenessProps = ViewServiceHelper.getUniqueCandidateProperties(unmaterializedViewChain[i].getViewFactoryChain());
+                if (uniquenessProps != null) {
+                    uniqueKeys[i] = new String[1][];
+                    uniqueKeys[i][0] = uniquenessProps.toArray(new String[uniquenessProps.size()]);
+                }
+            }
+        }
     }
 }

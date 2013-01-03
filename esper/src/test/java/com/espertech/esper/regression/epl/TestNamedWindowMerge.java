@@ -59,6 +59,27 @@ public class TestNamedWindowMerge extends TestCase {
         mergeListener = null;
     }
 
+    public void testUpdateOrderOfFields() throws Exception {
+        epService.getEPAdministrator().createEPL("create window MyWindow.win:keepall() as SupportBean");
+        epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportBean");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("on SupportBean_S0 as sb " +
+                "merge MyWindow as mywin where mywin.theString = sb.p00 when matched then " +
+                "update set intPrimitive=id, intBoxed=mywin.intPrimitive, doublePrimitive=initial.intPrimitive");
+        stmt.addListener(mergeListener);
+        String[] fields = "intPrimitive,intBoxed,doublePrimitive".split(",");
+
+        epService.getEPRuntime().sendEvent(makeSupportBean("E1", 1, 2));
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(5, "E1"));
+        EPAssertionUtil.assertProps(mergeListener.getAndResetLastNewData()[0], fields, new Object[]{5, 5, 1.0});
+
+        epService.getEPRuntime().sendEvent(makeSupportBean("E2", 10, 20));
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(6, "E2"));
+        EPAssertionUtil.assertProps(mergeListener.getAndResetLastNewData()[0], fields, new Object[]{6, 6, 10.0});
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(7, "E1"));
+        EPAssertionUtil.assertProps(mergeListener.getAndResetLastNewData()[0], fields, new Object[]{7, 7, 5.0});
+    }
+
     public void testInsertOtherStream() throws Exception {
         runAssertionInsertOtherStream(EventRepresentationEnum.OBJECTARRAY);
         runAssertionInsertOtherStream(EventRepresentationEnum.MAP);
@@ -873,5 +894,11 @@ public class TestNamedWindowMerge extends TestCase {
         else {
             engine.getEPRuntime().sendEvent(theEvent, typeName);
         }
+    }
+
+    private SupportBean makeSupportBean(String theString, int intPrimitive, double doublePrimitive) {
+        SupportBean sb = new SupportBean(theString, intPrimitive);
+        sb.setDoublePrimitive(doublePrimitive);
+        return sb;
     }
 }

@@ -126,8 +126,8 @@
 		<para>
 			The following example declares a data flow that is triggered by <literal>MyMapEventType</literal> events from the event bus (type not declared here) and that writes to the file <literal>output.csv</literal> the CSV-formatted events:
 		</para>
-		<programlisting><![CDATA[create dataflow AMQPOutgoingDataFlow
-   EventBusSink -> outstream<MyMapEventType> {}
+		<programlisting><![CDATA[create dataflow FileSinkSampleFlow
+   EventBusSource -> outstream<MyMapEventType> {}
    FileSink(outstream) {
      file: 'output.csv',
      append: true
@@ -146,7 +146,7 @@
 			</para>
 			
 			<para>
-			  The FileSource operator must have a single output stream.
+			  The FileSource operator must have at least one output stream. You can declare additional output streams to hold beginning-of-file and end-of-file indication.
 			</para>
 	
 			<para>
@@ -175,11 +175,11 @@
 						</row>
 						<row>
 							<entry>hasTitleLine</entry>
-							<entry>Boolean indicator whether a title line exists that the operator should read and parse to obtain event property names.</entry>
+							<entry>For use with the <literal>csv</literal> format, boolean indicator whether a title line exists that the operator should read and parse to obtain event property names.</entry>
 						</row>
 						<row>
 							<entry>hasHeaderLine</entry>
-							<entry>Boolean indicator whether a header line exists that the operator should skip.</entry>
+							<entry>For use with the <literal>csv</literal> format, boolean indicator whether a header line exists that the operator should skip.</entry>
 						</row>
 						<row>
 							<entry>classpathFile</entry>
@@ -187,35 +187,106 @@
 						</row>
 						<row>
 							<entry>numLoops</entry>
-							<entry>Number of loops, an integer value that instructs the engine to restart reading the file upon encountering EOF, defaults to zero.</entry>
+							<entry>For use with the <literal>csv</literal> format, number of loops, an integer value that instructs the engine to restart reading the file upon encountering EOF, defaults to zero.</entry>
 						</row>
 						<row>
 							<entry>propertyNames</entry>
-							<entry>String array with a list of property names in the same order they appear in the file.</entry>
+							<entry>For use with the <literal>csv</literal> format, string array with a list of property names in the same order they appear in the file.</entry>
 						</row>
 						<row>
 							<entry>format</entry>
 							<entry>Specify <literal>csv</literal> (the default) for comma-separate value or <literal>line</literal> for single-line.</entry>
+						</row>
+						<row>
+							<entry>propertyNameLine</entry>
+							<entry>For use with the <literal>line</literal> format, specifies the property name of the output event type that receives the line text of type string.</entry>
+						</row>
+						<row>
+							<entry>propertyNameFile</entry>
+							<entry>For use with the <literal>line</literal> format, specifies the property name of the output event type(s) that receive the file name of type string.</entry>
 						</row>
 					</tbody>
 				</tgroup>
 			</table>		
 			
 			<para>
+			  The first output stream holds per-line output events. For use with the <literal>line</literal> format and if declaring two output streams, the second stream holds end-of-file indication. If declaring three output streams, the second stream holds beginning-of-file indication and the third stream holds end-of-file indication.
+			</para>
+			
+			<para>
 			The <literal>line</literal> format requires that the output stream's event type is an object-array event type that features a single string-type property that the operator populates with each line of the file.
 			</para>
 			
 			<para>
-				Please consider the following examples:
+			  The file name (or <literal>adapterInputSource</literal>) may point to a zip file. If the file name ends with the literal <literal>zip</literal> the operator opens the zip file and uses the first packaged file.
+			  All other parameters including the format parameter for CSV or line-formatting then apply to the zipped file.
 			</para>
-		<programlisting><![CDATA[create dataflow AMQPIncomingDataFlow
-  FileSource -> outstream<MyMapEventType> {
-    file: 'regression/noTimestampOne.csv', 
-    classpathFile: true, 
-    propertyNames: ['myInt','myDouble','myString'], 
+			
+			<para>
+				This example defines a data flow that consists of two operators that work together to read a file and send the resulting events into the engine:
+			</para>
+		<programlisting><![CDATA[create dataflow SensorCSVFlow
+  FileSource -> sensorstream<TemperatureEventStream> {
+    file: 'sensor_events.csv', 
+    propertyNames: ['sensor','temp','updtime'], 
     numLoops: 3
   }
-  EventBusSource(outstream){}]]></programlisting>			
+  EventBusSource(sensorstream){}]]></programlisting>			
+			<para>
+				The data flow above configures the <literal>FileSource</literal> operator to read the file <literal>sensor_events.csv</literal>, populate the <literal>sensor</literal>, <literal>temp</literal> and <literal>updtime</literal> properties of the <literal>TemperatureEventStream</literal> event type (type definition not shown here) and make the output events available within the data flow under the name <literal>sensorstream</literal>.
+			</para>
+			<para>
+				The data flow above configures the <literal>EventBusSource</literal> operator to send the <literal>sensorstream</literal> events into the engine for processing.
+			</para>
+			
+			<sect3 xml:id="file-source-sample">
+				<title>FileSource Operator Detailed Example</title>
+				
+				<para>
+				  This example shows the EPL and code to read and count lines in text files. 
+				</para>
+				<para>
+					Below EPL defines an event type to each hold the file line text as well as to indictate the beginning and end of a file (remove the semicolon if creating EPL individually and not as a module):
+				</para>
+				<programlisting><![CDATA[// for beginning-of-file events
+create objectarray schema MyBOF (filename string); 
+// for end of file events
+create objectarray schema MyEOF (filename string); 
+// for line text events
+create objectarray schema MyLine (filename string, line string);  ]]></programlisting>			
+				<para>
+				  The next EPL statements count lines per file outputting the final line count only when the end-of-file is reached.
+				</para>
+				<programlisting><![CDATA[// Initiate a context partition for each file, terminate upon end-of-file
+create context FileContext 
+  initiated by MyBOF as mybof 
+  terminated by MyEOF(filename=mybof.filename);
+  
+// For each file, count lines 
+context FileContext 
+  select context.mybof.filename as filename, count(*) as cnt
+  from MyLine(filename=context.mybof.filename)
+  output snapshot when terminated;]]></programlisting>
+				  <para>
+				    The below EPL defines a data flow that reads text files line-by-line and that send events into the engine for processing.
+				  </para>
+				<programlisting><![CDATA[create dataflow MyEOFEventFileReader
+  FileSource -> mylines<MyLine>, mybof<MyBOF>, myeof<MyEOF> { 
+    format: 'line', 
+    propertyNameLine: 'line',      // store the text in the event property 'line' 
+    propertyNameFile: 'filename'   // store the file name in 'filename'
+  }
+  EventBusSink(mylines, mybof, myeof) {}  // send events into engine]]></programlisting>  
+				  <para>
+				    The next sample code instantiates and runs data flows passing a file name:
+				  </para>
+				<programlisting><![CDATA[EPDataFlowInstantiationOptions options = new EPDataFlowInstantiationOptions();
+options.addParameterURI("FileSource/file", "myfile.txt");
+EPDataFlowInstance instance = epService.getEPRuntime().getDataFlowRuntime()
+    .instantiate("MyEOFEventFileReader",options);
+instance.run();]]></programlisting>
+
+			</sect3>
 		</sect2>
     </sect1>
     

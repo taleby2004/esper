@@ -18,7 +18,17 @@ import com.espertech.esper.schedule.ScheduleSlot;
 
 public class ContextControllerConditionFactory {
 
-    public static ContextControllerCondition getEndpoint(String contextName, EPServicesContext servicesContext, AgentInstanceContext agentInstanceContext, ContextDetailCondition endpoint, ContextControllerConditionCallback callback, ContextInternalFilterAddendum filterAddendum, boolean isStartEndpoint, int subPathId) {
+    public static ContextControllerCondition getEndpoint(String contextName,
+                                                         EPServicesContext servicesContext,
+                                                         AgentInstanceContext agentInstanceContext,
+                                                         ContextDetailCondition endpoint,
+                                                         ContextControllerConditionCallback callback,
+                                                         ContextInternalFilterAddendum filterAddendum,
+                                                         boolean isStartEndpoint,
+                                                         String outermostContextName,
+                                                         int nestingLevel,
+                                                         int pathId,
+                                                         int subpathId) {
         if (endpoint instanceof ContextDetailConditionCrontab) {
             ContextDetailConditionCrontab crontab = (ContextDetailConditionCrontab) endpoint;
             ScheduleSlot scheduleSlot = agentInstanceContext.getStatementContext().getScheduleBucket().allocateSlot();
@@ -29,8 +39,9 @@ public class ContextControllerConditionFactory {
             return new ContextControllerConditionFilter(servicesContext, agentInstanceContext, filter, callback, filterAddendum);
         }
         else if (endpoint instanceof ContextDetailConditionPattern) {
+            ContextStatePathKey key = new ContextStatePathKey(outermostContextName, nestingLevel, pathId, subpathId);
             ContextDetailConditionPattern pattern = (ContextDetailConditionPattern) endpoint;
-            return new ContextControllerConditionPattern(servicesContext, agentInstanceContext, pattern, callback, filterAddendum, isStartEndpoint, subPathId);
+            return new ContextControllerConditionPattern(servicesContext, agentInstanceContext, pattern, callback, filterAddendum, isStartEndpoint, key);
         }
         else if (endpoint instanceof ContextDetailConditionTimePeriod) {
             ContextDetailConditionTimePeriod timePeriond = (ContextDetailConditionTimePeriod) endpoint;

@@ -176,7 +176,7 @@ public class FilterStreamSpecRaw extends StreamSpecBase implements StreamSpecRaw
         }
         catch (EventAdapterException ex)
         {
-            log.info(".resolveType Event type named '" + eventName + "' not resolved as Java-Class event");
+            log.debug(".resolveType Event type named '" + eventName + "' not resolved as Java-Class event");
             message = "Failed to resolve event type: " + ex.getMessage();
         }
 

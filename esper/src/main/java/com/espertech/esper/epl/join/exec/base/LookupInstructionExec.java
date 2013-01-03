@@ -125,7 +125,7 @@ public class LookupInstructionExec
                 Set<EventBean> lookupResult = lookupStrategies[streamCount].lookup(lookupEvent, cursor, exprEvaluatorContext);
 
                 // There is no result, break if this is a required stream
-                if (lookupResult == null)
+                if (lookupResult == null || lookupResult.isEmpty())
                 {
                     break;
                 }

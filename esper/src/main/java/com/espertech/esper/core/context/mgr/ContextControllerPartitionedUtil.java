@@ -127,7 +127,6 @@ public class ContextControllerPartitionedUtil {
         List<FilterSpecCompiled> filters = streamAnalysis.getFilters();
 
         boolean isCreateWindow = statement.getStatementSpec().getCreateWindowDesc() != null;
-        String message = "Segmented context '" + contextName + "' requires that any of the event types that are listed in the segmented context also appear in any of the filter expressions of the statement";
 
         // if no create-window: at least one of the filters must match one of the filters specified by the context
         if (!isCreateWindow) {
@@ -149,7 +148,7 @@ public class ContextControllerPartitionedUtil {
             }
 
             if (!filters.isEmpty()) {
-                throw new ExprValidationException(message);
+                throw new ExprValidationException(getTypeValidationMessage(contextName, filters.get(0).getFilterForEventType().getName()));
             }
             return;
         }
@@ -163,7 +162,7 @@ public class ContextControllerPartitionedUtil {
                 }
             }
 
-            throw new ExprValidationException(message);
+            throw new ExprValidationException(getTypeValidationMessage(contextName, declaredAsName));
         }
     }
 
@@ -270,5 +269,9 @@ public class ContextControllerPartitionedUtil {
                 }
             }
         }
+    }
+
+    private static String getTypeValidationMessage(String contextName, String typeNameEx) {
+        return "Segmented context '" + contextName + "' requires that any of the event types that are listed in the segmented context also appear in any of the filter expressions of the statement, type '" + typeNameEx + "' is not one of the types listed";
     }
 }

@@ -22,6 +22,7 @@ public class CreateVariableDesc implements MetaDefItem, Serializable
     private String variableName;
     private ExprNode assignment;
     private boolean constant;
+    private boolean array;
     private static final long serialVersionUID = -7864602464816397227L;
 
     /**
@@ -30,12 +31,13 @@ public class CreateVariableDesc implements MetaDefItem, Serializable
      * @param variableName name of the variable
      * @param assignment expression assigning the initial value, or null if none
      */
-    public CreateVariableDesc(String variableType, String variableName, ExprNode assignment, boolean constant)
+    public CreateVariableDesc(String variableType, String variableName, ExprNode assignment, boolean constant, boolean array)
     {
         this.variableType = variableType;
         this.variableName = variableName;
         this.assignment = assignment;
         this.constant = constant;
+        this.array = array;
     }
 
     /**
@@ -69,7 +71,7 @@ public class CreateVariableDesc implements MetaDefItem, Serializable
         return constant;
     }
 
-    public void setConstant(boolean constant) {
-        this.constant = constant;
+    public boolean isArray() {
+        return array;
     }
 }

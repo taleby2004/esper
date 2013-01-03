@@ -9,18 +9,15 @@
 package com.espertech.esper.epl.spec;
 
 import com.espertech.esper.client.ConfigurationInformation;
-import com.espertech.esper.client.soda.ScriptExpression;
 import com.espertech.esper.core.context.mgr.ContextManagementService;
 import com.espertech.esper.epl.core.EngineImportService;
+import com.espertech.esper.epl.declexpr.ExprDeclaredService;
 import com.espertech.esper.epl.named.NamedWindowService;
 import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.pattern.PatternNodeFactory;
 import com.espertech.esper.schedule.SchedulingService;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Context for mapping a SODA statement to a statement specification, or multiple for subqueries,
@@ -36,6 +33,7 @@ public class StatementSpecMapContext
     private final PatternNodeFactory patternNodeFactory;
     private final NamedWindowService namedWindowService;
     private final ContextManagementService contextManagementService;
+    private final ExprDeclaredService exprDeclaredService;
 
     private boolean hasVariables;
     private Set<String> variableNames;
@@ -49,7 +47,7 @@ public class StatementSpecMapContext
      * @param variableService variable names
      * @param configuration the configuration
      */
-    public StatementSpecMapContext(EngineImportService engineImportService, VariableService variableService, ConfigurationInformation configuration, SchedulingService schedulingService, String engineURI, PatternNodeFactory patternNodeFactory, NamedWindowService namedWindowService, ContextManagementService contextManagementService)
+    public StatementSpecMapContext(EngineImportService engineImportService, VariableService variableService, ConfigurationInformation configuration, SchedulingService schedulingService, String engineURI, PatternNodeFactory patternNodeFactory, NamedWindowService namedWindowService, ContextManagementService contextManagementService, ExprDeclaredService exprDeclaredService)
     {
         this.engineImportService = engineImportService;
         this.variableService = variableService;
@@ -60,6 +58,7 @@ public class StatementSpecMapContext
         this.patternNodeFactory = patternNodeFactory;
         this.namedWindowService = namedWindowService;
         this.contextManagementService = contextManagementService;
+        this.exprDeclaredService = exprDeclaredService;
     }
 
     /**
@@ -134,6 +133,9 @@ public class StatementSpecMapContext
     }
 
     public Map<String, ExpressionDeclItem> getExpressionDeclarations() {
+        if (expressionDeclarations == null) {
+            return Collections.emptyMap();
+        }
         return expressionDeclarations;
     }
 
@@ -145,6 +147,9 @@ public class StatementSpecMapContext
     }
 
     public Map<String, ExpressionScriptProvided> getScripts() {
+        if (scripts == null) {
+            return Collections.emptyMap();
+        }
         return scripts;
     }
 
@@ -165,5 +170,9 @@ public class StatementSpecMapContext
 
     public void setContextName(String contextName) {
         this.contextName = contextName;
+    }
+
+    public ExprDeclaredService getExprDeclaredService() {
+        return exprDeclaredService;
     }
 }

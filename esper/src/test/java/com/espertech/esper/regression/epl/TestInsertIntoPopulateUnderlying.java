@@ -237,9 +237,6 @@ public class TestInsertIntoPopulateUnderlying extends TestCase
         text = "insert into SupportBean(dummy) select 3 from SupportBean";
         tryInvalid("Error starting statement: Column 'dummy' could not be assigned to any of the properties of the underlying type (missing column names, event property, setter method or constructor?) [insert into SupportBean(dummy) select 3 from SupportBean]", text);
 
-        text = "insert into SupportBeanErrorTestingOne(value) select 'E1' from MyMap";
-        tryInvalid("Error starting statement: Failed to instantiate class 'com.espertech.esper.support.bean.SupportBeanErrorTestingOne', define a factory method if the class has no suitable constructors: Default ctor manufactured test exception [insert into SupportBeanErrorTestingOne(value) select 'E1' from MyMap]", text);
-
         text = "insert into SupportBeanReadOnly(side) select 'E1' from MyMap";
         tryInvalid("Error starting statement: Failed to find a suitable constructor for bean-event type 'SupportBeanReadOnly': Could not find constructor in class 'com.espertech.esper.support.bean.SupportBeanReadOnly' with matching parameter number and expected parameter type(s) 'String' (nearest matching constructor taking no parameters) [insert into SupportBeanReadOnly(side) select 'E1' from MyMap]", text);
 

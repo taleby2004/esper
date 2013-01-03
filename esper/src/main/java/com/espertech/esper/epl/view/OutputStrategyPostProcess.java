@@ -42,12 +42,12 @@ public class OutputStrategyPostProcess
         // route first
         if (parent.isRoute())
         {
-            if ((newEvents != null) && (!parent.isRouteRStream()))
+            if ((newEvents != null) && (parent.getInsertIntoStreamSelector().isSelectsIStream()))
             {
                 route(newEvents, agentInstanceContext);
             }
 
-            if ((oldEvents != null) && (parent.isRouteRStream()))
+            if ((oldEvents != null) && (parent.getInsertIntoStreamSelector().isSelectsRStream()))
             {
                 route(oldEvents, agentInstanceContext);
             }

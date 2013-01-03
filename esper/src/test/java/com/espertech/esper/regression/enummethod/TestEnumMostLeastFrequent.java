@@ -95,5 +95,27 @@ public class TestEnumMostLeastFrequent extends TestCase {
 
         epService.getEPRuntime().sendEvent(SupportCollection.makeString(""));
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, null});
+        stmtFragment.destroy();
+
+        epService.getEPAdministrator().getConfiguration().addPlugInSingleRowFunction("extractNum", TestEnumMinMax.MyService.class.getName(), "extractNum");
+        String eplLambda = "select " +
+                "strvals.mostFrequent(v => extractNum(v)) as val0, " +
+                "strvals.leastFrequent(v => extractNum(v)) as val1 " +
+                "from SupportCollection";
+        EPStatement stmtLambda = epService.getEPAdministrator().createEPL(eplLambda);
+        stmtLambda.addListener(listener);
+        LambdaAssertionUtil.assertTypes(stmtLambda.getEventType(), fields, new Class[]{Integer.class, Integer.class});
+
+        epService.getEPRuntime().sendEvent(SupportCollection.makeString("E2,E1,E2,E1,E3,E3,E4,E3"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{3, 4});
+
+        epService.getEPRuntime().sendEvent(SupportCollection.makeString("E1"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{1, 1});
+
+        epService.getEPRuntime().sendEvent(SupportCollection.makeString(null));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, null});
+
+        epService.getEPRuntime().sendEvent(SupportCollection.makeString(""));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, null});
     }
 }

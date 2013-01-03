@@ -40,5 +40,9 @@ public class EvalRootFactoryNode extends EvalNodeFactoryBase
         return false;
     }
 
+    public boolean isStateful() {
+        return this.getChildNodes().get(0).isStateful();
+    }
+
     private static final Log log = LogFactory.getLog(EvalRootFactoryNode.class);
 }

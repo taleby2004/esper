@@ -17,7 +17,9 @@ import java.util.HashSet;
 
 import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.soda.StreamSelector;
 import com.espertech.esper.epl.core.eval.SelectExprStreamDesc;
+import com.espertech.esper.epl.spec.SelectClauseStreamSelectorEnum;
 import junit.framework.TestCase;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
@@ -46,7 +48,7 @@ public class TestSelectExprEvalProcessor extends TestCase
 
         methodOne = new SelectExprProcessorHelper(Collections.<Integer>emptyList(), selectList, Collections.<SelectExprStreamDesc>emptyList(), null, false, new SupportStreamTypeSvc1Stream(), eventAdapterService, vaeService, selectExprEventTypeRegistry, methodResolutionService, null, null, new Configuration());
 
-        InsertIntoDesc insertIntoDesc = new InsertIntoDesc(true, "Hello");
+        InsertIntoDesc insertIntoDesc = new InsertIntoDesc(SelectClauseStreamSelectorEnum.ISTREAM_ONLY, "Hello");
         insertIntoDesc.add("a");
         insertIntoDesc.add("b");
 

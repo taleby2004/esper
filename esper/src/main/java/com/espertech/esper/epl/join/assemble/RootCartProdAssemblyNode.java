@@ -8,11 +8,13 @@
  **************************************************************************************/
 package com.espertech.esper.epl.join.assemble;
 
-import com.espertech.esper.epl.join.rep.Node;
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.epl.join.rep.Node;
 import com.espertech.esper.util.IndentWriter;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Assembly node for an event stream that is a root with a two or more child nodes below it.
@@ -72,22 +74,22 @@ public class RootCartProdAssemblyNode extends BaseAssemblyNode
         }
     }
 
-    public void process(List<Node>[] result)
+    public void process(List<Node>[] result, Collection<EventBean[]> resultFinalRows, EventBean resultRootEvent)
     {
         // If no child has posted any rows, generate row and done
         if ((!haveChildResults) && (allSubStreamsOptional))
         {
             // post an empty row
             EventBean[] row = new EventBean[numStreams];
-            parentNode.result(row, streamNum, null, null);
+            parentNode.result(row, streamNum, null, null, resultFinalRows, resultRootEvent);
             return;
         }
 
         // Compute the cartesian product
-        postCartesian(rowsPerStream);
+        postCartesian(rowsPerStream, resultFinalRows, resultRootEvent);
     }
 
-    public void result(EventBean[] row, int fromStreamNum, EventBean myEvent, Node myNode)
+    public void result(EventBean[] row, int fromStreamNum, EventBean myEvent, Node myNode, Collection<EventBean[]> resultFinalRows, EventBean resultRootEvent)
     {
         haveChildResults = true;
 
@@ -110,7 +112,7 @@ public class RootCartProdAssemblyNode extends BaseAssemblyNode
         indentWriter.println("RootCartProdAssemblyNode streamNum=" + streamNum);
     }
 
-    private void postCartesian(List<EventBean[]>[] rowsPerStream)
+    private void postCartesian(List<EventBean[]>[] rowsPerStream, Collection<EventBean[]> resultFinalRows, EventBean resultRootEvent)
     {
         List<EventBean[]> result = new LinkedList<EventBean[]>();
         CartesianUtil.computeCartesian(
@@ -133,7 +135,7 @@ public class RootCartProdAssemblyNode extends BaseAssemblyNode
 
         for (EventBean[] row : result)
         {
-            parentNode.result(row, streamNum, null, null);
+            parentNode.result(row, streamNum, null, null, resultFinalRows, resultRootEvent);
         }
     }
 

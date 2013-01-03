@@ -8,8 +8,8 @@
  **************************************************************************************/
 package com.espertech.esper.epl.join.assemble;
 
-import com.espertech.esper.epl.join.rep.Node;
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.epl.join.rep.Node;
 import com.espertech.esper.util.IndentWriter;
 
 import java.util.*;
@@ -109,7 +109,7 @@ public class CartesianProdAssemblyNode extends BaseAssemblyNode
         }
     }
 
-    public void process(List<Node>[] result)
+    public void process(List<Node>[] result, Collection<EventBean[]> resultFinalRows, EventBean resultRootEvent)
     {
         // there cannot be child nodes to compute a cartesian product if this node had no results
         if (resultsForStream == null)
@@ -128,13 +128,13 @@ public class CartesianProdAssemblyNode extends BaseAssemblyNode
                 {
                     EventBean[] row = new EventBean[numStreams];
                     row[streamNum] = singleResultParentEvent;
-                    parentNode.result(row, streamNum, singleResultNode.getParentEvent(), singleResultNode);
+                    parentNode.result(row, streamNum, singleResultNode.getParentEvent(), singleResultNode, resultFinalRows, resultRootEvent);
                 }
                 return;
             }
 
             // Compute the cartesian product
-            postCartesian(singleResultRowsPerStream, singleResultNode);
+            postCartesian(singleResultRowsPerStream, singleResultNode, resultFinalRows, resultRootEvent);
             return;
         }
 
@@ -154,18 +154,18 @@ public class CartesianProdAssemblyNode extends BaseAssemblyNode
                     {
                         EventBean[] row = new EventBean[numStreams];
                         row[streamNum] = theEvent;
-                        parentNode.result(row, streamNum, node.getParentEvent(), node.getParent());
+                        parentNode.result(row, streamNum, node.getParentEvent(), node.getParent(), resultFinalRows, resultRootEvent);
                     }
                     continue;
                 }
 
                 // Compute the cartesian product
-                postCartesian(results.getRowsPerStream(), node);
+                postCartesian(results.getRowsPerStream(), node, resultFinalRows, resultRootEvent);
             }
         }
     }
 
-    private void postCartesian(List<EventBean[]>[] rowsPerStream, Node node)
+    private void postCartesian(List<EventBean[]>[] rowsPerStream, Node node, Collection<EventBean[]> resultFinalRows, EventBean resultRootEvent)
     {
         List<EventBean[]> result = new LinkedList<EventBean[]>();
         CartesianUtil.computeCartesian(
@@ -188,11 +188,11 @@ public class CartesianProdAssemblyNode extends BaseAssemblyNode
 
         for (EventBean[] row : result)
         {
-            parentNode.result(row, streamNum, node.getParentEvent(), node.getParent());
+            parentNode.result(row, streamNum, node.getParentEvent(), node.getParent(), resultFinalRows, resultRootEvent);
         }
     }
 
-    public void result(EventBean[] row, int fromStreamNum, EventBean myEvent, Node myNode)
+    public void result(EventBean[] row, int fromStreamNum, EventBean myEvent, Node myNode, Collection<EventBean[]> resultFinalRows, EventBean resultRootEvent)
     {
         // fill event in
         row[streamNum] = myEvent;

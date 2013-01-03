@@ -220,6 +220,11 @@ public class TestContextTemporalFixed extends TestCase {
 
         epService.getEPRuntime().sendEvent(new SupportBean("E6", 6));
         assertFalse(listener.isInvoked());
+
+        // try variable
+        epService.getEPAdministrator().createEPL("create variable int var_start = 10");
+        epService.getEPAdministrator().createEPL("create variable int var_end = 20");
+        epService.getEPAdministrator().createEPL("create context FrequentlyContext as start after var_start sec end after var_end sec");
     }
 
     public void testFilterStartedFilterEndedOutputSnapshot() {

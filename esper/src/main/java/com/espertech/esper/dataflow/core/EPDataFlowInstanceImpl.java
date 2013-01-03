@@ -11,6 +11,7 @@
 
 package com.espertech.esper.dataflow.core;
 
+import com.espertech.esper.client.annotation.AuditEnum;
 import com.espertech.esper.client.dataflow.*;
 import com.espertech.esper.dataflow.interfaces.DataFlowOpCloseContext;
 import com.espertech.esper.dataflow.interfaces.DataFlowOpLifecycle;
@@ -18,6 +19,7 @@ import com.espertech.esper.dataflow.interfaces.DataFlowOpOpenContext;
 import com.espertech.esper.dataflow.ops.Emitter;
 import com.espertech.esper.dataflow.runnables.CompletionListener;
 import com.espertech.esper.dataflow.runnables.GraphSourceRunnable;
+import com.espertech.esper.util.AuditPath;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -28,6 +30,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class EPDataFlowInstanceImpl implements EPDataFlowInstance, CompletionListener {
     private static final Log log = LogFactory.getLog(EPDataFlowInstanceImpl.class);
 
+    private final String engineURI;
+    private final String statementName;
+    private final boolean audit;
     private final String dataFlowName;
     private final Object userObject;
     private final String instanceId;
@@ -41,15 +46,18 @@ public class EPDataFlowInstanceImpl implements EPDataFlowInstance, CompletionLis
     private List<Thread> threads;
     private Thread runCurrentThread;
 
-    public EPDataFlowInstanceImpl(String dataFlowName, Object userObject, String instanceId, EPDataFlowState state, List<GraphSourceRunnable> sourceRunnables, Map<Integer, Object> operators, Set<Integer> operatorBuildOrder, EPDataFlowInstanceStatistics statisticsProvider) {
+    public EPDataFlowInstanceImpl(String engineURI, String statementName, boolean audit, String dataFlowName, Object userObject, String instanceId, EPDataFlowState state, List<GraphSourceRunnable> sourceRunnables, Map<Integer, Object> operators, Set<Integer> operatorBuildOrder, EPDataFlowInstanceStatistics statisticsProvider) {
+        this.engineURI = engineURI;
+        this.statementName = statementName;
+        this.audit = audit;
         this.dataFlowName = dataFlowName;
         this.userObject = userObject;
         this.instanceId = instanceId;
-        this.state = state;
         this.sourceRunnables = sourceRunnables;
         this.operators = operators;
         this.operatorBuildOrder = operatorBuildOrder;
         this.statisticsProvider = statisticsProvider;
+        setState(state);
     }
 
     public String getDataFlowName() {
@@ -72,7 +80,7 @@ public class EPDataFlowInstanceImpl implements EPDataFlowInstance, CompletionLis
         checkExecCompleteState();
         checkExecCancelledState();
         checkExecRunningState();
-        state = EPDataFlowState.RUNNING;
+        setState(EPDataFlowState.RUNNING);
 
         callOperatorOpen();
 
@@ -99,24 +107,24 @@ public class EPDataFlowInstanceImpl implements EPDataFlowInstance, CompletionLis
         callOperatorOpen();
         
         GraphSourceRunnable sourceRunnable = sourceRunnables.get(0);
-        state = EPDataFlowState.RUNNING;
+        setState(EPDataFlowState.RUNNING);
         runCurrentThread = Thread.currentThread();
         try {
             sourceRunnable.runSync();
         }
         catch (InterruptedException ex) {
             callOperatorClose();
-            state = EPDataFlowState.CANCELLED;
+            setState(EPDataFlowState.CANCELLED);
             throw new EPDataFlowCancellationException("Data flow '" + dataFlowName + "' execution was cancelled", dataFlowName);
         }
         catch (Throwable t) {
             callOperatorClose();
-            state = EPDataFlowState.COMPLETE;
+            setState(EPDataFlowState.COMPLETE);
             throw new EPDataFlowExecutionException("Exception encountered running data flow '" + dataFlowName + "': " + t.getMessage(), t, dataFlowName);
         }
         callOperatorClose();
         if (state != EPDataFlowState.CANCELLED) {
-            state = EPDataFlowState.COMPLETE;
+            setState(EPDataFlowState.COMPLETE);
         }
     }
 
@@ -143,7 +151,7 @@ public class EPDataFlowInstanceImpl implements EPDataFlowInstance, CompletionLis
                     }
                 }
             });
-            state = EPDataFlowState.RUNNING;
+            setState(EPDataFlowState.RUNNING);
             threads.add(thread);
             thread.start();
         }
@@ -182,7 +190,7 @@ public class EPDataFlowInstanceImpl implements EPDataFlowInstance, CompletionLis
             return;
         }
         if (state == EPDataFlowState.INSTANTIATED) {
-            state = EPDataFlowState.CANCELLED;
+            setState(EPDataFlowState.CANCELLED);
             sourceRunnables.clear();
             callOperatorClose();
             return;
@@ -209,13 +217,13 @@ public class EPDataFlowInstanceImpl implements EPDataFlowInstance, CompletionLis
 
         callOperatorClose();
 
-        state = EPDataFlowState.CANCELLED;
+        setState(EPDataFlowState.CANCELLED);
         sourceRunnables.clear();
     }
 
     public synchronized void completed() {
         if (state != EPDataFlowState.CANCELLED) {
-            state = EPDataFlowState.COMPLETE;
+            setState(EPDataFlowState.COMPLETE);
         }
 
         callOperatorClose();
@@ -277,5 +285,12 @@ public class EPDataFlowInstanceImpl implements EPDataFlowInstance, CompletionLis
                 }
             }
         }
+    }
+
+    private void setState(EPDataFlowState newState) {
+        if (audit) {
+            AuditPath.auditLog(engineURI, statementName, AuditEnum.DATAFLOW_TRANSITION, "dataflow " + dataFlowName + " instance " + instanceId + " from state " + state + " to state " + newState);
+        }
+        this.state = newState;
     }
 }

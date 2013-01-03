@@ -28,7 +28,7 @@ public class EnumEvalMostLeastFrequentEvent extends EnumEvalBase implements Enum
         isMostFrequent = mostFrequent;
     }
 
-    public Object evaluateEnumMethod(Collection target, boolean isNewData, ExprEvaluatorContext context) {
+    public Object evaluateEnumMethod(EventBean[] eventsLambda, Collection target, boolean isNewData, ExprEvaluatorContext context) {
 
         Map<Object, Integer> items = new LinkedHashMap<Object, Integer>();
         Collection<EventBean> beans = (Collection<EventBean>) target;

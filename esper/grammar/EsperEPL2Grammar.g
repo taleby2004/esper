@@ -287,6 +287,7 @@ tokens
 	MERGE_DEL;
 	NEW_ITEM;
    	AGG_FILTER_EXPR;
+   	CREATE_EXPR;
    	CREATE_CTX;
    	CREATE_CTX_FIXED;
    	CREATE_CTX_PART;
@@ -564,6 +565,10 @@ tokens
 	parserTokenParaphases.put(END, "'end'");
 	parserTokenParaphases.put(INITIATED, "'initiated'");
 	parserTokenParaphases.put(TERMINATED, "'terminated'");
+	parserTokenParaphases.put(USING, "'using'");
+	parserTokenParaphases.put(EXPRESSIONDECL, "'expression'");
+	parserTokenParaphases.put(NEWKW, "'new'");
+	parserTokenParaphases.put(DATAFLOW, "'dataflow'");
 
 	parserKeywordSet = new java.util.TreeSet<String>(parserTokenParaphases.values());
     }
@@ -721,6 +726,7 @@ eplExpression
 	|	createVariableExpr
 	|	createSchemaExpr
 	|	createContextExpr
+	|	createExpressionExpr
 	|	onExpr
 	|	updateExpr
 	|	createDataflow) forExpr?
@@ -807,15 +813,15 @@ mergeInsert
 onSelectExpr	
 @init  { paraphrases.push("on-select clause"); }
 @after { paraphrases.pop(); }
-	:	(INSERT insertIntoExpr)?
-		SELECT DISTINCT? selectionList
+	:	(INSERT insertIntoExpr)?		
+		SELECT (AND_EXPR? d=DELETE)? DISTINCT? selectionList
 		onExprFrom?
 		(WHERE whereClause)?		
 		(GROUP BY groupByListExpr)?
 		(HAVING havingClause)?
 		(ORDER BY orderByListExpr)?
 		(ROW_LIMIT_EXPR rowLimit)?
-		-> ^(ON_SELECT_EXPR insertIntoExpr? DISTINCT? selectionList onExprFrom? whereClause? groupByListExpr? havingClause? orderByListExpr? rowLimit?)
+		-> ^(ON_SELECT_EXPR insertIntoExpr? $d? DISTINCT? selectionList onExprFrom? whereClause? groupByListExpr? havingClause? orderByListExpr? rowLimit?)
 	;
 	
 onUpdateExpr	
@@ -885,8 +891,8 @@ createWindowExprModelAfter
 	;
 		
 createIndexExpr
-	:	CREATE INDEX n=IDENT ON w=IDENT LPAREN createIndexColumnList RPAREN
-		-> ^(CREATE_INDEX_EXPR $n $w createIndexColumnList)
+	:	CREATE (u=IDENT)? INDEX n=IDENT ON w=IDENT LPAREN createIndexColumnList RPAREN
+		-> ^(CREATE_INDEX_EXPR $n $w createIndexColumnList $u?)
 	;
 	
 createIndexColumnList
@@ -900,8 +906,8 @@ createIndexColumn
 	;	
 
 createVariableExpr
-	:	CREATE c=IDENT? VARIABLE classIdentifier n=IDENT (EQUALS expression)?
-		-> ^(CREATE_VARIABLE_EXPR classIdentifier $n $c? expression?)
+	:	CREATE c=IDENT? VARIABLE classIdentifier (arr=LBRACK RBRACK)? n=IDENT (EQUALS expression)?
+		-> ^(CREATE_VARIABLE_EXPR classIdentifier $n $c? $arr? expression?)
 	;
 
 createColumnList 	
@@ -1027,6 +1033,11 @@ createContextExpr
 	:	CREATE CONTEXT name=IDENT AS? createContextDetail
 		-> ^(CREATE_CTX $name createContextDetail)
 	;
+	
+createExpressionExpr
+	:	CREATE expressionDecl
+		-> ^(CREATE_EXPR expressionDecl)
+	;
 
 createContextDetail
 	:	createContextChoice
@@ -1097,7 +1108,7 @@ variantListElement
 insertIntoExpr
 @init  { paraphrases.push("insert-into clause"); }
 @after { paraphrases.pop(); }
-	:	(s=ISTREAM | s=RSTREAM)? INTO classIdentifier (LPAREN columnList RPAREN)?
+	:	(s=ISTREAM | s=RSTREAM | s=IRSTREAM)? INTO classIdentifier (LPAREN columnList RPAREN)?
 		-> ^(INSERTINTO_EXPR $s? classIdentifier columnList?)
 	;
 		
@@ -1615,6 +1626,7 @@ builtinFunc
 	| CURRENT_TIMESTAMP (LPAREN RPAREN)? (d=DOT libFunctionNoClass (d=DOT libFunctionNoClass)* )?
 	  -> {$d != null}? ^(DOT_EXPR ^(CURRENT_TIMESTAMP) libFunctionNoClass+)
 	  -> ^(CURRENT_TIMESTAMP)
+	| ISTREAM^ LPAREN! RPAREN!
 	;
 	
 firstAggregation
@@ -2050,7 +2062,8 @@ keywordAllowedIdent returns [String result]
 		
 escapableStr returns [String result]
 	:	i1=IDENT { $result = $i1.getText(); }
-		|i2=TICKED_STRING_LITERAL { $result = removeTicks($i2.getText()); }
+		|i2=EVENTS { $result = $i2.getText(); }
+		|i3=TICKED_STRING_LITERAL { $result = removeTicks($i3.getText()); }
 	;
 	
 escapableIdent

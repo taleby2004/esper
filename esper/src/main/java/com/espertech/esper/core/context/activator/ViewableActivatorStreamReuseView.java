@@ -44,11 +44,19 @@ public class ViewableActivatorStreamReuseView implements ViewableActivator, Stop
 
     public ViewableActivationResult activate(AgentInstanceContext agentInstanceContext, boolean isSubselect, boolean isRecoveringResilient) {
         Pair<EventStream, StatementAgentInstanceLock> pair = services.getStreamService().createStream(statementContext.getStatementId(), filterStreamSpec.getFilterSpec(),
-                statementContext.getFilterService(), agentInstanceContext.getEpStatementAgentInstanceHandle(), join, false, evaluatorContextStmt, !statementSpec.getOrderByList().isEmpty(), filterSubselectSameStream, statementContext.getAnnotations());
+                statementContext.getFilterService(),
+                agentInstanceContext.getEpStatementAgentInstanceHandle(),
+                join,
+                false,
+                evaluatorContextStmt,
+                !statementSpec.getOrderByList().isEmpty(),
+                filterSubselectSameStream,
+                statementContext.getAnnotations(),
+                statementContext.isStatelessSelect());
         return new ViewableActivationResult(pair.getFirst(), this, pair.getSecond(), null);
     }
 
     public void stop() {
-        services.getStreamService().dropStream(filterStreamSpec.getFilterSpec(), statementContext.getFilterService(), join, false, !statementSpec.getOrderByList().isEmpty(), filterSubselectSameStream);
+        services.getStreamService().dropStream(filterStreamSpec.getFilterSpec(), statementContext.getFilterService(), join, false, !statementSpec.getOrderByList().isEmpty(), filterSubselectSameStream, statementContext.isStatelessSelect());
     }
 }

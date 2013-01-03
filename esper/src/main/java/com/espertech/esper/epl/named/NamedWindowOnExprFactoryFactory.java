@@ -13,10 +13,7 @@ import com.espertech.esper.core.service.InternalEventRouter;
 import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.metric.StatementMetricHandle;
-import com.espertech.esper.epl.spec.OnTriggerDesc;
-import com.espertech.esper.epl.spec.OnTriggerMergeDesc;
-import com.espertech.esper.epl.spec.OnTriggerType;
-import com.espertech.esper.epl.spec.OnTriggerWindowUpdateDesc;
+import com.espertech.esper.epl.spec.*;
 import com.espertech.esper.event.EventBeanReader;
 import com.espertech.esper.event.EventBeanReaderDefaultImpl;
 import com.espertech.esper.event.EventTypeSPI;
@@ -59,8 +56,9 @@ public class NamedWindowOnExprFactoryFactory
                     eventBeanReader = new EventBeanReaderDefaultImpl(outputEventType);
                 }
             }
+            OnTriggerWindowDesc windowDesc = (OnTriggerWindowDesc) onTriggerDesc;
             return new NamedWindowOnSelectViewFactory(namedWindowEventType, internalEventRouter, addToFront,
-                    statementContext.getEpStatementHandle(), eventBeanReader, isDistinct, outputEventType, statementContext.getStatementResultService(), statementContext.getInternalEventEngineRouteDest());
+                    statementContext.getEpStatementHandle(), eventBeanReader, isDistinct, outputEventType, statementContext.getStatementResultService(), statementContext.getInternalEventEngineRouteDest(), windowDesc.isDeleteAndSelect());
         }
         else if (onTriggerDesc.getOnTriggerType() == OnTriggerType.ON_UPDATE)
         {

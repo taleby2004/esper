@@ -14,7 +14,8 @@ package com.espertech.esper.epl.enummethod.eval;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
-import com.espertech.esper.event.map.MapEventType;
+import com.espertech.esper.event.arr.ObjectArrayEventBean;
+import com.espertech.esper.event.arr.ObjectArrayEventType;
 
 import java.util.ArrayDeque;
 import java.util.Collection;
@@ -22,22 +23,25 @@ import java.util.Collections;
 
 public class EnumEvalTakeWhileLastIndexScalar extends EnumEvalBaseScalarIndex implements EnumEval {
 
-    public EnumEvalTakeWhileLastIndexScalar(ExprEvaluator innerExpression, int streamNumLambda, MapEventType evalEventType, String evalPropertyName, MapEventType indexEventType, String indexPropertyName) {
-        super(innerExpression, streamNumLambda, evalEventType, evalPropertyName, indexEventType, indexPropertyName);
+    public EnumEvalTakeWhileLastIndexScalar(ExprEvaluator innerExpression, int streamNumLambda, ObjectArrayEventType evalEventType, ObjectArrayEventType indexEventType) {
+        super(innerExpression, streamNumLambda, evalEventType, indexEventType);
     }
 
-    public Object evaluateEnumMethod(Collection target, boolean isNewData, ExprEvaluatorContext context) {
+    public Object evaluateEnumMethod(EventBean[] eventsLambda, Collection target, boolean isNewData, ExprEvaluatorContext context) {
         if (target.isEmpty()) {
             return target;
         }
 
+        ObjectArrayEventBean evalEvent = new ObjectArrayEventBean(new Object[1], evalEventType);
+        ObjectArrayEventBean indexEvent = new ObjectArrayEventBean(new Object[1], indexEventType);
+
         if (target.size() == 1) {
             Object item = target.iterator().next();
 
-            evalEvent.getProperties().put(evalPropertyName, item);
+            evalEvent.getProperties()[0] = item;
             eventsLambda[streamNumLambda] = evalEvent;
 
-            indexEvent.getProperties().put(indexPropertyName, 0);
+            indexEvent.getProperties()[0] = 0;
             eventsLambda[streamNumLambda + 1] = indexEvent;
 
             Object pass = innerExpression.evaluate(eventsLambda, isNewData, context);
@@ -58,10 +62,10 @@ public class EnumEvalTakeWhileLastIndexScalar extends EnumEvalBaseScalarIndex im
         int index = 0;
         for (int i = all.length - 1; i >= 0; i--) {
 
-            evalEvent.getProperties().put(evalPropertyName, all[i]);
+            evalEvent.getProperties()[0] = all[i];
             eventsLambda[streamNumLambda] = evalEvent;
 
-            indexEvent.getProperties().put(indexPropertyName, index++);
+            indexEvent.getProperties()[0] = index++;
             eventsLambda[streamNumLambda + 1] = indexEvent;
 
             Object pass = innerExpression.evaluate(eventsLambda, isNewData, context);

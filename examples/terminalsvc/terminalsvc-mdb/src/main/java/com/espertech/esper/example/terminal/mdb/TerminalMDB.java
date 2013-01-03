@@ -8,12 +8,14 @@
  **************************************************************************************/
 package com.espertech.esper.example.terminal.mdb;
 
-import javax.ejb.MessageDrivenBean;
-import javax.ejb.MessageDrivenContext;
-import javax.ejb.EJBException;
+import javax.ejb.*;
 import javax.jms.*;
 
-public class TerminalMDB implements MessageDrivenBean, MessageListener
+@MessageDriven(name = "TerminalMDB", activationConfig = {
+        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
+        @ActivationConfigProperty(propertyName = "destination", propertyValue = "queue_b"),
+        @ActivationConfigProperty(propertyName = "acknowledgeMode", propertyValue = "Auto-acknowledge") })
+public class TerminalMDB implements MessageListener
 {
     private static OutboundQueueSender outboundQueueSender;
     private static EPServiceMDBAdapter mdbAdapter;
@@ -21,12 +23,12 @@ public class TerminalMDB implements MessageDrivenBean, MessageListener
 
     public void setMessageDrivenContext(MessageDrivenContext messageDrivenContext) throws EJBException
     {
-        //System.out.println(TerminalMDB.class.getName() + "::setMessageDrivenContext invoked");
+        // System.out.println(TerminalMDB.class.getName() + "::setMessageDrivenContext invoked");
     }
 
     public void ejbCreate() throws EJBException
     {
-        //System.out.println(TerminalMDB.class.getName() + "::ejbCreate invoked");
+        // System.out.println(TerminalMDB.class.getName() + "::ejbCreate invoked");
 
         synchronized(isInitialized)
         {
@@ -56,7 +58,7 @@ public class TerminalMDB implements MessageDrivenBean, MessageListener
         try
         {
             ObjectMessage objMessage = (ObjectMessage) message;
-            //System.out.println("onMessage received event=" + objMessage.getObject());
+            // System.out.println("onMessage received event=" + objMessage.getObject());
             theEvent = objMessage.getObject();
         }
         catch (JMSException ex)

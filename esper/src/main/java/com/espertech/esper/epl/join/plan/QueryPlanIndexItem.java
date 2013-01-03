@@ -17,22 +17,31 @@ import java.util.Arrays;
  */
 public class QueryPlanIndexItem
 {
-    private String[] indexProps;
+    private final String[] indexProps;
     private Class[] optIndexCoercionTypes;
-    private String[] rangeProps;
-    private Class[] optRangeCoercionTypes;
+    private final String[] rangeProps;
+    private final Class[] optRangeCoercionTypes;
+    private final boolean unique;
 
     /**
      * Ctor.
      * @param indexProps - array of property names with the first dimension suplying the number of
      * distinct indexes. The second dimension can be empty and indicates a full table scan.
      * @param optIndexCoercionTypes - array of coercion types for each index, or null entry for no coercion required
+     * @param unique whether index is unique on index props (not applicable to range-only)
      */
-    public QueryPlanIndexItem(String[] indexProps, Class[] optIndexCoercionTypes, String[] rangeProps, Class[] optRangeCoercionTypes) {
+    public QueryPlanIndexItem(String[] indexProps, Class[] optIndexCoercionTypes, String[] rangeProps, Class[] optRangeCoercionTypes, boolean unique) {
         this.indexProps = indexProps;
         this.optIndexCoercionTypes = optIndexCoercionTypes;
         this.rangeProps = rangeProps;
         this.optRangeCoercionTypes = optRangeCoercionTypes;
+        this.unique = unique;
+        if (unique && indexProps.length == 0) {
+            throw new IllegalStateException("Invalid unique index planned without hash index props");
+        }
+        if (unique && rangeProps.length > 0) {
+            throw new IllegalStateException("Invalid unique index planned that includes range props");
+        }
     }
 
     public String[] getIndexProps() {
@@ -55,10 +64,15 @@ public class QueryPlanIndexItem
         this.optIndexCoercionTypes = optIndexCoercionTypes;
     }
 
+    public boolean isUnique() {
+        return unique;
+    }
+
     @Override
     public String toString() {
         return "QueryPlanIndexItem{" +
-                "indexProps=" + (indexProps == null ? null : Arrays.asList(indexProps)) +
+                "unique=" + unique +
+                ", indexProps=" + (indexProps == null ? null : Arrays.asList(indexProps)) +
                 ", rangeProps=" + (rangeProps == null ? null : Arrays.asList(rangeProps)) +
                 ", optIndexCoercionTypes=" + (optIndexCoercionTypes == null ? null : Arrays.asList(optIndexCoercionTypes)) +
                 ", optRangeCoercionTypes=" + (optRangeCoercionTypes == null ? null : Arrays.asList(optRangeCoercionTypes)) +
@@ -66,6 +80,9 @@ public class QueryPlanIndexItem
     }
 
     public boolean equalsCompareSortedProps(QueryPlanIndexItem other) {
+        if (unique != other.unique) {
+            return false;
+        }
         String[] otherIndexProps = CollectionUtil.copySortArray(other.getIndexProps());
         String[] thisIndexProps = CollectionUtil.copySortArray(this.getIndexProps());
         String[] otherRangeProps = CollectionUtil.copySortArray(other.getRangeProps());

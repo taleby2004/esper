@@ -13,9 +13,7 @@ import com.espertech.esper.collection.MultiKey;
 import com.espertech.esper.epl.join.exec.base.ExecNode;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
-import java.util.Set;
-import java.util.List;
-import java.util.LinkedList;
+import java.util.*;
 
 /**
  * Query strategy for building a join tuple set by using an execution node tree.
@@ -41,11 +39,12 @@ public class ExecNodeQueryStrategy implements QueryStrategy
 
     public void lookup(EventBean[] lookupEvents, Set<MultiKey<EventBean>> joinSet, ExprEvaluatorContext exprEvaluatorContext)
     {
-        if (lookupEvents == null)
+        if (lookupEvents == null || lookupEvents.length == 0)
         {
             return;
         }
 
+        ArrayDeque<EventBean[]> results = new ArrayDeque<EventBean[]>();
         for (EventBean theEvent : lookupEvents)
         {
             // Set up prototype row
@@ -53,7 +52,6 @@ public class ExecNodeQueryStrategy implements QueryStrategy
             prototype[forStream] = theEvent;
 
             // Perform execution
-            List<EventBean[]> results = new LinkedList<EventBean[]>();
             execNode.process(theEvent, prototype, results, exprEvaluatorContext);
 
             // Convert results into unique set
@@ -61,6 +59,7 @@ public class ExecNodeQueryStrategy implements QueryStrategy
             {
                 joinSet.add(new MultiKey<EventBean>(row));
             }
+            results.clear();
         }
     }
 

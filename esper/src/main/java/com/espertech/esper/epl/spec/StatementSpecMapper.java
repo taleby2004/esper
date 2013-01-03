@@ -21,8 +21,10 @@ import com.espertech.esper.epl.agg.service.AggregationSupport;
 import com.espertech.esper.epl.core.EngineImportService;
 import com.espertech.esper.epl.core.EngineImportSingleRowDesc;
 import com.espertech.esper.epl.db.DatabasePollingViewableFactory;
+import com.espertech.esper.epl.declexpr.ExprDeclaredHelper;
 import com.espertech.esper.epl.declexpr.ExprDeclaredNode;
 import com.espertech.esper.epl.declexpr.ExprDeclaredNodeImpl;
+import com.espertech.esper.epl.declexpr.ExprDeclaredService;
 import com.espertech.esper.epl.enummethod.dot.ExprLambdaGoesNode;
 import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.epl.named.NamedWindowService;
@@ -71,7 +73,7 @@ public class StatementSpecMapper
      * @return annotation
      */
     public static AnnotationPart unmap(AnnotationDesc node) {
-        List<AnnotationPart> list = unmapAnnotations(Collections.singletonList(node));
+        List<AnnotationPart> list = unmapAnnotations(new ArrayList<AnnotationDesc>(Collections.singletonList(node)));
         return list.get(0);
     }
 
@@ -92,9 +94,9 @@ public class StatementSpecMapper
      * @param configuration supplies config values
      * @return statement specification, and internal representation of a statement
      */
-    public static StatementSpecRaw map(EPStatementObjectModel sodaStatement, EngineImportService engineImportService, VariableService variableService, ConfigurationInformation configuration, SchedulingService schedulingService, String engineURI, PatternNodeFactory patternNodeFactory, NamedWindowService namedWindowService, ContextManagementService contextManagementService)
+    public static StatementSpecRaw map(EPStatementObjectModel sodaStatement, EngineImportService engineImportService, VariableService variableService, ConfigurationInformation configuration, SchedulingService schedulingService, String engineURI, PatternNodeFactory patternNodeFactory, NamedWindowService namedWindowService, ContextManagementService contextManagementService, ExprDeclaredService exprDeclaredService)
     {
-        StatementSpecMapContext mapContext = new StatementSpecMapContext(engineImportService, variableService, configuration, schedulingService, engineURI, patternNodeFactory, namedWindowService, contextManagementService);
+        StatementSpecMapContext mapContext = new StatementSpecMapContext(engineImportService, variableService, configuration, schedulingService, engineURI, patternNodeFactory, namedWindowService, contextManagementService, exprDeclaredService);
 
         StatementSpecRaw raw = map(sodaStatement, mapContext);
         if (mapContext.isHasVariables())
@@ -120,6 +122,7 @@ public class StatementSpecMapper
         mapCreateIndex(sodaStatement.getCreateIndex(), raw, mapContext);
         mapCreateVariable(sodaStatement.getCreateVariable(), raw, mapContext);
         mapCreateSchema(sodaStatement.getCreateSchema(), raw, mapContext);
+        mapCreateExpression(sodaStatement.getCreateExpression(), raw, mapContext);
         mapCreateGraph(sodaStatement.getCreateDataFlow(), raw, mapContext);
         mapOnTrigger(sodaStatement.getOnExpr(), raw, mapContext);
         InsertIntoDesc desc = mapInsertInto(sodaStatement.getInsertInto());
@@ -171,6 +174,7 @@ public class StatementSpecMapper
         unmapCreateIndex(statementSpec.getCreateIndexDesc(), model, unmapContext);
         unmapCreateVariable(statementSpec.getCreateVariableDesc(), model, unmapContext);
         unmapCreateSchema(statementSpec.getCreateSchemaDesc(), model, unmapContext);
+        unmapCreateExpression(statementSpec.getCreateExpressionDesc(), model, unmapContext);
         unmapCreateGraph(statementSpec.getCreateDataFlowDesc(), model, unmapContext);
         unmapUpdateClause(statementSpec.getStreamSpecs(), statementSpec.getUpdateDesc(), model, unmapContext);
         unmapOnClause(statementSpec.getOnTriggerDesc(), model, unmapContext);
@@ -229,7 +233,9 @@ public class StatementSpecMapper
         else if (onTriggerDesc.getOnTriggerType() == OnTriggerType.ON_SELECT)
         {
             OnTriggerWindowDesc window = (OnTriggerWindowDesc) onTriggerDesc;
-            model.setOnExpr(new OnSelectClause(window.getWindowName(), window.getOptionalAsName()));
+            OnSelectClause onSelect = new OnSelectClause(window.getWindowName(), window.getOptionalAsName());
+            onSelect.setDeleteAndSelect(window.isDeleteAndSelect());
+            model.setOnExpr(onSelect);
         }
         else if (onTriggerDesc.getOnTriggerType() == OnTriggerType.ON_SET)
         {
@@ -377,8 +383,8 @@ public class StatementSpecMapper
             ContextDetailHash init = (ContextDetailHash) contextDetail;
             List<ContextDescriptorHashSegmentedItem> hashes = new ArrayList<ContextDescriptorHashSegmentedItem>();
             for (ContextDetailHashItem item : init.getItems()) {
-                DotExpressionItem dot = unmapChains(Collections.singletonList(item.getFunction()), unmapContext, false).get(0);
-                SingleRowMethodExpression dotExpression = new SingleRowMethodExpression(Collections.singletonList(dot));
+                DotExpressionItem dot = unmapChains(new ArrayList<ExprChainedSpec>(Collections.singletonList(item.getFunction())), unmapContext, false).get(0);
+                SingleRowMethodExpression dotExpression = new SingleRowMethodExpression(new ArrayList<DotExpressionItem>(Collections.singletonList(dot)));
                 Filter filter = unmapFilter(item.getFilterSpecRaw(), unmapContext);
                 hashes.add(new ContextDescriptorHashSegmentedItem(dotExpression, filter));
             }
@@ -449,7 +455,7 @@ public class StatementSpecMapper
         for (CreateIndexItem item : createIndexDesc.getColumns()) {
             cols.add(new CreateIndexColumn(item.getName(), CreateIndexColumnType.valueOf(item.getType().name().toUpperCase())));
         }
-        model.setCreateIndex(new CreateIndexClause(createIndexDesc.getIndexName(), createIndexDesc.getWindowName(), cols));
+        model.setCreateIndex(new CreateIndexClause(createIndexDesc.getIndexName(), createIndexDesc.getWindowName(), cols, createIndexDesc.isUnique()));
     }
 
     private static void unmapCreateVariable(CreateVariableDesc createVariableDesc, EPStatementObjectModel model, StatementSpecUnMapContext unmapContext)
@@ -463,7 +469,9 @@ public class StatementSpecMapper
         {
             assignment = unmapExpressionDeep(createVariableDesc.getAssignment(), unmapContext);
         }
-        model.setCreateVariable(new CreateVariableClause(createVariableDesc.getVariableType(), createVariableDesc.getVariableName(), assignment, createVariableDesc.isConstant()));
+        CreateVariableClause clause = new CreateVariableClause(createVariableDesc.getVariableType(), createVariableDesc.getVariableName(), assignment, createVariableDesc.isConstant());
+        clause.setArray(createVariableDesc.isArray());
+        model.setCreateVariable(clause);
     }
 
     private static void unmapCreateSchema(CreateSchemaDesc desc, EPStatementObjectModel model, StatementSpecUnMapContext unmapContext)
@@ -473,6 +481,22 @@ public class StatementSpecMapper
             return;
         }
         model.setCreateSchema(unmapCreateSchemaInternal(desc, unmapContext));
+    }
+
+    private static void unmapCreateExpression(CreateExpressionDesc desc, EPStatementObjectModel model, StatementSpecUnMapContext unmapContext)
+    {
+        if (desc == null)
+        {
+            return;
+        }
+        CreateExpressionClause clause;
+        if (desc.getExpression() != null) {
+            clause = new CreateExpressionClause(unmapExpressionDeclItem(desc.getExpression(), unmapContext));
+        }
+        else {
+            clause = new CreateExpressionClause(unmapScriptExpression(desc.getScript(), unmapContext));
+        }
+        model.setCreateExpression(clause);
     }
 
     private static CreateSchemaClause unmapCreateSchemaInternal(CreateSchemaDesc desc, StatementSpecUnMapContext unmapContext)
@@ -519,7 +543,7 @@ public class StatementSpecMapper
 
         List<DataFlowOperatorOutput> outputs = new ArrayList<DataFlowOperatorOutput>();
         for (GraphOperatorOutputItem out : spec.getOutput().getItems()) {
-            List<DataFlowOperatorOutputType> types = out.getTypeInfo().isEmpty() ? null : Collections.singletonList(unmapTypeInfo(out.getTypeInfo().get(0)));
+            List<DataFlowOperatorOutputType> types = out.getTypeInfo().isEmpty() ? null : new ArrayList<DataFlowOperatorOutputType>(Collections.singletonList(unmapTypeInfo(out.getTypeInfo().get(0))));
             outputs.add(new DataFlowOperatorOutput(out.getStreamName(), types));
         }
         op.setOutput(outputs);
@@ -547,11 +571,11 @@ public class StatementSpecMapper
 
     private static DataFlowOperatorOutputType unmapTypeInfo(GraphOperatorOutputItemType typeInfo) {
         List<DataFlowOperatorOutputType> types = Collections.emptyList();
-        if (!typeInfo.getTypeParameters().isEmpty()) {
+        if (typeInfo.getTypeParameters() != null && !typeInfo.getTypeParameters().isEmpty()) {
             types = new ArrayList<DataFlowOperatorOutputType>();
-        }
-        for (GraphOperatorOutputItemType type : typeInfo.getTypeParameters()) {
-            types.add(unmapTypeInfo(type));
+            for (GraphOperatorOutputItemType type : typeInfo.getTypeParameters()) {
+                types.add(unmapTypeInfo(type));
+            }
         }
         return new DataFlowOperatorOutputType(typeInfo.isWildcard(), typeInfo.getTypeOrClassname(), types);
     }
@@ -846,12 +870,12 @@ public class StatementSpecMapper
         if (onExpr instanceof OnDeleteClause)
         {
             OnDeleteClause onDeleteClause = (OnDeleteClause) onExpr;
-            raw.setOnTriggerDesc(new OnTriggerWindowDesc(onDeleteClause.getWindowName(), onDeleteClause.getOptionalAsName(), OnTriggerType.ON_DELETE));
+            raw.setOnTriggerDesc(new OnTriggerWindowDesc(onDeleteClause.getWindowName(), onDeleteClause.getOptionalAsName(), OnTriggerType.ON_DELETE, false));
         }
         else if (onExpr instanceof OnSelectClause)
         {
             OnSelectClause onSelectClause = (OnSelectClause) onExpr;
-            raw.setOnTriggerDesc(new OnTriggerWindowDesc(onSelectClause.getWindowName(), onSelectClause.getOptionalAsName(), OnTriggerType.ON_SELECT));
+            raw.setOnTriggerDesc(new OnTriggerWindowDesc(onSelectClause.getWindowName(), onSelectClause.getOptionalAsName(), OnTriggerType.ON_SELECT, onSelectClause.isDeleteAndSelect()));
         }
         else if (onExpr instanceof OnSetClause)
         {
@@ -1216,17 +1240,13 @@ public class StatementSpecMapper
 
     private static InsertIntoClause unmapInsertInto(InsertIntoDesc insertIntoDesc)
     {
-        StreamSelector s = StreamSelector.ISTREAM_ONLY;
         if (insertIntoDesc == null)
         {
             return null;
         }
-        if (!insertIntoDesc.isIStream())
-        {
-            s = StreamSelector.RSTREAM_ONLY;
-        }
+        StreamSelector selector = SelectClauseStreamSelectorEnum.mapFromSODA(insertIntoDesc.getStreamSelector());
         return InsertIntoClause.create(insertIntoDesc.getEventTypeName(),
-                        insertIntoDesc.getColumnNames().toArray(new String[insertIntoDesc.getColumnNames().size()]), s);
+                        insertIntoDesc.getColumnNames().toArray(new String[insertIntoDesc.getColumnNames().size()]), selector);
     }
 
     private static void mapCreateContext(CreateContextClause createContext, StatementSpecRaw raw, StatementSpecMapContext mapContext) {
@@ -1346,7 +1366,7 @@ public class StatementSpecMapper
             cols.add(new CreateIndexItem(col.getColumnName(), CreateIndexType.valueOf(col.getType().name().toUpperCase())));
         }
 
-        CreateIndexDesc desc = new CreateIndexDesc(clause.getIndexName(),clause.getWindowName(), cols);
+        CreateIndexDesc desc = new CreateIndexDesc(clause.isUnique(), clause.getIndexName(), clause.getWindowName(), cols);
         raw.setCreateIndexDesc(desc);
     }
 
@@ -1386,7 +1406,7 @@ public class StatementSpecMapper
             assignment = mapExpressionDeep(createVariable.getOptionalAssignment(), mapContext);
         }
 
-        raw.setCreateVariableDesc(new CreateVariableDesc(createVariable.getVariableType(), createVariable.getVariableName(), assignment, createVariable.isConstant()));
+        raw.setCreateVariableDesc(new CreateVariableDesc(createVariable.getVariableType(), createVariable.getVariableName(), assignment, createVariable.isConstant(), createVariable.isArray()));
     }
 
     private static void mapCreateSchema(CreateSchemaClause clause, StatementSpecRaw raw, StatementSpecMapContext mapContext)
@@ -1397,6 +1417,25 @@ public class StatementSpecMapper
         }
         CreateSchemaDesc desc = mapCreateSchemaInternal(clause, raw, mapContext);
         raw.setCreateSchemaDesc(desc);
+    }
+
+    private static void mapCreateExpression(CreateExpressionClause clause, StatementSpecRaw raw, StatementSpecMapContext mapContext)
+    {
+        if (clause == null)
+        {
+            return;
+        }
+
+        CreateExpressionDesc desc;
+        if (clause.getExpressionDeclaration() != null) {
+            ExpressionDeclItem item = mapExpressionDeclItem(clause.getExpressionDeclaration(), mapContext);
+            desc = new CreateExpressionDesc(item);
+        }
+        else {
+            ExpressionScriptProvided item = mapScriptExpression(clause.getScriptExpression(), mapContext);
+            desc = new CreateExpressionDesc(item);
+        }
+        raw.setCreateExpressionDesc(desc);
     }
 
     private static CreateSchemaDesc mapCreateSchemaInternal(CreateSchemaClause clause, StatementSpecRaw raw, StatementSpecMapContext mapContext)
@@ -1498,9 +1537,8 @@ public class StatementSpecMapper
             return null;
         }
 
-        boolean isIStream = insertInto.isIStream();
         String eventTypeName = insertInto.getStreamName();
-        InsertIntoDesc desc = new InsertIntoDesc(isIStream, eventTypeName);
+        InsertIntoDesc desc = new InsertIntoDesc(SelectClauseStreamSelectorEnum.mapFromSODA(insertInto.getStreamSelector()), eventTypeName);
 
         for (String name : insertInto.getColumnNames())
         {
@@ -1883,6 +1921,10 @@ public class StatementSpecMapper
         {
             return new ExprTimestampNode();
         }
+        else if (expr instanceof IStreamBuiltinExpression)
+        {
+            return new ExprIStreamNode();
+        }
         else if (expr instanceof TimePeriodExpression)
         {
             TimePeriodExpression tpe = (TimePeriodExpression) expr;
@@ -2030,11 +2072,14 @@ public class StatementSpecMapper
             List<ExprChainedSpec> chain = mapChains(theBase.getChain(), mapContext);
             if (chain.size() == 1) {
                 String name = chain.get(0).getName();
-                if (mapContext.getExpressionDeclarations() != null && mapContext.getExpressionDeclarations().containsKey(name)) {
-                    return new ExprDeclaredNodeImpl(mapContext.getExpressionDeclarations().get(name), chain.get(0).getParameters());
+                ExprDeclaredNodeImpl declared = ExprDeclaredHelper.getExistsDeclaredExpr(name, chain.get(0).getParameters(), mapContext.getExpressionDeclarations().values(), mapContext.getExprDeclaredService());
+                if (declared != null) {
+                    return declared;
                 }
-                if (mapContext.getScripts() != null && mapContext.getScripts().containsKey(name)) {
-                    return new ExprNodeScript(mapContext.getConfiguration().getEngineDefaults().getScripts().getDefaultDialect(), mapContext.getScripts().get(name), chain.get(0).getParameters());
+                ExprNodeScript script = ExprDeclaredHelper.getExistsScript(mapContext.getConfiguration().getEngineDefaults().getScripts().getDefaultDialect(),
+                        name, chain.get(0).getParameters(), mapContext.getScripts().values(), mapContext.getExprDeclaredService());
+                if (script != null) {
+                    return script;
                 }
             }
             return new ExprDotNode(chain,
@@ -2390,6 +2435,10 @@ public class StatementSpecMapper
         else if (expr instanceof ExprTimestampNode)
         {
             return new CurrentTimestampExpression();
+        }
+        else if (expr instanceof ExprIStreamNode)
+        {
+            return new IStreamBuiltinExpression();
         }
         else if (expr instanceof ExprSubstitutionNode)
         {
@@ -2933,9 +2982,13 @@ public class StatementSpecMapper
         }
         List<ExpressionDeclaration> result = new ArrayList<ExpressionDeclaration>();
         for (ExpressionDeclItem desc : expr.getExpressions()) {
-            result.add(new ExpressionDeclaration(desc.getName(), desc.getParametersNames(), unmapExpressionDeep(desc.getInner(), unmapContext)));
+            result.add(unmapExpressionDeclItem(desc, unmapContext));
         }
         return result;
+    }
+
+    private static ExpressionDeclaration unmapExpressionDeclItem(ExpressionDeclItem desc, StatementSpecUnMapContext unmapContext) {
+        return new ExpressionDeclaration(desc.getName(), desc.getParametersNames(), unmapExpressionDeep(desc.getInner(), unmapContext));
     }
 
     private static List<ScriptExpression> unmapScriptExpressions(List<ExpressionScriptProvided> scripts, StatementSpecUnMapContext unmapContext) {
@@ -2944,13 +2997,18 @@ public class StatementSpecMapper
         }
         List<ScriptExpression> result = new ArrayList<ScriptExpression>();
         for (ExpressionScriptProvided script : scripts) {
-            String returnType = script.getOptionalReturnTypeName();
-            if (returnType != null && script.isOptionalReturnTypeIsArray()) {
-                returnType = returnType + "[]";
-            }
-            result.add(new ScriptExpression(script.getName(), script.getParameterNames(), script.getExpression(), returnType, script.getOptionalDialect()));
+            ScriptExpression e = unmapScriptExpression(script, unmapContext);
+            result.add(e);
         }
         return result;
+    }
+
+    private static ScriptExpression unmapScriptExpression(ExpressionScriptProvided script, StatementSpecUnMapContext unmapContext) {
+        String returnType = script.getOptionalReturnTypeName();
+        if (returnType != null && script.isOptionalReturnTypeIsArray()) {
+            returnType = returnType + "[]";
+        }
+        return new ScriptExpression(script.getName(), script.getParameterNames(), script.getExpression(), returnType, script.getOptionalDialect());
     }
 
     private static AnnotationPart unmapAnnotation(AnnotationDesc desc) {
@@ -2998,10 +3056,14 @@ public class StatementSpecMapper
         raw.setExpressionDeclDesc(desc);
 
         for (ExpressionDeclaration decl : expressionDeclarations) {
-            ExpressionDeclItem item = new ExpressionDeclItem(decl.getName(), decl.getParameterNames(), mapExpressionDeep(decl.getExpression(), mapContext));
+            ExpressionDeclItem item = mapExpressionDeclItem(decl, mapContext);
             desc.getExpressions().add(item);
             mapContext.addExpressionDeclarations(item);
         }
+    }
+
+    private static ExpressionDeclItem mapExpressionDeclItem(ExpressionDeclaration decl, StatementSpecMapContext mapContext) {
+        return new ExpressionDeclItem(decl.getName(), decl.getParameterNames(), mapExpressionDeep(decl.getExpression(), mapContext));
     }
 
     private static void mapScriptExpressions(List<ScriptExpression> scriptExpressions, StatementSpecRaw raw, StatementSpecMapContext mapContext) {
@@ -3013,12 +3075,16 @@ public class StatementSpecMapper
         raw.setScriptExpressions(scripts);
 
         for (ScriptExpression decl : scriptExpressions) {
-            String returnType = decl.getOptionalReturnType() != null ? decl.getOptionalReturnType().replace("[]", "") : null;
-            boolean isArray = decl.getOptionalReturnType() != null ? decl.getOptionalReturnType().contains("[]") : false;
-            ExpressionScriptProvided scriptProvided = new ExpressionScriptProvided(decl.getName(), decl.getExpressionText(), decl.getParameterNames(), returnType, isArray, decl.getOptionalDialect());
+            ExpressionScriptProvided scriptProvided = mapScriptExpression(decl, mapContext);
             scripts.add(scriptProvided);
             mapContext.addScript(scriptProvided);
         }
+    }
+
+    private static ExpressionScriptProvided mapScriptExpression(ScriptExpression decl, StatementSpecMapContext mapContext) {
+        String returnType = decl.getOptionalReturnType() != null ? decl.getOptionalReturnType().replace("[]", "") : null;
+        boolean isArray = decl.getOptionalReturnType() != null ? decl.getOptionalReturnType().contains("[]") : false;
+        return new ExpressionScriptProvided(decl.getName(), decl.getExpressionText(), decl.getParameterNames(), returnType, isArray, decl.getOptionalDialect());
     }
 
     private static AnnotationDesc mapAnnotation(AnnotationPart part) {
@@ -3078,7 +3144,7 @@ public class StatementSpecMapper
                 }
                 String toCompile = "select * from java.lang.Object where " + expression;
                 StatementSpecRaw rawSqlExpr = EPAdministratorHelper.compileEPL(toCompile, expression, false, null, SelectClauseStreamSelectorEnum.ISTREAM_ONLY,
-                        mapContext.getEngineImportService(), mapContext.getVariableService(), mapContext.getSchedulingService(), mapContext.getEngineURI(), mapContext.getConfiguration(), mapContext.getPatternNodeFactory(), mapContext.getContextManagementService());
+                        mapContext.getEngineImportService(), mapContext.getVariableService(), mapContext.getSchedulingService(), mapContext.getEngineURI(), mapContext.getConfiguration(), mapContext.getPatternNodeFactory(), mapContext.getContextManagementService(), mapContext.getExprDeclaredService());
 
                 if ((rawSqlExpr.getSubstitutionParameters() != null) && (rawSqlExpr.getSubstitutionParameters().size() > 0)) {
                     throw new ASTWalkException("EPL substitution parameters are not allowed in SQL ${...} expressions, consider using a variable instead");

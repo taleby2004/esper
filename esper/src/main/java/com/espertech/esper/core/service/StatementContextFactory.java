@@ -18,6 +18,8 @@ import java.util.Map;
  */
 public interface StatementContextFactory
 {
+    public void setStmtEngineServices(EPServicesContext services);
+
     /**
      * Create a new statement context consisting of statement-level services.
      * @param statementId is the statement is

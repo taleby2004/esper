@@ -62,6 +62,11 @@ public enum StatementType
     CREATE_GRAPH,
 
     /**
+     * Create-expression statement.
+     */
+    CREATE_EXPRESSION,
+
+    /**
      * On-merge statement.
      */
     ON_MERGE,

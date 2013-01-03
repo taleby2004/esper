@@ -11,10 +11,16 @@
 
 package com.espertech.esper.client.dataflow;
 
+import com.espertech.esper.core.service.EPRuntimeEventSender;
+
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Options for use when instantiating a data flow in {@link EPDataFlowRuntime}.
  */
-public class EPDataFlowInstantiationOptions {
+public class EPDataFlowInstantiationOptions implements Serializable {
 
     private EPDataFlowOperatorProvider operatorProvider;
     private EPDataFlowOperatorParameterProvider parameterProvider;
@@ -23,6 +29,8 @@ public class EPDataFlowInstantiationOptions {
     private Object dataFlowInstanceUserObject;
     private boolean operatorStatistics;
     private boolean cpuStatistics;
+    private EPRuntimeEventSender surrogateEventSender;
+    private Map<String, Object> parametersURIs;
 
     /**
      * Returns the operator provider.
@@ -204,5 +212,28 @@ public class EPDataFlowInstantiationOptions {
     public EPDataFlowInstantiationOptions cpuStatistics(boolean cpuStatistics) {
         this.cpuStatistics = cpuStatistics;
         return this;
+    }
+
+    public EPRuntimeEventSender getSurrogateEventSender() {
+        return surrogateEventSender;
+    }
+
+    public void setSurrogateEventSender(EPRuntimeEventSender surrogateEventSender) {
+        this.surrogateEventSender = surrogateEventSender;
+    }
+
+    public void addParameterURI(String name, Object value) {
+        if (parametersURIs == null) {
+            parametersURIs = new HashMap<String, Object>();
+        }
+        parametersURIs.put(name, value);
+    }
+
+    public Map<String, Object> getParametersURIs() {
+        return parametersURIs;
+    }
+
+    public void setParametersURIs(Map<String, Object> parametersURIs) {
+        this.parametersURIs = parametersURIs;
     }
 }

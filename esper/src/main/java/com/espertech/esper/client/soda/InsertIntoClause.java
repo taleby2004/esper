@@ -21,7 +21,7 @@ public class InsertIntoClause implements Serializable
 {
     private static final long serialVersionUID = 0L;
 
-    private boolean insertStream;
+    private StreamSelector streamSelector;
     private String streamName;
     private List<String> columnNames;
 
@@ -65,7 +65,7 @@ public class InsertIntoClause implements Serializable
         {
             throw new IllegalArgumentException("Insert into only allows istream or rstream selection, not both");
         }
-        return new InsertIntoClause(streamName, Arrays.asList(columns), streamSelector != StreamSelector.RSTREAM_ONLY);
+        return new InsertIntoClause(streamName, Arrays.asList(columns), streamSelector);
     }
 
     /**
@@ -74,7 +74,7 @@ public class InsertIntoClause implements Serializable
      */
     public InsertIntoClause(String streamName)
     {
-        this.insertStream = true;
+        this.streamSelector = StreamSelector.ISTREAM_ONLY;
         this.streamName = streamName;
         this.columnNames = new ArrayList<String>();
     }
@@ -86,7 +86,7 @@ public class InsertIntoClause implements Serializable
      */
     public InsertIntoClause(String streamName, String[] columnNames)
     {
-        this.insertStream = true;
+        this.streamSelector = StreamSelector.ISTREAM_ONLY;
         this.streamName = streamName;
         this.columnNames = Arrays.asList(columnNames);
     }
@@ -95,49 +95,21 @@ public class InsertIntoClause implements Serializable
      * Ctor.
      * @param streamName is the stream name to insert into
      * @param columnNames column names
-     * @param isIStream is true for selecting the insert stream (default)
+     * @param streamSelector selector for either insert stream (the default) or remove stream or both
      */
-    public InsertIntoClause(String streamName, List<String> columnNames, boolean isIStream)
+    public InsertIntoClause(String streamName, List<String> columnNames, StreamSelector streamSelector)
     {
-        this.insertStream = isIStream;
+        this.streamSelector = streamSelector;
         this.streamName = streamName;
         this.columnNames = columnNames;
     }
 
-    /**
-     * Returns true for insert stream.
-     * @return indicator insert stream
-     */
-    public boolean isInsertStream()
-    {
-        return insertStream;
+    public StreamSelector getStreamSelector() {
+        return streamSelector;
     }
 
-    /**
-     * Set to true for insert stream.
-     * @param insertStream indicator insert stream
-     */
-    public void setInsertStream(boolean insertStream)
-    {
-        this.insertStream = insertStream;
-    }
-
-    /**
-     * Returns true if insert (new data) events are fed, or false for remove (old data) events are fed.
-     * @return true for insert stream, false for remove stream
-     */
-    public boolean isIStream()
-    {
-        return insertStream;
-    }
-
-    /**
-     * Returns true if insert (new data) events are fed, or false for remove (old data) events are fed.
-     * @return true for insert stream, false for remove stream
-     */
-    public boolean getIStream()
-    {
-        return insertStream;
+    public void setStreamSelector(StreamSelector streamSelector) {
+        this.streamSelector = streamSelector;
     }
 
     /**
@@ -156,15 +128,6 @@ public class InsertIntoClause implements Serializable
     public List<String> getColumnNames()
     {
         return columnNames;
-    }
-
-    /**
-     * Set to true for insert stream.
-     * @param IStream indicator insert stream
-     */
-    public void setIStream(boolean IStream)
-    {
-        insertStream = IStream;
     }
 
     /**
@@ -203,11 +166,11 @@ public class InsertIntoClause implements Serializable
     {
         formatter.beginInsertInto(writer, isTopLevel);
         writer.write("insert ");
-        if (!insertStream)
+        if (streamSelector != StreamSelector.ISTREAM_ONLY)
         {
-            writer.write("rstream ");
+            writer.write(streamSelector.getEpl());
+            writer.write(" ");
         }
-
 
         writer.write("into ");
         writer.write(streamName);

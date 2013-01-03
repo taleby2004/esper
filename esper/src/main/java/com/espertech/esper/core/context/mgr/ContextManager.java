@@ -21,6 +21,8 @@ import com.espertech.esper.type.NumberSetParameter;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public interface ContextManager extends FilterFaultHandler {
     public ContextDescriptor getContextDescriptor();
@@ -34,5 +36,8 @@ public interface ContextManager extends FilterFaultHandler {
     public void setContextPartitionRange(List<NumberSetParameter> partitionRanges);
     public FilterSpecLookupable getFilterLookupable(EventType eventType);
 
+    public void deactivateContextPartitions(Set<Integer> agentInstanceIds);
+
     public Collection<Integer> getAgentInstanceIds(ContextPartitionSelector contextPartitionSelector);
+    public Map<String, ContextControllerStatementDesc> getStatements();
 }

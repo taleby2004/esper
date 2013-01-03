@@ -32,7 +32,9 @@ public class ContextMergeView extends ViewSupport implements UpdateDispatchView 
     }
 
     public void newResult(UniformPair<EventBean[]> result) {
-        updateChildren(result.getFirst(), result.getSecond());
+        if (result != null) {
+            updateChildren(result.getFirst(), result.getSecond());
+        }
     }
 
     public EventType getEventType() {

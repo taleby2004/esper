@@ -77,7 +77,7 @@ public class QueryPlanBuilder
                 outerJoinType = outerJoinDescList.get(0).getOuterJoinType();
             }
 
-            QueryPlan queryPlan = TwoStreamQueryPlanBuilder.build(typesPerStream, queryGraph, outerJoinType);
+            QueryPlan queryPlan = TwoStreamQueryPlanBuilder.build(typesPerStream, queryGraph, outerJoinType, streamJoinAnalysisResult.getUniqueKeys());
             removeUnidirectional(queryPlan, streamJoinAnalysisResult);
 
             if (log.isDebugEnabled())
@@ -95,7 +95,7 @@ public class QueryPlanBuilder
         {
             QueryPlan queryPlan = NStreamQueryPlanBuilder.build(queryGraph, typesPerStream,
                                     historicalViewableDesc, dependencyGraph, historicalStreamIndexLists,
-                                    hasForceNestedIter);
+                                    hasForceNestedIter, streamJoinAnalysisResult.getUniqueKeys());
 
             if (queryPlan != null) {
                 removeUnidirectional(queryPlan, streamJoinAnalysisResult);
@@ -113,7 +113,7 @@ public class QueryPlanBuilder
         }
 
         QueryPlan queryPlan = NStreamOuterQueryPlanBuilder.build(queryGraph, outerJoinDescList, streamNames, typesPerStream,
-                                    historicalViewableDesc, dependencyGraph, historicalStreamIndexLists, exprEvaluatorContext);
+                                    historicalViewableDesc, dependencyGraph, historicalStreamIndexLists, exprEvaluatorContext, streamJoinAnalysisResult.getUniqueKeys());
         removeUnidirectional(queryPlan, streamJoinAnalysisResult);
         return queryPlan;
     }

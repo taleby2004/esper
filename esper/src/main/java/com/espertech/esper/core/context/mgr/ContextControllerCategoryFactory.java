@@ -23,6 +23,7 @@ import com.espertech.esper.epl.spec.ContextDetailCategoryItem;
 import com.espertech.esper.epl.spec.ContextDetailPartitionItem;
 import com.espertech.esper.epl.spec.util.StatementSpecCompiledAnalyzer;
 import com.espertech.esper.epl.spec.util.StatementSpecCompiledAnalyzerResult;
+import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.EventTypeUtility;
 import com.espertech.esper.filter.FilterSpecCompiled;
 import com.espertech.esper.filter.FilterSpecLookupable;
@@ -32,15 +33,27 @@ import java.util.*;
 
 public class ContextControllerCategoryFactory extends ContextControllerFactoryBase implements ContextControllerFactory {
 
+    public static final ContextStatePathValueBinding EMPTY_BINDING = new ContextStatePathValueBinding() {
+        public Object byteArrayToObject(byte[] bytes, EventAdapterService eventAdapterService) {
+            return null;
+        }
+
+        public byte[] toByteArray(Object contextInfo) {
+            return new byte[0];
+        }
+    };
+
     private final ContextDetailCategory categorySpec;
     private final List<FilterSpecCompiled> filtersSpecsNestedContexts;
+    private final ContextStateCache stateCache;
 
     private Map<String, Object> contextBuiltinProps;
 
-    public ContextControllerCategoryFactory(ContextControllerFactoryContext factoryContext, ContextDetailCategory categorySpec, List<FilterSpecCompiled> filtersSpecsNestedContexts) {
+    public ContextControllerCategoryFactory(ContextControllerFactoryContext factoryContext, ContextDetailCategory categorySpec, List<FilterSpecCompiled> filtersSpecsNestedContexts, ContextStateCache stateCache) {
         super(factoryContext);
         this.categorySpec = categorySpec;
         this.filtersSpecsNestedContexts = filtersSpecsNestedContexts;
+        this.stateCache = stateCache;
     }
 
     public boolean hasFiltersSpecsNestedContexts() {
@@ -101,6 +114,10 @@ public class ContextControllerCategoryFactory extends ContextControllerFactoryBa
 
     public Map<String, Object> getContextBuiltinProps() {
         return contextBuiltinProps;
+    }
+
+    public ContextStateCache getStateCache() {
+        return stateCache;
     }
 
     public ContextController createNoCallback(int pathId, ContextControllerLifecycleCallback callback) {

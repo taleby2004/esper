@@ -22,7 +22,7 @@ public class EnumEvalLastOfNoPredicate extends EnumEvalBase implements EnumEval 
         super(streamCountIncoming);
     }
 
-    public Object evaluateEnumMethod(Collection target, boolean isNewData, ExprEvaluatorContext context) {
+    public Object evaluateEnumMethod(EventBean[] eventsLambda, Collection target, boolean isNewData, ExprEvaluatorContext context) {
 
         Object result = null;
         for (Object next : target) {

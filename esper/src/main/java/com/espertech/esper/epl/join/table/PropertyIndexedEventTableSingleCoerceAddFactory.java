@@ -27,7 +27,7 @@ public class PropertyIndexedEventTableSingleCoerceAddFactory extends PropertyInd
      */
     public PropertyIndexedEventTableSingleCoerceAddFactory(int streamNum, EventType eventType, String propertyName, Class coercionType)
     {
-        super(streamNum, eventType, propertyName);
+        super(streamNum, eventType, propertyName, false, null);
         this.coercionType = coercionType;
         if (JavaClassHelper.isNumeric(coercionType)) {
             coercer = SimpleNumberCoercerFactory.getCoercer(null, coercionType);

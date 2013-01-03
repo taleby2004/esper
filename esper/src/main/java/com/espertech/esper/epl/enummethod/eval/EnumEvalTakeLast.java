@@ -22,20 +22,20 @@ import java.util.Collections;
 public class EnumEvalTakeLast implements EnumEval {
 
     private ExprEvaluator sizeEval;
-    private EventBean[] events;
+    private int numStreams;
 
     public EnumEvalTakeLast(ExprEvaluator sizeEval, int numStreams) {
         this.sizeEval = sizeEval;
-        this.events = new EventBean[numStreams];
+        this.numStreams = numStreams;
     }
 
-    public EventBean[] getEventsPrototype() {
-        return events;
+    public int getStreamNumSize() {
+        return numStreams;
     }
 
-    public Object evaluateEnumMethod(Collection target, boolean isNewData, ExprEvaluatorContext context) {
+    public Object evaluateEnumMethod(EventBean[] eventsLambda, Collection target, boolean isNewData, ExprEvaluatorContext context) {
 
-        Object sizeObj = sizeEval.evaluate(events, isNewData, context);
+        Object sizeObj = sizeEval.evaluate(eventsLambda, isNewData, context);
         if (sizeObj == null) {
             return null;
         }

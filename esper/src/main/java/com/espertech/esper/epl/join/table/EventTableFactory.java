@@ -18,6 +18,8 @@ import java.util.Iterator;
  */
 public interface EventTableFactory
 {
+    public Class getEventTableClass();
+
     public EventTable makeEventTable();
 
     public String toQueryPlan();

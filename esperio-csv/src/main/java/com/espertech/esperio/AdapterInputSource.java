@@ -8,15 +8,19 @@
  **************************************************************************************/
 package com.espertech.esperio;
 
+import com.espertech.esper.client.EPException;
+import com.espertech.esperio.csv.CSVReader;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.net.URISyntaxException;
 import java.net.URL;
-
-
-import com.espertech.esperio.csv.CSVReader;
-import com.espertech.esper.client.EPException;
+import java.util.Enumeration;
+import java.util.NoSuchElementException;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 /**
  * An input source for adapters.
@@ -28,6 +32,8 @@ public class AdapterInputSource
 	private final File file;
 	private final InputStream inputStream;
 	private final Reader reader;
+
+    private ZipFile zipFile;
 
 	/**
 	 * Ctor.
@@ -132,6 +138,9 @@ public class AdapterInputSource
 		}
 		if(file != null)
 		{
+            if (file.getName().endsWith("zip")) {
+                return openZipFile(file);
+            }
 			try
 			{
 				return file.toURL().openStream();
@@ -143,7 +152,10 @@ public class AdapterInputSource
 		}
 		if(url != null)
 		{
-			try
+            if (url.toString().endsWith("zip")) {
+                return openZipUrl(url);
+            }
+            try
 			{
 				return url.openStream();
 			}
@@ -183,6 +195,25 @@ public class AdapterInputSource
 
 	private InputStream resolvePathAsStream(String path)
     {
+        if (path.endsWith(".zip")) {
+            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+            URL url = null;
+            if (classLoader!=null) {
+                url = classLoader.getResource(path);
+            }
+            if (url == null ) {
+                url = CSVReader.class.getResource(path);
+            }
+            if (url == null ) {
+                url = CSVReader.class.getClassLoader().getResource(path);
+            }
+            if (url == null ) {
+                throw new EPException("Resource '" + path + "' not found in classpath" );
+            }
+
+            return openZipUrl(url);
+        }
+
     	InputStream stream = null;
     	ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
     	if (classLoader!=null) {
@@ -201,7 +232,54 @@ public class AdapterInputSource
     	return stream;
     }
 
-    public void close() {
+    private InputStream openZipUrl(URL url) {
+        File file;
+        try {
+            file = new File(url.toURI());
+        }
+        catch (URISyntaxException e) {
+            throw new EPException("Resource '" + url + "' did not return a file uri: " + e.getMessage(), e);
+        }
+        return openZipFile(file);
+    }
 
+    private InputStream openZipFile(File file) {
+        try {
+            zipFile = new ZipFile(file);
+        }
+        catch (IOException e) {
+            throw new EPException("Resource '" + file + "' could not be opened as a valid zip file: " + e.getMessage(), e);
+        }
+
+        Enumeration<? extends ZipEntry> entry = zipFile.entries();
+        ZipEntry zipEntry;
+        try {
+            zipEntry = entry.nextElement();
+        }
+        catch (NoSuchElementException ex) {
+            closeZip();
+            throw new EPException("Zip archive '" + file + "' is empty");
+        }
+
+        try {
+            return zipFile.getInputStream(zipEntry);
+        }
+        catch (IOException ex) {
+            throw new EPException("Zip archive '" + file + "' entry '" + zipEntry.getName() + " could not be opened for reading");
+        }
+    }
+
+    public void close() {
+        closeZip();
+    }
+
+    private synchronized void closeZip() {
+        if (zipFile != null) {
+            try {
+                zipFile.close();
+            }
+            catch (IOException e) {}
+            zipFile = null;
+        }
     }
 }

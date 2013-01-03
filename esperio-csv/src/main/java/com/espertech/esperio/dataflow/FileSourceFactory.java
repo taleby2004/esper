@@ -49,6 +49,12 @@ public class FileSourceFactory implements DataFlowOperatorFactory {
     @DataFlowOpParameter
     private String format;
 
+    @DataFlowOpParameter
+    private String propertyNameLine;
+
+    @DataFlowOpParameter
+    private String propertyNameFile;
+
     public DataFlowSourceOperator create() {
 
         AdapterInputSource inputSource;
@@ -71,7 +77,7 @@ public class FileSourceFactory implements DataFlowOperatorFactory {
             return new FileSourceCSV(inputSource, hasHeaderLine, hasTitleLine, numLoops, propertyNames);
         }
         else if (format.equals("line")) {
-            return new FileSourceLineUnformatted(inputSource);
+            return new FileSourceLineUnformatted(inputSource, file, propertyNameLine, propertyNameFile);
         }
         else {
             throw new IllegalArgumentException("Unrecognized file format '" + format + "'");

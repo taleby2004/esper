@@ -215,6 +215,9 @@ public interface EPRuntime
      * object send in matches in class, or implements or extends the class underlying the event type
      * for the given event type name.
      * <p>
+     * For events backed by a Object[] (Object-array events), the sender does not perform any checking other
+     * then checking that the event object indeed is an array of object.
+     * <p>
      * For events backed by a java.util.Map (Map events), the sender does not perform any checking other
      * then checking that the event object indeed implements Map.
      * <p>

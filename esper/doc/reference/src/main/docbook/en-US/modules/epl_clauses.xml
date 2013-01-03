@@ -38,7 +38,7 @@
 		<orderedlist spacing="compact">
 			<listitem>
 				<para>
-					Data window views: <literal>win:length</literal>, <literal>win:length_batch</literal>, <literal>win:time</literal>, <literal>win:time_batch</literal>, <literal>win:time_length_batch</literal>, <literal>win:time_accum</literal>, <literal>win:ext_timed</literal>, <literal>ext:sort</literal>, <literal>ext:rank</literal>, <literal>ext:time_order</literal>, <literal>std:unique</literal>, <literal>std:groupwin</literal>, <literal>std:lastevent</literal>, <literal>std:firstevent</literal>, <literal>std:firstunique</literal>, <literal>win:firstlength</literal>,  <literal>win:firsttime</literal>.
+					Data window views: <literal>win:length</literal>, <literal>win:length_batch</literal>, <literal>win:time</literal>, <literal>win:time_batch</literal>, <literal>win:time_length_batch</literal>, <literal>win:time_accum</literal>, <literal>win:ext_timed</literal>, <literal>win:ext_timed_batch</literal>, <literal>ext:sort</literal>, <literal>ext:rank</literal>, <literal>ext:time_order</literal>, <literal>std:unique</literal>, <literal>std:groupwin</literal>, <literal>std:lastevent</literal>, <literal>std:firstevent</literal>, <literal>std:firstunique</literal>, <literal>win:firstlength</literal>,  <literal>win:firsttime</literal>.
 				</para>
 			</listitem>
 			<listitem>
@@ -750,7 +750,12 @@ select ipaddress, count(*) from SecurityFilter.win:time(60 sec) group by ipaddre
 			<indexterm><primary>lambda</primary><secondary>expression declaration</secondary></indexterm>
 
 			<para>
-				An EPL statement can contain expression declarations. Expressions that are common to multiple places in an EPL statement can be moved to a named expression declaration and reused within the statement without duplicating the expression itself.
+				An EPL statement can contain expression declarations. Expressions that are common to multiple places in the same EPL statement can be moved to a named expression declaration and reused within the same statement without duplicating the expression itself.
+			</para>
+			
+			<para>
+			    For declaring expressions that are visible across multiple EPL statements i.e. globally visible expressions please consult <xref linkend="create-exprglobal-expr"/> 
+			    that explains the <literal>create expression</literal> clause.
 			</para>
 			
 			<para>
@@ -797,7 +802,17 @@ select ipaddress, count(*) from SecurityFilter.win:time(60 sec) group by ipaddre
 			<para>
 				The next example declares an expression that accepts one parameter: a MarketData event. The expression computes a new "mid" price based on the buy and sell price:
 			</para>
-			<programlisting><![CDATA[expression midPrice { x => x.buy + x.sell / 2 } 
+			<programlisting><![CDATA[expression midPrice { x => (x.buy + x.sell) / 2 } 
+select midPrice(md) from MarketDataEvent as md]]></programlisting>
+
+			<para>
+				The variable name can be left off if event property names resolve without ambiguity.
+			</para>
+			
+			<para>
+				This example EPL removes the variable name <literal>x</literal>:
+			</para>
+			<programlisting><![CDATA[expression midPrice { x => (buy + sell) / 2 } 
 select midPrice(md) from MarketDataEvent as md]]></programlisting>
 
 			<para>
@@ -2216,23 +2231,23 @@ select symbol, sum(price) from StockTickEvent.std:groupwin(symbol).win:length(10
 				<para>
 					The time interval can also be specified in terms of minutes; the following statement is identical to the first one.
 				</para>
-			    <programlisting>select * from StockTickEvent.win:length(5) output every 1.5 minutes</programlisting>
+			    <programlisting>select * from StockTickEvent output every 1.5 minutes</programlisting>
 
 				<para>
-					A second way that output can be stabilized is by batching events until a certain number of events have been collected. The next statement only outputs when either 5 (or more) new or 5 (or more) old events have been batched.
+					A second way that output can be stabilized is by batching events until a certain number of events have been collected:
 				</para>				
-			    <programlisting>select * from StockTickEvent.win:time(30 sec) output every 5 events</programlisting>
+			    <programlisting>select * from StockTickEvent output every 5 events</programlisting>
 			    
 				<para>
 					Additionally, event output can be further modified by the optional <literal>last</literal> keyword, which causes output of only the last event to arrive into an output batch.
 				</para>
-			    <programlisting>select * from StockTickEvent.win:time(30 sec) output last every 5 events</programlisting>
+			    <programlisting>select * from StockTickEvent output last every 5 events</programlisting>
 
 				<para>
 					Using the <literal>first</literal> keyword you can be notified at the start of the interval. The allows to watch for situations such as a rate falling below a threshold
 					and only be informed every now and again after the specified output interval, but be informed the moment it first happens. 
 				</para>
-			    <programlisting>select * from TickRate.win:time(30 seconds) where rate&lt;100 output first every 60 seconds</programlisting>
+			    <programlisting>select * from TickRate where rate&lt;100 output first every 60 seconds</programlisting>
 
 				<para>
 					A sample statement using the Unix "crontab"-command schedule is shown next. See <xref linkend="pattern-timer-at"/> for details on schedule syntax. Here, output occurs every 15 minutes from 8am to 5:45pm (hours 8 to 17 at 0, 15, 30 and 45 minutes past the hour):
@@ -2631,10 +2646,14 @@ limit 2, 8</programlisting>
 			The syntax for the <literal>insert into</literal> clause is as follows:
 		</para>
 
-		<synopsis>insert [istream | rstream] into <emphasis>event_stream_name</emphasis>  [ (<emphasis>property_name</emphasis> [, property_name] ) ]</synopsis>
+		<synopsis>insert [istream | irstream | rstream] into <emphasis>event_stream_name</emphasis>  [ (<emphasis>property_name</emphasis> [, property_name] ) ]</synopsis>
 
 		<para>
 			The <literal>istream</literal> (default) and <literal>rstream</literal> keywords are optional. If no keyword or the <literal>istream</literal> keyword is specified, the engine supplies the insert stream events generated by the statement. The insert stream consists of the events entering the respective window(s) or stream(s). If the <literal>rstream</literal> keyword is specified, the engine supplies the remove stream events generated by the statement. The remove stream consists of the events leaving the respective window(s). 
+		</para>
+
+		<para>
+			If your application specifies <literal>irstream</literal>, the engine inserts into the new stream both the insert and remove stream. This is often useful in connection with the <literal>istream</literal> built-in function that returns an inserted/removed boolean indicator for each event, see <xref linkend="epl-single-row-function-istream"/>.			
 		</para>
 
 		<para>
@@ -4712,32 +4731,37 @@ from OrdersNamedWindow as onw
 where onw.symbol = trig.symbol]]></programlisting>
 		</sect2>
 
-		<sect2 xml:id="named_playback" revision="1">
-			<title>Triggered Playback from Named Windows: the <literal>On Insert</literal> clause</title>
+		<sect2 xml:id="named_selectdelete" revision="1">
+			<title>Triggered Select+Delete on Named Windows: the <literal>On Select Delete</literal> clause</title>
 			
-			<indexterm><primary>on-insert</primary></indexterm>
-			<indexterm><primary>named window</primary><secondary>triggered playback using On Insert</secondary></indexterm>
-			<indexterm><primary>EPL</primary><secondary>named window</secondary><tertiary>triggered playback using On Insert</tertiary></indexterm>
+			<indexterm><primary>on-select-delete</primary></indexterm>
+			<indexterm><primary>named window</primary><secondary>triggered select and delete using On Select Delete</secondary></indexterm>
+			<indexterm><primary>EPL</primary><secondary>named window</secondary><tertiary>triggered select and delete using On Select Delete</tertiary></indexterm>
 
 			<para>
-				The <literal>on insert</literal> clause is an <literal>on select</literal> clause as described in the prior chapter with the addition of an <literal>insert into</literal> clause. 
+				The <literal>on select delete</literal> clause performs a one-time, non-continuous query on a named window every time a triggering event arrives or a triggering pattern matches, similar to <literal>on-select</literal> as described in the previous section. In addition, any selected rows are also deleted.
 			</para>
-
+			
 			<para>
-				Similar to the <literal>on select</literal> clause, the engine executes the query when a triggering event arrives. It then provides the query results as an event stream to further statements. It populates the event stream that is named in the <literal>insert into</literal> clause.
+				The syntax for the <literal>on select delete</literal> clause is as follows: 
 			</para>
-
+			<synopsis>on <emphasis>trigger</emphasis>
+select [and] delete <emphasis>select_list</emphasis>...
+... (please see on-select for <literal>insert into, from, group by, having, order by</literal>)...</synopsis>
+				
 			<para>
-				The statement below provides the query results to any consumers of the MyOrderStream, upon arrival of a QueryEvent event:
+				The syntax follows the syntax of <literal>on-select</literal> as described earlier. The <literal>select</literal> clause follows the optional <literal>and</literal> keyword and the <literal>delete</literal> keyword.
 			</para>
-			<programlisting><![CDATA[on QueryEvent as query
-insert into MyOrderStream
-select win.* from OrdersNamedWindow as win]]></programlisting>
+				
+			<para>				
+				The example statement below selects and deletes all rows from OrdersNamedWindow when a QueryEvent arrives:
+			</para>
+			<programlisting><![CDATA[on QueryEvent select and delete window(win.*) as rows from OrdersNamedWindow as win]]></programlisting>			
 
-			<para>
-				Here is a sample consuming statement of the MyOrderStream. The statement further filters the events provided by the <literal>on insert</literal> statement by user id and reports a total of volume per symbol:
+			<para>				
+				The sample EPL above also shows the use of the <literal>window</literal> aggregation function. It specifies the <literal>window</literal> aggregation function 
+				to instruct the engine to output a single event, regardless of the number of rows in the named window, and that contains a column <literal>rows</literal> that contains a collection of the selected event's underlying objects.
 			</para>
-			<programlisting><![CDATA[select symbol, sum(volume) from MyOrderStream(userId='user1') group by symbol]]></programlisting>
 		</sect2>
 
 		<sect2 xml:id="named_populate_named" revision="1">
@@ -4798,7 +4822,7 @@ set <emphasis>property_name</emphasis> = <emphasis>expression</emphasis> [, <emp
 			<para>
 				The comma-separated list of property names and expressions set the value of one or more properties. Subqueries may by part of expressions however aggregation functions and the <literal>prev</literal> or <literal>prior</literal> function may not be used in expressions.
 			</para>
-
+			
 			<para>
 				The optional <literal>where</literal> clause contains a <emphasis>criteria_expression</emphasis> that correlates the arriving (triggering) event to the events to be updated in the named window. The <emphasis>criteria_expression</emphasis> may also simply filter for events in the named window to be updated.
 			</para>
@@ -4854,6 +4878,19 @@ where ord.id = win.id or flush.id = win.id]]></programlisting>
 				When updating mapped properties use the syntax <emphasis>propertyName</emphasis><literal>(</literal><emphasis>key</emphasis><literal>) = </literal><emphasis>value</emphasis> with the key being a string value.
 			</para>
 	
+			<para>
+			  The engine executes assignments in the order they are listed. When performing multiple assignments, the engine takes the most recent named window event property value according to the last assignment, if any. To instruct the engine to use the initial property value before update, prefix the event property name with the literal <literal>initial</literal>.
+			</para>
+			
+			<para>
+			  The following statement illustrates:
+			</para>
+			<programlisting><![CDATA[on UpdateEvent as upd
+update MyWindow as win
+set field_a = 1, 
+  field_b = win.field_a, // assigns the value 1 
+  field_c = initial.field_a // assigns the field_a original value before update]]></programlisting>
+
 			<para>
 				The following restrictions apply:
 			</para>
@@ -5046,7 +5083,7 @@ merge [into] <emphasis>window_name</emphasis> [as <emphasis>stream_name</emphasi
 			</para>
 
 			<para>
-			     After <literal>update</literal> follows the <literal>set</literal> keyword and one or more assignment pairs. It follows an optional where-clause that may return Boolean false to indicate that the action should not be applied. 
+			     After <literal>update</literal> follows the <literal>set</literal> keyword and one or more assignment pairs. It follows an optional where-clause that may return Boolean false to indicate that the action should not be applied. See on-update above for information on the order of assignment evaluation and the use of the <literal>initial</literal> prefix to obtain the before-update value. 
 			</para>
 
 			<para>
@@ -5170,6 +5207,17 @@ merge [into] <emphasis>window_name</emphasis> [as <emphasis>stream_name</emphasi
 			<para>
 				Your application can subscribe a listener to <literal>on merge</literal> statements to determine inserted, updated and removed events. Statements post any events that are inserted to, updated or deleted from a named window to all listeners attached to the statement as new data and removed data. Upon iteration, the statement provides the last inserted events, if any.
 			</para>
+			
+			<para>
+			  The following limitations apply to on-merge statements:
+			</para>	
+			<orderedlist spacing="compact">
+				<listitem>
+					<para>
+						Aggregation functions and the <literal>prev</literal> and <literal>prior</literal> operators are not available in conditions and the <literal>select</literal>-clause.
+					</para>
+				</listitem>
+			</orderedlist>
 		</sect2>
 
 		<sect2 xml:id="named_explicit_index" revision="1">
@@ -5204,11 +5252,16 @@ merge [into] <emphasis>window_name</emphasis> [as <emphasis>stream_name</emphasi
 			<para>
 				Please use the following syntax to create an explicit index on a named window:
 			</para>
-			<synopsis>create index <emphasis>index_name</emphasis> on <emphasis>named_window_name</emphasis> (<emphasis>property</emphasis> [hash|btree] 
+			<synopsis>create [<literal>unique</literal>] index <emphasis>index_name</emphasis> on <emphasis>named_window_name</emphasis> (<emphasis>property</emphasis> [hash|btree] 
     [, property] [hash|btree] [,...] )</synopsis>
 			
 			<para>
-				The <emphasis>index_name</emphasis> is the name assigned to the index. The name uniquely identifies the index and is used in engine logging.
+				The optional <emphasis>unique</emphasis> keyboard indicates that the property or properties uniquely identify rows. If <emphasis>unique</emphasis> is not specified
+				the index allows duplicate rows.
+			</para>
+
+			<para>
+				The <emphasis>index_name</emphasis> is the name assigned to the index. The name uniquely identifies the index and is used in engine query plan logging.
 			</para>
 
 			<para>
@@ -5222,7 +5275,7 @@ merge [into] <emphasis>window_name</emphasis> [as <emphasis>stream_name</emphasi
 			<para>
 				If you specify no keyword or the <literal>hash</literal> keyword for a property, the index will be a hash-based (unsorted) index in respect to that property. If you specify the <literal>btree</literal> keyword, the index will be a binary-tree-based sorted index in respect to that property.
 				You may combine <literal>hash</literal> and <literal>btree</literal> properties for the same index.
-				Specify <literal>btree</literal> for a property if you expect to perform numerical or string comparison using relational operators (&lt;, &gt;, &gt;=, &lt;=), the <literal>between</literal> or the <literal>in</literal> keyword for ranges and inverted ranges.
+				Specify <literal>btree</literal> for a property if you expect to perform numerical or string comparison using relational operators (&lt;, &gt;, &gt;=, &lt;=), the <literal>between</literal> or the <literal>in</literal> keyword for ranges and inverted ranges. Use <literal>hash</literal> (the default) instead of <literal>btree</literal> if you expect to perform exact comparison using <literal>=</literal>.
 			</para>
 
 			<para>
@@ -5230,7 +5283,7 @@ merge [into] <emphasis>window_name</emphasis> [as <emphasis>stream_name</emphasi
 			</para>
 			<programlisting><![CDATA[// create a named window
 create window UserProfileWindow.win:time(1 hour) select * from UserProfile]]></programlisting>
-			<programlisting><![CDATA[// create an index for the user id property only
+			<programlisting><![CDATA[// create a non-unique index (duplicates allowed) for the user id property only
 create index UserProfileIndex on UserProfileWindow(userId)]]></programlisting>
 
 			<para>
@@ -5244,16 +5297,30 @@ EPOnDemandQueryResult result = prepared.execute();
 prepared.execute();	// execute a second time]]></programlisting>
 
 			<para>
-				By default, the engine builds a hash code -based index useful for direct comparison via equals (=). Filter expressions that look for ranges or use <literal>in, between </literal> do not benefit from the hash-based index and should use the <literal>btree</literal> keyword.
+			  A unique index is generally preferable over non-unique indexes. If your data window declares a unique data window (<literal>std:unique</literal>, <literal>std:firstunique</literal>, including intersections and grouped unique data windows) it is not necessary to create a unique index unless index sharing is enabled, since the engine considers the unique data window declaration in query planning. 
+			</para>
+			
+			<para>
+			  The engine enforces uniqueness (e.g. unique constraint) for unique indexes. If your application inserts a duplicate row the engine raises a runtime exception when processing the statement and discards the row. The default error handler logs such an exception and continues.
+			</para>
+
+			<para>
+				For example, if the user id together with the profile id uniquely identifies an entry into the named window, your application can create a unique index as shown below:
+			</para>
+			<programlisting><![CDATA[// create a unique index on user id and profile id
+create unique index UserProfileIndex on UserProfileWindow(userId, profileId)]]></programlisting>
+
+			<para>
+				By default, the engine builds a hash code -based index useful for direct comparison via equals (=). Filter expressions that look for ranges or use <literal>in, between </literal> do not benefit from the hash-based index and should use the <literal>btree</literal> keyword. For direct comparison via equals (=) then engine does not use <literal>btree</literal> indexes.
 			</para>			
 
 			<para>
 				The next example creates a composite index over two fields <literal>symbol</literal> and <literal>buyPrice</literal>:
-			</para>			
+			</para>
 
 			<programlisting><![CDATA[// create a named window
 create window TickEventWindow.win:time(1 hour) as (symbol string, buyPrice double)]]></programlisting>
-			<programlisting><![CDATA[// create an index 
+			<programlisting><![CDATA[// create a non-unique index 
 create index idx1 on TickEventWindow(symbol hash, buyPrice btree)]]></programlisting>
 
 			<para>
@@ -5728,7 +5795,7 @@ can be used to assign a stream name. Patterns and named windows can also be spec
 			<para>
 				The synopsis for creating a variable is as follows: 
 			</para>
-			<synopsis>create [constant] variable <emphasis>variable_type</emphasis> <emphasis>variable_name</emphasis> [ = <emphasis>assignment_expression</emphasis> ]</synopsis>
+			<synopsis>create [constant] variable <emphasis>variable_type</emphasis> [[]] <emphasis>variable_name</emphasis> [ = <emphasis>assignment_expression</emphasis> ]</synopsis>
 			
 			<para>
 			  Specify the optional <literal>constant</literal> keyword when the variable is a constant whose associated value cannot be altered. Your EPL design should prefer constant variables over non-constant variables.
@@ -5751,11 +5818,16 @@ can be used to assign a stream name. Patterns and named windows can also be spec
 	|  double
 	|  float
 	|  object
+	|  <emphasis>enum_class</emphasis>
 	|  <emphasis>class_name</emphasis>
 	|  <emphasis>event_type_name</emphasis></synopsis>
 				
 			<para>
-				All variable types accept null values. The <literal>object</literal> type is for an untyped variable that can be assigned any value. You can provide a fully-qualified class name to declare a variable of that Java class type. You can also supply the name of an event type to declare a variable that holds an event of that type.
+				All variable types accept null values. The <literal>object</literal> type is for an untyped variable that can be assigned any value. You can provide a class name (use imports) or a fully-qualified class name to declare a variable of that Java class type including an enumeration class. You can also supply the name of an event type to declare a variable that holds an event of that type.
+			</para>
+			
+			<para>
+			   Append <literal>[]</literal> to the variable type to declare an array variable. A limitation is that if your variable type is an event type then array is not allowed.
 			</para>
 
 			<para>
@@ -5793,11 +5865,19 @@ can be used to assign a stream name. Patterns and named windows can also be spec
 			<programlisting><![CDATA[epService.getEPAdministrator().getConfiguration()
   .addVariable("myVar", String.class, "init value");]]></programlisting>
   
+			<para>
+				The following example declares a constant that is an array of string:
+			</para>
+			<programlisting><![CDATA[create constant variable string[] const_filters = {'GE', 'MSFT'}]]></programlisting>
+			<para>
+				The next example declares a constant that is an array of enumeration values. It assumes the <literal>Color</literal> enumeration class was imported:
+			</para>
+			<programlisting><![CDATA[create constant variable Color[] const_colors = {Color.RED, Color.BLUE}]]></programlisting>
+
 			  <para>
 				  The engine removes the variable if the statement that created the variable is destroyed and all statements that reference the variable are also destroyed. 
 				  The <literal>getVariableNameUsedBy</literal> and the <literal>removeVariable</literal> methods, both part of the runtime <literal>ConfigurationOperations</literal> API, provide use information and can remove a variable. If the variable was added via configuration, it can only be removed via the configuration API.
 			  </para>
-
 		</sect2>
 
 		<sect2 xml:id="variable_set" revision="1">
@@ -5933,6 +6013,127 @@ on PageHitEvent(ip='0.0.0.0') pagehit set varPageHitZero.userId = pagehit.userId
 		</sect2>
 
 	</sect1>		
+
+	<sect1 xml:id="create-exprglobal" revision="1">
+		<title>Declaring Global Expressions And Scripts: <emphasis>Create Expression</emphasis></title>
+		
+		<indexterm><primary>create expression</primary></indexterm>
+		<indexterm><primary>expression</primary><secondary>declaring</secondary></indexterm>
+		<indexterm><primary>script</primary><secondary>declaring</secondary></indexterm>
+		<para>
+			Your application can declare an expression or script using the <literal>create expression</literal> clause. Such expressions or scripts become available 
+			globally to any EPL statement.
+		</para>
+		
+		<para>
+			The synopsis of the <literal>create expression</literal> syntax is:
+		</para>
+		<synopsis>create expression <emphasis>expression_or_script</emphasis></synopsis>
+		
+		<para>
+		  Use the <literal>create expression</literal> keywords and append the expression or scripts. 
+		</para>
+		
+		<para>
+		  At the time your application creates the <literal>create expression</literal> statement the expression or script becomes globally visible.
+		</para>
+
+		<para>
+		  At the time your application destroys the <literal>create expression</literal> statement the expression or script are no longer visible.
+		  Existing statements that use the global expression or script are unaffected.
+		</para>
+
+		<sect2 xml:id="create-exprglobal-expr" revision="1">
+			<title>Declaring a Global Expression</title>
+		
+			<para>
+				The syntax and additional examples for declaring an expression is outlined in <xref linkend="epl-syntax-expression-decl"/>,
+				which discusses declaring expressions that are visible within the same EPL statement i.e. visible locally only.
+			</para>
+						
+			<para>
+				When using the <literal>create expression</literal> syntax to declare an expression the engine remembers the expression
+				and allows the expression to be referenced in all other EPL statements.
+			</para>
+	
+			<para>
+				The below EPL declares a globally visible expression that computes a mid-price:
+			</para>
+			<programlisting><![CDATA[create expression midPrice { in => (buy + sell) / 2 }]]></programlisting>			
+	
+			<para>
+				The next EPL returns mid-price for each event:
+			</para>
+			<programlisting><![CDATA[select midPrice(md) from MarketDataEvent as md]]></programlisting>				
+			
+			<para>
+			  The expression name must be unique for global expressions. It is not possible to declare the same global expression twice with the same name.
+			</para>
+			
+			<para>
+			  Your application can declare an expression of the same name local to a given EPL statement as well as globally using <literal>create expression</literal>. 
+			  The locally-declared expression overrides the globally declared expression.
+			</para>
+			
+			<para>
+				The engine validates globally declared expressions at the time your application creates a statement that references the global expression. 
+				When a statement references a global expression, the engine uses that statement's type information to validate the global expressions.
+				Global expressions can therefore be dynamically typed and type information does not need to be the same 
+				for all statements that reference the global expression.
+			</para>
+
+			<para>
+				This example shows a sequence of EPL, that can be created in the order shown, and that demonstrates expression validation at time of referral:
+			</para>
+			<programlisting><![CDATA[create expression minPrice {(select min(price) from OrderWindow)}]]></programlisting>				
+			<programlisting><![CDATA[create window OrderWindow.win:time(30) as OrderEvent]]></programlisting>				
+			<programlisting><![CDATA[insert into OrderWindow select * from OrderEvent]]></programlisting>				
+			<programlisting><![CDATA[// Validates and incorporates the declared global expression
+select minPrice() as minprice from MarketData]]></programlisting>				
+		</sect2>
+
+		<sect2 xml:id="create-exprglobal-script" revision="1">
+			<title>Declaring a Global Script</title>
+		
+			<para>
+				The syntax and additional examples for declaring scripts is outlined in <xref linkend="script"/>,
+				which discusses declaring scripts that are visible within the same EPL statement i.e. visible locally only.
+			</para>
+	
+			<para>
+				When using the <literal>create expression</literal> syntax to declare a script the engine remembers the script
+				and allows the script to be referenced in all other EPL statements.
+			</para>
+	
+			<para>
+				The below EPL declares a globally visible script in the JavaScript dialect that computes a mid-price:
+			</para>
+			<programlisting><![CDATA[create expression midPrice(buy, sell) [ (buy + sell) / 2 ]]]></programlisting>			
+	
+			<para>
+				The next EPL returns mid-price for each event:
+			</para>
+			<programlisting><![CDATA[select midPrice(buy, sell) from MarketDataEvent]]></programlisting>				
+			
+			<para>
+				The engine validates globally declared scripts at the time your application creates a statement that references the global script. 
+				When a statement references a global script, the engine uses that statement's type information to determine parameter types.
+				Global scripts can therefore be dynamically typed and type information does not need to be the same 
+				for all statements that reference the global script.
+			</para>
+
+			<para>
+			  The script name in combination with the number of parameters must be unique for global scripts. 
+			  It is not possible to declare the same global script twice with the same name and number of parameters.
+			</para>
+			
+			<para>
+			  Your application can declare a script of the same name and number of parameters that is local to a given EPL statement as well as globally using <literal>create expression</literal>. 
+			  The locally-declared script overrides the globally declared script. 
+			</para>
+
+		</sect2>
+	</sect1>
 
 	<sect1 xml:id="epl-containedeventselect">
 	   <title>Contained-Event Selection</title>
@@ -6389,7 +6590,7 @@ where productId = bookId]]></programlisting>
 			<programlisting><![CDATA[epService.getEPRuntime().sendEvent(new SentenceEvent("Hello Word Contained Events"));]]></programlisting>
 		</sect2>		
 		
-		<sect2 xml:id="epl-containedeventselect-type" revision="1">
+		<sect2 xml:id="epl-containedeventselect-examples" revision="1">
 			<title>More Examples</title>
 			
 			<para>
@@ -6429,6 +6630,24 @@ select * from SentenceEvent[splitSentenceJS(sentence)@type(WordEvent)]]]></progr
   [splitWord(word)@type(CharacterEvent)]]]></programlisting>
 		</sect2>		
 		
+		<sect2 xml:id="epl-containedeventselect-restrictions" >
+			<title>Contained-Event Limitations</title>
+			<para>
+				The following restrictions apply to contained-event selection:
+			</para>        
+			<itemizedlist spacing="compact">
+				<listitem>
+					<para>
+						When selecting contained events from a named window in a join, the stream must be marked as <literal>unidirectional</literal>.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						Selecting contained events from a named window in a correlated subquery is not allowed. 
+					</para>
+				</listitem>
+			</itemizedlist>
+		</sect2>
 	</sect1>
 	
 	<sect1 xml:id="epl-update">

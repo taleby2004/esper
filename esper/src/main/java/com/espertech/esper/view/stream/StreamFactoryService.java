@@ -43,7 +43,8 @@ public interface StreamFactoryService
      * @return event stream representing active filter
      */
     public Pair<EventStream, StatementAgentInstanceLock> createStream(final String statementId, FilterSpecCompiled filterSpec, FilterService filterService, EPStatementAgentInstanceHandle epStatementAgentInstanceHandle,
-                                                         boolean isJoin, boolean isSubSelect, ExprEvaluatorContext exprEvaluatorContext, boolean isNamedWindowTrigger, boolean filterWithSameTypeSubselect, Annotation[] annotations);
+                                                         boolean isJoin, boolean isSubSelect, ExprEvaluatorContext exprEvaluatorContext, boolean isNamedWindowTrigger, boolean filterWithSameTypeSubselect, Annotation[] annotations,
+                                                         boolean stateless);
 
     /**
      * Drop the event stream associated with the filter passed in.
@@ -55,7 +56,7 @@ public interface StreamFactoryService
      * @param isSubSelect true for subselects
      * @param isNamedWindowTrigger if a named window or trigger querying from named window
      */
-    public void dropStream(FilterSpecCompiled filterSpec, FilterService filterService, boolean isJoin, boolean isSubSelect, boolean isNamedWindowTrigger, boolean filterWithSameTypeSubselect);
+    public void dropStream(FilterSpecCompiled filterSpec, FilterService filterService, boolean isJoin, boolean isSubSelect, boolean isNamedWindowTrigger, boolean filterWithSameTypeSubselect, boolean stateless);
 
     /**
      * Destroy the service.

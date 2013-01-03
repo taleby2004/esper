@@ -12,7 +12,7 @@ import com.espertech.esper.client.*;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.core.service.EPRuntimeEventSender;
 import com.espertech.esper.core.thread.ThreadingService;
-import com.espertech.esper.epl.core.MethodResolutionService;
+import com.espertech.esper.epl.core.EngineImportService;
 import com.espertech.esper.event.bean.BeanEventTypeFactory;
 import com.espertech.esper.event.xml.SchemaModel;
 import com.espertech.esper.plugin.PlugInEventRepresentation;
@@ -40,13 +40,14 @@ public interface EventAdapterService
 
     /**
      * Returns a factory for creating and populating event object instances for the given type. 
+     *
      * @param eventType to create underlying objects for
      * @param properties to write
-     * @param methodResolutionService for resolving methods
+     * @param engineImportService
      * @return factory
      * @throws EventBeanManufactureException if a factory cannot be created for the type
      */
-    public EventBeanManufacturer getManufacturer(EventType eventType, WriteablePropertyDescriptor[] properties, MethodResolutionService methodResolutionService)
+    public EventBeanManufacturer getManufacturer(EventType eventType, WriteablePropertyDescriptor[] properties, EngineImportService engineImportService)
         throws EventBeanManufactureException;
 
     /**

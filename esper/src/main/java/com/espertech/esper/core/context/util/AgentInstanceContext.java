@@ -13,6 +13,7 @@ package com.espertech.esper.core.context.util;
 
 import com.espertech.esper.core.context.mgr.AgentInstanceFilterProxy;
 import com.espertech.esper.core.service.ExpressionResultCacheService;
+import com.espertech.esper.core.service.ExpressionResultCacheServiceAgentInstance;
 import com.espertech.esper.core.service.StatementAgentInstanceLock;
 import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
@@ -33,6 +34,7 @@ public class AgentInstanceContext implements ExprEvaluatorContext {
     private final MappedEventBean agentInstanceProperties;
     private final Set<StopCallback> terminationCallbacks = new HashSet<StopCallback>();
     private final AgentInstanceScriptContext agentInstanceScriptContext;
+    private final ExpressionResultCacheService expressionResultCacheService;
 
     public AgentInstanceContext(StatementContext statementContext, EPStatementAgentInstanceHandle epStatementAgentInstanceHandle, int agentInstanceId, AgentInstanceFilterProxy agentInstanceFilterProxy, MappedEventBean agentInstanceProperties, AgentInstanceScriptContext agentInstanceScriptContext) {
         this.statementContext = statementContext;
@@ -41,6 +43,7 @@ public class AgentInstanceContext implements ExprEvaluatorContext {
         this.agentInstanceFilterProxy = agentInstanceFilterProxy;
         this.agentInstanceProperties = agentInstanceProperties;
         this.agentInstanceScriptContext = agentInstanceScriptContext;
+        this.expressionResultCacheService = new ExpressionResultCacheServiceAgentInstance();
     }
 
     public AgentInstanceFilterProxy getAgentInstanceFilterProxy() {
@@ -56,7 +59,7 @@ public class AgentInstanceContext implements ExprEvaluatorContext {
     }
 
     public ExpressionResultCacheService getExpressionResultCacheService() {
-        return statementContext.getExpressionResultCacheService();
+        return expressionResultCacheService;
     }
 
     public int getAgentInstanceId() {

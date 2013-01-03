@@ -1115,7 +1115,7 @@ EPStatement stmt = epService.getEPAdministrator().createEPL(epl);]]></programlis
 			</para>
 			
 			<para>
-			  Various optional arguments can be passed to <literal>instantiate</literal> via the <literal>EPDataFlowInstantiationOptions</literal> object as explained in more detail below.
+			  Various optional arguments including operator parameters can be passed to <literal>instantiate</literal> via the <literal>EPDataFlowInstantiationOptions</literal> object as explained in more detail below.
 			</para>
 
 			 <para>
@@ -1239,11 +1239,24 @@ EPStatement stmt = epService.getEPAdministrator().createEPL(epl);]]></programlis
 			</para>
 			
 			<para>
+			    Passing runtime parameters to data flow operators is easiest using the <literal>addParameterURI</literal> method. The first parameter is the data flow operator name and the 
+			    operator parameter name separated by the slash character. The second parameter is the value object.
+			</para>
+			<para>
+			    For example, in order to pass the file name to the <literal>FileSource</literal> operator at runtime, use the following code:
+			</para>
+			<programlisting><![CDATA[EPDataFlowInstantiationOptions options = new EPDataFlowInstantiationOptions();
+options.addParameterURI("FileSource/file", filename);
+EPDataFlowInstance instance = epService.getEPRuntime().getDataFlowRuntime()
+    .instantiate("MyFileReaderDataFlow",options);
+instance.run();]]></programlisting>
+
+			<para>
 			    The optional <literal>operatorProvider</literal> member takes an implementation of the <literal>EPDataFlowOperatorProvider</literal> interface. The engine invokes this provider to obtain operator instances.
 			</para>
 			
 			<para>
-			    The optional <literal>parameterProvider</literal> member takes an implementation of the <literal>EPDataFlowOperatorParameterProvider</literal> interface. The engine invokes this provider to obtain operator parameter values.
+			    The optional <literal>parameterProvider</literal> member takes an implementation of the <literal>EPDataFlowOperatorParameterProvider</literal> interface. The engine invokes this provider to obtain operator parameter values. The values override the values provided via parameter URI above.
 			</para>
 
 			<para>

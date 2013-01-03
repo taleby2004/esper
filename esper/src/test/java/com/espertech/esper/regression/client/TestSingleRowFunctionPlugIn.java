@@ -32,6 +32,9 @@ public class TestSingleRowFunctionPlugIn extends TestCase
         configuration.addPlugInSingleRowFunction("power3", MySingleRowFunction.class.getName(), "computePower3");
         configuration.addPlugInSingleRowFunction("chainTop", MySingleRowFunction.class.getName(), "getChainTop");
         configuration.addPlugInSingleRowFunction("surroundx", MySingleRowFunction.class.getName(), "surroundx");
+        configuration.addPlugInSingleRowFunction("throwExceptionLogMe", MySingleRowFunction.class.getName(), "throwexception", ConfigurationPlugInSingleRowFunction.ValueCache.DISABLED, ConfigurationPlugInSingleRowFunction.FilterOptimizable.ENABLED, false);
+        configuration.addPlugInSingleRowFunction("throwExceptionRethrow", MySingleRowFunction.class.getName(), "throwexception", ConfigurationPlugInSingleRowFunction.ValueCache.DISABLED, ConfigurationPlugInSingleRowFunction.FilterOptimizable.ENABLED, true);
+        configuration.addPlugInSingleRowFunction("power3Rethrow", MySingleRowFunction.class.getName(), "computePower3", ConfigurationPlugInSingleRowFunction.ValueCache.DISABLED, ConfigurationPlugInSingleRowFunction.FilterOptimizable.ENABLED, true);
         epService = EPServiceProviderManager.getDefaultProvider(configuration);
         epService.initialize();
     }
@@ -74,6 +77,7 @@ public class TestSingleRowFunctionPlugIn extends TestCase
     public void testSingleMethod() throws Exception
     {
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
+
         String text = "select power3(intPrimitive) as val from SupportBean";
         EPStatement stmt = epService.getEPAdministrator().createEPL(text);
         stmt.addListener(listener);
@@ -90,12 +94,38 @@ public class TestSingleRowFunctionPlugIn extends TestCase
         runAssertionSingleMethod();
 
         stmt.destroy();
-        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
         text = "select power3(2) as val from SupportBean";
         stmt = epService.getEPAdministrator().createEPL(text);
         stmt.addListener(listener);
 
         runAssertionSingleMethod();
+
+        // test exception behavior
+        // logged-only
+        epService.getEPAdministrator().createEPL("select throwExceptionLogMe() from SupportBean").addListener(listener);
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        epService.getEPAdministrator().destroyAllStatements();
+
+        // rethrow
+        epService.getEPAdministrator().createEPL("@Name('S0') select throwExceptionRethrow() from SupportBean").addListener(listener);
+        try {
+            epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+            fail();
+        }
+        catch (EPException ex) {
+            assertEquals("java.lang.RuntimeException: Unexpected exception in statement 'S0': Invocation exception when invoking method 'throwexception' of class 'com.espertech.esper.regression.client.MySingleRowFunction' passing parameters [] for statement 'S0': RuntimeException : This is a 'throwexception' generated exception", ex.getMessage());
+            epService.getEPAdministrator().destroyAllStatements();
+        }
+
+        // NPE when boxed is null
+        epService.getEPAdministrator().createEPL("@Name('S1') select power3Rethrow(intBoxed) from SupportBean").addListener(listener);
+        try {
+            epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+            fail();
+        }
+        catch (EPException ex) {
+            assertEquals("java.lang.RuntimeException: Unexpected exception in statement 'S1': NullPointerException invoking method 'computePower3' of class 'com.espertech.esper.regression.client.MySingleRowFunction' in parameter 0 passing parameters [null] for statement 'S1': The method expects a primitive int value but received a null value", ex.getMessage());
+        }
     }
 
     private void runAssertionChainMethod()
@@ -174,19 +204,6 @@ public class TestSingleRowFunctionPlugIn extends TestCase
         catch (ConfigurationException ex)
         {
             // expected
-        }
-    }
-
-    private void tryInvalid(String stmtText, String expectedMsg)
-    {
-        try
-        {
-            epService.getEPAdministrator().createEPL(stmtText);
-            fail();
-        }
-        catch (EPStatementException ex)
-        {
-            assertEquals(expectedMsg, ex.getMessage());
         }
     }
 }

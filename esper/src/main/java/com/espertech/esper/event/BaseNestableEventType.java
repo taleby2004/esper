@@ -11,10 +11,7 @@ package com.espertech.esper.event;
 import com.espertech.esper.client.*;
 import com.espertech.esper.epl.parse.ASTFilterSpecHelper;
 import com.espertech.esper.event.bean.BeanEventType;
-import com.espertech.esper.event.property.IndexedProperty;
-import com.espertech.esper.event.property.MappedProperty;
-import com.espertech.esper.event.property.Property;
-import com.espertech.esper.event.property.PropertyParser;
+import com.espertech.esper.event.property.*;
 import com.espertech.esper.util.GraphUtil;
 import com.espertech.esper.util.JavaClassHelper;
 
@@ -438,7 +435,7 @@ public abstract class BaseNestableEventType implements EventTypeSPI
     public EventPropertyDescriptor getPropertyDescriptor(String propertyName)
     {
         return propertyDescriptorMap.get(propertyName);
-    }    
+    }
 
     public EventTypeMetadata getMetadata()
     {

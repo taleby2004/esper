@@ -17,14 +17,14 @@ import com.espertech.esper.client.PropertyAccessException;
 import com.espertech.esper.client.dataflow.EPDataFlowSignalFinalMarker;
 import com.espertech.esper.client.dataflow.EPDataFlowSignalWindowMarker;
 import com.espertech.esper.core.service.StatementContext;
+import com.espertech.esper.dataflow.annotations.DataFlowContext;
+import com.espertech.esper.dataflow.annotations.DataFlowOpProvideSignal;
+import com.espertech.esper.dataflow.annotations.DataFlowOperator;
+import com.espertech.esper.dataflow.interfaces.*;
 import com.espertech.esper.event.EventBeanManufactureException;
 import com.espertech.esper.event.EventBeanManufacturer;
 import com.espertech.esper.event.EventTypeUtility;
 import com.espertech.esper.event.WriteablePropertyDescriptor;
-import com.espertech.esper.dataflow.annotations.DataFlowContext;
-import com.espertech.esper.dataflow.annotations.DataFlowOperator;
-import com.espertech.esper.dataflow.annotations.DataFlowOpProvideSignal;
-import com.espertech.esper.dataflow.interfaces.*;
 import com.espertech.esper.util.CollectionUtil;
 import com.espertech.esper.util.SimpleTypeParser;
 import com.espertech.esper.util.SimpleTypeParserFactory;
@@ -154,6 +154,9 @@ public class FileSourceCSV implements DataFlowSourceOperator {
             reader.close();
             reader = null;
         }
+        if (adapterInputSource != null) {
+            adapterInputSource.close();
+        }
     }
 
     private static ParseMakePropertiesDesc setupProperties(boolean requireOneMatch, String[] propertyNamesOffered, EventType outputEventType, StatementContext statementContext) {
@@ -194,7 +197,7 @@ public class FileSourceCSV implements DataFlowSourceOperator {
         int[] indexes = CollectionUtil.intArray(indexesList);
         EventBeanManufacturer manufacturer;
         try {
-            manufacturer = statementContext.getEventAdapterService().getManufacturer(outputEventType, writables, statementContext.getMethodResolutionService());
+            manufacturer = statementContext.getEventAdapterService().getManufacturer(outputEventType, writables, statementContext.getMethodResolutionService().getEngineImportService());
         }
         catch (EventBeanManufactureException e) {
             throw new EPException("Event type '" + outputEventType.getName() + "' cannot be written to: " + e.getMessage(), e);

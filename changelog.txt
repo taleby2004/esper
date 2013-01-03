@@ -1,7 +1,38 @@
 Esper Changelog
 ===================
 
-Changes in version 4.7.0
+Changes in version 4.8.0
+------------------------
+Major API or EPL changes
+  - Support for "create expression" to declare an independent expression or script for use in other statements
+  - Support for an externally-timed batch window (win:ext_timed_batch)
+  - Support for array variables
+  - Support for enumeration methods to operate on collections of scalar values (ESPER-717)
+  - Support for on-select-delete: On-select can now also delete the selected rows
+  - Support for insert-into clause to use "irstream" keyword to produce the insert as well as the remove stream
+  - Support for a new "istream" function that returns true if the event is part of the insert stream and false if the event is part of the remove stream
+  - Support for marking an index as a unique index
+  - Many optimizations around query planning, execution-time reduced memory use and performance
+  - Dependency updates for esperio-springjms adapter and J2EE terminal example
+
+Bug fixes
+  - Fixed Issue ESPER-703 Stateless statement with output rate limiting only outputs same event multiple times under inbound threading
+  - Fixed Issue ESPER-705 Esper tests build fails on platform with default encoding other than ISO-8859-2
+  - Fixed Issue ESPER-706 Query plan output for on-select not comprehensive and Join does not list key field names
+  - Fixed Issue ESPER-708 Allow configuration for static methods/UDF to trigger exception handler upon exception
+  - Fixed Issue ESPER-709 esperio AMQPSink ignores exchange property
+  - Fixed Issue ESPER-712 Contained-event misbehaves in join and subquery when used with named window
+  - Fixed Issue ESPER-713 Transaction example probabilistic event skipping won't ever skip for event type B
+  - Fixed Issue ESPER-714 NPE in enumeration method with join
+  - Fixed Issue ESPER-718 Debug-level logging triggers ClassCastException in dataflow Select operator when using XML underlying
+  - Fixed Issue ESPER-719 Exception using variable in "after" endpoint context declaration
+  - Fixed Issue ESPER-720 Thread safety issue with enumeration method in stream-level filter
+  - Fixed Issue ESPER-721 NPE on count() in combination with order by
+  - Fixed Issue ESPER-722 Partitioned full outer join selecting remove stream with time windows fails with NullPointerException
+  - Fixed Issue ESPER-725 Object-array event type not enforcing single supertype
+  - additional bug fixes
+
+Changes in version 4.8.0
 ------------------------
 Major API or EPL changes
   - Many performance-related changes and also related to support of the new EsperHA release.

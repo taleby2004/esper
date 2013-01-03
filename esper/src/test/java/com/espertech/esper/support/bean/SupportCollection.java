@@ -181,4 +181,36 @@ public class SupportCollection
         }
         return list.toArray(new String[list.size()]);
     }
+
+    public static void setSampleStaticCSV(String sampleStaticCSV) {
+        SupportCollection.sampleStaticCSV = sampleStaticCSV;
+    }
+
+    public void setStrvals(Collection<String> strvals) {
+        this.strvals = strvals;
+    }
+
+    public void setStrvalstwo(Collection<String> strvalstwo) {
+        this.strvalstwo = strvalstwo;
+    }
+
+    public void setIntvals(Collection<Integer> intvals) {
+        this.intvals = intvals;
+    }
+
+    public void setBdvals(Collection<BigDecimal> bdvals) {
+        this.bdvals = bdvals;
+    }
+
+    public void setBoolvals(Collection<Boolean> boolvals) {
+        this.boolvals = boolvals;
+    }
+
+    public void setIntarray(int[] intarray) {
+        this.intarray = intarray;
+    }
+
+    public void setIntiterable(Iterable<Integer> intiterable) {
+        this.intiterable = intiterable;
+    }
 }

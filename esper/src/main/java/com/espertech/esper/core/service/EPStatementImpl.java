@@ -45,7 +45,6 @@ public class EPStatementImpl implements EPStatementSPI
     private EventType eventType;
     private StatementMetadata statementMetadata;
     private Object userObject;
-    private Annotation[] annotations;
     private StatementContext statementContext;
     private String serviceIsolated;
 
@@ -122,7 +121,6 @@ public class EPStatementImpl implements EPStatementSPI
         this.timeLastStateChange = timeLastStateChange;
         this.statementMetadata = statementMetadata;
         this.userObject = userObject;
-        this.annotations = annotations;
         statementContext.getStatementResultService().setUpdateListeners(statementListenerSet);
     }
 
@@ -539,7 +537,7 @@ public class EPStatementImpl implements EPStatementSPI
 
     public Annotation[] getAnnotations()
     {
-        return annotations;
+        return statementContext.getAnnotations();
     }
 
     public StatementContext getStatementContext()

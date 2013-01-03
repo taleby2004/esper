@@ -21,6 +21,8 @@ import com.espertech.esper.support.bean.lambda.LambdaAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import junit.framework.TestCase;
 
+import java.util.Collection;
+
 public class TestEnumMinMaxBy extends TestCase {
 
     private EPServiceProvider epService;
@@ -70,13 +72,32 @@ public class TestEnumMinMaxBy extends TestCase {
         epService.getEPRuntime().sendEvent(SupportBean_ST0_Container.make2Value());
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
                 new Object[]{null, null, null, null});
-    }
+        stmtFragment.destroy();
 
-    public void testInvalid() {
-        String epl;
+        // test scalar-coll with lambda
+        String[] fieldsLambda = "val0,val1".split(",");
+        epService.getEPAdministrator().getConfiguration().addPlugInSingleRowFunction("extractNum", TestEnumMinMax.MyService.class.getName(), "extractNum");
+        String eplLambda = "select " +
+                "strvals.minBy(v => extractNum(v)) as val0, " +
+                "strvals.maxBy(v => extractNum(v)) as val1 " +
+                "from SupportCollection";
+        EPStatement stmtLambda = epService.getEPAdministrator().createEPL(eplLambda);
+        stmtLambda.addListener(listener);
+        LambdaAssertionUtil.assertTypes(stmtLambda.getEventType(), fieldsLambda, new Class[]{String.class, String.class});
 
-        epl = "select strvals.minby(x => x != 'E1') from SupportCollection";
-        tryInvalid(epl, "Error starting statement: Invalid input for built-in enumeration method 'minby' and 1-parameter footprint, expecting collection of events as input, received collection of String [select strvals.minby(x => x != 'E1') from SupportCollection]");
+        epService.getEPRuntime().sendEvent(SupportCollection.makeString("E2,E1,E5,E4"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsLambda, new Object[] {"E1", "E5"});
+
+        epService.getEPRuntime().sendEvent(SupportCollection.makeString("E1"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsLambda, new Object[] {"E1", "E1"});
+        listener.reset();
+
+        epService.getEPRuntime().sendEvent(SupportCollection.makeString(null));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsLambda, new Object[] {null, null});
+        listener.reset();
+
+        epService.getEPRuntime().sendEvent(SupportCollection.makeString(""));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsLambda, new Object[] {null, null});
     }
 
     private void tryInvalid(String epl, String message) {

@@ -368,6 +368,10 @@ config.addEventType("MyLegacyEvent", MyLegacyEventClass.class.getName(), legacyD
 				<para>
 				  The copy method should be a public method that takes no parameters and returns a new event object (it may not return <literal>this</literal>). The copy method may not be a static method and may not take parameters.
 				</para>
+				
+				<para>
+				  The <literal>Beacon</literal> data flow operator in connection with the Sun JVM can use <literal>sun.reflect.ReflectionFactory</literal> if the class has no default no-argument constructor.
+				</para>
 			</sect3>
 
 			<sect3 xml:id="config-java-startendtimestamp" revision="1">
@@ -510,10 +514,10 @@ configuration.addEventType("MyObjectArrayEvent", propertyNames, propertyTypes);]
 			<programlisting>select carType, assembly.chassisTag, count(assembly.numParts) from MyObjectArrayEvent.win:time(60 sec)</programlisting>
 
 			<para>
-				An Object-array event type may also become a subtype of one supertype that must also be an Object-array event type. The <literal>objectarray</literal> element provides the optional attribute <literal>supertype-names</literal> that accepts a comma-separated list of names of Object-array event types that are supertypes to the type:
+				An Object-array event type may also become a subtype of one supertype that must also be an Object-array event type. The <literal>objectarray</literal> element provides the optional attribute <literal>supertype-names</literal> that accepts a single name of an Object-array event type that is the supertype to the type:
 			</para>
 			<programlisting><![CDATA[<event-type name="AccountUpdate">
-<objectarray supertype-names="BaseUpdate, AccountEvent">
+<objectarray supertype-names="BaseUpdate">
 ...]]></programlisting>			
 
 			<para>

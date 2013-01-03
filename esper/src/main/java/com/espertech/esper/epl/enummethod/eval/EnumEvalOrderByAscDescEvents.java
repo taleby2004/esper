@@ -26,7 +26,7 @@ public class EnumEvalOrderByAscDescEvents extends EnumEvalBase implements EnumEv
         this.descending = descending;
     }
 
-    public Object evaluateEnumMethod(Collection target, boolean isNewData, ExprEvaluatorContext context) {
+    public Object evaluateEnumMethod(EventBean[] eventsLambda, Collection target, boolean isNewData, ExprEvaluatorContext context) {
         TreeMap<Comparable, Object> sort = new TreeMap<Comparable, Object>();
         boolean hasColl = false;
 

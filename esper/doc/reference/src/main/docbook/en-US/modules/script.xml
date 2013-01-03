@@ -19,6 +19,15 @@
 		<para>
 			Esper allows the use scripting languages within EPL. You may use scripts for imperative programming to execute certain code as part of EPL processing by the engine.
 		</para>
+
+		<para>
+		    The syntax and examples outlined below discuss how to declare a script that is visible to the same EPL statement that listed the script.
+		</para>
+		
+		<para>
+			For declaring scripts that are visible across multiple EPL statements i.e. globally visible scripts please consult <xref linkend="create-exprglobal-script"/> 
+			that explains the <literal>create expression</literal> clause.
+		</para>
 		
 		<para>
 			Any scripting language that supports JSR 223 and also the MVEL scripting language can be specified in EPL. This section provides MVEL and JavaScript examples.

@@ -8,11 +8,14 @@
  **************************************************************************************/
 package com.espertech.esper.epl.named;
 
+import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.Pair;
+import com.espertech.esper.epl.join.hint.*;
 import com.espertech.esper.epl.join.plan.QueryPlanIndexItem;
 import com.espertech.esper.epl.join.table.EventTable;
+import com.espertech.esper.epl.join.table.EventTableAndNamePair;
 import com.espertech.esper.epl.join.table.EventTableUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,7 +34,7 @@ public class NamedWindowIndexRepository
     private static final Log log = LogFactory.getLog(NamedWindowIndexRepository.class);
 
     private List<EventTable> tables;
-    private Map<IndexMultiKey, Pair<EventTable, Integer>> tableIndexesRefCount;
+    private Map<IndexMultiKey, NamedWindowIndexRepEntry> tableIndexesRefCount;
 
     /**
      * Ctor.
@@ -39,39 +42,168 @@ public class NamedWindowIndexRepository
     public NamedWindowIndexRepository()
     {
         tables = new ArrayList<EventTable>();
-        tableIndexesRefCount = new HashMap<IndexMultiKey, Pair<EventTable, Integer>>();
+        tableIndexesRefCount = new HashMap<IndexMultiKey, NamedWindowIndexRepEntry>();
     }
 
-    /**
-     * Create a new index table or use an existing index table, by matching the
-     * join descriptor properties to an existing table.
-     * @param hashProps must be in sorted natural order and define the properties joined
-     * @param btreeProps
-     * @param prefilledEvents is the events to enter into a new table, if a new table is created
-     * @param indexedType is the type of event to hold in the index
-     * @param mustCoerce is an indicator whether coercion is required or not.
-     * @return new or existing index table
-     */
-    public Pair<IndexMultiKey, EventTable> addTableCreateOrReuse(List<IndexedPropDesc> hashProps,
+    public Pair<IndexMultiKey, EventTableAndNamePair> addExplicitIndexOrReuse(
+                               boolean unique,
+                               List<IndexedPropDesc> hashProps,
                                List<IndexedPropDesc> btreeProps,
                                Iterable<EventBean> prefilledEvents,
                                EventType indexedType,
-                               boolean mustCoerce)
+                               String indexName)
     {
         if (hashProps.isEmpty() && btreeProps.isEmpty()) {
             throw new IllegalArgumentException("Invalid zero element list for hash and btree columns");
         }
 
-        // Get an existing table, if any
-        IndexMultiKey indexPropKeyMatch = findExactMatchNameAndType(tableIndexesRefCount.keySet(), hashProps, btreeProps);
-        if (indexPropKeyMatch != null)
-        {
-            Pair<EventTable, Integer> refTablePair = tableIndexesRefCount.get(indexPropKeyMatch);
-            refTablePair.setSecond(refTablePair.getSecond() + 1);
-            return new Pair<IndexMultiKey, EventTable>(indexPropKeyMatch, refTablePair.getFirst());
+        // Get an existing table, if any, matching the exact requirement
+        IndexMultiKey indexPropKeyMatch = findExactMatchNameAndType(tableIndexesRefCount.keySet(), unique, hashProps, btreeProps);
+        if (indexPropKeyMatch != null) {
+            NamedWindowIndexRepEntry refTablePair = tableIndexesRefCount.get(indexPropKeyMatch);
+            refTablePair.setRefCount(refTablePair.getRefCount() + 1);
+            return new Pair<IndexMultiKey, EventTableAndNamePair>(indexPropKeyMatch, new EventTableAndNamePair(refTablePair.getTable(), refTablePair.getOptionalIndexName()));
         }
 
-        IndexMultiKey indexPropKey = new IndexMultiKey(hashProps, btreeProps);
+        return addIndex(unique, hashProps, btreeProps, prefilledEvents, indexedType, indexName, false);
+    }
+
+    public Pair<IndexMultiKey, EventTableAndNamePair> addTableCreateOrReuse(
+            List<IndexedPropDesc> hashProps,
+            List<IndexedPropDesc> btreeProps,
+            Iterable<EventBean> prefilledEvents,
+            EventType indexedType,
+            IndexHint optionalIndexHint,
+            boolean isIndexShare,
+            int subqueryNumber,
+            Set<String> optionalUniqueKeyProps)
+    {
+        if (hashProps.isEmpty() && btreeProps.isEmpty()) {
+            throw new IllegalArgumentException("Invalid zero element list for hash and btree columns");
+        }
+
+        // if there are hints, follow these
+        if (optionalIndexHint != null) {
+            Map<IndexMultiKey, NamedWindowIndexRepEntry> indexCandidates = findCandidates(hashProps, btreeProps);
+            List<IndexHintInstruction> instructions = optionalIndexHint.getInstructionsSubquery(subqueryNumber);
+            IndexMultiKey found = handleIndexHint(indexCandidates, instructions);
+            if (found != null) {
+                return reference(found);
+            }
+        }
+
+        // Get an existing table, if any, matching the exact requirement, prefer unique
+        IndexMultiKey indexPropKeyMatch = findExactMatchNameAndType(tableIndexesRefCount.keySet(), true, hashProps, btreeProps);
+        if (indexPropKeyMatch == null) {
+            indexPropKeyMatch = findExactMatchNameAndType(tableIndexesRefCount.keySet(), false, hashProps, btreeProps);
+        }
+        if (indexPropKeyMatch != null) {
+            return reference(indexPropKeyMatch);
+        }
+
+        // not found as a full match
+        // try match on any of the unique indexes
+        Map<IndexMultiKey, NamedWindowIndexRepEntry> indexCandidates = findCandidates(hashProps, btreeProps);
+        if (!indexCandidates.isEmpty()) {
+            for (Map.Entry<IndexMultiKey, NamedWindowIndexRepEntry> indexKey : indexCandidates.entrySet()) {
+                if (indexKey.getKey().isUnique()) {
+                    return reference(indexKey.getKey());
+                }
+            }
+        }
+
+        // not found, see if the named window is declared unique
+        boolean unique = false;
+        boolean coerce = !isIndexShare;
+        if (optionalUniqueKeyProps != null && !optionalUniqueKeyProps.isEmpty()) {
+            List<IndexedPropDesc> newHashProps = new ArrayList<IndexedPropDesc>();
+            for (String uniqueKey : optionalUniqueKeyProps) {
+                boolean found = false;
+                for (IndexedPropDesc hashProp : hashProps) {
+                    if (hashProp.getIndexPropName().equals(uniqueKey)) {
+                        newHashProps.add(hashProp);
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    newHashProps = null;
+                    break;
+                }
+            }
+            if (newHashProps != null) {
+                hashProps = newHashProps;
+                btreeProps = Collections.emptyList();
+                unique = true;
+                coerce = false;
+            }
+        }
+
+        // not found at all, create
+        return addIndex(unique, hashProps, btreeProps, prefilledEvents, indexedType, null, coerce);
+    }
+
+    private IndexMultiKey handleIndexHint(Map<IndexMultiKey, NamedWindowIndexRepEntry> indexCandidates, List<IndexHintInstruction> instructions) {
+        for (IndexHintInstruction instruction : instructions) {
+            if (instruction instanceof IndexHintInstructionIndexName) {
+                String indexName = ((IndexHintInstructionIndexName) instruction).getIndexName();
+                IndexMultiKey found = findExplicitIndexByName(indexCandidates, indexName);
+                if (found != null) {
+                    return found;
+                }
+            }
+            if (instruction instanceof IndexHintInstructionExplicit) {
+                IndexMultiKey found = findExplicitIndexAnyName(indexCandidates);
+                if (found != null) {
+                    return found;
+                }
+            }
+            if (instruction instanceof IndexHintInstructionBust) {
+                throw new EPException("Failed to plan index access, index hint busted out");
+            }
+        }
+        return null;
+    }
+
+    private Pair<IndexMultiKey, EventTableAndNamePair> reference(IndexMultiKey found) {
+        NamedWindowIndexRepEntry refTablePair = tableIndexesRefCount.get(found);
+        refTablePair.setRefCount(refTablePair.getRefCount() + 1);
+        return new Pair<IndexMultiKey, EventTableAndNamePair>(found, new EventTableAndNamePair(refTablePair.getTable(), refTablePair.getOptionalIndexName()));
+    }
+
+    private IndexMultiKey findExplicitIndexByName(Map<IndexMultiKey, NamedWindowIndexRepEntry> indexCandidates, String name) {
+        for (Map.Entry<IndexMultiKey, NamedWindowIndexRepEntry> entry : indexCandidates.entrySet()) {
+            if (entry.getValue().getOptionalIndexName() != null && entry.getValue().getOptionalIndexName().equals(name)) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
+
+    private IndexMultiKey findExplicitIndexAnyName(Map<IndexMultiKey, NamedWindowIndexRepEntry> indexCandidates) {
+        for (Map.Entry<IndexMultiKey, NamedWindowIndexRepEntry> entry : indexCandidates.entrySet()) {
+            if (entry.getValue().getOptionalIndexName() != null) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
+
+    private Map<IndexMultiKey, NamedWindowIndexRepEntry> findCandidates(List<IndexedPropDesc> hashProps, List<IndexedPropDesc> btreeProps) {
+        Map<IndexMultiKey, NamedWindowIndexRepEntry> indexCandidates = new HashMap<IndexMultiKey, NamedWindowIndexRepEntry>();
+        for (Map.Entry<IndexMultiKey, NamedWindowIndexRepEntry> entry : tableIndexesRefCount.entrySet()) {
+            boolean matches = indexMatchesProvided(entry.getKey(), hashProps, btreeProps);
+            if (matches) {
+                indexCandidates.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return indexCandidates;
+    }
+
+    private Pair<IndexMultiKey, EventTableAndNamePair> addIndex(boolean unique, List<IndexedPropDesc> hashProps, List<IndexedPropDesc> btreeProps, Iterable<EventBean> prefilledEvents, EventType indexedType, String indexName, boolean mustCoerce) {
+
+        // not resolved as full match and not resolved as unique index match, allocate
+        IndexMultiKey indexPropKey = new IndexMultiKey(unique, hashProps, btreeProps);
 
         IndexedPropDesc[] indexedPropDescs = hashProps.toArray(new IndexedPropDesc[hashProps.size()]);
         String[] indexProps = IndexedPropDesc.getIndexProperties(indexedPropDescs);
@@ -84,8 +216,8 @@ public class NamedWindowIndexRepository
         String[] rangeProps = IndexedPropDesc.getIndexProperties(rangePropDescs);
         Class[] rangeCoercionTypes = IndexedPropDesc.getCoercionTypes(rangePropDescs);
 
-        QueryPlanIndexItem indexItem = new QueryPlanIndexItem(indexProps, indexCoercionTypes, rangeProps, rangeCoercionTypes);
-        EventTable table = EventTableUtil.buildIndex(0, indexItem, indexedType, true);
+        QueryPlanIndexItem indexItem = new QueryPlanIndexItem(indexProps, indexCoercionTypes, rangeProps, rangeCoercionTypes, false);
+        EventTable table = EventTableUtil.buildIndex(0, indexItem, indexedType, true, unique, indexName);
 
         // fill table since its new
         EventBean[] events = new EventBean[1];
@@ -99,32 +231,64 @@ public class NamedWindowIndexRepository
         tables.add(table);
 
         // add index, reference counted
-        tableIndexesRefCount.put(indexPropKey, new Pair<EventTable, Integer>(table, 1));
+        tableIndexesRefCount.put(indexPropKey, new NamedWindowIndexRepEntry(table, indexName, 1));
 
-        return new Pair<IndexMultiKey, EventTable>(indexPropKey, table);
+        return new Pair<IndexMultiKey, EventTableAndNamePair>(indexPropKey, new EventTableAndNamePair(table, indexName));
     }
 
-    private IndexMultiKey findExactMatchNameAndType(Set<IndexMultiKey> indexMultiKeys, List<IndexedPropDesc> hashProps, List<IndexedPropDesc> btreeProps) {
+    private boolean indexMatchesProvided(IndexMultiKey indexDesc, List<IndexedPropDesc> hashPropsProvided, List<IndexedPropDesc> rangePropsProvided) {
+        IndexedPropDesc[] hashPropIndexedList = indexDesc.getHashIndexedProps();
+        for (IndexedPropDesc hashPropIndexed : hashPropIndexedList) {
+            boolean foundHashProp = indexHashIsProvided(hashPropIndexed, hashPropsProvided);
+            if (!foundHashProp) {
+                return false;
+            }
+        }
+
+        IndexedPropDesc[] rangePropIndexedList = indexDesc.getRangeIndexedProps();
+        for (IndexedPropDesc rangePropIndexed : rangePropIndexedList) {
+            boolean foundRangeProp = indexHashIsProvided(rangePropIndexed, rangePropsProvided);
+            if (!foundRangeProp) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private boolean indexHashIsProvided(IndexedPropDesc hashPropIndexed, List<IndexedPropDesc> hashPropsProvided) {
+        for (IndexedPropDesc hashPropProvided : hashPropsProvided) {
+            if (hashPropProvided.getIndexPropName().equals(hashPropIndexed.getIndexPropName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private IndexMultiKey findExactMatchNameAndType(Set<IndexMultiKey> indexMultiKeys, boolean unique, List<IndexedPropDesc> hashProps, List<IndexedPropDesc> btreeProps) {
         for (IndexMultiKey existing : indexMultiKeys) {
-            if (isExactMatch(existing, hashProps, btreeProps)) {
+            if (isExactMatch(existing, unique, hashProps, btreeProps)) {
                 return existing;
             }
         }
         return null;
     }
 
-    private boolean isExactMatch(IndexMultiKey existing, List<IndexedPropDesc> hashProps, List<IndexedPropDesc> btreeProps) {
+    private boolean isExactMatch(IndexMultiKey existing, boolean unique, List<IndexedPropDesc> hashProps, List<IndexedPropDesc> btreeProps) {
+        if (existing.isUnique() != unique) {
+            return false;
+        }
         boolean keyPropCompare = IndexedPropDesc.compare(Arrays.asList(existing.getHashIndexedProps()), hashProps);
         return keyPropCompare && IndexedPropDesc.compare(Arrays.asList(existing.getRangeIndexedProps()), btreeProps);
     }
 
     public void addTableReference(EventTable table) {
-        for (Map.Entry<IndexMultiKey, Pair<EventTable, Integer>> entry : tableIndexesRefCount.entrySet())
+        for (Map.Entry<IndexMultiKey, NamedWindowIndexRepEntry> entry : tableIndexesRefCount.entrySet())
         {
-            if (entry.getValue().getFirst() == table)
+            if (entry.getValue().getTable() == table)
             {
-                int current = entry.getValue().getSecond() + 1;
-                entry.getValue().setSecond(current);
+                int current = entry.getValue().getRefCount() + 1;
+                entry.getValue().setRefCount(current);
             }
         }
     }
@@ -136,15 +300,15 @@ public class NamedWindowIndexRepository
      */
     public void removeTableReference(EventTable table)
     {
-        for (Map.Entry<IndexMultiKey, Pair<EventTable, Integer>> entry : tableIndexesRefCount.entrySet())
+        for (Map.Entry<IndexMultiKey, NamedWindowIndexRepEntry> entry : tableIndexesRefCount.entrySet())
         {
-            if (entry.getValue().getFirst() == table)
+            if (entry.getValue().getTable() == table)
             {
-                int current = entry.getValue().getSecond();
+                int current = entry.getValue().getRefCount();
                 if (current > 1)
                 {
                     current--;
-                    entry.getValue().setSecond(current);
+                    entry.getValue().setRefCount(current);
                     break;
                 }
 
@@ -173,50 +337,51 @@ public class NamedWindowIndexRepository
         tableIndexesRefCount.clear();
     }
 
-    public Pair<IndexMultiKey, EventTable> findTable(Set<String> keyPropertyNames, Set<String> rangePropertyNames, Map<String, EventTable> explicitIndexNames) {
+    public Pair<IndexMultiKey, EventTableAndNamePair> findTable(Set<String> keyPropertyNames, Set<String> rangePropertyNames, Map<String, EventTable> explicitIndexNames, IndexHint optionalIndexHint) {
 
         if (keyPropertyNames.isEmpty() && rangePropertyNames.isEmpty()) {
             return null;
         }
 
-        List<IndexMultiKey> candidateTables = null;
-        for (Map.Entry<IndexMultiKey, Pair<EventTable, Integer>> entry : tableIndexesRefCount.entrySet()) {
+        // determine candidates
+        List<IndexedPropDesc> hashProps = new ArrayList<IndexedPropDesc>();
+        for (String keyPropertyName : keyPropertyNames) {
+            hashProps.add(new IndexedPropDesc(keyPropertyName, null));
+        }
+        List<IndexedPropDesc> rangeProps = new ArrayList<IndexedPropDesc>();
+        for (String rangePropertyName : rangePropertyNames) {
+            rangeProps.add(new IndexedPropDesc(rangePropertyName, null));
+        }
+        Map<IndexMultiKey, NamedWindowIndexRepEntry> indexCandidates = findCandidates(hashProps, rangeProps);
 
-            boolean missed = false;
-            String[] indexedProps = IndexedPropDesc.getIndexProperties(entry.getKey().getHashIndexedProps());
-            for (String indexedProp : indexedProps) {
-                if (!keyPropertyNames.contains(indexedProp)) {
-                    missed = true;
-                    break;
-                }
-            }
-
-            String[] rangeIndexProps = IndexedPropDesc.getIndexProperties(entry.getKey().getRangeIndexedProps());
-            for (String rangeProp : rangeIndexProps) {
-                if (!rangePropertyNames.contains(rangeProp) && !keyPropertyNames.contains(rangeProp)) {
-                    missed = true;
-                    break;
-                }
-            }
-            
-            if (!missed) {
-                if (candidateTables == null) {
-                    candidateTables = new ArrayList<IndexMultiKey>();
-                }
-                candidateTables.add(entry.getKey());
+        // handle hint
+        if (optionalIndexHint != null) {
+            List<IndexHintInstruction> instructions = optionalIndexHint.getInstructionsFireAndForget();
+            IndexMultiKey found = handleIndexHint(indexCandidates, instructions);
+            if (found != null) {
+                return getPair(found);
             }
         }
 
-        if (candidateTables == null) {
+        // no candidates
+        if (indexCandidates == null || indexCandidates.isEmpty()) {
             if (log.isDebugEnabled()) {
                 log.debug("No index found.");
             }
             return null;
         }
 
+        // take the table that has a unique index
+        for (Map.Entry<IndexMultiKey, NamedWindowIndexRepEntry> entry : indexCandidates.entrySet()) {
+            if (entry.getKey().isUnique()) {
+                return getPair(entry.getKey());
+            }
+        }
+
         // take the best available table
         IndexMultiKey indexMultiKey;
-        if (candidateTables.size() > 1) {
+        List<IndexMultiKey> indexes = new ArrayList<IndexMultiKey>(indexCandidates.keySet());
+        if (indexes.size() > 1) {
             Comparator<IndexMultiKey> comparator = new Comparator<IndexMultiKey>() {
                 public int compare(IndexMultiKey o1, IndexMultiKey o2)
                 {
@@ -231,22 +396,16 @@ public class NamedWindowIndexRepository
                     return 1;
                 }
             };
-            Collections.sort(candidateTables,comparator);
+            Collections.sort(indexes,comparator);
         }
-        indexMultiKey = candidateTables.get(0);
-        EventTable tableFound = tableIndexesRefCount.get(indexMultiKey).getFirst();
+        indexMultiKey = indexes.get(0);
+        return getPair(indexMultiKey);
+    }
 
-        if (log.isDebugEnabled()) {
-            String indexName = null;
-            for (Map.Entry<String, EventTable> entry : explicitIndexNames.entrySet()) {
-                if (entry.getValue() == tableFound) {
-                    indexName = entry.getKey();
-                }
-            }
-            log.debug("Found index " + indexName + " for on-demand query");
-        }
-
-        return new Pair<IndexMultiKey, EventTable>(indexMultiKey, tableFound);
+    private Pair<IndexMultiKey, EventTableAndNamePair> getPair(IndexMultiKey indexMultiKey) {
+        NamedWindowIndexRepEntry indexFound = tableIndexesRefCount.get(indexMultiKey);
+        EventTable tableFound = indexFound.getTable();
+        return new Pair<IndexMultiKey, EventTableAndNamePair>(indexMultiKey, new EventTableAndNamePair(tableFound, indexFound.getOptionalIndexName()));
     }
 
     public IndexMultiKey[] getIndexDescriptors() {

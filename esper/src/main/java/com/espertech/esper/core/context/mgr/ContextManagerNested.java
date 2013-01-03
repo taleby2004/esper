@@ -15,7 +15,6 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.SafeIterator;
 import com.espertech.esper.client.context.*;
-import com.espertech.esper.collection.IntegerSetNextId;
 import com.espertech.esper.core.context.factory.StatementAgentInstanceFactoryResult;
 import com.espertech.esper.core.context.stmt.AIRegistryAggregationMap;
 import com.espertech.esper.core.context.stmt.AIRegistryExprMap;
@@ -62,14 +61,14 @@ public class ContextManagerNested implements ContextManager, ContextControllerLi
      */
     private final Map<ContextController, ContextControllerTreeEntry> subcontexts = new HashMap<ContextController, ContextControllerTreeEntry>();
 
-    private IntegerSetNextId contextPartitionIds;
+    private final ContextPartitionIdManager contextPartitionIdManager;
 
     public ContextManagerNested(ContextControllerFactoryServiceContext factoryServiceContext)
         throws ExprValidationException
     {
         this.contextName = factoryServiceContext.getContextName();
         this.servicesContext = factoryServiceContext.getServicesContext();
-        this.contextPartitionIds = new IntegerSetNextId();
+        this.contextPartitionIdManager = factoryServiceContext.getAgentInstanceContextCreate().getStatementContext().getContextControllerFactoryService().allocatePartitionIdMgr(contextName, factoryServiceContext.getAgentInstanceContextCreate().getStatementContext().getStatementId());
 
         nestedContextFactories = factoryServiceContext.getAgentInstanceContextCreate().getStatementContext().getContextControllerFactoryService().getFactory(factoryServiceContext);
 
@@ -86,6 +85,14 @@ public class ContextManagerNested implements ContextManager, ContextControllerLi
         EventType contextPropsType = servicesContext.getEventAdapterService().createAnonymousMapType(contextName, contextProps);
         ContextPropertyRegistryImpl registry = new ContextPropertyRegistryImpl(Collections.<ContextDetailPartitionItem>emptyList(), contextPropsType);
         contextDescriptor = new ContextDescriptor(contextName, false, registry, resourceRegistryFactory, this, factoryServiceContext.getDetail());
+    }
+
+    public void deactivateContextPartitions(Set<Integer> agentInstanceIds) {
+        throw new UnsupportedOperationException();
+    }
+
+    public Map<String, ContextControllerStatementDesc> getStatements() {
+        return statements;
     }
 
     public ContextDescriptor getContextDescriptor() {
@@ -163,7 +170,7 @@ public class ContextManagerNested implements ContextManager, ContextControllerLi
             rootContext = null;
             statements.clear();
             subcontexts.clear();
-            contextPartitionIds.clear();
+            contextPartitionIdManager.clear();
         }
     }
 
@@ -227,11 +234,11 @@ public class ContextManagerNested implements ContextManager, ContextControllerLi
         int assignedContextId;
         if (optionalContextPartitionId != null) {
             assignedContextId = optionalContextPartitionId;
+            contextPartitionIdManager.addExisting(optionalContextPartitionId);
         }
         else {
-            assignedContextId = contextPartitionIds.nextId();
+            assignedContextId = contextPartitionIdManager.allocateId();
         }
-        contextPartitionIds.add(assignedContextId);
 
         if (log.isDebugEnabled()) {
             log.debug("Instantiating agent instance for " + contextName +
@@ -302,7 +309,7 @@ public class ContextManagerNested implements ContextManager, ContextControllerLi
                 ContextControllerTreeAgentInstanceList ailist = leafEntry.getAgentInstances().get(leafHandle.getContextPartitionOrPathId());
                 if (ailist != null) {
                     StatementAgentInstanceUtil.stopAgentInstances(ailist.getAgentInstances(), null, servicesContext, false);
-                    contextPartitionIds.remove(leafHandle.getContextPartitionOrPathId());
+                    contextPartitionIdManager.removeId(leafHandle.getContextPartitionOrPathId());
                     ailist.getAgentInstances().clear();
                 }
 
@@ -441,7 +448,7 @@ public class ContextManagerNested implements ContextManager, ContextControllerLi
         if (entry.getAgentInstances() != null) {
             for (Map.Entry<Integer, ContextControllerTreeAgentInstanceList> entryCP : entry.getAgentInstances().entrySet()) {
                 StatementAgentInstanceUtil.stopAgentInstances(entryCP.getValue().getAgentInstances(), null, servicesContext, false);
-                contextPartitionIds.remove(entryCP.getKey());
+                contextPartitionIdManager.removeId(entryCP.getKey());
             }
         }
 
@@ -516,7 +523,7 @@ public class ContextManagerNested implements ContextManager, ContextControllerLi
             return new ArrayList<Integer>(ids);
         }
         else if (selector instanceof ContextPartitionSelectorAll) {
-            return new ArrayList<Integer>(contextPartitionIds.getIds());
+            return new ArrayList<Integer>(contextPartitionIdManager.getIds());
         }
         else if (selector instanceof ContextPartitionSelectorNested) {
             ContextPartitionSelectorNested nested = (ContextPartitionSelectorNested) selector;

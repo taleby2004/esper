@@ -11,10 +11,7 @@
 
 package com.espertech.esper.regression.dataflow;
 
-import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPServiceProviderManager;
-import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.*;
 import com.espertech.esper.client.dataflow.EPDataFlowInstance;
 import com.espertech.esper.client.dataflow.EPDataFlowInstantiationOptions;
 import com.espertech.esper.dataflow.util.DefaultSupportCaptureOp;
@@ -33,6 +30,38 @@ public class TestDataFlowOpBeaconSource extends TestCase {
     public void setUp() {
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
+    }
+
+    public void testBeaconWithBeans() throws Exception {
+
+        ConfigurationEventTypeLegacy legacy = new ConfigurationEventTypeLegacy();
+        legacy.setCodeGeneration(ConfigurationEventTypeLegacy.CodeGeneration.DISABLED);
+        epService.getEPAdministrator().getConfiguration().addEventType("MyLegacyEvent", MyLegacyEvent.class.getName(), legacy);
+        MyLegacyEvent resultLegacy = (MyLegacyEvent) runAssertionBeans("MyLegacyEvent");
+        assertEquals("abc", resultLegacy.getMyfield());
+
+        epService.getEPAdministrator().getConfiguration().addEventType("MyEventNoDefaultCtor", MyEventNoDefaultCtor.class);
+        MyEventNoDefaultCtor resultNoDefCtor = (MyEventNoDefaultCtor) runAssertionBeans("MyEventNoDefaultCtor");
+        assertEquals("abc", resultNoDefCtor.getMyfield());
+    }
+
+    private Object runAssertionBeans(String typeName) throws Exception {
+        EPStatement stmtGraph = epService.getEPAdministrator().createEPL("create dataflow MyDataFlowOne " +
+                "" +
+                "BeaconSource -> BeaconStream<" + typeName + "> {" +
+                "  myfield : 'abc', iterations : 1" +
+                "}" +
+                "DefaultSupportCaptureOp(BeaconStream) {}");
+
+        DefaultSupportCaptureOp<Object> future = new DefaultSupportCaptureOp<Object>(1);
+        EPDataFlowInstantiationOptions options = new EPDataFlowInstantiationOptions()
+                .operatorProvider(new DefaultSupportGraphOpProvider(future));
+        EPDataFlowInstance df = epService.getEPRuntime().getDataFlowRuntime().instantiate("MyDataFlowOne", options);
+        df.start();
+        Object[] output = future.get(2, TimeUnit.SECONDS);
+        assertEquals(1, output.length);
+        stmtGraph.destroy();
+        return output[0];
     }
 
     public void testBeaconFields() throws Exception {
@@ -194,5 +223,35 @@ public class TestDataFlowOpBeaconSource extends TestCase {
 
     public static String generateTagId() {
         return "";
+    }
+
+    public static class MyEventNoDefaultCtor {
+        private String myfield;
+
+        public MyEventNoDefaultCtor(String someOtherfield, int someOtherValue) {
+        }
+
+        public String getMyfield() {
+            return myfield;
+        }
+
+        public void setMyfield(String myfield) {
+            this.myfield = myfield;
+        }
+    }
+
+    public static class MyLegacyEvent {
+        private String myfield;
+
+        public MyLegacyEvent() {
+        }
+
+        public String getMyfield() {
+            return myfield;
+        }
+
+        public void setMyfield(String myfield) {
+            this.myfield = myfield;
+        }
     }
 }

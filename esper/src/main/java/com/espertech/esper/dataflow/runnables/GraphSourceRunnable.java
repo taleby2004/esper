@@ -11,12 +11,14 @@
 
 package com.espertech.esper.dataflow.runnables;
 
+import com.espertech.esper.client.annotation.AuditEnum;
 import com.espertech.esper.client.dataflow.EPDataFlowExceptionContext;
 import com.espertech.esper.client.dataflow.EPDataFlowExceptionHandler;
 import com.espertech.esper.client.dataflow.EPDataFlowSignal;
 import com.espertech.esper.client.dataflow.EPDataFlowSignalFinalMarker;
 import com.espertech.esper.dataflow.interfaces.DataFlowSourceOperator;
 import com.espertech.esper.dataflow.util.DataFlowSignalListener;
+import com.espertech.esper.util.AuditPath;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -26,23 +28,29 @@ import java.util.List;
 public class GraphSourceRunnable implements BaseRunnable, DataFlowSignalListener {
     private static final Log log = LogFactory.getLog(GraphSourceRunnable.class);
 
+    private final String engineURI;
+    private final String statementName;
     private final DataFlowSourceOperator graphSource;
     private final String dataFlowName;
     private final String operatorName;
     private final int operatorNumber;
     private final String operatorPrettyPrint;
     private final EPDataFlowExceptionHandler optionalExceptionHandler;
+    private final boolean audit;
 
     private boolean shutdown;
     private List<CompletionListener> completionListeners;
 
-    public GraphSourceRunnable(DataFlowSourceOperator graphSource, String dataFlowName, String operatorName, int operatorNumber, String operatorPrettyPrint, EPDataFlowExceptionHandler optionalExceptionHandler) {
+    public GraphSourceRunnable(String engineURI, String statementName, DataFlowSourceOperator graphSource, String dataFlowName, String operatorName, int operatorNumber, String operatorPrettyPrint, EPDataFlowExceptionHandler optionalExceptionHandler, boolean audit) {
+        this.engineURI = engineURI;
+        this.statementName = statementName;
         this.graphSource = graphSource;
         this.dataFlowName = dataFlowName;
         this.operatorName = operatorName;
         this.operatorNumber = operatorNumber;
         this.operatorPrettyPrint = operatorPrettyPrint;
         this.optionalExceptionHandler = optionalExceptionHandler;
+        this.audit = audit;
     }
 
     public void processSignal(EPDataFlowSignal signal) {
@@ -91,6 +99,9 @@ public class GraphSourceRunnable implements BaseRunnable, DataFlowSignalListener
 
     private void runLoop() throws InterruptedException {
         while(true) {
+            if (audit) {
+                AuditPath.auditLog(engineURI, statementName, AuditEnum.DATAFLOW_SOURCE, "dataflow " + dataFlowName + " operator " + operatorName + "(" + operatorNumber + ") invoking source.next()");
+            }
             graphSource.next();
 
             if (shutdown) {

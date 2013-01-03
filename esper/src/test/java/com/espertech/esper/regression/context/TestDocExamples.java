@@ -186,6 +186,20 @@ public class TestDocExamples extends TestCase {
         };
         create("context TxnCategoryContext create window BankTxnWindow.win:time(1 min) as BankTxn");
         epService.getEPRuntime().executeQuery("select count(*) from BankTxnWindow", new ContextPartitionSelector[] {categorySmallMed});
+
+        epService.getEPAdministrator().getConfiguration().addEventType(MyTwoKeyInit.class);
+        epService.getEPAdministrator().getConfiguration().addEventType(MyTwoKeyTerm.class);
+        create("create context CtxPerKeysAndExternallyControlled\n" +
+                "context PartitionedByKeys " +
+                "  partition by " +
+                "    key1, key2 from MyTwoKeyInit\n," +
+                "    key1, key2 from SensorEvent\n," +
+                "context InitiateAndTerm initiated by MyTwoKeyInit as e1 terminated by MyTwoKeyTerm(key1=e1.key1 and key2=e1.key2)");
+        create("context CtxPerKeysAndExternallyControlled\n" +
+                "select key1, key2, avg(temp) as avgTemp, count(*) as cnt\n" +
+                "from SensorEvent\n" +
+                "output snapshot when terminated\n" +
+                "// note: no group-by needed since \n");
     }
 
     private EPStatement create(String epl) {
@@ -241,9 +255,27 @@ public class TestDocExamples extends TestCase {
 
     public static class SensorEvent {
         private double temp;
+        private int key1;
+        private int key2;
 
         public double getTemp() {
             return temp;
+        }
+
+        public int getKey1() {
+            return key1;
+        }
+
+        public void setKey1(int key1) {
+            this.key1 = key1;
+        }
+
+        public int getKey2() {
+            return key2;
+        }
+
+        public void setKey2(int key2) {
+            this.key2 = key2;
         }
     }
 
@@ -374,6 +406,32 @@ public class TestDocExamples extends TestCase {
 
         public int getId() {
             return id;
+        }
+    }
+
+    public static class MyTwoKeyInit {
+        private int key1;
+        private int key2;
+
+        public int getKey1() {
+            return key1;
+        }
+
+        public int getKey2() {
+            return key2;
+        }
+    }
+
+    public static class MyTwoKeyTerm {
+        private int key1;
+        private int key2;
+
+        public int getKey1() {
+            return key1;
+        }
+
+        public int getKey2() {
+            return key2;
         }
     }
 }

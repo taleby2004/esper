@@ -19,21 +19,14 @@ import com.espertech.esper.epl.enummethod.dot.ExprDotEvalParamLambda;
 import com.espertech.esper.epl.enummethod.dot.ExprDotEvalTypeInfo;
 import com.espertech.esper.epl.expression.ExprDotNodeUtility;
 import com.espertech.esper.event.EventAdapterService;
-import com.espertech.esper.event.map.MapEventType;
+import com.espertech.esper.event.arr.ObjectArrayEventType;
 
 import java.util.List;
 
 public class ExprDotEvalCountOf extends ExprDotEvalEnumMethodBase {
 
     public EventType[] getAddStreamTypes(String enumMethodUsedName, List<String> goesToNames, EventType inputEventType, Class collectionComponentType, List<ExprDotEvalParam> bodiesAndParameters) {
-        EventType firstParamType;
-        if (inputEventType == null) {
-            firstParamType = ExprDotNodeUtility.makeTransientMapType(enumMethodUsedName, goesToNames.get(0), collectionComponentType);
-        }
-        else {
-            firstParamType = inputEventType;
-        }
-        return new EventType[] {firstParamType};
+        return ExprDotNodeUtility.getSingleLambdaParamEventType(enumMethodUsedName, goesToNames, inputEventType, collectionComponentType);
     }
 
     public EnumEval getEnumEval(EventAdapterService eventAdapterService, StreamTypeService streamTypeService, String statementId, String enumMethodUsedName, List<ExprDotEvalParam> bodiesAndParameters, EventType inputEventType, Class collectionComponentType, int numStreamsIncoming) {
@@ -47,7 +40,7 @@ public class ExprDotEvalCountOf extends ExprDotEvalEnumMethodBase {
             return new EnumEvalCountOfSelectorEvents(first.getBodyEvaluator(), first.getStreamCountIncoming());
         }
         else {
-            return new EnumEvalCountOfSelectorScalar(first.getBodyEvaluator(), first.getStreamCountIncoming(), (MapEventType) first.getGoesToTypes()[0], first.getGoesToNames().get(0));
+            return new EnumEvalCountOfSelectorScalar(first.getBodyEvaluator(), first.getStreamCountIncoming(), (ObjectArrayEventType) first.getGoesToTypes()[0]);
         }
     }
 }

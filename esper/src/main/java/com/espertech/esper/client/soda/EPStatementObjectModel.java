@@ -53,6 +53,7 @@ public class EPStatementObjectModel implements Serializable
     private CreateSchemaClause createSchema;
     private CreateContextClause createContext;
     private CreateDataFlowClause createDataFlow;
+    private CreateExpressionClause createExpression;
     private OnClause onExpr;
     private InsertIntoClause insertInto;
     private SelectClause selectClause;
@@ -367,6 +368,12 @@ public class EPStatementObjectModel implements Serializable
             createSchema.toEPL(writer);
             return;
         }
+        else if (createExpression != null)
+        {
+            formatter.beginCreateExpression(writer);
+            createExpression.toEPL(writer);
+            return;
+        }
         else if (createContext != null)
         {
             formatter.beginCreateContext(writer);
@@ -392,7 +399,7 @@ public class EPStatementObjectModel implements Serializable
                 createWindow.toEPLCreateTablePart(writer);
             }
             else {
-                selectClause.toEPL(writer, formatter, false);
+                selectClause.toEPL(writer, formatter, false, false);
                 fromClause.toEPL(writer, formatter);
                 createWindow.toEPLInsertPart(writer);
             }
@@ -437,13 +444,14 @@ public class EPStatementObjectModel implements Serializable
             }
             else if (onExpr instanceof OnSelectClause)
             {
+                OnSelectClause onSelect = (OnSelectClause) onExpr;
                 if (insertInto != null)
                 {
                     insertInto.toEPL(writer, formatter, true);
                 }
-                selectClause.toEPL(writer, formatter, true);
+                selectClause.toEPL(writer, formatter, true, onSelect.isDeleteAndSelect());
                 writer.write(" from ");
-                ((OnSelectClause)onExpr).toEPL(writer);
+                onSelect.toEPL(writer);
             }
             else if (onExpr instanceof OnSetClause)
             {
@@ -460,7 +468,7 @@ public class EPStatementObjectModel implements Serializable
             {
                 OnInsertSplitStreamClause split = (OnInsertSplitStreamClause) onExpr;
                 insertInto.toEPL(writer, formatter, true);
-                selectClause.toEPL(writer, formatter, true);
+                selectClause.toEPL(writer, formatter, true, false);
                 if (whereClause != null)
                 {
                     writer.write(" where ");
@@ -485,7 +493,7 @@ public class EPStatementObjectModel implements Serializable
             {
                 insertInto.toEPL(writer, formatter, true);
             }
-            selectClause.toEPL(writer, formatter, true);
+            selectClause.toEPL(writer, formatter, true, false);
             fromClause.toEPL(writer, formatter);
         }
 
@@ -807,5 +815,13 @@ public class EPStatementObjectModel implements Serializable
     public void setTreeObjectName(String treeObjectName)
     {
         this.treeObjectName = treeObjectName;
+    }
+
+    public CreateExpressionClause getCreateExpression() {
+        return createExpression;
+    }
+
+    public void setCreateExpression(CreateExpressionClause createExpression) {
+        this.createExpression = createExpression;
     }
 }

@@ -95,13 +95,32 @@ public class TestEnumSelectFrom extends TestCase {
         epService.getEPRuntime().sendEvent(SupportBean_ST0_Container.make2Value());
         LambdaAssertionUtil.assertValuesArrayScalar(listener, "val0", new String[0]);
         listener.reset();
-    }
+        stmtFragment.destroy();
 
-    public void testInvalid() {
-        String epl;
+        // test scalar-coll with lambda
+        String[] fields = "val0".split(",");
+        epService.getEPAdministrator().getConfiguration().addPlugInSingleRowFunction("extractNum", TestEnumMinMax.MyService.class.getName(), "extractNum");
+        String eplLambda = "select " +
+                "strvals.selectFrom(v => extractNum(v)) as val0 " +
+                "from SupportCollection";
+        EPStatement stmtLambda = epService.getEPAdministrator().createEPL(eplLambda);
+        stmtLambda.addListener(listener);
+        LambdaAssertionUtil.assertTypes(stmtLambda.getEventType(), fields, new Class[]{Collection.class, Collection.class});
 
-        epl = "select strvals.selectFrom(x=> x) from SupportCollection";
-        tryInvalid(epl, "Error starting statement: Invalid input for built-in enumeration method 'selectFrom' and 1-parameter footprint, expecting collection of events as input, received collection of String [select strvals.selectFrom(x=> x) from SupportCollection]");
+        epService.getEPRuntime().sendEvent(SupportCollection.makeString("E2,E1,E5,E4"));
+        LambdaAssertionUtil.assertValuesArrayScalar(listener, "val0", 2, 1, 5, 4);
+        listener.reset();
+
+        epService.getEPRuntime().sendEvent(SupportCollection.makeString("E1"));
+        LambdaAssertionUtil.assertValuesArrayScalar(listener, "val0", 1);
+        listener.reset();
+
+        epService.getEPRuntime().sendEvent(SupportCollection.makeString(null));
+        LambdaAssertionUtil.assertValuesArrayScalar(listener, "val0", null);
+        listener.reset();
+
+        epService.getEPRuntime().sendEvent(SupportCollection.makeString(""));
+        LambdaAssertionUtil.assertValuesArrayScalar(listener, "val0");
     }
 
     private void tryInvalid(String epl, String message) {

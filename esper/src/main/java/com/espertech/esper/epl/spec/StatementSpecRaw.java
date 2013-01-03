@@ -39,7 +39,7 @@ public class StatementSpecRaw implements MetaDefItem, Serializable
     private RowLimitSpec rowLimitSpec;
     private List<OrderByItem> orderByList = new LinkedList<OrderByItem>();
     private boolean hasVariables;
-    private List<AnnotationDesc> annotations = new ArrayList<AnnotationDesc>();
+    private List<AnnotationDesc> annotations = new ArrayList<AnnotationDesc>(1);
     private String expressionNoAnnotations;
     private MatchRecognizeSpec matchRecognizeSpec;
     private Set<String> referencedVariables;
@@ -50,6 +50,7 @@ public class StatementSpecRaw implements MetaDefItem, Serializable
     private String optionalContextName;
     private List<ExpressionScriptProvided> scriptExpressions;
     private CreateDataFlowDesc createDataFlowDesc;
+    private CreateExpressionDesc createExpressionDesc;
 
     private static final long serialVersionUID = 5390766716794133693L;
 
@@ -493,5 +494,13 @@ public class StatementSpecRaw implements MetaDefItem, Serializable
 
     public void setCreateDataFlowDesc(CreateDataFlowDesc createDataFlowDesc) {
         this.createDataFlowDesc = createDataFlowDesc;
+    }
+
+    public CreateExpressionDesc getCreateExpressionDesc() {
+        return createExpressionDesc;
+    }
+
+    public void setCreateExpressionDesc(CreateExpressionDesc createExpressionDesc) {
+        this.createExpressionDesc = createExpressionDesc;
     }
 }

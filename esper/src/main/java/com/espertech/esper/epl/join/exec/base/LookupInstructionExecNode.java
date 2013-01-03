@@ -8,16 +8,17 @@
  **************************************************************************************/
 package com.espertech.esper.epl.join.exec.base;
 
-import com.espertech.esper.epl.join.rep.RepositoryImpl;
-import com.espertech.esper.epl.join.rep.Node;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.join.assemble.BaseAssemblyNode;
 import com.espertech.esper.epl.join.assemble.ResultAssembler;
-import com.espertech.esper.epl.expression.ExprEvaluatorContext;
-import com.espertech.esper.client.EventBean;
+import com.espertech.esper.epl.join.rep.Node;
+import com.espertech.esper.epl.join.rep.RepositoryImpl;
 import com.espertech.esper.util.IndentWriter;
 
-import java.util.List;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Execution for a set of lookup instructions and for a set of result assemble instructions to perform
@@ -78,7 +79,7 @@ public class LookupInstructionExecNode extends ExecNode
         }
     }
 
-    public void process(EventBean lookupEvent, EventBean[] prefillPath, List<EventBean[]> result, ExprEvaluatorContext exprEvaluatorContext)
+    public void process(EventBean lookupEvent, EventBean[] prefillPath, Collection<EventBean[]> resultFinalRows, ExprEvaluatorContext exprEvaluatorContext)
     {
         RepositoryImpl repository = new RepositoryImpl(rootStream, lookupEvent, numStreams);
         boolean processOptional = true;
@@ -114,9 +115,6 @@ public class LookupInstructionExecNode extends ExecNode
             }
         }
 
-        // provide a place for the result
-        myResultAssembler.setResult(result, lookupEvent);
-
         // go over the assembly instruction set
         List<Node>[] results = repository.getNodesPerStream();
 
@@ -125,7 +123,7 @@ public class LookupInstructionExecNode extends ExecNode
         {
             BaseAssemblyNode lastAssemblyNode = assemblyInstructions[assemblyInstructions.length - 1];
             lastAssemblyNode.init(null);
-            lastAssemblyNode.process(null);
+            lastAssemblyNode.process(null, resultFinalRows, lookupEvent);
             return;
         }
 
@@ -139,7 +137,7 @@ public class LookupInstructionExecNode extends ExecNode
         for (int i = 0; i < assemblyInstructions.length; i++)
         {
             assemblyNode = assemblyInstructions[i];
-            assemblyNode.process(results);
+            assemblyNode.process(results, resultFinalRows, lookupEvent);
         }
     }
 
@@ -178,9 +176,6 @@ public class LookupInstructionExecNode extends ExecNode
     {
         private final int rootStream;
 
-        private List<EventBean[]> result;
-        private EventBean rootEvent;
-
         /**
          * Ctor.
          * @param rootStream is the root stream for which we get results
@@ -190,21 +185,10 @@ public class LookupInstructionExecNode extends ExecNode
             this.rootStream = rootStream;
         }
 
-        /**
-         * Supplies the result list to which to add result rows.
-         * @param result is the list of rows
-         * @param rootEvent is the event for lookup in other streams
-         */
-        public void setResult(List<EventBean[]> result, EventBean rootEvent)
+        public void result(EventBean[] row, int fromStreamNum, EventBean myEvent, Node myNode, Collection<EventBean[]> resultFinalRows, EventBean resultRootEvent)
         {
-            this.result = result;
-            this.rootEvent = rootEvent;
-        }
-
-        public void result(EventBean[] row, int fromStreamNum, EventBean myEvent, Node myNode)
-        {
-            row[rootStream] = rootEvent;
-            result.add(row);
+            row[rootStream] = resultRootEvent;
+            resultFinalRows.add(row);
         }
     }
 }

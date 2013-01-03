@@ -202,4 +202,8 @@ public class EPStatementFormatter
     public void endDataFlowOperatorDetails(StringWriter writer) {
         writeDelimiter(writer);
     }
+
+    public void beginCreateExpression(StringWriter writer) {
+        writeDelimiter(writer);
+    }
 }

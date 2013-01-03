@@ -26,7 +26,7 @@ public class OnTriggerWindowUpdateDesc extends OnTriggerWindowDesc
      * @param assignments set-assignments
      */
     public OnTriggerWindowUpdateDesc(String windowName, String optionalAsName, List<OnTriggerSetAssignment> assignments) {
-        super(windowName, optionalAsName, OnTriggerType.ON_UPDATE);
+        super(windowName, optionalAsName, OnTriggerType.ON_UPDATE, false);
         this.assignments = assignments;
     }
 

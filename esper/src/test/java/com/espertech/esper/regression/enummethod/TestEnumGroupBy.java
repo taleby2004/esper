@@ -12,11 +12,14 @@
 package com.espertech.esper.regression.enummethod;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean_ST0;
 import com.espertech.esper.support.bean.SupportBean_ST0_Container;
+import com.espertech.esper.support.bean.SupportCollection;
 import com.espertech.esper.support.bean.lambda.LambdaAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import java.util.Collection;
@@ -32,6 +35,7 @@ public class TestEnumGroupBy extends TestCase {
 
         Configuration config = SupportConfigFactory.getConfiguration();
         config.addEventType("Bean", SupportBean_ST0_Container.class);
+        config.addEventType("SupportCollection", SupportCollection.class);
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
         listener = new SupportUpdateListener();
@@ -50,15 +54,40 @@ public class TestEnumGroupBy extends TestCase {
         EPStatement stmtFragment = epService.getEPAdministrator().createEPL(eplFragment);
         stmtFragment.addListener(listener);
         LambdaAssertionUtil.assertTypes(stmtFragment.getEventType(), "val".split(","), new Class[]{Map.class});
+        EPAssertionUtil.AssertionCollectionValueString extractorEvents = new EPAssertionUtil.AssertionCollectionValueString() {
+            public String extractValue(Object collectionItem) {
+                int p00 = ((SupportBean_ST0) collectionItem).getP00();
+                return Integer.toString(p00);
+            }
+        };
 
         epService.getEPRuntime().sendEvent(SupportBean_ST0_Container.make2Value("E1,1", "E1,2", "E2,5"));
-        assertKeyObject(listener.assertOneGetNewAndReset(), "E1,E2", new String[]{"1,2", "5"});
+        EPAssertionUtil.assertMapOfCollection((Map) listener.assertOneGetNewAndReset().get("val"), "E1,E2".split(","),
+                new String[]{"1,2", "5"}, extractorEvents);
 
         epService.getEPRuntime().sendEvent(SupportBean_ST0_Container.make2Value(null));
         assertNull(listener.assertOneGetNewAndReset().get("val"));
 
         epService.getEPRuntime().sendEvent(SupportBean_ST0_Container.make2Value());
-        assertKeyObject(listener.assertOneGetNewAndReset(), "", new String[0]);
+        assertEquals(0, ((Map) listener.assertOneGetNewAndReset().get("val")).size());
+        stmtFragment.destroy();
+
+        // test scalar
+        epService.getEPAdministrator().getConfiguration().addPlugInSingleRowFunction("extractAfterUnderscore", this.getClass().getName(), "extractAfterUnderscore");
+        String eplScalar = "select strvals.groupBy(c => extractAfterUnderscore(c)) as val from SupportCollection";
+        EPStatement stmtScalar = epService.getEPAdministrator().createEPL(eplScalar);
+        stmtScalar.addListener(listener);
+        LambdaAssertionUtil.assertTypes(stmtScalar.getEventType(), "val".split(","), new Class[]{Map.class});
+
+        epService.getEPRuntime().sendEvent(SupportCollection.makeString("E1_2,E2_1,E3_2"));
+        EPAssertionUtil.assertMapOfCollection((Map) listener.assertOneGetNewAndReset().get("val"), "2,1".split(","),
+                new String[]{"E1_2,E3_2", "E2_1"}, getExtractorScalar());
+
+        epService.getEPRuntime().sendEvent(SupportCollection.makeString(null));
+        assertNull(listener.assertOneGetNewAndReset().get("val"));
+
+        epService.getEPRuntime().sendEvent(SupportCollection.makeString(""));
+        assertEquals(0, ((Map) listener.assertOneGetNewAndReset().get("val")).size());
     }
 
     public void testKeyValueSelector() {
@@ -66,58 +95,54 @@ public class TestEnumGroupBy extends TestCase {
         String eplFragment = "select contained.groupBy(k => id, v => p00) as val from Bean";
         EPStatement stmtFragment = epService.getEPAdministrator().createEPL(eplFragment);
         stmtFragment.addListener(listener);
+        EPAssertionUtil.AssertionCollectionValueString extractor = new EPAssertionUtil.AssertionCollectionValueString() {
+            public String extractValue(Object collectionItem) {
+                int p00 = (Integer) collectionItem;
+                return Integer.toString(p00);
+            }
+        };
 
         epService.getEPRuntime().sendEvent(SupportBean_ST0_Container.make2Value("E1,1", "E1,2", "E2,5"));
-        assertKeyValue(listener.assertOneGetNewAndReset(), "E1,E2", new String[]{"1,2", "5"});
+        EPAssertionUtil.assertMapOfCollection((Map)listener.assertOneGetNewAndReset().get("val"), "E1,E2".split(","),
+                new String[]{"1,2", "5"}, extractor);
 
         epService.getEPRuntime().sendEvent(SupportBean_ST0_Container.make2Value(null));
         assertNull(listener.assertOneGetNewAndReset().get("val"));
 
         epService.getEPRuntime().sendEvent(SupportBean_ST0_Container.make2Value());
-        assertKeyValue(listener.assertOneGetNewAndReset(), "", new String[0]);
+        assertEquals(0, ((Map) listener.assertOneGetNewAndReset().get("val")).size());
+
+        // test scalar
+        epService.getEPAdministrator().getConfiguration().addPlugInSingleRowFunction("extractAfterUnderscore", this.getClass().getName(), "extractAfterUnderscore");
+        String eplScalar = "select strvals.groupBy(k => extractAfterUnderscore(k), v => v) as val from SupportCollection";
+        EPStatement stmtScalar = epService.getEPAdministrator().createEPL(eplScalar);
+        stmtScalar.addListener(listener);
+        LambdaAssertionUtil.assertTypes(stmtScalar.getEventType(), "val".split(","), new Class[]{Map.class});
+
+        epService.getEPRuntime().sendEvent(SupportCollection.makeString("E1_2,E2_1,E3_2"));
+        EPAssertionUtil.assertMapOfCollection((Map) listener.assertOneGetNewAndReset().get("val"), "2,1".split(","),
+                new String[]{"E1_2,E3_2", "E2_1"}, getExtractorScalar());
+
+        epService.getEPRuntime().sendEvent(SupportCollection.makeString(null));
+        assertNull(listener.assertOneGetNewAndReset().get("val"));
+
+        epService.getEPRuntime().sendEvent(SupportCollection.makeString(""));
+        assertEquals(0, ((Map) listener.assertOneGetNewAndReset().get("val")).size());
+    }
+    
+    public static String extractAfterUnderscore(String string) {
+        int indexUnderscore = string.indexOf("_");
+        if (indexUnderscore == -1) {
+            Assert.fail();
+        }
+        return string.substring(indexUnderscore + 1);
     }
 
-    private void assertKeyObject(EventBean eventBean, String keysList, String[] expectedList) {
-        Map map = (Map) eventBean.get("val");
-        if (keysList.isEmpty() && map.isEmpty()) {
-            return;
-        }
-
-        String[] keys = keysList.split(",");
-        assertEquals(map.size(), keys.length);
-
-        for (int i = 0; i < keys.length; i++) {
-            Collection value = (Collection) map.get(keys[i]);
-            String[] itemsExpected = expectedList[i].split(",");
-            assertEquals(itemsExpected.length, value.size());
-
-            Iterator it = value.iterator();
-            for (int j = 0; j < itemsExpected.length; j++) {
-                int p00 = ((SupportBean_ST0) it.next()).getP00();
-                assertEquals(itemsExpected[j], Integer.toString(p00));
+    private static EPAssertionUtil.AssertionCollectionValueString getExtractorScalar() {
+        return new EPAssertionUtil.AssertionCollectionValueString() {
+            public String extractValue(Object collectionItem) {
+                return collectionItem.toString();
             }
-        }
-    }
-
-    private void assertKeyValue(EventBean eventBean, String keysList, String[] expectedList) {
-        Map map = (Map) eventBean.get("val");
-        if (keysList.isEmpty() && map.isEmpty()) {
-            return;
-        }
-
-        String[] keys = keysList.split(",");
-        assertEquals(map.size(), keys.length);
-
-        for (int i = 0; i < keys.length; i++) {
-            Collection value = (Collection) map.get(keys[i]);
-            String[] itemsExpected = expectedList[i].split(",");
-            assertEquals(itemsExpected.length, value.size());
-
-            Iterator it = value.iterator();
-            for (int j = 0; j < itemsExpected.length; j++) {
-                int p00 = (Integer) it.next();
-                assertEquals(itemsExpected[j], Integer.toString(p00));
-            }
-        }
+        };
     }
 }

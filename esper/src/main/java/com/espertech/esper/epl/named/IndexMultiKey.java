@@ -16,12 +16,18 @@ import java.util.List;
 
 public class IndexMultiKey {
 
-    private IndexedPropDesc[] hashIndexedProps;
-    private IndexedPropDesc[] rangeIndexedProps;
+    private final boolean unique;
+    private final IndexedPropDesc[] hashIndexedProps;
+    private final IndexedPropDesc[] rangeIndexedProps;
 
-    public IndexMultiKey(List<IndexedPropDesc> hashIndexedProps, List<IndexedPropDesc> rangeIndexedProps) {
+    public IndexMultiKey(boolean unique, List<IndexedPropDesc> hashIndexedProps, List<IndexedPropDesc> rangeIndexedProps) {
+        this.unique = unique;
         this.hashIndexedProps = hashIndexedProps.toArray(new IndexedPropDesc[hashIndexedProps.size()]);
         this.rangeIndexedProps = rangeIndexedProps.toArray(new IndexedPropDesc[rangeIndexedProps.size()]);
+    }
+
+    public boolean isUnique() {
+        return unique;
     }
 
     public IndexedPropDesc[] getHashIndexedProps() {
@@ -38,6 +44,7 @@ public class IndexMultiKey {
 
         IndexMultiKey that = (IndexMultiKey) o;
 
+        if (unique != that.unique) return false;
         if (!Arrays.equals(hashIndexedProps, that.hashIndexedProps)) return false;
         if (!Arrays.equals(rangeIndexedProps, that.rangeIndexedProps)) return false;
 

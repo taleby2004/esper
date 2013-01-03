@@ -10,6 +10,7 @@ package com.espertech.esper.core.service;
 
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.hook.*;
+import com.espertech.esper.collection.Pair;
 import com.espertech.esper.core.context.mgr.ContextManagementService;
 import com.espertech.esper.core.context.mgr.ContextManagementServiceImpl;
 import com.espertech.esper.core.context.schedule.SchedulableAgentInstanceDirectory;
@@ -17,12 +18,15 @@ import com.espertech.esper.core.deploy.DeploymentStateService;
 import com.espertech.esper.core.deploy.DeploymentStateServiceImpl;
 import com.espertech.esper.core.thread.ThreadingService;
 import com.espertech.esper.core.thread.ThreadingServiceImpl;
+import com.espertech.esper.dataflow.core.DataFlowConfigurationStateServiceImpl;
+import com.espertech.esper.dataflow.core.DataFlowServiceImpl;
 import com.espertech.esper.epl.core.EngineImportException;
 import com.espertech.esper.epl.core.EngineImportService;
 import com.espertech.esper.epl.core.EngineImportServiceImpl;
 import com.espertech.esper.epl.core.EngineSettingsService;
 import com.espertech.esper.epl.db.DatabaseConfigService;
 import com.espertech.esper.epl.db.DatabaseConfigServiceImpl;
+import com.espertech.esper.epl.declexpr.ExprDeclaredServiceImpl;
 import com.espertech.esper.epl.metric.MetricReportingServiceImpl;
 import com.espertech.esper.epl.named.NamedWindowService;
 import com.espertech.esper.epl.named.NamedWindowServiceImpl;
@@ -38,7 +42,6 @@ import com.espertech.esper.event.xml.SchemaModel;
 import com.espertech.esper.event.xml.XSDSchemaMapper;
 import com.espertech.esper.filter.FilterServiceProvider;
 import com.espertech.esper.filter.FilterServiceSPI;
-import com.espertech.esper.dataflow.core.GraphServiceImpl;
 import com.espertech.esper.pattern.PatternNodeFactoryImpl;
 import com.espertech.esper.pattern.pool.PatternSubexpressionPoolEngineSvc;
 import com.espertech.esper.plugin.PlugInEventRepresentation;
@@ -127,7 +130,7 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
         TimerService timerService = new TimerServiceImpl(epServiceProvider.getURI(), msecTimerResolution);
 
         VariableService variableService = new VariableServiceImpl(configSnapshot.getEngineDefaults().getVariables().getMsecVersionRelease(), schedulingService, eventAdapterService, null);
-        initVariables(variableService, configSnapshot.getVariables());
+        initVariables(variableService, configSnapshot.getVariables(), engineImportService);
 
         StatementLockFactory statementLockFactory = new StatementLockFactoryImpl(configSnapshot.getEngineDefaults().getExecution().isFairlock(), configSnapshot.getEngineDefaults().getExecution().isDisableLocking());
         StreamFactoryService streamFactoryService = StreamFactoryServiceProvider.newService(epServiceProvider.getURI(), configSnapshot.getEngineDefaults().getViewResources().isShareViews());
@@ -168,15 +171,20 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
         }
 
         // New services context
-        EPServicesContext services = new EPServicesContext(epServiceProvider.getURI(), epServiceProvider.getURI(), schedulingService,
+        EPServicesContext services = new EPServicesContext(epServiceProvider.getURI(), schedulingService,
                 eventAdapterService, engineImportService, engineSettingsService, databaseConfigService, plugInViews,
                 statementLockFactory, eventProcessingRWLock, null, jndiContext, statementContextFactory,
                 plugInPatternObj, timerService, filterService, streamFactoryService,
                 namedWindowService, variableService, timeSourceService, valueAddEventService, metricsReporting, statementEventTypeRef,
                 statementVariableRef, configSnapshot, threadingService, internalEventRouterImpl, statementIsolationService, schedulingMgmtService,
                 deploymentStateService, exceptionHandlingService, new PatternNodeFactoryImpl(), eventTypeIdGenerator, stmtMetadataFactory,
-                contextManagementService, schedulableAgentInstanceDirectory, patternSubexpressionPoolSvc, new GraphServiceImpl(epServiceProvider) {
+                contextManagementService, schedulableAgentInstanceDirectory, patternSubexpressionPoolSvc,
+                new DataFlowServiceImpl(epServiceProvider, new DataFlowConfigurationStateServiceImpl()),
+                new ExprDeclaredServiceImpl() {
         });
+
+        // Engine services subset available to statements
+        statementContextFactory.setStmtEngineServices(services);
 
         // Circular dependency
         StatementLifecycleSvc statementLifecycleSvc = new StatementLifecycleSvcImpl(epServiceProvider, services);
@@ -263,13 +271,14 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
      * @param variableService service to add to
      * @param variables configured variables
      */
-    protected static void initVariables(VariableService variableService, Map<String, ConfigurationVariable> variables)
+    protected static void initVariables(VariableService variableService, Map<String, ConfigurationVariable> variables, EngineImportService engineImportService)
     {
         for (Map.Entry<String, ConfigurationVariable> entry : variables.entrySet())
         {
             try
             {
-                variableService.createNewVariable(entry.getKey(), entry.getValue().getType(), entry.getValue().getInitializationValue(), entry.getValue().isConstant(), null);
+                Pair<String, Boolean> arrayType = JavaClassHelper.isGetArrayType(entry.getValue().getType());
+                variableService.createNewVariable(entry.getKey(), arrayType.getFirst(), entry.getValue().getInitializationValue(), entry.getValue().isConstant(), arrayType.getSecond(), null, engineImportService);
             }
             catch (VariableExistsException e)
             {
@@ -526,7 +535,7 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
 
             for (ConfigurationPlugInSingleRowFunction config : configSnapshot.getPlugInSingleRowFunctions())
             {
-                engineImportService.addSingleRow(config.getName(), config.getFunctionClassName(), config.getFunctionMethodName(), config.getValueCache(), config.getFilterOptimizable());
+                engineImportService.addSingleRow(config.getName(), config.getFunctionClassName(), config.getFunctionMethodName(), config.getValueCache(), config.getFilterOptimizable(), config.isRethrowExceptions());
             }
         }
         catch (EngineImportException ex)

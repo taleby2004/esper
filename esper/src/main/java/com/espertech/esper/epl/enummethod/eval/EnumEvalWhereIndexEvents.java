@@ -14,33 +14,33 @@ package com.espertech.esper.epl.enummethod.eval;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
-import com.espertech.esper.event.map.MapEventBean;
-import com.espertech.esper.event.map.MapEventType;
+import com.espertech.esper.event.arr.ObjectArrayEventBean;
+import com.espertech.esper.event.arr.ObjectArrayEventType;
 
 import java.util.ArrayDeque;
 import java.util.Collection;
-import java.util.HashMap;
 
 public class EnumEvalWhereIndexEvents extends EnumEvalBaseIndex implements EnumEval {
 
-    public EnumEvalWhereIndexEvents(ExprEvaluator innerExpression, int streamNumLambda, MapEventType indexEventType, String indexPropertyName) {
-        super(innerExpression, streamNumLambda, indexEventType, indexPropertyName);
+    public EnumEvalWhereIndexEvents(ExprEvaluator innerExpression, int streamNumLambda, ObjectArrayEventType indexEventType) {
+        super(innerExpression, streamNumLambda, indexEventType);
     }
 
-    public Object evaluateEnumMethod(Collection target, boolean isNewData, ExprEvaluatorContext context) {
+    public Object evaluateEnumMethod(EventBean[] eventsLambda, Collection target, boolean isNewData, ExprEvaluatorContext context) {
         if (target.isEmpty()) {
             return target;
         }
 
         Collection<EventBean> beans = (Collection<EventBean>) target;
         ArrayDeque<Object> result = new ArrayDeque<Object>();
+        ObjectArrayEventBean indexEvent = new ObjectArrayEventBean(new Object[1], indexEventType);
 
         int count = -1;
         for (EventBean next : beans) {
 
             count++;
 
-            indexEvent.getProperties().put(indexPropertyName, count);
+            indexEvent.getProperties()[0] = count;
             eventsLambda[streamNumLambda] = next;
             eventsLambda[streamNumLambda + 1] = indexEvent;
 

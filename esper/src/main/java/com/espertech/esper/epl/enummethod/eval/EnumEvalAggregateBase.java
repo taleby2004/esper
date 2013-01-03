@@ -11,34 +11,26 @@
 
 package com.espertech.esper.epl.enummethod.eval;
 
-import com.espertech.esper.client.EventBean;
 import com.espertech.esper.epl.expression.ExprEvaluator;
-import com.espertech.esper.event.map.MapEventBean;
-import com.espertech.esper.event.map.MapEventType;
-
-import java.util.HashMap;
+import com.espertech.esper.event.arr.ObjectArrayEventType;
 
 public class EnumEvalAggregateBase {
 
     protected ExprEvaluator initialization;
     protected ExprEvaluator innerExpression;
     protected int streamNumLambda;
-    protected MapEventBean resultEvent;
-    protected String resultPropertyName;
-    protected EventBean[] eventsLambda;
+    protected ObjectArrayEventType resultEventType;
 
     public EnumEvalAggregateBase(ExprEvaluator initialization,
                                  ExprEvaluator innerExpression, int streamNumLambda,
-                                 MapEventType resultEventType, String resultPropertyName) {
+                                 ObjectArrayEventType resultEventType) {
         this.initialization = initialization;
         this.innerExpression = innerExpression;
         this.streamNumLambda = streamNumLambda;
-        this.resultEvent = new MapEventBean(new HashMap<String, Object>(), resultEventType);
-        this.resultPropertyName = resultPropertyName;
-        this.eventsLambda = new EventBean[streamNumLambda + 2];
+        this.resultEventType = resultEventType;
     }
 
-    public EventBean[] getEventsPrototype() {
-        return eventsLambda;
+    public int getStreamNumSize() {
+        return streamNumLambda + 2;
     }
 }

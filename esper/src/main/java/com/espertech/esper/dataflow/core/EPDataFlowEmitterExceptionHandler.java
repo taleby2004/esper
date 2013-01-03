@@ -11,25 +11,34 @@
 
 package com.espertech.esper.dataflow.core;
 
+import com.espertech.esper.client.annotation.AuditEnum;
 import com.espertech.esper.client.dataflow.EPDataFlowExceptionContext;
 import com.espertech.esper.client.dataflow.EPDataFlowExceptionHandler;
+import com.espertech.esper.util.AuditPath;
 import net.sf.cglib.reflect.FastMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 
 public class EPDataFlowEmitterExceptionHandler {
 
     private static final Log log = LogFactory.getLog(EPDataFlowEmitterExceptionHandler.class);
 
+    private final String engineURI;
+    private final String statementName;
+    private final boolean audit;
     private final String dataFlowName;
     private final String operatorName;
     private final int operatorNumber;
     private final String operatorPrettyPrint;
     private final EPDataFlowExceptionHandler optionalExceptionHandler;
 
-    public EPDataFlowEmitterExceptionHandler(String dataFlowName, String operatorName, int operatorNumber, String operatorPrettyPrint, EPDataFlowExceptionHandler optionalExceptionHandler) {
+    public EPDataFlowEmitterExceptionHandler(String engineURI, String statementName, boolean audit, String dataFlowName, String operatorName, int operatorNumber, String operatorPrettyPrint, EPDataFlowExceptionHandler optionalExceptionHandler) {
+        this.engineURI = engineURI;
+        this.statementName = statementName;
+        this.audit = audit;
         this.dataFlowName = dataFlowName;
         this.operatorName = operatorName;
         this.operatorNumber = operatorNumber;
@@ -42,6 +51,40 @@ public class EPDataFlowEmitterExceptionHandler {
         
         if (optionalExceptionHandler != null) {
             optionalExceptionHandler.handle(new EPDataFlowExceptionContext(dataFlowName, operatorName, operatorNumber, operatorPrettyPrint, ex.getTargetException()));
+        }
+    }
+
+    public String getEngineURI() {
+        return engineURI;
+    }
+
+    public String getStatementName() {
+        return statementName;
+    }
+
+    public String getDataFlowName() {
+        return dataFlowName;
+    }
+
+    public String getOperatorName() {
+        return operatorName;
+    }
+
+    public int getOperatorNumber() {
+        return operatorNumber;
+    }
+
+    public String getOperatorPrettyPrint() {
+        return operatorPrettyPrint;
+    }
+
+    public EPDataFlowExceptionHandler getOptionalExceptionHandler() {
+        return optionalExceptionHandler;
+    }
+
+    public void handleAudit(Object targetObject, Object[] parameters) {
+        if (audit) {
+            AuditPath.auditLog(engineURI, statementName, AuditEnum.DATAFLOW_OP, "dataflow " + dataFlowName + " operator " + operatorName + "(" + operatorNumber + ") parameters " + Arrays.toString(parameters));
         }
     }
 }

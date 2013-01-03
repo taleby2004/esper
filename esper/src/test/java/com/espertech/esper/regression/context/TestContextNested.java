@@ -144,7 +144,7 @@ public class TestContextNested extends TestCase {
         epl = "create context ABC context EightToNine as start (0, 8, *, *, *) end (0, 9, *, *, *), context PartCtx as partition by theString from SupportBean";
         epService.getEPAdministrator().createEPL(epl);
         epl = "context ABC select * from SupportBean_S0";
-        tryInvalid(epl, "Error starting statement: Segmented context 'PartCtx' requires that any of the event types that are listed in the segmented context also appear in any of the filter expressions of the statement [");
+        tryInvalid(epl, "Error starting statement: Segmented context 'PartCtx' requires that any of the event types that are listed in the segmented context also appear in any of the filter expressions of the statement, type 'SupportBean_S0' is not one of the types listed [");
     }
 
     private void tryInvalid(String epl, String expected) {
@@ -344,7 +344,7 @@ public class TestContextNested extends TestCase {
         String eplCtx = "create context NestedContext as " +
                 "context ByCat as group intPrimitive < 0 as g1, group intPrimitive > 0 as g2, group intPrimitive = 0 as g3 from SupportBean, " +
                 "context InitCtx as initiated by pattern [every a=SupportBean_S0 -> b=SupportBean_S1(id = a.id)] terminated after 10 sec";
-        EPStatement stmtCtx = epService.getEPAdministrator().createEPL(eplCtx);
+        epService.getEPAdministrator().createEPL(eplCtx);
 
         SupportUpdateListener listener = new SupportUpdateListener();
         String[] fields = "c0,c1,c2,c3".split(",");
@@ -995,7 +995,7 @@ public class TestContextNested extends TestCase {
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 30));
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"EightToNine", DateTime.parseDefaultMSec("2002-05-1T8:30:00.000"),
                 "SegmentedByAString", "E2",
-                "NestedContext", 0,
+                "NestedContext", 2,
                 30, 1L});
         assertEquals(1, spi.getSchedulingService().getScheduleHandleCount());
         assertEquals(2, filterSPI.getFilterCountApprox());

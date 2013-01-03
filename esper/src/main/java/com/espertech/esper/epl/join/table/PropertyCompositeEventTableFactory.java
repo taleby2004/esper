@@ -79,6 +79,10 @@ public class PropertyCompositeEventTableFactory implements EventTableFactory
         return new PropertyCompositeEventTable((optionalKeyedProps != null && optionalKeyedProps.length > 0), chain, optKeyCoercedTypes, optRangeCoercedTypes);
     }
 
+    public Class getEventTableClass() {
+        return PropertyCompositeEventTable.class;
+    }
+
     public String toQueryPlan()
     {
         return this.getClass().getName() +

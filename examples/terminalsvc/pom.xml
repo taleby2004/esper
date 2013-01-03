@@ -7,8 +7,8 @@
   <packaging>pom</packaging>
   <modules>
     <module>terminalsvc-common</module>
-    <module>terminalsvc-sender</module>
     <module>terminalsvc-receiver</module>
+    <module>terminalsvc-sender</module>
     <module>terminalsvc-mdb</module>
     <module>terminalsvc-ear</module>
   </modules>

@@ -36,6 +36,7 @@ import com.espertech.esper.epl.named.NamedWindowProcessorInstance;
 import com.espertech.esper.epl.spec.*;
 import com.espertech.esper.epl.variable.OnSetVariableViewFactory;
 import com.espertech.esper.epl.view.OutputProcessViewFactory;
+import com.espertech.esper.pattern.EvalRootState;
 import com.espertech.esper.util.StopCallback;
 import com.espertech.esper.view.View;
 import com.espertech.esper.view.internal.RouteResultView;
@@ -62,7 +63,6 @@ public class StatementAgentInstanceFactoryOnTrigger implements StatementAgentIns
     private final OnSetVariableViewFactory onSetVariableViewFactory;
     private final NamedWindowOnExprFactory onExprFactory;
     private final OutputProcessViewFactory outputProcessViewFactory;
-    private final boolean recoveringStatement;
 
     public StatementAgentInstanceFactoryOnTrigger(StatementContext statementContext, StatementSpecCompiled statementSpec, EPServicesContext services, ViewableActivator activator, SubSelectStrategyCollection subSelectStrategyCollection, ResultSetProcessorFactoryDesc resultSetProcessorPrototype, ExprNode validatedJoin, EventType activatorResultEventType, StatementAgentInstanceFactoryOnTriggerSplitDesc splitDesc, ResultSetProcessorFactoryDesc outputResultSetProcessorPrototype, OnSetVariableViewFactory onSetVariableViewFactory, NamedWindowOnExprFactory onExprFactory, OutputProcessViewFactory outputProcessViewFactory, boolean recoveringStatement) {
         this.statementContext = statementContext;
@@ -78,7 +78,6 @@ public class StatementAgentInstanceFactoryOnTrigger implements StatementAgentIns
         this.onSetVariableViewFactory = onSetVariableViewFactory;
         this.onExprFactory = onExprFactory;
         this.outputProcessViewFactory = outputProcessViewFactory;
-        this.recoveringStatement = recoveringStatement;
     }
 
     public StatementAgentInstanceFactoryOnTriggerResult newContext(final AgentInstanceContext agentInstanceContext, boolean isRecoveringResilient)
@@ -93,6 +92,7 @@ public class StatementAgentInstanceFactoryOnTrigger implements StatementAgentIns
         View onExprView;
         Map<ExprSubselectNode, SubSelectStrategyHolder> subselectStrategies;
         AggregationService aggregationService = null;
+        EvalRootState optPatternRoot;
 
         try {
             if (services.getSchedulableAgentInstanceDirectory() != null) {
@@ -141,6 +141,7 @@ public class StatementAgentInstanceFactoryOnTrigger implements StatementAgentIns
             final ViewableActivationResult activationResult = activator.activate(agentInstanceContext, false, isRecoveringResilient);
             activationResult.getViewable().addView(onExprView);
             stopCallbacks.add(activationResult.getStopCallback());
+            optPatternRoot = activationResult.getOptionalPatternRoot();
 
             // start subselects
             subselectStrategies = EPStatementStartMethodHelperSubselect.startSubselects(services, subSelectStrategyCollection, agentInstanceContext, stopCallbacks);
@@ -165,6 +166,6 @@ public class StatementAgentInstanceFactoryOnTrigger implements StatementAgentIns
         }
 
         log.debug(".start Statement start completed");
-        return new StatementAgentInstanceFactoryOnTriggerResult(onExprView, stopCallback, agentInstanceContext, aggregationService, subselectStrategies);
+        return new StatementAgentInstanceFactoryOnTriggerResult(onExprView, stopCallback, agentInstanceContext, aggregationService, subselectStrategies, optPatternRoot);
     }
 }

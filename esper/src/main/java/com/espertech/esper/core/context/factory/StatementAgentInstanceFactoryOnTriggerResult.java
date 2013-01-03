@@ -15,6 +15,7 @@ import com.espertech.esper.core.context.subselect.SubSelectStrategyHolder;
 import com.espertech.esper.core.context.util.AgentInstanceContext;
 import com.espertech.esper.epl.agg.service.AggregationService;
 import com.espertech.esper.epl.expression.*;
+import com.espertech.esper.pattern.EvalRootState;
 import com.espertech.esper.util.StopCallback;
 import com.espertech.esper.view.Viewable;
 
@@ -23,10 +24,18 @@ import java.util.Map;
 
 public class StatementAgentInstanceFactoryOnTriggerResult extends StatementAgentInstanceFactoryResult {
 
-    public StatementAgentInstanceFactoryOnTriggerResult(Viewable finalView, StopCallback stopCallback, AgentInstanceContext agentInstanceContext, AggregationService aggregationService, Map<ExprSubselectNode, SubSelectStrategyHolder> subselectStrategies) {
+    private final EvalRootState optPatternRoot;
+
+    public StatementAgentInstanceFactoryOnTriggerResult(Viewable finalView, StopCallback stopCallback, AgentInstanceContext agentInstanceContext, AggregationService aggregationService, Map<ExprSubselectNode, SubSelectStrategyHolder> subselectStrategies,
+                                                        EvalRootState optPatternRoot) {
         super(finalView, stopCallback, agentInstanceContext, aggregationService, subselectStrategies,
                 Collections.<ExprPriorNode, ExprPriorEvalStrategy>emptyMap(),
                 Collections.<ExprPreviousNode, ExprPreviousEvalStrategy>emptyMap(),
                 Collections.<StatementAgentInstancePreload>emptyList());
+        this.optPatternRoot = optPatternRoot;
+    }
+
+    public EvalRootState getOptPatternRoot() {
+        return optPatternRoot;
     }
 }

@@ -136,7 +136,7 @@ public class ContainedEventSelect implements Serializable
     {
         if (selectClause != null)
         {
-            selectClause.toEPL(writer, formatter, false);
+            selectClause.toEPL(writer, formatter, false, false);
             writer.write(" from ");
         }
         splitExpression.toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);

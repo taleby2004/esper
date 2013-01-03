@@ -51,7 +51,8 @@ public class NStreamOuterQueryPlanBuilder
                                      HistoricalViewableDesc historicalViewableDesc,
                                      DependencyGraph dependencyGraph,
                                      HistoricalStreamIndexList[] historicalStreamIndexLists,
-                                     ExprEvaluatorContext exprEvaluatorContext)
+                                     ExprEvaluatorContext exprEvaluatorContext,
+                                     String[][][] indexedStreamsUniqueProps)
             throws ExprValidationException
     {
         if (log.isDebugEnabled())
@@ -63,7 +64,7 @@ public class NStreamOuterQueryPlanBuilder
         QueryPlanNode[] planNodeSpecs = new QueryPlanNode[numStreams];
 
         // Build index specifications
-        QueryPlanIndex[] indexSpecs = QueryPlanIndexBuilder.buildIndexSpec(queryGraph, typesPerStream);
+        QueryPlanIndex[] indexSpecs = QueryPlanIndexBuilder.buildIndexSpec(queryGraph, typesPerStream, indexedStreamsUniqueProps);
         if (log.isDebugEnabled())
         {
             log.debug(".build Index build completed, indexes=" + QueryPlanIndex.print(indexSpecs));

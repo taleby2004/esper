@@ -29,9 +29,7 @@ import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.join.base.HistoricalViewableDesc;
 import com.espertech.esper.epl.join.base.JoinSetComposerPrototype;
 import com.espertech.esper.epl.join.base.JoinSetComposerPrototypeFactory;
-import com.espertech.esper.epl.named.NamedWindowProcessor;
-import com.espertech.esper.epl.named.NamedWindowProcessorInstance;
-import com.espertech.esper.epl.named.NamedWindowService;
+import com.espertech.esper.epl.named.*;
 import com.espertech.esper.epl.spec.*;
 import com.espertech.esper.epl.view.OutputProcessViewCallback;
 import com.espertech.esper.epl.view.OutputProcessViewFactory;
@@ -46,11 +44,14 @@ import com.espertech.esper.util.StopCallback;
 import com.espertech.esper.view.HistoricalEventViewable;
 import com.espertech.esper.view.ViewFactory;
 import com.espertech.esper.view.ViewFactoryChain;
+import com.espertech.esper.view.ViewServiceHelper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Starts and provides the stop method for EPL statements.
@@ -144,7 +145,7 @@ public class EPStatementStartMethodSelectUtil
                 final EvalRootFactoryNode rootFactoryNode = services.getPatternNodeFactory().makeRootNode();
                 rootFactoryNode.addChildNode(patternStreamSpec.getEvalFactoryNode());
 
-                final PatternContext patternContext = statementContext.getPatternContextFactory().createContext(statementContext, i, rootFactoryNode, patternStreamSpec.getMatchedEventMapMeta());
+                final PatternContext patternContext = statementContext.getPatternContextFactory().createContext(statementContext, i, rootFactoryNode, patternStreamSpec.getMatchedEventMapMeta(), true);
 
                 // create activator
                 ViewableActivator patternActivator = new ViewableActivatorPattern(patternContext, rootFactoryNode, eventType, EPStatementStartMethodHelperUtil.isConsumingFilters(patternStreamSpec.getEvalFactoryNode()));
@@ -240,6 +241,9 @@ public class EPStatementStartMethodSelectUtil
             streamEventTypes[i] = unmaterializedViewChain[i].getEventType();
         }
 
+        // Add uniqueness information useful for joins
+        joinAnalysisResult.addUniquenessInfo(unmaterializedViewChain);
+
         // Validate sub-select views
         SubSelectStrategyCollection subSelectStrategyCollection = EPStatementStartMethodHelperSubselect.planSubSelect(services, statementContext, queryPlanLogging, subSelectStreamDesc, streamNames, streamEventTypes, eventTypeNames, stopCallbacks, statementSpec.getAnnotations(), statementSpec.getDeclaredExpressions(), contextPropertyRegistry);
 
@@ -320,7 +324,7 @@ public class EPStatementStartMethodSelectUtil
 
         // Determine if any stream has a unidirectional keyword
 
-        // inspect unidirection indicator and named window flags
+        // inspect unidirectional indicator and named window flags
         int unidirectionalStreamNumber = -1;
         for (int i = 0; i < statementSpec.getStreamSpecs().size(); i++)
         {
@@ -341,9 +345,14 @@ public class EPStatementStartMethodSelectUtil
             if (streamSpec instanceof NamedWindowConsumerStreamSpec)
             {
                 NamedWindowConsumerStreamSpec nwSpec = (NamedWindowConsumerStreamSpec) streamSpec;
+                if (nwSpec.getOptPropertyEvaluator() != null && !streamSpec.getOptions().isUnidirectional()) {
+                    throw new ExprValidationException("Failed to validate named window use in join, contained-event is only allowed for named windows when marked as unidirectional");
+                }
                 analysisResult.setNamedWindow(i);
                 NamedWindowProcessor processor = namedWindowService.getProcessor(nwSpec.getWindowName());
                 NamedWindowProcessorInstance processorInstance = processor.getProcessorInstance(defaultAgentInstanceContext);
+                String[][] uniqueIndexes = processor.getUniqueIndexes(processorInstance);
+                analysisResult.getUniqueKeys()[i] = uniqueIndexes;
                 if (processor.isVirtualDataWindow()) {
                     analysisResult.getViewExternal()[i] = processorInstance.getRootViewInstance().getVirtualDataWindow();
                 }

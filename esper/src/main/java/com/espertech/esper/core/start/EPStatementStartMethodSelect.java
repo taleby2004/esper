@@ -25,6 +25,7 @@ import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.epl.agg.service.AggregationService;
 import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.epl.spec.StatementSpecCompiled;
+import com.espertech.esper.util.StopCallback;
 import com.espertech.esper.view.ViewProcessingException;
 import com.espertech.esper.view.Viewable;
 import org.apache.commons.logging.Log;
@@ -42,15 +43,15 @@ public class EPStatementStartMethodSelect extends EPStatementStartMethodBase
 {
     private static final Log log = LogFactory.getLog(EPStatementStartMethodSelect.class);
 
-    public EPStatementStartMethodSelect(StatementSpecCompiled statementSpec, EPServicesContext services, StatementContext statementContext) {
-        super(statementSpec, services, statementContext);
+    public EPStatementStartMethodSelect(StatementSpecCompiled statementSpec) {
+        super(statementSpec);
     }
 
-    public EPStatementStartResult startInternal(boolean isNewStatement, boolean isRecoveringStatement, boolean isRecoveringResilient) throws ExprValidationException, ViewProcessingException {
+    public EPStatementStartResult startInternal(final EPServicesContext services, final StatementContext statementContext, boolean isNewStatement, boolean isRecoveringStatement, boolean isRecoveringResilient) throws ExprValidationException, ViewProcessingException {
 
         final String contextName = statementSpec.getOptionalContextName();
-        AgentInstanceContext defaultAgentInstanceContext = getDefaultAgentInstanceContext();
-        final EPStatementStartMethodSelectDesc selectDesc = EPStatementStartMethodSelectUtil.prepare(statementSpec, services, statementContext, isRecoveringResilient, defaultAgentInstanceContext, queryPlanLogging, null, null, null);
+        AgentInstanceContext defaultAgentInstanceContext = getDefaultAgentInstanceContext(statementContext);
+        EPStatementStartMethodSelectDesc selectDesc = EPStatementStartMethodSelectUtil.prepare(statementSpec, services, statementContext, isRecoveringResilient, defaultAgentInstanceContext, isQueryPlanLogging(services), null, null, null);
 
         // Determine context
         EPStatementStopMethod stopStatementMethod;
@@ -112,10 +113,11 @@ public class EPStatementStartMethodSelect extends EPStatementStartMethodBase
                     selectDesc.getResultSetProcessorPrototypeDesc().getAggregationServiceFactoryDesc().getExpressions(),
                     selectDesc.getSubSelectStrategyCollection());
             services.getContextManagementService().addStatement(contextName, statement, isRecoveringResilient);
+            final EPStatementStopMethod selectStop = selectDesc.getStopMethod();
             stopStatementMethod = new EPStatementStopMethod(){
                 public void stop() {
                     services.getContextManagementService().stoppedStatement(contextName, statementContext.getStatementName(), statementContext.getStatementId());
-                    selectDesc.getStopMethod().stop();
+                    selectStop.stop();
                 }
             };
 
@@ -127,12 +129,14 @@ public class EPStatementStartMethodSelect extends EPStatementStartMethodBase
         }
         // Without context - start here
         else {
-            final StatementAgentInstanceFactorySelectResult resultOfStart = selectDesc.getStatementAgentInstanceFactorySelect().newContext(defaultAgentInstanceContext, isRecoveringResilient);
+            StatementAgentInstanceFactorySelectResult resultOfStart = selectDesc.getStatementAgentInstanceFactorySelect().newContext(defaultAgentInstanceContext, isRecoveringResilient);
             finalViewable = resultOfStart.getFinalView();
+            final EPStatementStopMethod selectStop = selectDesc.getStopMethod();
+            final StopCallback startResultStop = resultOfStart.getStopCallback();
             stopStatementMethod = new EPStatementStopMethod() {
                 public void stop() {
-                    StatementAgentInstanceUtil.stopSafe(resultOfStart.getStopCallback(), statementContext);
-                    selectDesc.getStopMethod().stop();
+                    StatementAgentInstanceUtil.stopSafe(startResultStop, statementContext);
+                    selectStop.stop();
                 }
             };
             destroyStatementMethod = null;

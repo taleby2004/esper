@@ -15,6 +15,7 @@ import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.dataflow.EPDataFlowInstance;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.support.bean.SupportBean;
@@ -27,6 +28,7 @@ import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 public class TestAudit extends TestCase {
@@ -64,7 +66,7 @@ public class TestAudit extends TestCase {
         }
     }
 
-    public void testAudit() {
+    public void testAudit() throws Exception {
 
         // stream
         auditLog.info("*** Stream: ");
@@ -175,5 +177,14 @@ public class TestAudit extends TestCase {
         String epl = "@Audit @Name('S0') on SupportBean as sel select count(*) from MyWindow as win having count(*)=3 order by win.intPrimitive";
         epService.getEPAdministrator().createEPL(epl);
 
+        // data flow
+        epService.getEPAdministrator().createEPL("@Audit @Name('df') create dataflow MyFlow " +
+                "EventBusSource -> a<SupportBean> {filter:theString like 'I%'} " +
+                "Filter(a) -> b {filter: true}" +
+                "LogSink(b) {log:false}");
+        EPDataFlowInstance df = epService.getEPRuntime().getDataFlowRuntime().instantiate("MyFlow");
+        df.start();
+        epService.getEPRuntime().sendEvent(new SupportBean("I1", 1));
+        df.cancel();
     }
 }

@@ -350,7 +350,7 @@ public class TestVirtualDataWindow extends TestCase {
 
         // create-index event
         vdw.getEvents().clear();
-        EPStatement stmtIndex = epService.getEPAdministrator().createEPL("create index IndexOne on MyVDW (col3, col2 btree)");
+        EPStatement stmtIndex = epService.getEPAdministrator().createEPL("create unique index IndexOne on MyVDW (col3, col2 btree)");
         VirtualDataWindowEventStartIndex startEvent = (VirtualDataWindowEventStartIndex) vdw.getEvents().get(0);
         assertEquals("MyVDW", startEvent.getNamedWindowName());
         assertEquals("IndexOne", startEvent.getIndexName());
@@ -359,6 +359,7 @@ public class TestVirtualDataWindow extends TestCase {
         assertEquals(true, startEvent.getFields().get(0).isHash());
         assertEquals("col2", startEvent.getFields().get(1).getName());
         assertEquals(false, startEvent.getFields().get(1).isHash());
+        assertTrue(startEvent.isUnique());
 
         // stop-index event
         vdw.getEvents().clear();

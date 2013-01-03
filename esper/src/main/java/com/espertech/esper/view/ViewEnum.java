@@ -73,6 +73,11 @@ public enum ViewEnum
     EXT_TIMED_WINDOW("win", "ext_timed", ExternallyTimedWindowViewFactory.class, null),
 
     /**
+     * Externally timed window.
+     */
+    EXT_TIMED_BATCH("win", "ext_timed_batch", ExternallyTimedBatchViewFactory.class, null),
+
+    /**
      * Keep-all data window.
      */
     KEEPALL_WINDOW("win", "keepall", KeepAllViewFactory.class, null),

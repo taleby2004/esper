@@ -13,6 +13,7 @@ package com.espertech.esper.util;
 
 import com.espertech.esper.client.dataflow.EPDataFlowOperatorParameterProvider;
 import com.espertech.esper.client.dataflow.EPDataFlowOperatorParameterProviderContext;
+import com.espertech.esper.dataflow.annotations.DataFlowOpParameter;
 import com.espertech.esper.epl.core.EngineImportService;
 import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.event.WriteablePropertyDescriptor;
@@ -20,7 +21,8 @@ import com.espertech.esper.event.bean.PropertyHelper;
 import com.espertech.esper.event.property.MappedProperty;
 import com.espertech.esper.event.property.Property;
 import com.espertech.esper.event.property.PropertyParser;
-import com.espertech.esper.dataflow.annotations.DataFlowOpParameter;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -34,6 +36,8 @@ import java.util.Set;
 public class PopulateUtil {
     private final static String CLASS_PROPERTY_NAME = "class";
     private final static String SYSTEM_PROPETIES_NAME = "systemProperties".toLowerCase();
+
+    private static Log log = LogFactory.getLog(PopulateUtil.class);
 
     public static Object instantiatePopulateObject(Map<String, Object> objectProperties, Class topClass, EngineImportService engineImportService) throws ExprValidationException {
 
@@ -56,12 +60,12 @@ public class PopulateUtil {
             throw new ExprValidationException("Illegal access to construct class " + applicableClass.getName() + ": " + e.getMessage(), e);
         }
 
-        populateObject(topClass.getSimpleName(), 0, topClass.getSimpleName(), objectProperties, top, engineImportService, null);
+        populateObject(topClass.getSimpleName(), 0, topClass.getSimpleName(), objectProperties, top, engineImportService, null, null);
 
         return top;
     }
 
-    public static void populateObject(String operatorName, int operatorNum, String dataFlowName, Map<String, Object> objectProperties, Object top, EngineImportService engineImportService, EPDataFlowOperatorParameterProvider optionalParameterProvider)
+    public static void populateObject(String operatorName, int operatorNum, String dataFlowName, Map<String, Object> objectProperties, Object top, EngineImportService engineImportService, EPDataFlowOperatorParameterProvider optionalParameterProvider, Map<String, Object> optionalParameterURIs)
             throws ExprValidationException
     {
         Class applicableClass = top.getClass();
@@ -150,7 +154,32 @@ public class PopulateUtil {
             throw new ExprValidationException("Failed to find writable property '" + propertyName + "' for class " + applicableClass.getName());
         }
 
-        // second pass: if a parameter provider is provided, use that
+        // second pass: if a parameter URI - value pairs were provided, check that
+        if (optionalParameterURIs != null) {
+            for (Field annotatedField : annotatedFields) {
+                try {
+                    annotatedField.setAccessible(true);
+                    String uri = operatorName + "/" + annotatedField.getName();
+                    if (optionalParameterURIs.containsKey(uri)) {
+                        Object value = optionalParameterURIs.get(uri);
+                        annotatedField.set(top, value);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Found parameter '" + uri + "' for data flow " + dataFlowName + " setting " + value);
+                        }
+                    }
+                    else {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Not found parameter '" + uri + "' for data flow " + dataFlowName);
+                        }
+                    }
+                }
+                catch (Exception e) {
+                    throw new ExprValidationException("Failed to set field '" + annotatedField.getName() + "': " + e.getMessage(), e);
+                }
+            }
+        }
+
+        // third pass: if a parameter provider is provided, use that
         if (optionalParameterProvider != null) {
             for (Field annotatedField : annotatedFields) {
                 try {

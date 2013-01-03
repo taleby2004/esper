@@ -63,4 +63,8 @@ public class EvalAuditFactoryNode extends EvalNodeFactoryBase
     public boolean isFilterChildNonQuitting() {
         return filterChildNonQuitting;
     }
+
+    public boolean isStateful() {
+        return getChildNodes().get(0).isStateful();
+    }
 }

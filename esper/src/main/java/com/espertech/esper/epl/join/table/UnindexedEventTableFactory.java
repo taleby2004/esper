@@ -30,6 +30,10 @@ public class UnindexedEventTableFactory implements EventTableFactory
         return new UnindexedEventTable(streamNum);
     }
 
+    public Class getEventTableClass() {
+        return UnindexedEventTable.class;
+    }
+
     public String toQueryPlan()
     {
         return this.getClass().getSimpleName() + " streamNum=" + streamNum;

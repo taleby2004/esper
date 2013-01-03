@@ -13,6 +13,8 @@ package com.espertech.esper.core.service;
 
 import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventSender;
+import com.espertech.esper.client.EventTypeException;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.client.time.CurrentTimeSpanEvent;
 import com.espertech.esper.client.time.TimerControlEvent;
@@ -33,6 +35,7 @@ import com.espertech.esper.util.ThreadLogUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.net.URI;
 import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,7 +44,7 @@ import java.util.TreeMap;
 /**
  * Implementation for isolated runtime.
  */
-public class EPRuntimeIsolatedImpl implements EPRuntimeIsolatedSPI, InternalEventRouteDest
+public class EPRuntimeIsolatedImpl implements EPRuntimeIsolatedSPI, InternalEventRouteDest, EPRuntimeEventSender
 {
     private EPServicesContext unisolatedServices;
     private EPIsolationUnitServices services;
@@ -447,33 +450,12 @@ public class EPRuntimeIsolatedImpl implements EPRuntimeIsolatedSPI, InternalEven
                 // Dispatch results to listeners
                 dispatch();
                 if (!queues.getFrontQueue().isEmpty()) {
-                    processThreadWorkQueue();
+                    processThreadWorkQueueFront(queues);
                 }
             }
         }
         else {
-            Object item;
-            while ( (item = queues.getFrontQueue().poll()) != null)
-            {
-                if (item instanceof InsertIntoLatchSpin)
-                {
-                    processThreadWorkQueueLatchedSpin((InsertIntoLatchSpin) item);
-                }
-                else if (item instanceof InsertIntoLatchWait)
-                {
-                    processThreadWorkQueueLatchedWait((InsertIntoLatchWait) item);
-                }
-                else
-                {
-                    processThreadWorkQueueUnlatched(item);
-                }
-
-                boolean haveDispatched = unisolatedServices.getNamedWindowService().dispatch(isolatedTimeEvalContext);
-                if (haveDispatched)
-                {
-                    dispatch();
-                }
-            }
+            processThreadWorkQueueFront(queues);
         }
 
         Object item;
@@ -500,6 +482,31 @@ public class EPRuntimeIsolatedImpl implements EPRuntimeIsolatedSPI, InternalEven
 
             if (!queues.getFrontQueue().isEmpty()) {
                 processThreadWorkQueue();
+            }
+        }
+    }
+
+    private void processThreadWorkQueueFront(DualWorkQueue queues) {
+        Object item;
+        while ( (item = queues.getFrontQueue().poll()) != null)
+        {
+            if (item instanceof InsertIntoLatchSpin)
+            {
+                processThreadWorkQueueLatchedSpin((InsertIntoLatchSpin) item);
+            }
+            else if (item instanceof InsertIntoLatchWait)
+            {
+                processThreadWorkQueueLatchedWait((InsertIntoLatchWait) item);
+            }
+            else
+            {
+                processThreadWorkQueueUnlatched(item);
+            }
+
+            boolean haveDispatched = unisolatedServices.getNamedWindowService().dispatch(isolatedTimeEvalContext);
+            if (haveDispatched)
+            {
+                dispatch();
             }
         }
     }
@@ -877,6 +884,21 @@ public class EPRuntimeIsolatedImpl implements EPRuntimeIsolatedSPI, InternalEven
                 return new ArrayBackedCollection<ScheduleHandle>(100);
             }
         };
+    }
+
+    public EventSender getEventSender(String eventTypeName)
+    {
+        return unisolatedServices.getEventAdapterService().getStaticTypeEventSender(this, eventTypeName, unisolatedServices.getThreadingService());
+    }
+
+    public EventSender getEventSender(URI uri[]) throws EventTypeException
+    {
+        return unisolatedServices.getEventAdapterService().getDynamicTypeEventSender(this, uri, unisolatedServices.getThreadingService());
+    }
+
+    public void routeEventBean(EventBean theEvent)
+    {
+        threadWorkQueue.addBack(theEvent);
     }
 
     private static final Log log = LogFactory.getLog(EPRuntimeImpl.class);

@@ -73,11 +73,42 @@ public class ContextControllerCategory implements ContextController {
         throw ContextControllerSelectorUtil.getInvalidSelector(new Class[] {ContextPartitionSelectorCategory.class}, contextPartitionSelector);
     }
 
-    public void activate(EventBean optionalTriggeringEvent, Map<String, Object> optionalTriggeringPattern, ContextControllerState states, ContextInternalFilterAddendum activationFilterAddendum) {
+    public void activate(EventBean optionalTriggeringEvent, Map<String, Object> optionalTriggeringPattern, ContextControllerState controllerState, ContextInternalFilterAddendum activationFilterAddendum) {
+        if (factory.getFactoryContext().getNestingLevel() == 1) {
+            controllerState = ContextControllerStateUtil.getRecoveryStates(factory.getStateCache(), factory.getFactoryContext().getOutermostContextName());
+        }
+
+        if (controllerState == null) {
+            int count = 0;
+            for (ContextDetailCategoryItem category : factory.getCategorySpec().getItems()) {
+                Map<String, Object> context = ContextPropertyEventType.getCategorizedBean(factory.getFactoryContext().getContextName(), 0, category.getName());
+                currentSubpathId++;
+
+                // merge filter addendum, if any
+                ContextInternalFilterAddendum filterAddendumToUse = activationFilterAddendum;
+                if (factory.hasFiltersSpecsNestedContexts()) {
+                    filterAddendumToUse = activationFilterAddendum != null ? activationFilterAddendum.deepCopy() : new ContextInternalFilterAddendum();
+                    factory.populateContextInternalFilterAddendums(filterAddendumToUse, category.getName());
+                }
+
+                ContextControllerInstanceHandle handle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, this, null, null, category.getName(), context, controllerState, filterAddendumToUse, factory.getFactoryContext().isRecoveringResilient());
+                handleCategories.put(count, handle);
+                count++;
+
+                factory.getStateCache().addContextPath(factory.getFactoryContext().getOutermostContextName(), factory.getFactoryContext().getNestingLevel(), pathId, currentSubpathId, handle.getContextPartitionOrPathId(), null, ContextControllerCategoryFactory.EMPTY_BINDING);
+            }
+            return;
+        }
+
+        TreeMap<ContextStatePathKey, ContextStatePathValue> states = controllerState.getStates();
+        NavigableMap<ContextStatePathKey, ContextStatePathValue> childContexts = ContextControllerStateUtil.getChildContexts(factory.getFactoryContext(), pathId, states);
+
+        int maxSubpathId = Integer.MIN_VALUE;
         int count = 0;
-        for (ContextDetailCategoryItem category : factory.getCategorySpec().getItems()) {
+        for (Map.Entry<ContextStatePathKey, ContextStatePathValue> entry : childContexts.entrySet()) {
+
+            ContextDetailCategoryItem category = factory.getCategorySpec().getItems().get(count);
             Map<String, Object> context = ContextPropertyEventType.getCategorizedBean(factory.getFactoryContext().getContextName(), 0, category.getName());
-            currentSubpathId++;
 
             // merge filter addendum, if any
             ContextInternalFilterAddendum filterAddendumToUse = activationFilterAddendum;
@@ -86,10 +117,17 @@ public class ContextControllerCategory implements ContextController {
                 factory.populateContextInternalFilterAddendums(filterAddendumToUse, category.getName());
             }
 
-            ContextControllerInstanceHandle handle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, this, null, null, category.getName(), context, states, filterAddendumToUse, factory.getFactoryContext().isRecoveringResilient());
+            int contextPartitionId = entry.getValue().getOptionalContextPartitionId();
+            ContextControllerInstanceHandle handle = activationCallback.contextPartitionInstantiate(contextPartitionId, entry.getKey().getSubPath(), this, null, null, category.getName(), context, controllerState, filterAddendumToUse, factory.getFactoryContext().isRecoveringResilient());
             handleCategories.put(count, handle);
             count++;
+
+            int subPathId = entry.getKey().getSubPath();
+            if (entry.getKey().getSubPath() > maxSubpathId) {
+                maxSubpathId = subPathId;
+            }
         }
+        currentSubpathId = maxSubpathId != Integer.MIN_VALUE ? maxSubpathId : 0;
     }
 
     public ContextControllerFactory getFactory() {

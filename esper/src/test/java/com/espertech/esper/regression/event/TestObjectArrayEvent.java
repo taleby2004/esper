@@ -23,8 +23,7 @@ import com.espertech.esper.support.bean.SupportBeanComplexProps;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import junit.framework.TestCase;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class TestObjectArrayEvent extends TestCase
 {
@@ -229,6 +228,38 @@ public class TestObjectArrayEvent extends TestCase
         tryInvalid("select XXX from MyObjectArrayEvent.win:length(5)");
         tryInvalid("select myString * 2 from MyObjectArrayEvent.win:length(5)");
         tryInvalid("select String.trim(myInt) from MyObjectArrayEvent.win:length(5)");
+
+        ConfigurationEventTypeObjectArray invalidOAConfig = new ConfigurationEventTypeObjectArray();
+        invalidOAConfig.setSuperTypes(new HashSet<String>(Arrays.asList("A", "B")));
+        String[] invalidOANames = new String[] {"p00"};
+        Object[] invalidOATypes = new Object[] {int.class};
+        try
+        {
+            Configuration configuration = SupportConfigFactory.getConfiguration();
+            configuration.addEventType("MyInvalidEventTwo", invalidOANames, invalidOATypes, invalidOAConfig);
+            fail();
+        }
+        catch (ConfigurationException ex)
+        {
+            assertEquals("Object-array event types only allow a single supertype", ex.getMessage());
+        }
+
+        try {
+            epService.getEPAdministrator().getConfiguration().addEventType("MyInvalidOA", invalidOANames, invalidOATypes, invalidOAConfig);
+            fail();
+        }
+        catch (ConfigurationException ex)
+        {
+            assertEquals("Object-array event types only allow a single supertype", ex.getMessage());
+        }
+
+        try {
+            epService.getEPAdministrator().createEPL("create objectarray schema InvalidOA () inherits A, B");
+            fail();
+        }
+        catch (EPStatementException ex) {
+            assertEquals("Error starting statement: Object-array event types only allow a single supertype [create objectarray schema InvalidOA () inherits A, B]", ex.getMessage());
+        }
     }
 
     public void testSendMapNative()

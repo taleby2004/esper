@@ -50,14 +50,14 @@ public class TestNStreamQueryPlanBuilder extends TestCase
 
     public void testBuild()
     {
-        QueryPlan plan = NStreamQueryPlanBuilder.build(queryGraph, typesPerStream, new HistoricalViewableDesc(6), dependencyGraph, null, false);
+        QueryPlan plan = NStreamQueryPlanBuilder.build(queryGraph, typesPerStream, new HistoricalViewableDesc(6), dependencyGraph, null, false, new String[queryGraph.getNumStreams()][][]);
 
         log.debug(".testBuild plan=" + plan);
     }
 
     public void testCreateStreamPlan()
     {
-        QueryPlanIndex[] indexes = QueryPlanIndexBuilder.buildIndexSpec(queryGraph, typesPerStream);
+        QueryPlanIndex[] indexes = QueryPlanIndexBuilder.buildIndexSpec(queryGraph, typesPerStream, new String[queryGraph.getNumStreams()][][]);
         for (int i = 0; i < indexes.length; i++)
         {
             log.debug(".testCreateStreamPlan index " + i + " = " + indexes[i]);

@@ -24,6 +24,7 @@ public class EPDataFlowEmitter1Stream1TargetUnwind extends EPDataFlowEmitter1Str
     public void submitInternal(Object object) {
         Object[] parameters = (Object[]) object;
         try {
+            exceptionHandler.handleAudit(targetObject, parameters);
             fastMethod.invoke(targetObject, parameters);
         }
         catch (InvocationTargetException e) {

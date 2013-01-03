@@ -3,7 +3,7 @@
 	<!-- Name of project and version, used to create filenames -->
 	<property name="Name" value="EsperIO"/>
 	<property name="name" value="esperio"/>
-	<property name="version" value="4.7.0"/>
+	<property name="version" value="4.8.0"/>
 	<property name="patchlevel" value=""/>
 	<property name="fullversion" value="${version}${patchlevel}"/>
 	<property name="fullname" value="${name}-${fullversion}"/>
@@ -62,6 +62,9 @@
 				</script>
 				]]>
 			</footer>
+			<packageset dir="../esperio-amqp/${src.dir}" defaultexcludes="yes">
+				<include name="com/espertech/esperio/**"/>
+			</packageset>						
 			<packageset dir="../esperio-csv/${src.dir}" defaultexcludes="yes">
 				<include name="com/espertech/esperio/**"/>
 			</packageset>						

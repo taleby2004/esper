@@ -658,6 +658,15 @@ public class TestIsolationUnit extends TestCase
         assertTrue(subscriber.isInvoked());
     }
 
+    public void testEventSender()
+    {
+        EPServiceProviderIsolated unit = epService.getEPServiceIsolated("i1");
+        EventSender sender = unit.getEPRuntime().getEventSender("SupportBean");
+        epService.getEPAdministrator().createEPL("select * from SupportBean").addListener(listener);
+        sender.sendEvent(new SupportBean());
+        listener.isInvoked();
+    }
+
     private void sendTimerUnisolated(long millis){
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(millis));
     }

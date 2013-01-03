@@ -2068,6 +2068,62 @@ public class TestNamedWindowViews extends TestCase
         assertFalse(listenerStmtOne.isInvoked());
     }
 
+    public void testExternallyTimedBatch()
+    {
+        String[] fields = new String[] {"key", "value"};
+
+        // create window
+        String stmtTextCreate = "create window MyWindow.win:ext_timed_batch(value, 10 sec, 0L) as MyMap";
+        EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
+        stmtCreate.addListener(listenerWindow);
+
+        // create insert into
+        String stmtTextInsert = "insert into MyWindow select theString as key, longBoxed as value from " + SupportBean.class.getName();
+        epService.getEPAdministrator().createEPL(stmtTextInsert);
+
+        // create consumer
+        String stmtTextSelectOne = "select irstream key, value as value from MyWindow";
+        EPStatement stmtSelectOne = epService.getEPAdministrator().createEPL(stmtTextSelectOne);
+        stmtSelectOne.addListener(listenerStmtOne);
+
+        // create delete stmt
+        String stmtTextDelete = "on " + SupportMarketDataBean.class.getName() + " as s0 delete from MyWindow as s1 where s0.symbol = s1.key";
+        EPStatement stmtDelete = epService.getEPAdministrator().createEPL(stmtTextDelete);
+        stmtDelete.addListener(listenerStmtDelete);
+
+        sendSupportBean("E1", 1000L);
+        sendSupportBean("E2", 8000L);
+        sendSupportBean("E3", 9999L);
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E1", 1000L}, {"E2", 8000L}, {"E3", 9999L}});
+
+        // delete E2
+        sendMarketBean("E2");
+        EPAssertionUtil.assertPropsPerRow(listenerWindow.assertInvokedAndReset(), fields, null, new Object[][] {{"E2", 8000L}});
+        EPAssertionUtil.assertPropsPerRow(listenerStmtOne.assertInvokedAndReset(), fields, null, new Object[][] {{"E2", 8000L}});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E1", 1000L}, {"E3", 9999L}});
+
+        sendSupportBean("E4", 10000L);
+        EPAssertionUtil.assertPropsPerRow(listenerWindow.assertInvokedAndReset(), fields,
+                new Object[][] {{"E1", 1000L}, {"E3", 9999L}}, null);
+        EPAssertionUtil.assertPropsPerRow(listenerStmtOne.assertInvokedAndReset(), fields,
+                new Object[][] {{"E1", 1000L}, {"E3", 9999L}}, null);
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E4", 10000L}});
+
+        // delete E4
+        sendMarketBean("E4");
+        EPAssertionUtil.assertPropsPerRow(listenerWindow.assertInvokedAndReset(), fields, null, new Object[][] {{"E4", 10000L}});
+        EPAssertionUtil.assertPropsPerRow(listenerStmtOne.assertInvokedAndReset(), fields, null, new Object[][] {{"E4", 10000L}});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, null);
+
+        sendSupportBean("E5", 14000L);
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E5", 14000L}});
+
+        sendSupportBean("E6", 21000L);
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E6", 21000L}});
+        EPAssertionUtil.assertPropsPerRow(listenerWindow.assertInvokedAndReset(), fields,
+                new Object[][] {{"E5", 14000L}}, new Object[][] {{"E1", 1000L}, {"E3", 9999L}});
+    }
+
     private SupportBean sendSupportBean(String theString, Long longBoxed)
     {
         SupportBean bean = new SupportBean();

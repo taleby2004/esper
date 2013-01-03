@@ -119,7 +119,7 @@ public class EsperHttpRequestHandler implements HttpRequestHandler {
 
         EventBeanManufacturer eventBeanManufacturer;
         try {
-            eventBeanManufacturer = engineSPI.getEventAdapterService().getManufacturer(eventType, writableProperties, methods);
+            eventBeanManufacturer = engineSPI.getEventAdapterService().getManufacturer(eventType, writableProperties, methods.getEngineImportService());
         }
         catch (EventBeanManufactureException e) {
             log.info("Unable to create manufacturer for event type: " + e.getMessage(), e);

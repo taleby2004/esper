@@ -279,18 +279,18 @@ else {
 				<tbody>
 					<row>
 						<entry>1</entry>
-						<entry>unary</entry>
-						<entry><literal>every, not, every-distinct</literal></entry>
-						<entry><programlisting><![CDATA[every MyEvent
-timer:interval(5 min) and not MyEvent]]></programlisting></entry>
-					</row>
-					<row>
-						<entry>2</entry>
 						<entry>guard postfix</entry>
 						<entry><literal>where timer:within</literal> and <literal>while (expression)</literal> (incl. withinmax and plug-in pattern guard)</entry>
 						<entry><para><programlisting><![CDATA[MyEvent where timer:within(1 sec)]]></programlisting></para>
 									<para><programlisting><![CDATA[a=MyEvent while (a.price between 1 and 10)]]></programlisting></para>
 						</entry>
+					</row>
+					<row>
+						<entry>2</entry>
+						<entry>unary</entry>
+						<entry><literal>every, not, every-distinct</literal></entry>
+						<entry><programlisting><![CDATA[every MyEvent
+timer:interval(5 min) and not MyEvent]]></programlisting></entry>
 					</row>
 					<row>
 						<entry>3</entry>
@@ -376,6 +376,11 @@ timer:interval(5 min) and not MyEvent]]></programlisting></entry>
 						<entry>[5] A or B </entry>
 						<entry>([5] A) or B</entry>
 						<entry>The <literal>[num]</literal> repeat operator has higher precedence then the <literal>or</literal> operator.</entry>
+					</row>
+					<row>
+						<entry>every A where timer:within(10)</entry>
+						<entry>every (A where timer:within(10))</entry>
+						<entry>The <literal>where</literal> postfix has higher precedence then the <literal>every</literal> operator.</entry>
 					</row>
 				</tbody>
 			</tgroup>

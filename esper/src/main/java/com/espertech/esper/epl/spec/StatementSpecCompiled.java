@@ -55,6 +55,7 @@ public class StatementSpecCompiled
     private final CreateContextDesc contextDesc;
     private final String optionalContextName;
     private final CreateDataFlowDesc createGraphDesc;
+    private final CreateExpressionDesc createExpressionDesc;
 
     /**
      * Ctor.
@@ -107,7 +108,8 @@ public class StatementSpecCompiled
                                  Map<Integer, List<ExprNode>> sqlParameters,
                                  CreateContextDesc contextDesc,
                                  String optionalContextName,
-                                 CreateDataFlowDesc createGraphDesc)
+                                 CreateDataFlowDesc createGraphDesc,
+                                 CreateExpressionDesc createExpressionDesc)
     {
         this.onTriggerDesc = onTriggerDesc;
         this.createWindowDesc = createWindowDesc;
@@ -137,6 +139,7 @@ public class StatementSpecCompiled
         this.contextDesc = contextDesc;
         this.optionalContextName = optionalContextName;
         this.createGraphDesc = createGraphDesc;
+        this.createExpressionDesc = createExpressionDesc;
     }
 
     /**
@@ -172,6 +175,7 @@ public class StatementSpecCompiled
         contextDesc = null;
         optionalContextName = null;
         createGraphDesc = null;
+        createExpressionDesc = null;
     }
 
     /**
@@ -433,5 +437,9 @@ public class StatementSpecCompiled
 
     public CreateDataFlowDesc getCreateGraphDesc() {
         return createGraphDesc;
+    }
+
+    public CreateExpressionDesc getCreateExpressionDesc() {
+        return createExpressionDesc;
     }
 }

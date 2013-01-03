@@ -113,6 +113,18 @@ INFO  [audit] Statement All-Order-Events property price value 100.0]]></programl
 					</thead>
 					<tbody>
 						<row>
+							<entry>Dataflow-Source</entry>
+							<entry>Each data flow source operator providing an event.</entry>
+						</row>
+						<row>
+							<entry>Dataflow-Op</entry>
+							<entry>Each data flow operator processing an event.</entry>
+						</row>
+						<row>
+							<entry>Dataflow-Transition</entry>
+							<entry>Each data flow instance state transition.</entry>
+						</row>
+						<row>
 							<entry>Exprdef</entry>
 							<entry>Each expression declaration name and return value.</entry>
 						</row>

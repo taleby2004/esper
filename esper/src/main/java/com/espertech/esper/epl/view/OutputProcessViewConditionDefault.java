@@ -161,7 +161,7 @@ public class OutputProcessViewConditionDefault extends OutputProcessViewBaseWAft
         // Process the events and get the result
         UniformPair<EventBean[]> newOldEvents = resultSetProcessor.processOutputLimitedView(viewEventsList, isGenerateSynthetic, parent.getOutputLimitLimitType());
 
-        if (parent.isDistinct())
+        if (parent.isDistinct() && newOldEvents != null)
         {
             newOldEvents.setFirst(EventBeanUtility.getDistinctByProp(newOldEvents.getFirst(), parent.getEventBeanReader()));
             newOldEvents.setSecond(EventBeanUtility.getDistinctByProp(newOldEvents.getSecond(), parent.getEventBeanReader()));
@@ -218,7 +218,7 @@ public class OutputProcessViewConditionDefault extends OutputProcessViewBaseWAft
         // Process the events and get the result
         UniformPair<EventBean[]> newOldEvents = resultSetProcessor.processOutputLimitedJoin(joinEventsSet, isGenerateSynthetic, parent.getOutputLimitLimitType());
 
-        if (parent.isDistinct())
+        if (parent.isDistinct() && newOldEvents != null)
         {
             newOldEvents.setFirst(EventBeanUtility.getDistinctByProp(newOldEvents.getFirst(), parent.getEventBeanReader()));
             newOldEvents.setSecond(EventBeanUtility.getDistinctByProp(newOldEvents.getSecond(), parent.getEventBeanReader()));

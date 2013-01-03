@@ -251,12 +251,30 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
                                            ConfigurationPlugInSingleRowFunction.ValueCache valueCache,
                                            ConfigurationPlugInSingleRowFunction.FilterOptimizable filterOptimizable) throws ConfigurationException
     {
+        addPlugInSingleRowFunction(functionName, className, methodName, valueCache, filterOptimizable, false);
+    }
+
+    /**
+     * Add single-row function with configurations.
+     * @param functionName EPL name of function
+     * @param className providing fully-qualified class name
+     * @param methodName providing method name
+     * @param valueCache value cache settings
+     * @param filterOptimizable settings whether subject to optimizations
+     * @throws ConfigurationException thrown to indicate that the configuration is invalid
+     */
+    public void addPlugInSingleRowFunction(String functionName, String className, String methodName,
+                                           ConfigurationPlugInSingleRowFunction.ValueCache valueCache,
+                                           ConfigurationPlugInSingleRowFunction.FilterOptimizable filterOptimizable,
+                                           boolean rethrowExceptions) throws ConfigurationException
+    {
         ConfigurationPlugInSingleRowFunction entry = new ConfigurationPlugInSingleRowFunction();
         entry.setFunctionClassName(className);
         entry.setFunctionMethodName(methodName);
         entry.setName(functionName);
         entry.setValueCache(valueCache);
         entry.setFilterOptimizable(filterOptimizable);
+        entry.setRethrowExceptions(rethrowExceptions);
         plugInSingleRowFunctions.add(entry);
     }
 
@@ -417,6 +435,9 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
         LinkedHashMap<String, Object> propertyTypesMap = EventTypeUtility.validateObjectArrayDef(propertyNames, propertyTypes);
         nestableObjectArrayNames.put(eventTypeName, propertyTypesMap);
         objectArrayTypeConfigurations.put(eventTypeName, config);
+        if (config.getSuperTypes() != null && config.getSuperTypes().size() > 1) {
+            throw new ConfigurationException(ConfigurationEventTypeObjectArray.SINGLE_SUPERTYPE_MSG);
+        }
     }
 
     public void addRevisionEventType(String revisioneventTypeName, ConfigurationRevisionEventType revisionEventTypeConfig)

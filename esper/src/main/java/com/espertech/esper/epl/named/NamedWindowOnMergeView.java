@@ -39,7 +39,7 @@ public class NamedWindowOnMergeView extends NamedWindowOnExprBaseView
     {
         OneEventCollection newData = new OneEventCollection();
         OneEventCollection oldData = null;
-        EventBean[] eventsPerStream = new EventBean[2];
+        EventBean[] eventsPerStream = new EventBean[3]; // first:named window, second: trigger, third:before-update (optional)
 
         if ((matchingEvents == null) || (matchingEvents.length == 0)){
             for (EventBean triggerEvent : triggerEvents) {

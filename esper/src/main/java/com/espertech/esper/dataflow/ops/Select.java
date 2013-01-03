@@ -158,7 +158,7 @@ public class Select implements OutputProcessViewCallback, DataFlowOpLifecycle {
         StatementSpecCompiled compiled = new StatementSpecCompiled(null, null, null, null, null, null, SelectClauseStreamSelectorEnum.ISTREAM_ONLY,
                 selectClauseCompiled, streamSpecCompileds, select.getOuterJoinDescList(), select.getFilterExprRootNode(), groupByExpressions, select.getHavingExprRootNode(), outputLimitSpec,
                 select.getOrderByList(), Collections.<ExprSubselectNode>emptyList(), Collections.<ExprDeclaredNode>emptyList(), select.getReferencedVariables(),
-                select.getRowLimitSpec(), new HashSet<String>(), mergedAnnotations, null, null, null, null, null, null, null);
+                select.getRowLimitSpec(), new HashSet<String>(), mergedAnnotations, null, null, null, null, null, null, null, null);
 
         // create viewable per port
         final EPLSelectViewable[] viewables = new EPLSelectViewable[context.getInputPorts().size()];
@@ -243,7 +243,7 @@ public class Select implements OutputProcessViewCallback, DataFlowOpLifecycle {
 
     public void onInput(int originatingStream, Object row) {
         if (log.isDebugEnabled()) {
-            log.debug("Received row from stream " + originatingStream + " for select: " + Arrays.toString((Object[]) row));
+            log.debug("Received row from stream " + originatingStream + " for select, row is " + row);
         }
 
         EventBean theEvent = adapterFactories[originatingStream].makeAdapter(row);

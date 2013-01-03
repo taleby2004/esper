@@ -8,6 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.epl.expression;
 
+import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.client.PropertyAccessException;
@@ -31,6 +32,7 @@ public class ExprDotEvalStaticMethod implements ExprEvaluator, EventPropertyGett
     private final boolean isConstantParameters;
     private final ExprDotEval[] chainEval;
     private final ExprDotStaticMethodWrap resultWrapLambda;
+    private final boolean rethrowExceptions;
 
     private boolean isCachedResult;
     private Object cachedResult;
@@ -41,7 +43,8 @@ public class ExprDotEvalStaticMethod implements ExprEvaluator, EventPropertyGett
                                    ExprEvaluator[] childEvals,
                                    boolean constantParameters,
                                    ExprDotStaticMethodWrap resultWrapLambda,
-                                   ExprDotEval[] chainEval)
+                                   ExprDotEval[] chainEval,
+                                   boolean rethrowExceptions)
     {
         this.statementName = statementName;
         this.classOrPropertyName = classOrPropertyName;
@@ -55,6 +58,7 @@ public class ExprDotEvalStaticMethod implements ExprEvaluator, EventPropertyGett
         }
         this.resultWrapLambda = resultWrapLambda;
         this.chainEval = chainEval;
+        this.rethrowExceptions = rethrowExceptions;
     }
 
     public Class getType()
@@ -113,6 +117,9 @@ public class ExprDotEvalStaticMethod implements ExprEvaluator, EventPropertyGett
 		{
             String message = JavaClassHelper.getMessageInvocationTarget(statementName, staticMethod.getJavaMethod(), classOrPropertyName, args, e);
             log.error(message, e.getTargetException());
+            if (rethrowExceptions) {
+                throw new EPException(message, e.getTargetException());
+            }
 		}
         return null;
     }
@@ -134,6 +141,9 @@ public class ExprDotEvalStaticMethod implements ExprEvaluator, EventPropertyGett
         {
             String message = JavaClassHelper.getMessageInvocationTarget(statementName, staticMethod.getJavaMethod(), classOrPropertyName, args, e);
             log.error(message, e.getTargetException());
+            if (rethrowExceptions) {
+                throw new EPException(message, e.getTargetException());
+            }
         }
         return null;
     }

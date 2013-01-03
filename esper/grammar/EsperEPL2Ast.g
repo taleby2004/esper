@@ -72,8 +72,8 @@ elementValue
 //----------------------------------------------------------------------------
 // Expression Declaration
 //----------------------------------------------------------------------------
-expressionDecl
-	:	^(e=EXPRESSIONDECL IDENT expressionDef exprCol? CLASS_IDENT? (^(COLON IDENT))? LBRACK?) { leaveNode($e); }
+expressionDecl[boolean isLeaveNode]
+	:	^(e=EXPRESSIONDECL IDENT expressionDef exprCol? CLASS_IDENT? (^(COLON IDENT))? LBRACK?) { if ($isLeaveNode) leaveNode($e); }
 	;
 	
 expressionDef
@@ -89,12 +89,12 @@ expressionLambdaDecl
 // EPL expression
 //----------------------------------------------------------------------------
 startEPLExpressionRule
-	:	^(EPL_EXPR (annotation[true] | expressionDecl)* eplExpressionRule) { end(); }		
+	:	^(EPL_EXPR (annotation[true] | expressionDecl[true])* eplExpressionRule) { end(); }		
 	;
 
 eplExpressionRule
 	:	(contextExpr? (selectExpr | createWindowExpr | createIndexExpr | createVariableExpr | createSchemaExpr[true] | onExpr | updateExpr | createDataflow) forExpr?)
-	|	createContextExpr
+	|	createContextExpr | createExpr
 	;
 	
 contextExpr
@@ -146,7 +146,7 @@ onDeleteExpr
 	;	
 
 onSelectExpr
-	:	^(s=ON_SELECT_EXPR insertIntoExpr? DISTINCT? selectionList onExprFrom? whereClause[true]? groupByClause? havingClause? orderByClause? rowLimitClause? { leaveNode($s); }) 
+	:	^(s=ON_SELECT_EXPR insertIntoExpr? DELETE? DISTINCT? selectionList onExprFrom? whereClause[true]? groupByClause? havingClause? orderByClause? rowLimitClause? { leaveNode($s); }) 
 	;	
 
 onSelectInsertExpr
@@ -185,7 +185,7 @@ createWindowExpr
 	;
 
 createIndexExpr
-	:	^(i=CREATE_INDEX_EXPR IDENT IDENT indexColList { leaveNode($i); })
+	:	^(i=CREATE_INDEX_EXPR IDENT IDENT indexColList IDENT? { leaveNode($i); })
 	;
 
 indexColList
@@ -221,7 +221,7 @@ createSelectionListElement
 	;
 
 createVariableExpr
-	:	^(i=CREATE_VARIABLE_EXPR CLASS_IDENT IDENT IDENT? valueExpr? { leaveNode($i); } )
+	:	^(i=CREATE_VARIABLE_EXPR CLASS_IDENT IDENT IDENT? LBRACK? valueExpr? { leaveNode($i); } )
 	;
 			
 //----------------------------------------------------------------------------
@@ -327,6 +327,10 @@ createContextCategoryItem
 	:	^(CREATE_CTX_CATITEM valueExpr IDENT)	
 	;	
 
+createExpr
+	:	^(s=CREATE_EXPR expressionDecl[false] { leaveNode($s); })
+	;
+
 createSchemaExpr[boolean isLeaveNode]
 	:	^(s=CREATE_SCHEMA_EXPR createSchemaDef IDENT? { if ($isLeaveNode) leaveNode($s); })
 	;
@@ -357,7 +361,7 @@ selectExpr
 	;
 	
 insertIntoExpr
-	:	^(i=INSERTINTO_EXPR (ISTREAM | RSTREAM)? CLASS_IDENT (exprCol)? { leaveNode($i); } )
+	:	^(i=INSERTINTO_EXPR (ISTREAM | RSTREAM | IRSTREAM)? CLASS_IDENT (exprCol)? { leaveNode($i); } )
 	;
 	
 exprCol
@@ -721,6 +725,7 @@ builtinFunc
 	| 	^(f=CAST valueExpr CLASS_IDENT) { leaveNode($f); }
 	| 	^(f=EXISTS eventPropertyExpr[true]) { leaveNode($f); }
 	|	^(f=CURRENT_TIMESTAMP {}) { leaveNode($f); }
+	|	^(f=ISTREAM {}) { leaveNode($f); }
 	;
 
 aggregationFilterExpr

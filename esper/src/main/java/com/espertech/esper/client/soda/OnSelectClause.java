@@ -19,6 +19,7 @@ public class OnSelectClause extends OnClause
 
     private String windowName;
     private String optionalAsName;
+    private boolean deleteAndSelect;
 
     /**
      * Ctor.
@@ -96,5 +97,13 @@ public class OnSelectClause extends OnClause
     public void setOptionalAsName(String optionalAsName)
     {
         this.optionalAsName = optionalAsName;
+    }
+
+    public boolean isDeleteAndSelect() {
+        return deleteAndSelect;
+    }
+
+    public void setDeleteAndSelect(boolean deleteAndSelect) {
+        this.deleteAndSelect = deleteAndSelect;
     }
 }

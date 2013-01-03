@@ -69,7 +69,22 @@ public enum AuditEnum
     /**
      * For use with insert-into audit.
      */
-    INSERT("INSERT");
+    INSERT("INSERT"),
+
+    /**
+     * For use with data flow source operators.
+     */
+    DATAFLOW_SOURCE("DATAFLOW-SOURCE"),
+
+    /**
+     * For use with data flow (non-source and source) operators.
+     */
+    DATAFLOW_OP("DATAFLOW-OP"),
+
+    /**
+     * For use with data flows specifically for transitions.
+     */
+    DATAFLOW_TRANSITION("DATAFLOW-TRANSITION");
 
     private final String value;
     private final String prettyPrintText;
@@ -122,11 +137,34 @@ public enum AuditEnum
                 return auditAnnotation;
             }
 
-            boolean isListed = AnnotationUtil.isListed(auditAnnoValue, value);
+            boolean isListed = isListed(auditAnnoValue, value);
             if (isListed) {
                 return auditAnnotation;
             }
         }
         return null;
+    }
+
+    private static boolean isListed(String list, String lookedForValue) {
+        if (list == null) {
+            return false;
+        }
+
+        lookedForValue = lookedForValue.trim().toUpperCase();
+        list = list.trim().toUpperCase();
+
+        if (list.toUpperCase().equals(lookedForValue)) {
+            return true;
+        }
+
+        String[] items = list.split(",");
+        for (String item : items) {
+            String listItem = item.trim().toUpperCase();
+            if (listItem.equals(lookedForValue))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }

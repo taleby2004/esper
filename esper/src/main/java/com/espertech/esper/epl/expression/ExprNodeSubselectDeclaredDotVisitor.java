@@ -27,9 +27,9 @@ public class ExprNodeSubselectDeclaredDotVisitor implements ExprNodeVisitorWithP
      */
     public ExprNodeSubselectDeclaredDotVisitor()
     {
-        subselects = new ArrayList<ExprSubselectNode>();
-        chainedExpressionsDot = new ArrayList<ExprDotNode>();
-        declaredExpressions = new ArrayList<ExprDeclaredNode>();
+        subselects = new ArrayList<ExprSubselectNode>(1);
+        chainedExpressionsDot = new ArrayList<ExprDotNode>(1);
+        declaredExpressions = new ArrayList<ExprDeclaredNode>(1);
     }
 
     public void reset() {

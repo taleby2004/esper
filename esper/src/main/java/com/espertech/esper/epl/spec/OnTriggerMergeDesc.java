@@ -20,7 +20,7 @@ public class OnTriggerMergeDesc extends OnTriggerWindowDesc
     private List<OnTriggerMergeMatched> items;
 
     public OnTriggerMergeDesc(String windowName, String optionalAsName, List<OnTriggerMergeMatched> items) {
-        super(windowName, optionalAsName, OnTriggerType.ON_MERGE);
+        super(windowName, optionalAsName, OnTriggerType.ON_MERGE, false);
         this.items = items;
     }
 

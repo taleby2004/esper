@@ -51,4 +51,8 @@ public class EPDataFlowExecutionException extends EPException {
         super(cause);
         this.dataFlowName = dataFlowName;
     }
+
+    public String getDataFlowName() {
+        return dataFlowName;
+    }
 }

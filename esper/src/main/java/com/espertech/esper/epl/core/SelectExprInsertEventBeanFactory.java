@@ -43,7 +43,7 @@ public class SelectExprInsertEventBeanFactory
     private static Log log = LogFactory.getLog(SelectExprInsertEventBeanFactory.class);
 
     public static SelectExprProcessor getInsertUnderlyingNonJoin(EventAdapterService eventAdapterService, EventType eventType,
-                            boolean isUsingWildcard, StreamTypeService typeService, ExprEvaluator[] expressionNodes, String[] columnNames, Object[] expressionReturnTypes, MethodResolutionService methodResolutionService,
+                            boolean isUsingWildcard, StreamTypeService typeService, ExprEvaluator[] expressionNodes, String[] columnNames, Object[] expressionReturnTypes, EngineImportService engineImportService,
                             InsertIntoDesc insertIntoDesc, String[] columnNamesAsProvided)
             throws ExprValidationException
     {
@@ -69,7 +69,7 @@ public class SelectExprInsertEventBeanFactory
         }
 
         try {
-            return initializeSetterManufactor(eventType, writableProps, isUsingWildcard, typeService, expressionNodes, columnNames, expressionReturnTypes, methodResolutionService, eventAdapterService);
+            return initializeSetterManufactor(eventType, writableProps, isUsingWildcard, typeService, expressionNodes, columnNames, expressionReturnTypes, engineImportService, eventAdapterService);
         }
         catch (ExprValidationException ex) {
             if (!(eventType instanceof BeanEventType)) {
@@ -77,7 +77,7 @@ public class SelectExprInsertEventBeanFactory
             }
             // Try constructor injection
             try {
-                return initializeCtorInjection(eventType, expressionNodes, typeService, expressionReturnTypes, methodResolutionService, eventAdapterService);
+                return initializeCtorInjection(eventType, expressionNodes, typeService, expressionReturnTypes, engineImportService, eventAdapterService);
             }
             catch (ExprValidationException ctorEx) {
                 if (writableProps.isEmpty()) {
@@ -89,7 +89,7 @@ public class SelectExprInsertEventBeanFactory
     }
 
     public static SelectExprProcessor getInsertUnderlyingJoinWildcard(EventAdapterService eventAdapterService, EventType eventType,
-                            String[] streamNames, EventType[] streamTypes, MethodResolutionService methodResolutionService)
+                            String[] streamNames, EventType[] streamTypes, EngineImportService engineImportService)
         throws ExprValidationException
     {
         Set<WriteablePropertyDescriptor> writableProps = eventAdapterService.getWriteableProperties(eventType);
@@ -99,7 +99,7 @@ public class SelectExprInsertEventBeanFactory
         }
 
         try {
-            return initializeJoinWildcardInternal(eventType, writableProps, streamNames, streamTypes, methodResolutionService, eventAdapterService);
+            return initializeJoinWildcardInternal(eventType, writableProps, streamNames, streamTypes, engineImportService, eventAdapterService);
         }
         catch (ExprValidationException ex) {
             if (!(eventType instanceof BeanEventType)) {
@@ -114,7 +114,7 @@ public class SelectExprInsertEventBeanFactory
                     resultTypes[i] = evaluators[i].getType();
                 }
 
-                return initializeCtorInjection(eventType, evaluators, null, resultTypes, methodResolutionService, eventAdapterService);
+                return initializeCtorInjection(eventType, evaluators, null, resultTypes, engineImportService, eventAdapterService);
             }
             catch (ExprValidationException ctorEx) {
                 if (writableProps.isEmpty()) {
@@ -142,7 +142,7 @@ public class SelectExprInsertEventBeanFactory
         return true;
     }
 
-    private static SelectExprProcessor initializeSetterManufactor(EventType eventType, Set<WriteablePropertyDescriptor> writables, boolean isUsingWildcard, StreamTypeService typeService, ExprEvaluator[] expressionNodes, String[] columnNames, Object[] expressionReturnTypes, MethodResolutionService methodResolutionService, EventAdapterService eventAdapterService)
+    private static SelectExprProcessor initializeSetterManufactor(EventType eventType, Set<WriteablePropertyDescriptor> writables, boolean isUsingWildcard, StreamTypeService typeService, ExprEvaluator[] expressionNodes, String[] columnNames, Object[] expressionReturnTypes, EngineImportService engineImportService, EventAdapterService eventAdapterService)
             throws ExprValidationException
     {
         List<WriteablePropertyDescriptor> writablePropertiesList = new ArrayList<WriteablePropertyDescriptor>();
@@ -340,7 +340,7 @@ public class SelectExprInsertEventBeanFactory
         EventBeanManufacturer eventManufacturer;
         try
         {
-            eventManufacturer = eventAdapterService.getManufacturer(eventType, writableProperties, methodResolutionService);
+            eventManufacturer = eventAdapterService.getManufacturer(eventType, writableProperties, engineImportService);
         }
         catch (EventBeanManufactureException e)
         {
@@ -350,7 +350,7 @@ public class SelectExprInsertEventBeanFactory
         return new SelectExprInsertNativeWidening(eventType, eventManufacturer, exprEvaluators, wideners);
     }
 
-    private static SelectExprProcessor initializeCtorInjection(EventType eventType, ExprEvaluator[] exprEvaluators, StreamTypeService typeService, Object[] expressionReturnTypes, MethodResolutionService methodResolutionService, EventAdapterService eventAdapterService)
+    private static SelectExprProcessor initializeCtorInjection(EventType eventType, ExprEvaluator[] exprEvaluators, StreamTypeService typeService, Object[] expressionReturnTypes, EngineImportService engineImportService, EventAdapterService eventAdapterService)
         throws ExprValidationException {
 
         BeanEventType beanEventType = (BeanEventType) eventType;
@@ -444,7 +444,7 @@ public class SelectExprInsertEventBeanFactory
 
         FastConstructor fctor;
         try {
-            Constructor ctor = methodResolutionService.resolveCtor(beanEventType.getUnderlyingType(), ctorTypes);
+            Constructor ctor = engineImportService.resolveCtor(beanEventType.getUnderlyingType(), ctorTypes);
             FastClass fastClass = FastClass.create(beanEventType.getUnderlyingType());
             fctor = fastClass.getConstructor(ctor);
         }
@@ -456,7 +456,7 @@ public class SelectExprInsertEventBeanFactory
         return new SelectExprInsertNativeNoWiden(eventType, eventManufacturer, evaluators);
     }
 
-    private static SelectExprProcessor initializeJoinWildcardInternal(EventType eventType, Set<WriteablePropertyDescriptor> writables, String[] streamNames, EventType[] streamTypes, MethodResolutionService methodResolutionService, EventAdapterService eventAdapterService)
+    private static SelectExprProcessor initializeJoinWildcardInternal(EventType eventType, Set<WriteablePropertyDescriptor> writables, String[] streamNames, EventType[] streamTypes, EngineImportService engineImportService, EventAdapterService eventAdapterService)
             throws ExprValidationException
         {
         List<WriteablePropertyDescriptor> writablePropertiesList = new ArrayList<WriteablePropertyDescriptor>();
@@ -522,10 +522,10 @@ public class SelectExprInsertEventBeanFactory
         ExprEvaluator[] exprEvaluators = evaluatorsList.toArray(new ExprEvaluator[evaluatorsList.size()]);
         TypeWidener[] wideners = widenersList.toArray(new TypeWidener[widenersList.size()]);
 
-        EventBeanManufacturer eventManufacturer = null;
+        EventBeanManufacturer eventManufacturer;
         try
         {
-            eventManufacturer = eventAdapterService.getManufacturer(eventType, writableProperties, methodResolutionService);
+            eventManufacturer = eventAdapterService.getManufacturer(eventType, writableProperties, engineImportService);
         }
         catch (EventBeanManufactureException e)
         {

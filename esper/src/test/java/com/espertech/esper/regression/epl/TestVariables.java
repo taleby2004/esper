@@ -19,10 +19,7 @@ import com.espertech.esper.core.service.EPRuntimeSPI;
 import com.espertech.esper.core.service.EPServiceProviderSPI;
 import com.espertech.esper.core.service.EPStatementSPI;
 import com.espertech.esper.filter.*;
-import com.espertech.esper.support.bean.SupportBean;
-import com.espertech.esper.support.bean.SupportBean_A;
-import com.espertech.esper.support.bean.SupportBean_S0;
-import com.espertech.esper.support.bean.SupportBean_S1;
+import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import junit.framework.TestCase;
 import org.w3c.dom.Document;
@@ -56,7 +53,6 @@ public class TestVariables extends TestCase
 
     public void testConstantVariable() {
         epService.getEPAdministrator().getConfiguration().addEventType(SupportBean.class);
-
         epService.getEPAdministrator().createEPL("create const variable int MYCONST = 10");
 
         tryOperator("MYCONST = intBoxed", new Object[][] {{10, true}, {9, false}, {null, false}});
@@ -121,6 +117,50 @@ public class TestVariables extends TestCase
         EPStatement stmtDate = epService.getEPAdministrator().createEPL("create constant variable java.util.Date START_TIME = java.util.Calendar.getInstance().getTime()");
         Object value = stmtDate.iterator().next().get("START_TIME");
         assertNotNull(value);
+
+        // test array constant
+        epService.getEPAdministrator().destroyAllStatements();
+        epService.getEPAdministrator().createEPL("create constant variable string[] var_strings = {'E1', 'E2'}");
+        EPStatement stmtArrayVar = epService.getEPAdministrator().createEPL("select var_strings from SupportBean");
+        assertEquals(String[].class, stmtArrayVar.getEventType().getPropertyType("var_strings"));
+        runAssertionArrayVar("var_strings");
+        epService.getEPAdministrator().getConfiguration().addVariable("varcoll", "String[]", new String[] {"E1", "E2"}, true);
+
+        tryOperator("intBoxed in (10, 8)", new Object[][] {{11, false}, {10, true}, {9, false}, {8, true}});
+
+        epService.getEPAdministrator().createEPL("create constant variable int [ ] var_ints = {8, 10}");
+        tryOperator("intBoxed in (var_ints)", new Object[][] {{11, false}, {10, true}, {9, false}, {8, true}});
+
+        epService.getEPAdministrator().createEPL("create constant variable int[]  var_intstwo = {9}");
+        tryOperator("intBoxed in (var_ints, var_intstwo)", new Object[][] {{11, false}, {10, true}, {9, true}, {8, true}});
+
+        tryInvalid("create constant variable SupportBean[] var_beans",
+                "Error starting statement: Cannot create variable: Cannot create variable 'var_beans', type 'SupportBean' cannot be declared as an array type [create constant variable SupportBean[] var_beans]");
+
+        // test enum constant
+        epService.getEPAdministrator().destroyAllStatements();
+        epService.getEPAdministrator().getConfiguration().addImport(SupportEnum.class);
+        epService.getEPAdministrator().createEPL("create constant variable SupportEnum var_enumone = SupportEnum.ENUM_VALUE_2");
+        tryOperator("var_enumone = enumValue", new Object[][] {{SupportEnum.ENUM_VALUE_3, false}, {SupportEnum.ENUM_VALUE_2, true}, {SupportEnum.ENUM_VALUE_1, false}});
+
+        epService.getEPAdministrator().createEPL("create constant variable SupportEnum[] var_enumarr = {SupportEnum.ENUM_VALUE_2, SupportEnum.ENUM_VALUE_1}");
+        tryOperator("enumValue in (var_enumarr, var_enumone)", new Object[][] {{SupportEnum.ENUM_VALUE_3, false}, {SupportEnum.ENUM_VALUE_2, true}, {SupportEnum.ENUM_VALUE_1, true}});
+
+        epService.getEPAdministrator().createEPL("create variable SupportEnum var_enumtwo = SupportEnum.ENUM_VALUE_2");
+        epService.getEPAdministrator().createEPL("on SupportBean set var_enumtwo = enumValue");
+    }
+
+    private void runAssertionArrayVar(String varName) {
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select * from SupportBean(theString in (" + varName + "))");
+        stmt.addListener(listener);
+        sendBeanAssert("E1", true);
+        sendBeanAssert("E2", true);
+        sendBeanAssert("E3", false);
+    }
+
+    private void sendBeanAssert(String theString, boolean expected) {
+        epService.getEPRuntime().sendEvent(new SupportBean(theString, 1));
+        assertEquals(expected, listener.getAndClearIsInvoked());
     }
 
     public void testConstantPerformance() {
@@ -238,7 +278,7 @@ public class TestVariables extends TestCase
         catch (VariableValueException ex)
         {
             // expected
-            assertEquals("Variable 'dummy' of declared type 'java.lang.Integer' cannot be assigned a value of type 'java.lang.String'", ex.getMessage());
+            assertEquals("Variable 'dummy' of declared type java.lang.Integer cannot be assigned a value of type java.lang.String", ex.getMessage());
         }
         try
         {
@@ -248,7 +288,7 @@ public class TestVariables extends TestCase
         catch (VariableValueException ex)
         {
             // expected
-            assertEquals("Variable 'dummy' of declared type 'java.lang.Integer' cannot be assigned a value of type 'java.lang.Long'", ex.getMessage());
+            assertEquals("Variable 'dummy' of declared type java.lang.Integer cannot be assigned a value of type java.lang.Long", ex.getMessage());
         }
         try
         {
@@ -258,7 +298,7 @@ public class TestVariables extends TestCase
         catch (VariableValueException ex)
         {
             // expected
-            assertEquals("Variable 'var2' of declared type 'java.lang.String' cannot be assigned a value of type 'java.lang.Integer'", ex.getMessage());
+            assertEquals("Variable 'var2' of declared type java.lang.String cannot be assigned a value of type java.lang.Integer", ex.getMessage());
         }
 
         // coercion
@@ -804,13 +844,13 @@ public class TestVariables extends TestCase
                       "Error starting statement: Variable by name 'dummy' has not been created or configured [on com.espertech.esper.support.bean.SupportBean set dummy = 100]");
 
         tryInvalidSet("on " + SupportBean.class.getName() + " set var1 = 1",
-                      "Error starting statement: Variable 'var1' of declared type 'java.lang.String' cannot be assigned a value of type 'java.lang.Integer' [on com.espertech.esper.support.bean.SupportBean set var1 = 1]");
+                      "Error starting statement: Variable 'var1' of declared type java.lang.String cannot be assigned a value of type java.lang.Integer [on com.espertech.esper.support.bean.SupportBean set var1 = 1]");
 
         tryInvalidSet("on " + SupportBean.class.getName() + " set var3 = 'abc'",
-                      "Error starting statement: Variable 'var3' of declared type 'java.lang.Integer' cannot be assigned a value of type 'java.lang.String' [on com.espertech.esper.support.bean.SupportBean set var3 = 'abc']");
+                      "Error starting statement: Variable 'var3' of declared type java.lang.Integer cannot be assigned a value of type java.lang.String [on com.espertech.esper.support.bean.SupportBean set var3 = 'abc']");
 
         tryInvalidSet("on " + SupportBean.class.getName() + " set var3 = doublePrimitive",
-                      "Error starting statement: Variable 'var3' of declared type 'java.lang.Integer' cannot be assigned a value of type 'double' [on com.espertech.esper.support.bean.SupportBean set var3 = doublePrimitive]");
+                      "Error starting statement: Variable 'var3' of declared type java.lang.Integer cannot be assigned a value of type double [on com.espertech.esper.support.bean.SupportBean set var3 = doublePrimitive]");
 
         tryInvalidSet("on " + SupportBean.class.getName() + " set var2 = 'false'", null);
         tryInvalidSet("on " + SupportBean.class.getName() + " set var3 = 1.1", null);
@@ -836,10 +876,10 @@ public class TestVariables extends TestCase
     public void testInvalidInitialization()
     {
         tryInvalid(Integer.class, "abcdef",
-                "Error creating variable: Variable 'var1' of declared type 'java.lang.Integer' cannot be initialized by value 'abcdef': java.lang.NumberFormatException: For input string: \"abcdef\"");
+                "Error creating variable: Variable 'var1' of declared type java.lang.Integer cannot be initialized by value 'abcdef': java.lang.NumberFormatException: For input string: \"abcdef\"");
 
         tryInvalid(Integer.class, new Double(11.1),
-                "Error creating variable: Variable 'var1' of declared type 'java.lang.Integer' cannot be initialized by a value of type 'java.lang.Double'");
+                "Error creating variable: Variable 'var1' of declared type java.lang.Integer cannot be initialized by a value of type java.lang.Double");
 
         tryInvalid(int.class, new Double(11.1), null);
         tryInvalid(String.class, true, null);
@@ -858,6 +898,19 @@ public class TestVariables extends TestCase
             {
                 assertEquals(message, ex.getMessage());
             }
+        }
+    }
+
+    private void tryInvalid(String epl, String message)
+    {
+        try
+        {
+            epService.getEPAdministrator().createEPL(epl);
+            fail();
+        }
+        catch (EPStatementException ex)
+        {
+            assertEquals(message, ex.getMessage());
         }
     }
 
@@ -986,6 +1039,9 @@ public class TestVariables extends TestCase
             Object testValue = testdata[i][0];
             if (testValue instanceof Integer) {
                 bean.setIntBoxed((Integer) testValue);
+            }
+            else if (testValue instanceof SupportEnum) {
+                bean.setEnumValue((SupportEnum) testValue);
             }
             else {
                 bean.setShortBoxed((Short) testValue);

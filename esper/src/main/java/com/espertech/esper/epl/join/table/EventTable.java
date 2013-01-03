@@ -19,6 +19,23 @@ import java.util.Iterator;
 public interface EventTable extends Iterable<EventBean>
 {
     /**
+     * Add and remove events from table.
+     * <p>
+     *     It is up to the index to decide whether to add first and then remove,
+     *     or whether to remove and then add.
+     * </p>
+     * <p>
+     *     It is important to note that a given event can be in both the
+     *     removed and the added events. This means that unique indexes probably need to remove first
+     *     and then add. Most other non-unique indexes will add first and then remove
+     *     since the an event can be both in the add and the remove stream.
+     * </p>
+     * @param newData to add
+     * @param oldData to remove
+     */
+    void addRemove(EventBean[] newData, EventBean[] oldData);
+
+    /**
      * Add events to table.
      * @param events to add
      */

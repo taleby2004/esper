@@ -48,6 +48,9 @@ public class ExprPreviousEvalStrategyWindow implements ExprPreviousEvalStrategy
         {
             EventBean evalEvent = eventsPerStream[streamNumber];
             RelativeAccessByEventNIndex relativeAccess = relativeAccessGetter.getAccessor(evalEvent);
+            if (relativeAccess == null) {
+                return null;
+            }
             size = relativeAccess.getWindowToEventCount(evalEvent);
             events = relativeAccess.getWindowToEvent(evalEvent);
         }
@@ -80,6 +83,9 @@ public class ExprPreviousEvalStrategyWindow implements ExprPreviousEvalStrategy
         {
             EventBean evalEvent = eventsPerStream[streamNumber];
             RelativeAccessByEventNIndex relativeAccess = relativeAccessGetter.getAccessor(evalEvent);
+            if (relativeAccess == null) {
+                return null;
+            }
             events = relativeAccess.getWindowToEventCollReadOnly(evalEvent);
         }
         return events;
@@ -98,6 +104,9 @@ public class ExprPreviousEvalStrategyWindow implements ExprPreviousEvalStrategy
         {
             EventBean evalEvent = eventsPerStream[streamNumber];
             RelativeAccessByEventNIndex relativeAccess = relativeAccessGetter.getAccessor(evalEvent);
+            if (relativeAccess == null) {
+                return null;
+            }
             size = relativeAccess.getWindowToEventCount(evalEvent);
             events = relativeAccess.getWindowToEvent(evalEvent);
         }

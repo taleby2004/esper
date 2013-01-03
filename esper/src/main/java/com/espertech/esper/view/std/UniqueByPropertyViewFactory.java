@@ -16,11 +16,12 @@ import com.espertech.esper.epl.expression.ExprNodeUtility;
 import com.espertech.esper.view.*;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Factory for {@link UniqueByPropertyView} instances.
  */
-public class UniqueByPropertyViewFactory implements DataWindowViewFactory
+public class UniqueByPropertyViewFactory implements DataWindowViewFactoryUniqueCandidate, DataWindowViewFactory
 {
     /**
      * View parameters.
@@ -75,5 +76,9 @@ public class UniqueByPropertyViewFactory implements DataWindowViewFactory
         }
 
         return myView.isEmpty();
+    }
+
+    public Set<String> getUniquenessCandidatePropertyNames() {
+        return ExprNodeUtility.getPropertyNamesIfAllProps(criteriaExpressions);
     }
 }

@@ -56,7 +56,7 @@ public interface EngineImportService
      * @param valueCache setting to control value cache behavior which may cache a result value when constant parameters are passed
      * @throws EngineImportException throw if format or information is invalid
      */
-    public void addSingleRow(String functionName, String singleRowFuncClass, String methodName, ConfigurationPlugInSingleRowFunction.ValueCache valueCache, ConfigurationPlugInSingleRowFunction.FilterOptimizable filterOptimizable) throws EngineImportException;
+    public void addSingleRow(String functionName, String singleRowFuncClass, String methodName, ConfigurationPlugInSingleRowFunction.ValueCache valueCache, ConfigurationPlugInSingleRowFunction.FilterOptimizable filterOptimizable, boolean rethrowExceptions) throws EngineImportException;
 
     /**
      * Used at statement compile-time to try and resolve a given function name into an

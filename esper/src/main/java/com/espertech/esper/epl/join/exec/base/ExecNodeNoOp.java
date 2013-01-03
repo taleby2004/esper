@@ -12,11 +12,11 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.util.IndentWriter;
 
-import java.util.List;
+import java.util.Collection;
 
 public class ExecNodeNoOp extends ExecNode
 {
-    public void process(EventBean lookupEvent, EventBean[] prefillPath, List<EventBean[]> result, ExprEvaluatorContext exprEvaluatorContext) {
+    public void process(EventBean lookupEvent, EventBean[] prefillPath, Collection<EventBean[]> result, ExprEvaluatorContext exprEvaluatorContext) {
     }
 
     public void print(IndentWriter writer) {

@@ -15,12 +15,14 @@ import java.io.Serializable;
  */
 public class ConfigurationPlugInSingleRowFunction implements Serializable
 {
+    private static final long serialVersionUID = 4096734947283212246L;
+
     private String name;
     private String functionClassName;
     private String functionMethodName;
     private ValueCache valueCache = ValueCache.DISABLED;
     private FilterOptimizable filterOptimizable = FilterOptimizable.ENABLED;
-    private static final long serialVersionUID = 4096734947283212246L;
+    private boolean rethrowExceptions = false;
 
     /**
      * Ctor.
@@ -113,6 +115,26 @@ public class ConfigurationPlugInSingleRowFunction implements Serializable
      */
     public void setFilterOptimizable(FilterOptimizable filterOptimizable) {
         this.filterOptimizable = filterOptimizable;
+    }
+
+    /**
+     * Returns indicator whether the engine re-throws exceptions
+     * thrown by the single-row function. The default is false
+     * therefore the engine by default does not rethrow exceptions.
+     * @return indicator
+     */
+    public boolean isRethrowExceptions() {
+        return rethrowExceptions;
+    }
+
+    /**
+     * Sets indicator whether the engine re-throws exceptions
+     * thrown by the single-row function. The default is false
+     * therefore the engine by default does not rethrow exceptions.
+     * @param rethrowExceptions indicator
+     */
+    public void setRethrowExceptions(boolean rethrowExceptions) {
+        this.rethrowExceptions = rethrowExceptions;
     }
 
     /**

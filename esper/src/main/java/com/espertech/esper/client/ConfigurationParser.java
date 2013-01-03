@@ -659,7 +659,12 @@ class ConfigurationParser {
         if (filterOptimizableStr != null) {
             filterOptimizable = ConfigurationPlugInSingleRowFunction.FilterOptimizable.valueOf(filterOptimizableStr.toUpperCase());
         }
-        configuration.addPlugInSingleRowFunction(name, functionClassName, functionMethodName, valueCache, filterOptimizable);
+        String rethrowExceptionsStr = getOptionalAttribute(element, "rethrow-exceptions");
+        boolean rethrowExceptions = false;
+        if (rethrowExceptionsStr != null) {
+            rethrowExceptions = Boolean.parseBoolean(rethrowExceptionsStr);
+        }
+        configuration.addPlugInSingleRowFunction(name, functionClassName, functionMethodName, valueCache, filterOptimizable, rethrowExceptions);
     }
 
     private static void handlePlugInPatternGuard(Configuration configuration, Element element)

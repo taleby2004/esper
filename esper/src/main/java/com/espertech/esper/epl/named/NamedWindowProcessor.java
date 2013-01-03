@@ -36,6 +36,7 @@ public class NamedWindowProcessor
     private final boolean isEnableSubqueryIndexShare;
     private final boolean isVirtualDataWindow;
     private final StatementMetricHandle statementMetricHandle;
+    private final Set<String> optionalUniqueKeyProps;
 
     private final Map<Integer, NamedWindowProcessorInstance> instances = new HashMap<Integer, NamedWindowProcessorInstance>();
     private NamedWindowProcessorInstance instanceNoContext;
@@ -50,7 +51,7 @@ public class NamedWindowProcessor
      * @param statementName statement name
      * @param isPrioritized if the engine is running with prioritized execution
      */
-    public NamedWindowProcessor(String namedWindowName, NamedWindowService namedWindowService, String contextName, boolean singleInstanceContext, EventType eventType, StatementResultService statementResultService, ValueAddEventProcessor revisionProcessor, String eplExpression, String statementName, boolean isPrioritized, boolean isEnableSubqueryIndexShare, boolean enableQueryPlanLog, MetricReportingService metricReportingService, boolean isBatchingDataWindow, boolean isVirtualDataWindow, StatementMetricHandle statementMetricHandle)
+    public NamedWindowProcessor(String namedWindowName, NamedWindowService namedWindowService, String contextName, boolean singleInstanceContext, EventType eventType, StatementResultService statementResultService, ValueAddEventProcessor revisionProcessor, String eplExpression, String statementName, boolean isPrioritized, boolean isEnableSubqueryIndexShare, boolean enableQueryPlanLog, MetricReportingService metricReportingService, boolean isBatchingDataWindow, boolean isVirtualDataWindow, StatementMetricHandle statementMetricHandle, Set<String> optionalUniqueKeyProps)
     {
         this.namedWindowName = namedWindowName;
         this.contextName = contextName;
@@ -61,8 +62,9 @@ public class NamedWindowProcessor
         this.isEnableSubqueryIndexShare = isEnableSubqueryIndexShare;
         this.isVirtualDataWindow = isVirtualDataWindow;
         this.statementMetricHandle = statementMetricHandle;
+        this.optionalUniqueKeyProps = optionalUniqueKeyProps;
 
-        rootView = new NamedWindowRootView(revisionProcessor, enableQueryPlanLog, metricReportingService, eventType, isBatchingDataWindow);
+        rootView = new NamedWindowRootView(revisionProcessor, enableQueryPlanLog, metricReportingService, eventType, isBatchingDataWindow, isEnableSubqueryIndexShare, optionalUniqueKeyProps);
         tailView = new NamedWindowTailView(eventType, namedWindowService, statementResultService, revisionProcessor, isPrioritized, isBatchingDataWindow);
     }
 
@@ -230,5 +232,36 @@ public class NamedWindowProcessor
 
     public String getNamedWindowName() {
         return namedWindowName;
+    }
+
+    public String[][] getUniqueIndexes(NamedWindowProcessorInstance processorInstance) {
+        List<String[]> unique = null;
+        if (processorInstance != null) {
+            IndexMultiKey[] indexDescriptors = processorInstance.getIndexDescriptors();
+            for (IndexMultiKey index : indexDescriptors) {
+                if (!index.isUnique()) {
+                    continue;
+                }
+                String[] uniqueKeys = IndexedPropDesc.getIndexProperties(index.getHashIndexedProps());
+                if (unique == null) {
+                    unique = new ArrayList<String[]>();
+                }
+                unique.add(uniqueKeys);
+            }
+        }
+        if (optionalUniqueKeyProps != null) {
+            if (unique == null) {
+                unique = new ArrayList<String[]>();
+            }
+            unique.add(optionalUniqueKeyProps.toArray(new String[optionalUniqueKeyProps.size()]));
+        }
+        if (unique == null) {
+            return null;
+        }
+        return unique.toArray(new String[unique.size()][]);
+    }
+
+    public Set<String> getOptionalUniqueKeyProps() {
+        return optionalUniqueKeyProps;
     }
 }

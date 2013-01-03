@@ -24,10 +24,10 @@ public class OutboundQueueSender implements OutboundSender
         {
             // Connect to outbound queue
             InitialContext iniCtx = new InitialContext();
-            Object tmp = iniCtx.lookup("ConnectionFactory");
+            Object tmp = iniCtx.lookup("java:/ConnectionFactory");
             QueueConnectionFactory qcf = (QueueConnectionFactory) tmp;
             QueueConnection conn = qcf.createQueueConnection();
-            Queue queA = (Queue) iniCtx.lookup("queue/A");
+            Queue queA = (Queue) iniCtx.lookup("queue_a");
             session = conn.createQueueSession(false, QueueSession.AUTO_ACKNOWLEDGE);
             conn.start();
             sender = session.createSender(queA);

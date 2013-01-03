@@ -351,6 +351,12 @@ public class TestSchema extends TestCase
         assertFalse(typeSPI.getMetadata().isApplicationPreConfiguredStatic());
         assertFalse(typeSPI.getMetadata().isApplicationPreConfigured());
         assertEquals(typeSPI.getName(), typeSPI.getMetadata().getPrimaryName());
+
+        // test keyword
+        tryInvalid("create schema MySchema as com.mycompany.event.ABC",
+                   "Error starting statement: Event type or class named 'com.mycompany.event.ABC' was not found [create schema MySchema as com.mycompany.event.ABC]");
+        tryInvalid("create schema MySchema as com.mycompany.events.ABC",
+                "Error starting statement: Event type or class named 'com.mycompany.events.ABC' was not found [create schema MySchema as com.mycompany.events.ABC]");
     }
 
     public void testNestableMapArray() throws Exception {

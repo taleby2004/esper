@@ -8,6 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.client;
 
+import java.net.URI;
 import java.util.Map;
 
 /**
@@ -78,4 +79,44 @@ public interface EPRuntimeIsolated
      * @return time of next schedule if any
      */
     public Long getNextScheduledTime();
+
+    /**
+     * Returns a facility to process event objects that are of a known type.
+     * <p>
+     * Given an event type name this method returns a sender that allows to send in
+     * event objects of that type. The event objects send in via the event sender
+     * are expected to match the event type, thus the event sender does
+     * not inspect the event object other then perform basic checking.
+     * <p>
+     * For events backed by a Java class (JavaBean events), the sender ensures that the
+     * object send in matches in class, or implements or extends the class underlying the event type
+     * for the given event type name.
+     * <p>
+     * For events backed by a Object[] (Object-array events), the sender does not perform any checking other
+     * then checking that the event object indeed is an array of object.
+     * <p>
+     * For events backed by a java.util.Map (Map events), the sender does not perform any checking other
+     * then checking that the event object indeed implements Map.
+     * <p>
+     * For events backed by a org.w3c.Node (XML DOM events), the sender checks that the root element name
+     * indeed does match the root element name for the event type name.
+     * @param eventTypeName is the name of the event type
+     * @return sender for fast-access processing of event objects of known type (and content)
+     * @throws EventTypeException thrown to indicate that the name does not exist
+     */
+    public EventSender getEventSender(String eventTypeName) throws EventTypeException;
+
+    /**
+     * For use with plug-in event representations, returns a facility to process event objects that are of one of a number of types
+     * that one or more of the registered plug-in event representation extensions can reflect upon and provide an
+     * event for.
+     * @param uris is the URIs that specify which plug-in event representations may process an event object.
+     * <p>URIs do not need to match event representation URIs exactly, a child (hierarchical) match is enough
+     * for an event representation to participate.
+     * <p>The order of URIs is relevant as each event representation's factory is asked in turn to
+     * process the event, until the first factory processes the event.
+     * @return sender for processing of event objects of one of the plug-in event representations
+     * @throws EventTypeException thrown to indicate that the URI list was invalid
+     */
+    public EventSender getEventSender(URI[] uris) throws EventTypeException;
 }

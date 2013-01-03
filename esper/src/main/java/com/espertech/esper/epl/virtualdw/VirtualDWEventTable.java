@@ -21,12 +21,19 @@ import java.util.List;
 
 public class VirtualDWEventTable implements EventTable
 {
+    private boolean unique;
     private List<VirtualDataWindowLookupFieldDesc> hashAccess;
     private List<VirtualDataWindowLookupFieldDesc> btreeAccess;
 
-    public VirtualDWEventTable(List<VirtualDataWindowLookupFieldDesc> hashAccess, List<VirtualDataWindowLookupFieldDesc> btreeAccess) {
+    public VirtualDWEventTable(boolean unique, List<VirtualDataWindowLookupFieldDesc> hashAccess, List<VirtualDataWindowLookupFieldDesc> btreeAccess) {
+        this.unique = unique;
         this.hashAccess = Collections.unmodifiableList(hashAccess);
         this.btreeAccess = Collections.unmodifiableList(btreeAccess);
+    }
+
+    public void addRemove(EventBean[] newData, EventBean[] oldData) {
+        add(newData);
+        remove(oldData);
     }
 
     public void add(EventBean[] events) {
@@ -60,5 +67,13 @@ public class VirtualDWEventTable implements EventTable
 
     public EventTable copyShallow() {
         throw new UnsupportedOperationException();
+    }
+
+    public boolean isUnique() {
+        return unique;
+    }
+
+    public void setUnique(boolean unique) {
+        this.unique = unique;
     }
 }

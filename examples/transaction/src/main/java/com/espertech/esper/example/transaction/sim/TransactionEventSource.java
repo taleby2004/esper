@@ -57,7 +57,7 @@ public class TransactionEventSource extends EventSource {
 
         long e2Stamp = fieldGenerator.randomLatency(beginningStamp);
         //skip event 2 with probability 1 in 1000
-        if (random.nextInt(1000) < 9998) {
+        if (random.nextInt(1000) < 998) {
             TxnEventB txnEventB = new TxnEventB(null, e2Stamp);
             t.add(txnEventB);
         }

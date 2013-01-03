@@ -11,10 +11,16 @@
 
 package com.espertech.esper.client.dataflow;
 
+import java.util.Map;
+
 /**
  * Data flow runtime for instantiating data flows.
  */
 public interface EPDataFlowRuntime {
+
+    public EPDataFlowDescriptor getDataFlow(String dataFlowName);
+
+    public String[] getDataFlows();
 
     /**
      * Instantiate a data flow.
@@ -32,4 +38,15 @@ public interface EPDataFlowRuntime {
      * @throws EPDataFlowInstantiationException when the instantiation failed
      */
     public EPDataFlowInstance instantiate(String dataFlowName, EPDataFlowInstantiationOptions options) throws EPDataFlowInstantiationException;
+
+    public void saveConfiguration(String dataflowConfigName, String dataFlowName, EPDataFlowInstantiationOptions options) throws EPDataFlowAlreadyExistsException, EPDataFlowNotFoundException;
+    public String[] getSavedConfigurations();
+    public EPDataFlowSavedConfiguration getSavedConfiguration(String configurationName);
+    public EPDataFlowInstance instantiateSavedConfiguration(String configurationName) throws EPDataFlowInstantiationException;
+    public boolean removeSavedConfiguration(String configurationName);
+
+    public void saveInstance(String instanceName, EPDataFlowInstance instance) throws EPDataFlowAlreadyExistsException;
+    public String[] getSavedInstances();
+    public EPDataFlowInstance getSavedInstance(String instanceName);
+    public boolean removeSavedInstance(String instanceName);
 }

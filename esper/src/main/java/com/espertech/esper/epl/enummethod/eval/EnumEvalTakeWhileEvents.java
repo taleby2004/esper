@@ -25,7 +25,7 @@ public class EnumEvalTakeWhileEvents extends EnumEvalBase implements EnumEval {
         super(innerExpression, streamCountIncoming);
     }
 
-    public Object evaluateEnumMethod(Collection target, boolean isNewData, ExprEvaluatorContext context) {
+    public Object evaluateEnumMethod(EventBean[] eventsLambda, Collection target, boolean isNewData, ExprEvaluatorContext context) {
         if (target.isEmpty()) {
             return target;
         }

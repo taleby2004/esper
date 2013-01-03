@@ -11,6 +11,7 @@
 
 package com.espertech.esper.view.std;
 
+import com.espertech.esper.collection.MultiKeyUntyped;
 import junit.framework.TestCase;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
@@ -88,7 +89,7 @@ public class TestAddPropertyValueView extends TestCase
         assertEquals(myView.getPropertyValues(), copied.getPropertyValues());
     }
 
-    public void TestAddProperty()
+    public void testAddProperty()
     {
         Map<String, Object> eventData = new HashMap<String, Object>();
         eventData.put("STDDEV", 100);
@@ -97,7 +98,7 @@ public class TestAddPropertyValueView extends TestCase
         Map<String, Object> addProps = new HashMap<String, Object>();
         addProps.put("test", Integer.class);
         EventType newEventType = SupportEventAdapterService.getService().createAnonymousWrapperType("test", parentEventType, addProps);
-        EventBean newBean = AddPropertyValueView.addProperty(eventBean, new String[] {"test"}, new Object[] {2}, newEventType, SupportEventAdapterService.getService());
+        EventBean newBean = AddPropertyValueView.addProperty(eventBean, new String[] {"test"}, new MultiKeyUntyped(new Object[] {2}), newEventType, SupportEventAdapterService.getService());
 
         assertEquals(2, newBean.get("test"));
         assertEquals(100, newBean.get("STDDEV"));

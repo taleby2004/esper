@@ -16,11 +16,12 @@ import com.espertech.esper.epl.expression.ExprNodeUtility;
 import com.espertech.esper.view.*;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Factory for {@link FirstUniqueByPropertyView} instances.
  */
-public class FirstUniqueByPropertyViewFactory implements AsymetricDataWindowViewFactory
+public class FirstUniqueByPropertyViewFactory implements AsymetricDataWindowViewFactory, DataWindowViewFactoryUniqueCandidate
 {
     /**
      * View parameters.
@@ -76,5 +77,9 @@ public class FirstUniqueByPropertyViewFactory implements AsymetricDataWindowView
         }
 
         return myView.isEmpty();
+    }
+
+    public Set<String> getUniquenessCandidatePropertyNames() {
+        return ExprNodeUtility.getPropertyNamesIfAllProps(criteriaExpressions);
     }
 }

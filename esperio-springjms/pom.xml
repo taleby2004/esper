@@ -3,7 +3,7 @@
 	<name>Esper IO SpringJMS</name>
 	<groupId>com.espertech</groupId>
 	<artifactId>esperio-springjms</artifactId>
-	<version>4.7.0</version>
+	<version>4.8.0</version>
 	<packaging>jar</packaging>
 	<description>Esper CEP engine for Java - Input Output Adapters</description>
 	<inceptionYear>2005</inceptionYear>
@@ -36,7 +36,7 @@
 		<dependency>
 			<groupId>com.espertech</groupId>
 			<artifactId>esper</artifactId>
-			<version>4.7.0</version>
+			<version>4.8.0</version>
 		</dependency>
 		<dependency>
 			<groupId>log4j</groupId>
@@ -87,39 +87,39 @@
 		<dependency>
 		    <groupId>org.apache.activemq</groupId>
 			<artifactId>activemq-core</artifactId>
-			<version>5.3.0</version>
+			<version>5.7.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 		    <groupId>org.apache.activemq</groupId>
 			<artifactId>activemq-pool</artifactId>
-			<version>5.3.0</version>
+			<version>5.7.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-beans</artifactId>
-			<version>3.0.3.RELEASE</version>
+			<version>3.1.1.RELEASE</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
-			<version>3.0.3.RELEASE</version>
+			<version>3.1.1.RELEASE</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-core</artifactId>
-			<version>3.0.3.RELEASE</version>
+			<version>3.1.1.RELEASE</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-jms</artifactId>
-			<version>3.0.3.RELEASE</version>
+			<version>3.1.1.RELEASE</version>
 		</dependency>
         	<dependency>
 			<groupId>commons-pool</groupId>
 			<artifactId>commons-pool</artifactId>
-			<version>1.3</version>
+			<version>1.6</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

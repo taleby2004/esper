@@ -22,6 +22,8 @@ import java.util.*;
  */
 public class ParserTool {
 
+    private final static String NEWLINE = System.getProperty("line.separator");
+
     public static void main(String[] args) {
 
         if (args.length == 0) {
@@ -31,7 +33,7 @@ public class ParserTool {
         List<String> lines = readFile(filename);
         System.out.println("Read " + lines.size() + " lines read from file " + filename);
 
-        List<String> result = new ArrayList<String>();
+        List<String> commentRemovedLines = new ArrayList<String>();
         for (String line : lines) {
             int indexComment = line.indexOf("// ");
             if (indexComment != -1) {
@@ -41,14 +43,18 @@ public class ParserTool {
                 continue;
             }
 
-            result.add(line);
+            commentRemovedLines.add(line);
         }
 
         // transform the state transition method
-        transformSpecialStateTransition(result);
+        transformSpecialStateTransition(commentRemovedLines);
 
         // transform the DFA197_transitionS
-        Map<String, List<String>> files = transformDFA197Array(filename, result);
+        Map<String, List<String>> files = transformDFA197Array(filename, commentRemovedLines);
+
+        List<String> staticFinals = moveStaticFinalToInterface(commentRemovedLines);
+        String[] filenameSplit = filename.split("\\.java");
+        files.put(filenameSplit[0] + "_Const.java", staticFinals);
 
         for (Map.Entry<String, List<String>> linesPerFile : files.entrySet()) {
             String filenameToWrite = linesPerFile.getKey();
@@ -95,6 +101,30 @@ public class ParserTool {
         List<String> lines = textToLines(text);
         transformSpecialStateTransition(lines);
         return linesToText(lines);
+    }
+
+    private static List<String> moveStaticFinalToInterface(List<String> lines) {
+        Iterator<String> it = lines.iterator();
+        ArrayList<String> bitsets = new ArrayList<String>();
+        for (;it.hasNext();) {
+            String line = it.next();
+            if (line.contains("public static final BitSet")) {
+                it.remove();
+                bitsets.add(line);
+            }
+        }
+        for (int i = 0; i < lines.size(); i++) {
+            String line = lines.get(i);
+            if (line.contains("public class EsperEPL2GrammarParser extends Parser")) {
+                lines.set(i, "public class EsperEPL2GrammarParser extends Parser implements EsperEPL2GrammarParser_Const {");
+            }
+        }
+
+        bitsets.add(0, "package com.espertech.esper.epl.generated;" + NEWLINE);
+        bitsets.add(1, "import org.antlr.runtime.BitSet;" + NEWLINE);
+        bitsets.add(2, "public interface EsperEPL2GrammarParser_Const {" + NEWLINE);
+        bitsets.add("}" + NEWLINE);
+        return bitsets;
     }
 
     private static void transformSpecialStateTransition(List<String> inputbuf) {

@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Set;
 
 public interface VirtualDWView {
-    public Pair<IndexMultiKey,EventTable> getSubordinateQueryDesc(List<IndexedPropDesc> hashedProps, List<IndexedPropDesc> btreeProps);
+    public Pair<IndexMultiKey,EventTable> getSubordinateQueryDesc(boolean unique, List<IndexedPropDesc> hashedProps, List<IndexedPropDesc> btreeProps);
     public SubordTableLookupStrategy getSubordinateLookupStrategy(String accessedByStatementName, String accessedByStatementId, Annotation[] accessedByStmtAnnotations, EventType[] outerStreamTypes, List<SubordPropHashKey> hashKeys, CoercionDesc hashKeyCoercionTypes, List<SubordPropRangeKey> rangeKeys, CoercionDesc rangeKeyCoercionTypes, boolean nwOnTrigger, EventTable eventTable, SubordPropPlan joinDesc, boolean forceTableScan);
 
     public EventTable getJoinIndexTable(QueryPlanIndexItem queryPlanIndexItem);

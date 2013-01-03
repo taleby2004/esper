@@ -102,5 +102,9 @@ public class EvalEveryDistinctFactoryNode extends EvalNodeFactoryBase
         return true;
     }
 
+    public boolean isStateful() {
+        return true;
+    }
+
     private static final Log log = LogFactory.getLog(EvalEveryNode.class);
 }

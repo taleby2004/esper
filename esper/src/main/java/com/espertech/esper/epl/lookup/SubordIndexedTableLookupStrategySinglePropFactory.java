@@ -12,6 +12,7 @@ import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.epl.join.table.EventTable;
 import com.espertech.esper.epl.join.table.PropertyIndexedEventTableSingle;
+import com.espertech.esper.epl.join.table.PropertyIndexedEventTableSingleUnique;
 import com.espertech.esper.event.EventBeanUtility;
 
 /**
@@ -45,6 +46,9 @@ public class SubordIndexedTableLookupStrategySinglePropFactory implements Subord
     }
 
     public SubordTableLookupStrategy makeStrategy(EventTable eventTable) {
+        if (eventTable instanceof PropertyIndexedEventTableSingleUnique) {
+            return new SubordIndexedTableLookupStrategySinglePropUnique(keyStreamNum, propertyGetter, (PropertyIndexedEventTableSingleUnique) eventTable);
+        }
         return new SubordIndexedTableLookupStrategySingleProp(keyStreamNum, propertyGetter, (PropertyIndexedEventTableSingle) eventTable);
     }
 

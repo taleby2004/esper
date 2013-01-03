@@ -96,6 +96,10 @@ public class TestStatementAnnotation extends TestCase
                    "Failed to process statement annotations: Hint 'RECLAIM_GROUP_AGED' requires a parameter value [@Hint('ITERATE_ONLY,RECLAIM_GROUP_AGED') select * from Bean]");
         tryInvalid("@Hint('ITERATE_ONLY=5,RECLAIM_GROUP_AGED=5') select * from Bean", false,
                    "Failed to process statement annotations: Hint 'ITERATE_ONLY' does not accept a parameter value [@Hint('ITERATE_ONLY=5,RECLAIM_GROUP_AGED=5') select * from Bean]");
+        tryInvalid("@Hint('index(name)xxx') select * from Bean", false,
+                    "Failed to process statement annotations: Hint 'INDEX' has additional text after parentheses [@Hint('index(name)xxx') select * from Bean]");
+        tryInvalid("@Hint('index') select * from Bean", false,
+                    "Failed to process statement annotations: Hint 'INDEX' requires additional parameters in parentheses [@Hint('index') select * from Bean]");
     }
 
     private void tryInvalid(String stmtText, boolean isSyntax, String message)
@@ -169,6 +173,9 @@ public class TestStatementAnnotation extends TestCase
         annos = epService.getEPAdministrator().createEPL("@Hint('reclaim_group_aged=11') select * from Bean").getAnnotations();
         hint = HintEnum.RECLAIM_GROUP_AGED.getHint(annos);
         assertEquals("11", HintEnum.RECLAIM_GROUP_AGED.getHintAssignedValue(hint));
+
+        annos = epService.getEPAdministrator().createEPL("@Hint('index(one, two)') select * from Bean").getAnnotations();
+        assertEquals("one, two", HintEnum.INDEX.getHintAssignedValues(annos).get(0));
 
         // NoLock
         stmt = epService.getEPAdministrator().createEPL("@NoLock select * from Bean");

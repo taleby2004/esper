@@ -17,6 +17,7 @@ import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanAbstractSub;
 import com.espertech.esper.support.bean.SupportBean_A;
+import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.util.EventRepresentationEnum;
 import junit.framework.TestCase;
@@ -41,6 +42,31 @@ public class TestNamedWindowUpdate extends TestCase
 
     protected void tearDown() throws Exception {
         listenerWindow = null;
+    }
+
+    public void testUpdateOrderOfFields() throws Exception {
+        epService.getEPAdministrator().getConfiguration().addEventType(SupportBean.class);
+        epService.getEPAdministrator().getConfiguration().addEventType(SupportBean_S0.class);
+
+        epService.getEPAdministrator().createEPL("create window MyWindow.win:keepall() as SupportBean");
+        epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportBean");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("on SupportBean_S0 as sb " +
+                "update MyWindow as mywin" +
+                " set intPrimitive=id, intBoxed=mywin.intPrimitive, doublePrimitive=initial.intPrimitive" +
+                " where mywin.theString = sb.p00");
+        stmt.addListener(listenerWindow);
+        String[] fields = "intPrimitive,intBoxed,doublePrimitive".split(",");
+
+        epService.getEPRuntime().sendEvent(makeSupportBean("E1", 1, 2));
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(5, "E1"));
+        EPAssertionUtil.assertProps(listenerWindow.getAndResetLastNewData()[0], fields, new Object[]{5, 5, 1.0});
+
+        epService.getEPRuntime().sendEvent(makeSupportBean("E2", 10, 20));
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(6, "E2"));
+        EPAssertionUtil.assertProps(listenerWindow.getAndResetLastNewData()[0], fields, new Object[]{6, 6, 10.0});
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(7, "E1"));
+        EPAssertionUtil.assertProps(listenerWindow.getAndResetLastNewData()[0], fields, new Object[]{7, 7, 5.0});
     }
 
     public void testSubquerySelf() {
@@ -180,5 +206,11 @@ public class TestNamedWindowUpdate extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         EPAssertionUtil.assertProps(listenerWindow.getLastNewData()[0], new String[]{"v1", "v2"}, new Object[]{"E1", "E1"});
+    }
+
+    private SupportBean makeSupportBean(String theString, int intPrimitive, double doublePrimitive) {
+        SupportBean sb = new SupportBean(theString, intPrimitive);
+        sb.setDoublePrimitive(doublePrimitive);
+        return sb;
     }
 }

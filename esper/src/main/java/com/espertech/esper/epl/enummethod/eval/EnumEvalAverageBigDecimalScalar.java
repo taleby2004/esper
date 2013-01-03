@@ -11,6 +11,7 @@
 
 package com.espertech.esper.epl.enummethod.eval;
 
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.epl.agg.aggregator.AggregatorAvgBigDecimal;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
@@ -22,7 +23,7 @@ public class EnumEvalAverageBigDecimalScalar extends EnumEvalBase implements Enu
         super(streamCountIncoming);
     }
 
-    public Object evaluateEnumMethod(Collection target, boolean isNewData, ExprEvaluatorContext context) {
+    public Object evaluateEnumMethod(EventBean[] eventsLambda, Collection target, boolean isNewData, ExprEvaluatorContext context) {
 
         AggregatorAvgBigDecimal agg = new AggregatorAvgBigDecimal();
 

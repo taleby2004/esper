@@ -12,6 +12,7 @@ import com.espertech.esper.epl.join.rep.Node;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.util.IndentWriter;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -34,17 +35,17 @@ public class BranchRequiredAssemblyNode extends BaseAssemblyNode
         // need not be concerned with results, all is passed from the child node
     }
 
-    public void process(List<Node>[] result)
+    public void process(List<Node>[] result, Collection<EventBean[]> resultFinalRows, EventBean resultRootEvent)
     {
         // no action here, since we have a required child row
         // The single required child generates all events that may exist
     }
 
-    public void result(EventBean[] row, int fromStreamNum, EventBean myEvent, Node myNode)
+    public void result(EventBean[] row, int fromStreamNum, EventBean myEvent, Node myNode, Collection<EventBean[]> resultFinalRows, EventBean resultRootEvent)
     {
         row[streamNum] = myEvent;
         Node parentResultNode = myNode.getParent();
-        parentNode.result(row, streamNum, myNode.getParentEvent(), parentResultNode);
+        parentNode.result(row, streamNum, myNode.getParentEvent(), parentResultNode, resultFinalRows, resultRootEvent);
     }
 
     public void print(IndentWriter indentWriter)

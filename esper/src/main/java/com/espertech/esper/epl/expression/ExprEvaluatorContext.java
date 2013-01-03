@@ -12,6 +12,8 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.core.service.ExpressionResultCacheService;
 import com.espertech.esper.epl.script.AgentInstanceScriptContext;
 import com.espertech.esper.core.service.StatementAgentInstanceLock;
+import com.espertech.esper.event.arr.ObjectArrayEventBean;
+import com.espertech.esper.event.arr.ObjectArrayEventType;
 import com.espertech.esper.schedule.TimeProvider;
 
 /**

@@ -42,15 +42,13 @@ import java.util.HashSet;
  */
 public final class StatementContext
 {
-    private final String engineURI;
-    private final String engineInstanceId;
+    private final StatementContextEngineServices stmtEngineServices;
     private final String statementId;
     private final byte[] statementIdBytes;
     private final String statementName;
     private final String expression;
     private SchedulingService schedulingService;
     private final ScheduleBucket scheduleBucket;
-    private final EventAdapterService eventAdapterService;
     private final EPStatementHandle epStatementHandle;
     private final ViewResolutionService viewResolutionService;
     private final PatternObjectResolutionService patternResolutionService;
@@ -60,20 +58,10 @@ public final class StatementContext
     private final PatternContextFactory patternContextFactory;
     private FilterService filterService;
     private InternalEventRouteDest internalEventEngineRouteDest;
-    private final NamedWindowService namedWindowService;
-    private final VariableService variableService;
     private final StatementResultService statementResultService;
-    private final URI[] plugInTypeResolutionURIs;
-    private final ValueAddEventService valueAddEventService;
     private final HashSet<String> dynamicReferenceEventTypes;
-    private final ConfigurationInformation configSnapshot;
     private final ScheduleAdjustmentService scheduleAdjustmentService;
-    private final MetricReportingServiceSPI metricReportingService;
-    private final ViewService viewService;
     private final Annotation[] annotations;
-    private final ExceptionHandlingService exceptionHandlingService;
-    private final ExpressionResultCacheService expressionResultCacheService;
-    private final EventTypeIdGenerator eventTypeIdGenerator;
     private final StatementAIResourceRegistry statementAgentInstanceRegistry;
     private final ContextDescriptor contextDescriptor;
     private final PatternSubexpressionPoolStmtSvc patternSubexpressionPoolSvc;
@@ -88,14 +76,12 @@ public final class StatementContext
 
     /**
      * Constructor.
-     * @param engineURI is the engine URI
-     * @param engineInstanceId is the name of the engine instance
+     * @param stmtEngineServices is the engine services for the statement
      * @param statementId is the statement is assigned for the statement for which this context exists
      * @param statementName is the statement name
      * @param expression is the EPL or pattern expression used
      * @param schedulingService implementation for schedule registration
      * @param scheduleBucket is for ordering scheduled callbacks within the view statements
-     * @param eventAdapterService service for generating events and handling event types
      * @param epStatementHandle is the statements-own handle for use in registering callbacks with services
      * @param viewResultionService is a service for resolving view namespace and name to a view factory
      * @param statementExtensionSvcContext provide extension points for custom statement resources
@@ -104,25 +90,16 @@ public final class StatementContext
      * @param patternContextFactory is the pattern-level services and context information factory
      * @param filterService is the filtering service
      * @param patternResolutionService is the service that resolves pattern objects for the statement
-     * @param namedWindowService is holding information about the named windows active in the system
-     * @param variableService provides access to variable values
      * @param statementResultService handles awareness of listeners/subscriptions for a statement customizing output produced
-     * @param plugInTypeResolutionURIs is URIs for resolving the event name against plug-inn event representations, if any
-     * @param valueAddEventService - service that handles update events
-     * @param configSnapshot configuration snapshot
      * @param internalEventEngineRouteDest routing destination
-     * @param metricReportingService metrics
-     * @param viewService views
      */
-    public StatementContext(String engineURI,
-                            String engineInstanceId,
+    public StatementContext(StatementContextEngineServices stmtEngineServices,
                               String statementId,
                               byte[] statementIdBytes,
                               String statementName,
                               String expression,
                               SchedulingService schedulingService,
                               ScheduleBucket scheduleBucket,
-                              EventAdapterService eventAdapterService,
                               EPStatementHandle epStatementHandle,
                               ViewResolutionService viewResultionService,
                               PatternObjectResolutionService patternResolutionService,
@@ -131,19 +108,9 @@ public final class StatementContext
                               MethodResolutionService methodResolutionService,
                               PatternContextFactory patternContextFactory,
                               FilterService filterService,
-                              NamedWindowService namedWindowService,
-                              VariableService variableService,
                               StatementResultService statementResultService,
-                              URI[] plugInTypeResolutionURIs,
-                              ValueAddEventService valueAddEventService,
-                              ConfigurationInformation configSnapshot,
                               InternalEventRouteDest internalEventEngineRouteDest,
-                              MetricReportingServiceSPI metricReportingService,
-                              ViewService viewService,
                               Annotation[] annotations,
-                              ExceptionHandlingService exceptionHandlingService,
-                              ExpressionResultCacheService expressionResultCacheService,
-                              EventTypeIdGenerator eventTypeIdGenerator,
                               StatementAIResourceRegistry statementAgentInstanceRegistry,
                               StatementAgentInstanceLock defaultAgentInstanceLock,
                               ContextDescriptor contextDescriptor,
@@ -153,14 +120,12 @@ public final class StatementContext
                               AgentInstanceScriptContext defaultAgentInstanceScriptContext,
                               AggregationServiceFactoryService aggregationServiceFactoryService)
     {
-        this.engineURI = engineURI;
-        this.engineInstanceId = engineInstanceId;
+        this.stmtEngineServices = stmtEngineServices;
         this.statementId = statementId;
         this.statementIdBytes = statementIdBytes;
         this.statementName = statementName;
         this.expression = expression;
         this.schedulingService = schedulingService;
-        this.eventAdapterService = eventAdapterService;
         this.scheduleBucket = scheduleBucket;
         this.epStatementHandle = epStatementHandle;
         this.viewResolutionService = viewResultionService;
@@ -170,21 +135,11 @@ public final class StatementContext
         this.methodResolutionService = methodResolutionService;
         this.patternContextFactory = patternContextFactory;
         this.filterService = filterService;
-        this.namedWindowService = namedWindowService;
-        this.variableService = variableService;
         this.statementResultService = statementResultService;
-        this.plugInTypeResolutionURIs = plugInTypeResolutionURIs;
-        this.valueAddEventService = valueAddEventService;
         this.dynamicReferenceEventTypes = new HashSet<String>();
-        this.configSnapshot = configSnapshot;
         this.internalEventEngineRouteDest = internalEventEngineRouteDest;
         this.scheduleAdjustmentService = new ScheduleAdjustmentService();
-        this.metricReportingService = metricReportingService;
-        this.viewService = viewService;
         this.annotations = annotations;
-        this.exceptionHandlingService = exceptionHandlingService;
-        this.expressionResultCacheService = expressionResultCacheService;
-        this.eventTypeIdGenerator = eventTypeIdGenerator;
         this.statementAgentInstanceRegistry = statementAgentInstanceRegistry;
         this.defaultAgentInstanceLock = defaultAgentInstanceLock;
         this.contextDescriptor = contextDescriptor;
@@ -228,7 +183,7 @@ public final class StatementContext
      */
     public EventAdapterService getEventAdapterService()
     {
-        return eventAdapterService;
+        return stmtEngineServices.getEventAdapterService();
     }
 
     /**
@@ -309,16 +264,7 @@ public final class StatementContext
      */
     public String getEngineURI()
     {
-        return engineURI;
-    }
-
-    /**
-     * Returns the engine instance id.
-     * @return instance id
-     */
-    public String getEngineInstanceId()
-    {
-        return engineInstanceId;
+        return stmtEngineServices.getEngineURI();
     }
 
     /**
@@ -345,7 +291,7 @@ public final class StatementContext
      */
     public NamedWindowService getNamedWindowService()
     {
-        return namedWindowService;
+        return stmtEngineServices.getNamedWindowService();
     }
 
     /**
@@ -354,7 +300,7 @@ public final class StatementContext
      */
     public VariableService getVariableService()
     {
-        return variableService;
+        return stmtEngineServices.getVariableService();
     }
 
     /**
@@ -372,7 +318,7 @@ public final class StatementContext
      */
     public URI[] getPlugInTypeResolutionURIs()
     {
-        return plugInTypeResolutionURIs;
+        return stmtEngineServices.getPlugInTypeResolutionURIs();
     }
 
     /**
@@ -381,7 +327,7 @@ public final class StatementContext
      */
     public ValueAddEventService getValueAddEventService()
     {
-        return valueAddEventService;
+        return stmtEngineServices.getValueAddEventService();
     }
 
     /**
@@ -408,7 +354,7 @@ public final class StatementContext
      */
     public ConfigurationInformation getConfigSnapshot()
     {
-        return configSnapshot;
+        return stmtEngineServices.getConfigSnapshot();
     }
 
     /**
@@ -461,7 +407,7 @@ public final class StatementContext
      * @return metrics
      */
     public MetricReportingServiceSPI getMetricReportingService() {
-        return metricReportingService;
+        return stmtEngineServices.getMetricReportingService();
     }
 
     /**
@@ -478,11 +424,11 @@ public final class StatementContext
      * @return svc
      */
     public ViewService getViewService() {
-        return viewService;
+        return stmtEngineServices.getViewService();
     }
 
     public ExceptionHandlingService getExceptionHandlingService() {
-        return exceptionHandlingService;
+        return stmtEngineServices.getExceptionHandlingService();
     }
 
     public Annotation[] getAnnotations()
@@ -490,18 +436,14 @@ public final class StatementContext
         return annotations;
     }
 
-    public ExpressionResultCacheService getExpressionResultCacheService() {
-        return expressionResultCacheService;
+    public ExpressionResultCacheService getExpressionResultCacheServiceSharable() {
+        return stmtEngineServices.getExpressionResultCacheService();
     }
 
     public String toString()
     {
         return  " stmtId=" + statementId +
                 " stmtName=" + statementName;
-    }
-
-    public EventTypeIdGenerator getEventTypeIdGenerator() {
-        return eventTypeIdGenerator;
     }
 
     public int getAgentInstanceId() {

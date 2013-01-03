@@ -137,7 +137,7 @@ public class ExprIdentNodeImpl extends ExprNodeBase implements ExprIdentNode
     }
 
     public boolean getFilterLookupEligible() {
-        return evaluator.getStreamNum() == 0;
+        return evaluator.getStreamNum() == 0 && !(evaluator.isContextEvaluated());
     }
 
     public FilterSpecLookupable getFilterLookupable() {

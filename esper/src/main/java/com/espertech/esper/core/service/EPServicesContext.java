@@ -13,12 +13,13 @@ import com.espertech.esper.core.context.mgr.ContextManagementService;
 import com.espertech.esper.core.context.schedule.SchedulableAgentInstanceDirectory;
 import com.espertech.esper.core.deploy.DeploymentStateService;
 import com.espertech.esper.core.thread.ThreadingService;
+import com.espertech.esper.dataflow.core.DataFlowService;
 import com.espertech.esper.dispatch.DispatchService;
 import com.espertech.esper.dispatch.DispatchServiceProvider;
 import com.espertech.esper.epl.core.EngineImportService;
 import com.espertech.esper.epl.core.EngineSettingsService;
 import com.espertech.esper.epl.db.DatabaseConfigService;
-import com.espertech.esper.dataflow.core.GraphService;
+import com.espertech.esper.epl.declexpr.ExprDeclaredService;
 import com.espertech.esper.epl.metric.MetricReportingServiceSPI;
 import com.espertech.esper.epl.named.NamedWindowService;
 import com.espertech.esper.epl.spec.PluggableObjectCollection;
@@ -44,7 +45,6 @@ import com.espertech.esper.view.stream.StreamFactoryService;
 public final class EPServicesContext
 {
     private String engineURI;
-    private String engineInstanceId;
     private FilterServiceSPI filterService;
     private TimerService timerService;
     private SchedulingServiceSPI schedulingService;
@@ -87,12 +87,13 @@ public final class EPServicesContext
     private InternalEventRouterImpl internalEventRouter;
     private EventTypeIdGenerator eventTypeIdGenerator;
 
-    private GraphService graphService;
+    private DataFlowService dataFlowService;
+    private ExprDeclaredService exprDeclaredService;
+    private ExpressionResultCacheService expressionResultCacheSharable;
 
     /**
      * Constructor - sets up new set of services.
      * @param engineURI is the engine URI
-     * @param engineInstanceId is the engine URI
      * @param schedulingService service to get time and schedule callbacks
      * @param eventAdapterService service to resolve event types
      * @param databaseConfigService service to resolve a database name to database connection factory and configs
@@ -122,7 +123,6 @@ public final class EPServicesContext
      * @param schedulingMgmtService - schedule management for statements
      */
     public EPServicesContext(String engineURI,
-                             String engineInstanceId,
                              SchedulingServiceSPI schedulingService,
                              EventAdapterService eventAdapterService,
                              EngineImportService engineImportService,
@@ -158,10 +158,10 @@ public final class EPServicesContext
                              ContextManagementService contextManagementService,
                              SchedulableAgentInstanceDirectory schedulableAgentInstanceDirectory,
                              PatternSubexpressionPoolEngineSvc patternSubexpressionPoolSvc,
-                             GraphService graphService)
+                             DataFlowService dataFlowService,
+                             ExprDeclaredService exprDeclaredService)
     {
         this.engineURI = engineURI;
-        this.engineInstanceId = engineInstanceId;
         this.schedulingService = schedulingService;
         this.eventAdapterService = eventAdapterService;
         this.engineImportService = engineImportService;
@@ -199,7 +199,9 @@ public final class EPServicesContext
         this.contextManagementService = contextManagementService;
         this.schedulableAgentInstanceDirectory = schedulableAgentInstanceDirectory;
         this.patternSubexpressionPoolSvc = patternSubexpressionPoolSvc;
-        this.graphService = graphService;
+        this.dataFlowService = dataFlowService;
+        this.exprDeclaredService = exprDeclaredService;
+        this.expressionResultCacheSharable = new ExpressionResultCacheServiceThreadlocal();
     }
 
     public PatternNodeFactory getPatternNodeFactory() {
@@ -400,8 +402,11 @@ public final class EPServicesContext
      */
     public void destroy()
     {
-        if (graphService != null) {
-            graphService.destroy();
+        if (exprDeclaredService != null) {
+            exprDeclaredService.destroy();
+        }
+        if (dataFlowService != null) {
+            dataFlowService.destroy();
         }
         if (variableService != null) {
             variableService.destroy();
@@ -479,9 +484,14 @@ public final class EPServicesContext
         this.metricsReportingService = null;
         this.statementEventTypeRef = null;
         this.threadingService = null;
+        this.expressionResultCacheSharable = null;
     }
 
     /**
+    }
+
+    public ExpressionResultCacheService getExpressionResultCacheSharable() {
+        return expressionResultCacheSharable;
      * Returns the factory to use for creating a statement context.
      * @return statement context factory
      */
@@ -497,15 +507,6 @@ public final class EPServicesContext
     public String getEngineURI()
     {
         return engineURI;
-    }
-
-    /**
-     * Returns the engine instance ID.
-     * @return instance id
-     */
-    public String getEngineInstanceId()
-    {
-        return engineInstanceId;
     }
 
     /**
@@ -644,7 +645,15 @@ public final class EPServicesContext
         return patternSubexpressionPoolSvc;
     }
 
-    public GraphService getGraphService() {
-        return graphService;
+    public DataFlowService getDataFlowService() {
+        return dataFlowService;
+    }
+
+    public ExprDeclaredService getExprDeclaredService() {
+        return exprDeclaredService;
+    }
+
+    public ExpressionResultCacheService getExpressionResultCacheSharable() {
+        return expressionResultCacheSharable;
     }
 }

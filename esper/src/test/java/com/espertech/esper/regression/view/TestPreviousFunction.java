@@ -918,6 +918,54 @@ public class TestPreviousFunction extends TestCase
         assertNewEvents("AAA", "AAA", 1d, "COX", 30d, "CXX", 56d, "XXX", 55d, "MSFT", 33d, 7L, splitDoubles("1d,30d,56d,1d,45d,33d,55d"));
     }
 
+    public void testPreviousExtTimedBatch()
+    {
+        String[] fields = "currSymbol,prev0Symbol,prev0Price,prev1Symbol,prev1Price,prev2Symbol,prev2Price,prevTail0Symbol,prevTail0Price,prevTail1Symbol,prevTail1Price,prevCountPrice,prevWindowPrice".split(",");
+        String viewExpr =   "select irstream symbol as currSymbol, " +
+                "prev(0, symbol) as prev0Symbol, " +
+                "prev(0, price) as prev0Price, " +
+                "prev(1, symbol) as prev1Symbol, " +
+                "prev(1, price) as prev1Price, " +
+                "prev(2, symbol) as prev2Symbol, " +
+                "prev(2, price) as prev2Price," +
+                "prevtail(0, symbol) as prevTail0Symbol, " +
+                "prevtail(0, price) as prevTail0Price, " +
+                "prevtail(1, symbol) as prevTail1Symbol, " +
+                "prevtail(1, price) as prevTail1Price, " +
+                "prevcount(price) as prevCountPrice, " +
+                "prevwindow(price) as prevWindowPrice " +
+                "from " + SupportMarketDataBean.class.getName() + ".win:ext_timed_batch(volume, 10, 0L) ";
+
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        selectTestView.addListener(listener);
+
+        sendMarketEvent("A", 1, 1000);
+        sendMarketEvent("B", 2, 1001);
+        sendMarketEvent("C", 3, 1002);
+        sendMarketEvent("D", 4, 10000);
+
+        EPAssertionUtil.assertPropsPerRow(listener.assertInvokedAndReset(), fields,
+                new Object[][] {
+                        {"A", "A", 1d, null, null, null, null, "A", 1d, "B", 2d, 3L, splitDoubles("3d,2d,1d")},
+                        {"B", "B", 2d, "A", 1d, null, null, "A", 1d, "B", 2d, 3L, splitDoubles("3d,2d,1d")},
+                        {"C", "C", 3d, "B", 2d, "A", 1d, "A", 1d, "B", 2d, 3L, splitDoubles("3d,2d,1d")}
+                },
+                null);
+
+        sendMarketEvent("E", 5, 20000);
+
+        EPAssertionUtil.assertPropsPerRow(listener.assertInvokedAndReset(), fields,
+                new Object[][] {
+                        {"D", "D", 4d, null, null, null, null, "D", 4d, null, null, 1L, splitDoubles("4d")},
+                },
+                new Object[][] {
+                        {"A", null, null, null, null, null, null, null, null, null, null, null, null},
+                        {"B", null, null, null, null, null, null, null, null, null, null, null, null},
+                        {"C", null, null, null, null, null, null, null, null, null, null, null, null},
+                }
+                );
+    }
+
     public void testInvalid()
     {
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);

@@ -279,7 +279,7 @@ public class EPAdministratorImpl implements EPAdministratorSPI
     }
 
     public StatementSpecRaw mapSODAToRaw(EPStatementObjectModel model) {
-        return StatementSpecMapper.map(model, services.getEngineImportService(), services.getVariableService(), services.getConfigSnapshot(), services.getSchedulingService(), services.getEngineURI(), services.getPatternNodeFactory(), services.getNamedWindowService(), services.getContextManagementService());
+        return StatementSpecMapper.map(model, services.getEngineImportService(), services.getVariableService(), services.getConfigSnapshot(), services.getSchedulingService(), services.getEngineURI(), services.getPatternNodeFactory(), services.getNamedWindowService(), services.getContextManagementService(), services.getExprDeclaredService());
     }
 
     public EvalFactoryNode compilePatternToNode(String pattern) throws EPException

@@ -43,11 +43,11 @@ public class EPStatementStartMethodCreateVariable extends EPStatementStartMethod
 {
     private static final Log log = LogFactory.getLog(EPStatementStartMethodCreateVariable.class);
 
-    public EPStatementStartMethodCreateVariable(StatementSpecCompiled statementSpec, EPServicesContext services, StatementContext statementContext) {
-        super(statementSpec, services, statementContext);
+    public EPStatementStartMethodCreateVariable(StatementSpecCompiled statementSpec) {
+        super(statementSpec);
     }
 
-    public EPStatementStartResult startInternal(boolean isNewStatement, boolean isRecoveringStatement, boolean isRecoveringResilient) throws ExprValidationException, ViewProcessingException {
+    public EPStatementStartResult startInternal(final EPServicesContext services, final StatementContext statementContext, boolean isNewStatement, boolean isRecoveringStatement, boolean isRecoveringResilient) throws ExprValidationException, ViewProcessingException {
         final CreateVariableDesc createDesc = statementSpec.getCreateVariableDesc();
 
         // Get assignment value
@@ -65,7 +65,7 @@ public class EPStatementStartMethodCreateVariable extends EPStatementStartMethod
         // Create variable
         try
         {
-            services.getVariableService().createNewVariable(createDesc.getVariableName(), createDesc.getVariableType(), value, createDesc.isConstant(), statementContext.getExtensionServicesContext());
+            services.getVariableService().createNewVariable(createDesc.getVariableName(), createDesc.getVariableType(), value, createDesc.isConstant(), createDesc.isArray(), statementContext.getExtensionServicesContext(), services.getEngineImportService());
         }
         catch (VariableExistsException ex)
         {
@@ -95,7 +95,7 @@ public class EPStatementStartMethodCreateVariable extends EPStatementStartMethod
         statementSpec.getSelectClauseSpec().add(new SelectClauseElementWildcard());
         statementSpec.setSelectStreamDirEnum(SelectClauseStreamSelectorEnum.RSTREAM_ISTREAM_BOTH);
         StreamTypeService typeService = new StreamTypeServiceImpl(new EventType[] {createView.getEventType()}, new String[] {"create_variable"}, new boolean[] {true}, services.getEngineURI(), false);
-        AgentInstanceContext agentInstanceContext = getDefaultAgentInstanceContext();
+        AgentInstanceContext agentInstanceContext = getDefaultAgentInstanceContext(statementContext);
         ResultSetProcessorFactoryDesc resultSetProcessorPrototype = ResultSetProcessorFactoryFactory.getProcessorPrototype(
                 statementSpec, statementContext, typeService, null, new boolean[0], true, ContextPropertyRegistryImpl.EMPTY_REGISTRY, null);
         ResultSetProcessor resultSetProcessor = EPStatementStartMethodHelperAssignExpr.getAssignResultSetProcessor(agentInstanceContext, resultSetProcessorPrototype);

@@ -10,7 +10,6 @@ package com.espertech.esper.epl.join.plan;
 
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.epl.expression.ExprNode;
-import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.lookup.SubordPropHashKey;
 import com.espertech.esper.epl.lookup.SubordPropPlan;
 import com.espertech.esper.epl.lookup.SubordPropRangeKey;
@@ -34,7 +33,7 @@ public class QueryPlanIndexBuilder
      * @param queryGraph - navigability info
      * @return query index specs for each stream
      */
-    public static QueryPlanIndex[] buildIndexSpec(QueryGraph queryGraph, EventType[] typePerStream)
+    public static QueryPlanIndex[] buildIndexSpec(QueryGraph queryGraph, EventType[] typePerStream, String[][][] indexedStreamsUniqueProps)
     {
         int numStreams = queryGraph.getNumStreams();
         QueryPlanIndex[] indexSpecs = new QueryPlanIndex[numStreams];
@@ -59,17 +58,30 @@ public class QueryPlanIndexBuilder
                 String[] hashIndexProps = hashKeyAndIndexProps.getIndexed();
                 List<QueryGraphValueEntryHashKeyed> hashKeyProps = hashKeyAndIndexProps.getKeys();
                 CoercionDesc indexCoercionTypes = CoercionUtil.getCoercionTypesHash(typePerStream, streamLookup, streamIndexed, hashKeyProps, hashIndexProps);
+                Class[] hashCoercionTypeArr = indexCoercionTypes.getCoercionTypes();
 
                 QueryGraphValuePairRangeIndex rangeAndIndexProps = value.getRangeProps();
                 String[] rangeIndexProps = rangeAndIndexProps.getIndexed();
                 List<QueryGraphValueEntryRange> rangeKeyProps = rangeAndIndexProps.getKeys();
                 CoercionDesc rangeCoercionTypes = CoercionUtil.getCoercionTypesRange(typePerStream, streamIndexed, rangeIndexProps, rangeKeyProps);
+                Class[] rangeCoercionTypeArr = rangeCoercionTypes.getCoercionTypes();
 
                 if (hashIndexProps.length == 0 && rangeIndexProps.length == 0) {
                     continue;
                 }
 
-                QueryPlanIndexItem proposed = new QueryPlanIndexItem(hashIndexProps, indexCoercionTypes.getCoercionTypes(), rangeIndexProps, rangeCoercionTypes.getCoercionTypes());
+                // reduce to any unique index if applicable
+                boolean unique = false;
+                QueryPlanIndexUniqueHelper.ReducedHashKeys reduced = QueryPlanIndexUniqueHelper.reduceToUniqueIfPossible(hashIndexProps, hashCoercionTypeArr, hashKeyProps, indexedStreamsUniqueProps[streamIndexed]);
+                if (reduced != null) {
+                    hashIndexProps = reduced.getPropertyNames();
+                    hashCoercionTypeArr = reduced.getCoercionTypes();
+                    unique = true;
+                    rangeIndexProps = new String[0];
+                    rangeCoercionTypeArr = new Class[0];
+                }
+
+                QueryPlanIndexItem proposed = new QueryPlanIndexItem(hashIndexProps, hashCoercionTypeArr, rangeIndexProps, rangeCoercionTypeArr, unique);
                 boolean found = false;
                 for (QueryPlanIndexItem index : indexesSet) {
                     if (proposed.equalsCompareSortedProps(index)) {
@@ -85,7 +97,7 @@ public class QueryPlanIndexBuilder
 
             // Copy the index properties for the stream to a QueryPlanIndex instance
             if (indexesSet.isEmpty()) {
-                indexesSet.add(new QueryPlanIndexItem(null, null, null, null));
+                indexesSet.add(new QueryPlanIndexItem(null, null, null, null, false));
             }
 
             indexSpecs[streamIndexed] = QueryPlanIndex.makeIndex(indexesSet);

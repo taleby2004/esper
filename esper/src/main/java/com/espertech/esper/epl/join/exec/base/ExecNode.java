@@ -8,6 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.epl.join.exec.base;
 
+import java.util.Collection;
 import java.util.List;
 import java.io.StringWriter;
 import java.io.PrintWriter;
@@ -30,7 +31,7 @@ public abstract class ExecNode
      * @param result is the list of tuples to add a result row to
      * @param exprEvaluatorContext context for expression evaluation
      */
-    public abstract void process(EventBean lookupEvent, EventBean[] prefillPath, List<EventBean[]> result, ExprEvaluatorContext exprEvaluatorContext);
+    public abstract void process(EventBean lookupEvent, EventBean[] prefillPath, Collection<EventBean[]> result, ExprEvaluatorContext exprEvaluatorContext);
 
     /**
      * Output the execution strategy.

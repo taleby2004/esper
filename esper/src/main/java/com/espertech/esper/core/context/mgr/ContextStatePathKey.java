@@ -81,4 +81,13 @@ public class ContextStatePathKey implements Comparable {
         result = 31 * result + subPath;
         return result;
     }
+
+    public String toString() {
+        return "ContextStatePathKey{" +
+                "contextName='" + contextName + '\'' +
+                ", level=" + level +
+                ", parentPath=" + parentPath +
+                ", subPath=" + subPath +
+                '}';
+    }
 }

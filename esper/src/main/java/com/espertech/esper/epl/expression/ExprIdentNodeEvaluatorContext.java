@@ -54,4 +54,8 @@ public class ExprIdentNodeEvaluatorContext implements ExprIdentNodeEvaluator {
     public EventPropertyGetter getGetter() {
         return getter;
     }
+
+    public boolean isContextEvaluated() {
+        return true;
+    }
 }

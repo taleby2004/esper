@@ -72,7 +72,7 @@ public class TestVirtualDataWindowToLookup extends TestCase {
         epService.getEPAdministrator().createEPL("insert into MyWin select * from SupportBean");
         NamedWindowProcessor processor = spi.getNamedWindowService().getProcessor("MyWin");
         NamedWindowProcessorInstance processorInstance = processor.getProcessorInstance(null);
-        SubordTableLookupStrategy strategy = processorInstance.getRootViewInstance().getAddSubqueryLookupStrategy("ABC", "001", null, spiContext.getOuterTypePerStream(), spiContext.getJoinDesc(), spiContext.isForceTableScan());
+        SubordTableLookupStrategy strategy = processorInstance.getRootViewInstance().getAddSubqueryLookupStrategy("ABC", "001", null, spiContext.getOuterTypePerStream(), spiContext.getJoinDesc(), spiContext.isForceTableScan(), 0, null);
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 200));
 
         // trigger

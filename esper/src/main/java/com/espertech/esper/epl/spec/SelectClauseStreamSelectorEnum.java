@@ -34,6 +34,10 @@ public enum SelectClauseStreamSelectorEnum
         return this != ISTREAM_ONLY;
     }
 
+    public boolean isSelectsIStream() {
+        return this != RSTREAM_ONLY;
+    }
+
     /**
      * Maps the SODA-selector to the internal representation
      * @param selector is the SODA-selector to map

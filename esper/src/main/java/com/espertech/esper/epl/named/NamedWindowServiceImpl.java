@@ -141,14 +141,15 @@ public class NamedWindowServiceImpl implements NamedWindowService
     public NamedWindowProcessor addProcessor(String name, String contextName, boolean singleInstanceContext, EventType eventType, StatementResultService statementResultService,
                                              ValueAddEventProcessor revisionProcessor, String eplExpression, String statementName, boolean isPrioritized,
                                              boolean isEnableSubqueryIndexShare, boolean isBatchingDataWindow,
-                                             boolean isVirtualDataWindow, StatementMetricHandle statementMetricHandle) throws ViewProcessingException
+                                             boolean isVirtualDataWindow, StatementMetricHandle statementMetricHandle,
+                                             Set<String> optionalUniqueKeyProps) throws ViewProcessingException
     {
         if (processors.containsKey(name))
         {
             throw new ViewProcessingException("A named window by name '" + name + "' has already been created");
         }
 
-        NamedWindowProcessor processor = new NamedWindowProcessor(name, this, contextName, singleInstanceContext, eventType, statementResultService, revisionProcessor, eplExpression, statementName, isPrioritized, isEnableSubqueryIndexShare, enableQueryPlanLog, metricReportingService, isBatchingDataWindow, isVirtualDataWindow, statementMetricHandle);
+        NamedWindowProcessor processor = new NamedWindowProcessor(name, this, contextName, singleInstanceContext, eventType, statementResultService, revisionProcessor, eplExpression, statementName, isPrioritized, isEnableSubqueryIndexShare, enableQueryPlanLog, metricReportingService, isBatchingDataWindow, isVirtualDataWindow, statementMetricHandle, optionalUniqueKeyProps);
         processors.put(name, processor);
 
         if (!observers.isEmpty())

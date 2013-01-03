@@ -39,7 +39,7 @@ public class PropertyIndexedEventTableCoerceAddFactory extends PropertyIndexedEv
      */
     public PropertyIndexedEventTableCoerceAddFactory(int streamNum, EventType eventType, String[] propertyNames, Class[] coercionType)
     {
-        super(streamNum, eventType, propertyNames);
+        super(streamNum, eventType, propertyNames, false, null);
         this.coercionType = coercionType;
         coercers = new SimpleNumberCoercer[coercionType.length];
         for (int i = 0; i < coercionType.length; i++)

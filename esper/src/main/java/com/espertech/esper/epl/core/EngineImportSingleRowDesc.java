@@ -22,12 +22,14 @@ public class EngineImportSingleRowDesc implements Serializable
     private final String methodName;
     private final ConfigurationPlugInSingleRowFunction.ValueCache valueCache;
     private final ConfigurationPlugInSingleRowFunction.FilterOptimizable filterOptimizable;
+    private final boolean rethrowExceptions;
 
-    public EngineImportSingleRowDesc(String className, String methodName, ConfigurationPlugInSingleRowFunction.ValueCache valueCache, ConfigurationPlugInSingleRowFunction.FilterOptimizable filterOptimizable) {
+    public EngineImportSingleRowDesc(String className, String methodName, ConfigurationPlugInSingleRowFunction.ValueCache valueCache, ConfigurationPlugInSingleRowFunction.FilterOptimizable filterOptimizable, boolean rethrowExceptions) {
         this.className = className;
         this.methodName = methodName;
         this.valueCache = valueCache;
         this.filterOptimizable = filterOptimizable;
+        this.rethrowExceptions = rethrowExceptions;
     }
 
     public String getClassName() {
@@ -44,5 +46,9 @@ public class EngineImportSingleRowDesc implements Serializable
 
     public ConfigurationPlugInSingleRowFunction.FilterOptimizable getFilterOptimizable() {
         return filterOptimizable;
+    }
+
+    public boolean isRethrowExceptions() {
+        return rethrowExceptions;
     }
 }

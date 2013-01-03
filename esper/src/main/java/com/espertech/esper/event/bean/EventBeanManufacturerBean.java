@@ -12,13 +12,11 @@
 package com.espertech.esper.event.bean;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.epl.core.EngineImportException;
-import com.espertech.esper.epl.core.MethodResolutionService;
+import com.espertech.esper.epl.core.EngineImportService;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.EventBeanManufactureException;
 import com.espertech.esper.event.EventBeanManufacturer;
 import com.espertech.esper.event.WriteablePropertyDescriptor;
-import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,11 +31,11 @@ public class EventBeanManufacturerBean implements EventBeanManufacturer
 {
     private static Log log = LogFactory.getLog(EventBeanManufacturerBean.class);
 
-    private final FastClass fastClass;
+    private final BeanInstantiator beanInstantiator;
     private final BeanEventType beanEventType;
     private final EventAdapterService service;
-    private final FastMethod[] writeMethods;
-    private final FastMethod factoryMethod;
+    private final FastMethod[] writeMethodsFastClass;
+    private final Method[] writeMethodsReflection;
     private final boolean hasPrimitiveTypes;
     private final boolean[] primitiveType;
 
@@ -46,52 +44,38 @@ public class EventBeanManufacturerBean implements EventBeanManufacturer
      * @param beanEventType target type
      * @param service factory for events
      * @param properties written properties
-     * @param methodResolutionService for resolving write methods
+     * @param engineImportService for resolving write methods
      * @throws EventBeanManufactureException if the write method lookup fail
      */
     public EventBeanManufacturerBean(BeanEventType beanEventType,
                                      EventAdapterService service,
                                      WriteablePropertyDescriptor[] properties,
-                                     MethodResolutionService methodResolutionService
+                                     EngineImportService engineImportService
                                      )
             throws EventBeanManufactureException
     {
-        this.fastClass = beanEventType.getFastClass();
         this.beanEventType = beanEventType;
         this.service = service;
 
-        // see if we use a factory method
-        if (beanEventType.getFactoryMethodName() != null)
-        {
-            factoryMethod = resolveFactoryMethod(fastClass, beanEventType.getFactoryMethodName(), methodResolutionService);
+        beanInstantiator = BeanInstantiatorFactory.makeInstantiator(beanEventType, engineImportService);
+
+        writeMethodsReflection = new Method[properties.length];
+        if (beanEventType.getFastClass() != null) {
+            writeMethodsFastClass = new FastMethod[properties.length];
         }
-        else
-        {
-            factoryMethod = null;
-            try
-            {
-                fastClass.newInstance();
-            }
-            catch (InvocationTargetException e)
-            {
-                String message = "Failed to instantiate class '" + fastClass.getJavaClass().getName() + "', define a factory method if the class has no suitable constructors: " + e.getTargetException().getMessage();
-                log.info(message, e);
-                throw new EventBeanManufactureException(message, e.getTargetException());
-            }
-            catch (IllegalArgumentException e)
-            {
-                String message = "Failed to instantiate class '" + fastClass.getJavaClass().getName() + "', define a factory method if the class has no suitable constructors";
-                log.info(message, e);
-                throw new EventBeanManufactureException(message, e);
-            }
+        else {
+            writeMethodsFastClass = null;
         }
 
-        writeMethods = new FastMethod[properties.length];
         boolean primitiveTypeCheck = false;
         primitiveType = new boolean[properties.length];
         for (int i = 0; i < properties.length; i++)
         {
-            writeMethods[i] = fastClass.getMethod(properties[i].getWriteMethod());
+            writeMethodsReflection[i] = properties[i].getWriteMethod();
+            if (beanEventType.getFastClass() != null) {
+                writeMethodsFastClass[i] = beanEventType.getFastClass().getMethod(properties[i].getWriteMethod());
+            }
+
             primitiveType[i] = properties[i].getType().isPrimitive();
             primitiveTypeCheck |= primitiveType[i];
         }
@@ -106,71 +90,92 @@ public class EventBeanManufacturerBean implements EventBeanManufacturer
 
     public Object makeUnderlying(Object[] propertyValues)
     {
-        Object outObject;
-        if (factoryMethod == null)
-        {
-            try
-            {
-                outObject = fastClass.newInstance();
-            }
-            catch (InvocationTargetException e)
-            {
-                String message = "Unexpected exception encountered invoking newInstance on class '" + fastClass.getJavaClass().getName() + "': " + e.getTargetException().getMessage();
-                log.error(message, e);
-                return null;
-            }
-        }
-        else
-        {
-            try
-            {
-                outObject = factoryMethod.invoke(null, null);
-            }
-            catch (InvocationTargetException e)
-            {
-                String message = "Unexpected exception encountered invoking factory method '" + factoryMethod.getName() + "' on class '" + factoryMethod.getJavaMethod().getDeclaringClass().getName() + "': " + e.getTargetException().getMessage();
-                log.error(message, e);
-                return null;
-            }
-        }
+        Object outObject = beanInstantiator.instantiate();
 
-        if (!hasPrimitiveTypes) {
-            Object[] parameters = new Object[1];
-            for (int i = 0; i < writeMethods.length; i++)
-            {
-                parameters[0] = propertyValues[i];
-                try
+        if (writeMethodsFastClass != null) {
+            if (!hasPrimitiveTypes) {
+                Object[] parameters = new Object[1];
+                for (int i = 0; i < writeMethodsFastClass.length; i++)
                 {
-                    writeMethods[i].invoke(outObject, parameters);
-                }
-                catch (InvocationTargetException e)
-                {
-                    String message = "Unexpected exception encountered invoking setter-method '" + writeMethods[i] + "' on class '" +
-                            fastClass.getJavaClass().getName() + "' : " + e.getTargetException().getMessage();
-                    log.error(message, e);
-                }
-            }
-        }
-        else
-        {
-            Object[] parameters = new Object[1];
-            for (int i = 0; i < writeMethods.length; i++)
-            {
-                if (primitiveType[i]) {
-                    if (propertyValues[i] == null) {
-                        continue;
+                    parameters[0] = propertyValues[i];
+                    try
+                    {
+                        writeMethodsFastClass[i].invoke(outObject, parameters);
+                    }
+                    catch (InvocationTargetException e)
+                    {
+                        handle(e, writeMethodsFastClass[i].getName());
                     }
                 }
-                parameters[0] = propertyValues[i];
-                try
+            }
+            else
+            {
+                Object[] parameters = new Object[1];
+                for (int i = 0; i < writeMethodsFastClass.length; i++)
                 {
-                    writeMethods[i].invoke(outObject, parameters);
+                    if (primitiveType[i]) {
+                        if (propertyValues[i] == null) {
+                            continue;
+                        }
+                    }
+                    parameters[0] = propertyValues[i];
+                    try
+                    {
+                        writeMethodsFastClass[i].invoke(outObject, parameters);
+                    }
+                    catch (InvocationTargetException e)
+                    {
+                        handle(e, writeMethodsFastClass[i].getName());
+                    }
                 }
-                catch (InvocationTargetException e)
+            }
+        }
+        else {
+
+            if (!hasPrimitiveTypes) {
+                Object[] parameters = new Object[1];
+                for (int i = 0; i < writeMethodsReflection.length; i++)
                 {
-                    String message = "Unexpected exception encountered invoking setter-method '" + writeMethods[i] + "' on class '" +
-                            fastClass.getJavaClass().getName() + "' : " + e.getTargetException().getMessage();
-                    log.error(message, e);
+                    parameters[0] = propertyValues[i];
+                    try
+                    {
+                        writeMethodsReflection[i].invoke(outObject, parameters);
+                    }
+                    catch (InvocationTargetException e)
+                    {
+                        String message = "Unexpected exception encountered invoking setter-method '" + writeMethodsReflection[i] + "' on class '" +
+                                beanEventType.getUnderlyingType().getName() + "' : " + e.getTargetException().getMessage();
+                        log.error(message, e);
+                    }
+                    catch (IllegalAccessException e)
+                    {
+                        handle(e, writeMethodsReflection[i].getName());
+                    }
+                }
+            }
+            else
+            {
+                Object[] parameters = new Object[1];
+                for (int i = 0; i < writeMethodsReflection.length; i++)
+                {
+                    if (primitiveType[i]) {
+                        if (propertyValues[i] == null) {
+                            continue;
+                        }
+                    }
+                    parameters[0] = propertyValues[i];
+                    try
+                    {
+                        writeMethodsReflection[i].invoke(outObject, parameters);
+                    }
+                    catch (InvocationTargetException e)
+                    {
+                        handle(e, writeMethodsReflection[i].getName());
+                    }
+                    catch (IllegalAccessException e)
+                    {
+                        handle(e, writeMethodsReflection[i].getName());
+                    }
                 }
             }
         }
@@ -178,39 +183,15 @@ public class EventBeanManufacturerBean implements EventBeanManufacturer
         return outObject;
     }
 
-    private static FastMethod resolveFactoryMethod(FastClass fastClass, String factoryMethodName, MethodResolutionService methodResolutionService)
-            throws EventBeanManufactureException
-    {
-        int lastDotIndex = factoryMethodName.lastIndexOf('.');
-        if (lastDotIndex == -1)
-        {
-            try
-            {
-                Method method = methodResolutionService.resolveMethod(fastClass.getJavaClass(), factoryMethodName, new Class[0]);
-                return fastClass.getMethod(method);
-            }
-            catch (EngineImportException e)
-            {
-                String message = "Failed to resolve configured factory method '" + factoryMethodName +
-                        "' expected to exist for class '" + fastClass.getName() + "'";
-                log.info(message, e);
-                throw new EventBeanManufactureException(message, e);
-            }
-        }
+    private void handle(InvocationTargetException ex, String methodName) {
+        String message = "Unexpected exception encountered invoking setter-method '" + methodName + "' on class '" +
+                beanEventType.getUnderlyingType().getName() + "' : " + ex.getTargetException().getMessage();
+        log.error(message, ex);
+    }
 
-        String className = factoryMethodName.substring(0, lastDotIndex);
-        String methodName = factoryMethodName.substring(lastDotIndex + 1);
-        try
-        {
-            Method method = methodResolutionService.resolveMethod(className, methodName, new Class[0]);
-            FastClass fastClassFactory = FastClass.create(method.getDeclaringClass());
-            return fastClassFactory.getMethod(method);
-        }
-        catch (EngineImportException e)
-        {
-            String message = "Failed to resolve configured factory method '" + methodName + "' expected to exist for class '" + className + "'";
-            log.info(message, e);
-            throw new EventBeanManufactureException(message, e);
-        }
+    private void handle(IllegalAccessException ex, String methodName) {
+        String message = "Unexpected exception encountered invoking setter-method '" + methodName + "' on class '" +
+                beanEventType.getUnderlyingType().getName() + "' : " + ex.getMessage();
+        log.error(message, ex);
     }
 }

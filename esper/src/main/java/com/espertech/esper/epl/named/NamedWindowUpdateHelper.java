@@ -114,6 +114,7 @@ public class NamedWindowUpdateHelper
     {
         EventBean copy = copyMethod.copy(matchingEvent);
         eventsPerStream[0] = copy;
+        eventsPerStream[2] = matchingEvent; // initial value
 
         for (int i = 0; i < expressions.length; i++) {
             Object result = expressions[i].evaluate(eventsPerStream, true, exprEvaluatorContext);

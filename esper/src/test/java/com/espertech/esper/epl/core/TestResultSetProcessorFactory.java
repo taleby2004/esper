@@ -213,6 +213,7 @@ public class TestResultSetProcessorFactory extends TestCase
                 null,
                 null,
                 null,
+                null,
                 null);
     }
 }

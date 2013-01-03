@@ -31,18 +31,18 @@ public class ContextControllerConditionPattern implements ContextControllerCondi
     private final ContextControllerConditionCallback callback;
     private final ContextInternalFilterAddendum filterAddendum;
     private final boolean isStartEndpoint;
-    private final int subPathId;
+    private final ContextStatePathKey contextStatePathKey;
 
     protected EvalRootState patternStopCallback;
 
-    public ContextControllerConditionPattern(EPServicesContext servicesContext, AgentInstanceContext agentInstanceContext, ContextDetailConditionPattern endpointPatternSpec, ContextControllerConditionCallback callback, ContextInternalFilterAddendum filterAddendum, boolean startEndpoint, int subPathId) {
+    public ContextControllerConditionPattern(EPServicesContext servicesContext, AgentInstanceContext agentInstanceContext, ContextDetailConditionPattern endpointPatternSpec, ContextControllerConditionCallback callback, ContextInternalFilterAddendum filterAddendum, boolean startEndpoint, ContextStatePathKey contextStatePathKey) {
         this.servicesContext = servicesContext;
         this.agentInstanceContext = agentInstanceContext;
         this.endpointPatternSpec = endpointPatternSpec;
         this.callback = callback;
         this.filterAddendum = filterAddendum;
         this.isStartEndpoint = startEndpoint;
-        this.subPathId = subPathId;
+        this.contextStatePathKey = contextStatePathKey;
     }
 
     public void activate(EventBean optionalTriggeringEvent, MatchedEventMap priorMatches, long timeOffset, boolean isRecoveringReslient) {
@@ -54,8 +54,10 @@ public class ContextControllerConditionPattern implements ContextControllerCondi
         StatementContext stmtContext = agentInstanceContext.getStatementContext();
 
         EvalRootFactoryNode rootFactoryNode = servicesContext.getPatternNodeFactory().makeRootNode();
-        PatternContext patternContext = stmtContext.getPatternContextFactory().createContext(stmtContext, 0, rootFactoryNode, new MatchedEventMapMeta(patternStreamSpec.getAllTags(), !patternStreamSpec.getArrayEventTypes().isEmpty()));
+        int streamNum = isStartEndpoint ? contextStatePathKey.getSubPath() : -1 * contextStatePathKey.getSubPath();
+        boolean allowResilient = contextStatePathKey.getLevel() == 1;
         rootFactoryNode.addChildNode(patternStreamSpec.getEvalFactoryNode());
+        PatternContext patternContext = stmtContext.getPatternContextFactory().createContext(stmtContext, streamNum, rootFactoryNode, new MatchedEventMapMeta(patternStreamSpec.getAllTags(), !patternStreamSpec.getArrayEventTypes().isEmpty()), allowResilient);
 
         PatternAgentInstanceContext patternAgentInstanceContext = stmtContext.getPatternContextFactory().createPatternAgentContext(patternContext, agentInstanceContext, false);
         EvalRootNode rootNode = EvalNodeUtil.makeRootNodeFromFactory(rootFactoryNode, patternAgentInstanceContext);
@@ -70,7 +72,7 @@ public class ContextControllerConditionPattern implements ContextControllerCondi
         callback.forwardCalls = true;
 
         if (agentInstanceContext.getStatementContext().getExtensionServicesContext() != null) {
-            agentInstanceContext.getStatementContext().getExtensionServicesContext().startContextPattern(patternStopCallback, isStartEndpoint, subPathId);
+            agentInstanceContext.getStatementContext().getExtensionServicesContext().startContextPattern(patternStopCallback, isStartEndpoint, contextStatePathKey);
         }
 
         if (callback.isInvoked) {
@@ -104,7 +106,7 @@ public class ContextControllerConditionPattern implements ContextControllerCondi
             patternStopCallback.stop();
             patternStopCallback = null;
             if (agentInstanceContext.getStatementContext().getExtensionServicesContext() != null) {
-                agentInstanceContext.getStatementContext().getExtensionServicesContext().stopContextPattern(patternStopCallback, isStartEndpoint, subPathId);
+                agentInstanceContext.getStatementContext().getExtensionServicesContext().stopContextPattern(patternStopCallback, isStartEndpoint, contextStatePathKey);
             }
         }
     }

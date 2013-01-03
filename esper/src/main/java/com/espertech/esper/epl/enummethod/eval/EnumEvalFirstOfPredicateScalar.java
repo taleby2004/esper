@@ -14,20 +14,22 @@ package com.espertech.esper.epl.enummethod.eval;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
-import com.espertech.esper.event.map.MapEventType;
+import com.espertech.esper.event.arr.ObjectArrayEventBean;
+import com.espertech.esper.event.arr.ObjectArrayEventType;
 
 import java.util.Collection;
 
 public class EnumEvalFirstOfPredicateScalar extends EnumEvalBaseScalar implements EnumEval {
 
-    public EnumEvalFirstOfPredicateScalar(ExprEvaluator innerExpression, int streamCountIncoming, MapEventType type, String propertyName) {
-        super(innerExpression, streamCountIncoming, type, propertyName);
+    public EnumEvalFirstOfPredicateScalar(ExprEvaluator innerExpression, int streamCountIncoming, ObjectArrayEventType type) {
+        super(innerExpression, streamCountIncoming, type);
     }
 
-    public Object evaluateEnumMethod(Collection target, boolean isNewData, ExprEvaluatorContext context) {
+    public Object evaluateEnumMethod(EventBean[] eventsLambda, Collection target, boolean isNewData, ExprEvaluatorContext context) {
+        ObjectArrayEventBean evalEvent = new ObjectArrayEventBean(new Object[1], type);
         for (Object next : target) {
 
-            evalEvent.getProperties().put(evalPropertyName, next);
+            evalEvent.getProperties()[0] = next;
             eventsLambda[streamNumLambda] = evalEvent;
 
             Object pass = getInnerExpression().evaluate(eventsLambda, isNewData, context);

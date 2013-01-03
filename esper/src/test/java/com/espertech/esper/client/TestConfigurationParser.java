@@ -329,12 +329,14 @@ public class TestConfigurationParser extends TestCase
         assertEquals("func3", pluginSingleRow.getName());
         assertEquals(ConfigurationPlugInSingleRowFunction.ValueCache.DISABLED, pluginSingleRow.getValueCache());
         assertEquals(ConfigurationPlugInSingleRowFunction.FilterOptimizable.ENABLED, pluginSingleRow.getFilterOptimizable());
+        assertFalse(pluginSingleRow.isRethrowExceptions());
         pluginSingleRow = config.getPlugInSingleRowFunctions().get(1);
         assertEquals("com.mycompany.MyMatrixSingleRowMethod1", pluginSingleRow.getFunctionClassName());
         assertEquals("func4", pluginSingleRow.getName());
         assertEquals("method2", pluginSingleRow.getFunctionMethodName());
         assertEquals(ConfigurationPlugInSingleRowFunction.ValueCache.ENABLED, pluginSingleRow.getValueCache());
         assertEquals(ConfigurationPlugInSingleRowFunction.FilterOptimizable.DISABLED, pluginSingleRow.getFilterOptimizable());
+        assertTrue(pluginSingleRow.isRethrowExceptions());
 
         // assert plug-in guard objects loaded
         assertEquals(4, config.getPlugInPatternObjects().size());

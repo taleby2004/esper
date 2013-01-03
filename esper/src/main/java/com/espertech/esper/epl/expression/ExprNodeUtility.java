@@ -21,6 +21,7 @@ import com.espertech.esper.epl.declexpr.ExprDeclaredNode;
 import com.espertech.esper.epl.declexpr.ExprDeclaredNodeImpl;
 import com.espertech.esper.epl.enummethod.dot.ExprDeclaredOrLambdaNode;
 import com.espertech.esper.epl.enummethod.dot.ExprLambdaGoesNode;
+import com.espertech.esper.epl.named.NamedWindowTailViewInstance;
 import com.espertech.esper.event.EventBeanUtility;
 import com.espertech.esper.schedule.ScheduleParameterException;
 import com.espertech.esper.schedule.ScheduleSpec;
@@ -36,6 +37,35 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 public class ExprNodeUtility {
+
+    public static void applyFilterExpressionsIterable(Iterable<EventBean> iterable, List<ExprNode> filterExpressions, ExprEvaluatorContext exprEvaluatorContext, Collection<EventBean> eventsInWindow) {
+        EventBean[] events = new EventBean[1];
+        for (EventBean theEvent : iterable) {
+            events[0] = theEvent;
+            boolean add = true;
+            for (ExprNode filter : filterExpressions) {
+                Object result = filter.getExprEvaluator().evaluate(events, true, exprEvaluatorContext);
+                if ((result == null) || (!((Boolean) result))) {
+                    add = false;
+                    break;
+                }
+            }
+            if (add) {
+                eventsInWindow.add(events[0]);
+            }
+        }
+    }
+
+    public static ExprAndNode connectExpressionsByLogicalAnd(List<ExprNode> nodes) {
+        if (nodes.size() < 2) {
+            throw new IllegalArgumentException("Invalid empty or 1-element list of nodes");
+        }
+        ExprAndNode andNode = new ExprAndNodeImpl();
+        for (ExprNode node : nodes) {
+            andNode.addChildNode(node);
+        }
+        return andNode;
+    }
 
     /**
      * Walk expression returning properties used.
@@ -528,6 +558,20 @@ public class ExprNodeUtility {
 
         ExprValidationContext validationContext = new ExprValidationContext(streamTypes, statementContext.getMethodResolutionService(), null, statementContext.getSchedulingService(), statementContext.getVariableService(), new ExprEvaluatorContextStatement(statementContext), statementContext.getEventAdapterService(), statementContext.getStatementName(), statementContext.getStatementId(), statementContext.getAnnotations(), statementContext.getContextDescriptor());
         return ExprNodeUtility.getValidatedSubtree(expression, validationContext);
+    }
+
+    public static Set<String> getPropertyNamesIfAllProps(ExprNode[] expressions) {
+        for (ExprNode expression : expressions) {
+            if (!(expression instanceof ExprIdentNode)) {
+                return null;
+            }
+        }
+        Set<String> uniquePropertyNames = new HashSet<String>();
+        for (ExprNode expression : expressions) {
+            ExprIdentNode identNode = (ExprIdentNode) expression;
+            uniquePropertyNames.add(identNode.getUnresolvedPropertyName());
+        }
+        return uniquePropertyNames;
     }
 
     /**

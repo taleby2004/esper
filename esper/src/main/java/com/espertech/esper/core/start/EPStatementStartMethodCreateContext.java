@@ -14,9 +14,7 @@ import com.espertech.esper.core.context.util.AgentInstanceContext;
 import com.espertech.esper.core.service.EPServicesContext;
 import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.epl.core.StreamTypeServiceImpl;
-import com.espertech.esper.epl.expression.ExprNodeUtility;
-import com.espertech.esper.epl.expression.ExprValidationContext;
-import com.espertech.esper.epl.expression.ExprValidationException;
+import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.epl.spec.*;
 import com.espertech.esper.pattern.EvalFactoryNode;
 import com.espertech.esper.schedule.ScheduleSpec;
@@ -37,17 +35,17 @@ public class EPStatementStartMethodCreateContext extends EPStatementStartMethodB
 {
     private static final Log log = LogFactory.getLog(EPStatementStartMethodCreateContext.class);
 
-    public EPStatementStartMethodCreateContext(StatementSpecCompiled statementSpec, EPServicesContext services, StatementContext statementContext) {
-        super(statementSpec, services, statementContext);
+    public EPStatementStartMethodCreateContext(StatementSpecCompiled statementSpec) {
+        super(statementSpec);
     }
 
-    public EPStatementStartResult startInternal(boolean isNewStatement, boolean isRecoveringStatement, boolean isRecoveringResilient) throws ExprValidationException, ViewProcessingException {
+    public EPStatementStartResult startInternal(final EPServicesContext services, StatementContext statementContext, boolean isNewStatement, boolean isRecoveringStatement, boolean isRecoveringResilient) throws ExprValidationException, ViewProcessingException {
         final CreateContextDesc context = statementSpec.getContextDesc();
-        final AgentInstanceContext agentInstanceContext = getDefaultAgentInstanceContext();
+        final AgentInstanceContext agentInstanceContext = getDefaultAgentInstanceContext(statementContext);
 
         // compile filter specs, if any
         Set<String> eventTypesReferenced = new HashSet<String>();
-        validateContextDetail(eventTypesReferenced, context.getContextDetail());
+        validateContextDetail(services, statementContext, eventTypesReferenced, context.getContextDetail());
         services.getStatementEventTypeRefService().addReferences(statementContext.getStatementName(), eventTypesReferenced);
 
         // add context - does not activate that context
@@ -71,7 +69,7 @@ public class EPStatementStartMethodCreateContext extends EPStatementStartMethodB
         return new EPStatementStartResult(new ZeroDepthStream(resultType), stopMethod, destroyMethod);
     }
 
-    private void validateContextDetail(Set<String> eventTypesReferenced, ContextDetail contextDetail) throws ExprValidationException {
+    private void validateContextDetail(EPServicesContext servicesContext, StatementContext statementContext, Set<String> eventTypesReferenced, ContextDetail contextDetail) throws ExprValidationException {
         if (contextDetail instanceof ContextDetailPartitioned) {
             ContextDetailPartitioned segmented = (ContextDetailPartitioned) contextDetail;
             for (ContextDetailPartitionItem partition : segmented.getItems()) {
@@ -87,7 +85,7 @@ public class EPStatementStartMethodCreateContext extends EPStatementStartMethodB
             FilterStreamSpecRaw raw = new FilterStreamSpecRaw(category.getFilterSpecRaw(), Collections.<ViewSpec>emptyList(), null, new StreamSpecOptions());
             FilterStreamSpecCompiled result = (FilterStreamSpecCompiled) raw.compile(statementContext, eventTypesReferenced, false, Collections.<Integer>emptyList());
             category.setFilterSpecCompiled(result.getFilterSpec());
-            services.getStatementEventTypeRefService().addReferences(statementContext.getStatementName(), eventTypesReferenced);
+            servicesContext.getStatementEventTypeRefService().addReferences(statementContext.getStatementName(), eventTypesReferenced);
 
             // compile expressions
             for (ContextDetailCategoryItem item : category.getItems()) {
@@ -106,28 +104,28 @@ public class EPStatementStartMethodCreateContext extends EPStatementStartMethodB
 
                 // validate parameters
                 StreamTypeServiceImpl streamTypes = new StreamTypeServiceImpl(result.getFilterSpec().getFilterForEventType(), null, true, statementContext.getEngineURI());
-                ExprValidationContext validationContext = new ExprValidationContext(streamTypes, statementContext.getMethodResolutionService(), null, statementContext.getSchedulingService(), statementContext.getVariableService(), getDefaultAgentInstanceContext(), statementContext.getEventAdapterService(), statementContext.getStatementName(), statementContext.getStatementId(), statementContext.getAnnotations(), statementContext.getContextDescriptor());
+                ExprValidationContext validationContext = new ExprValidationContext(streamTypes, statementContext.getMethodResolutionService(), null, statementContext.getSchedulingService(), statementContext.getVariableService(), getDefaultAgentInstanceContext(statementContext), statementContext.getEventAdapterService(), statementContext.getStatementName(), statementContext.getStatementId(), statementContext.getAnnotations(), statementContext.getContextDescriptor());
                 ExprNodeUtility.validate(Collections.singletonList(hashItem.getFunction()), validationContext);
             }
         }
         else if (contextDetail instanceof ContextDetailInitiatedTerminated) {
             ContextDetailInitiatedTerminated fixed = (ContextDetailInitiatedTerminated) contextDetail;
-            ContextDetailMatchPair startCondition = validateRewriteContextCondition(fixed.getStart(), eventTypesReferenced, new MatchEventSpec(), new LinkedHashSet<String>());
-            ContextDetailMatchPair endCondition = validateRewriteContextCondition(fixed.getEnd(), eventTypesReferenced, startCondition.getMatches(), startCondition.getAllTags());
+            ContextDetailMatchPair startCondition = validateRewriteContextCondition(servicesContext, statementContext, fixed.getStart(), eventTypesReferenced, new MatchEventSpec(), new LinkedHashSet<String>());
+            ContextDetailMatchPair endCondition = validateRewriteContextCondition(servicesContext, statementContext, fixed.getEnd(), eventTypesReferenced, startCondition.getMatches(), startCondition.getAllTags());
             fixed.setStart(startCondition.getCondition());
             fixed.setEnd(endCondition.getCondition());
         }
         else if (contextDetail instanceof ContextDetailInitiatedTerminated) {
             ContextDetailInitiatedTerminated overlap = (ContextDetailInitiatedTerminated) contextDetail;
-            ContextDetailMatchPair startCondition = validateRewriteContextCondition(overlap.getStart(), eventTypesReferenced, new MatchEventSpec(), new LinkedHashSet<String>());
-            ContextDetailMatchPair endCondition = validateRewriteContextCondition(overlap.getEnd(), eventTypesReferenced, startCondition.getMatches(), startCondition.getAllTags());
+            ContextDetailMatchPair startCondition = validateRewriteContextCondition(servicesContext, statementContext, overlap.getStart(), eventTypesReferenced, new MatchEventSpec(), new LinkedHashSet<String>());
+            ContextDetailMatchPair endCondition = validateRewriteContextCondition(servicesContext, statementContext, overlap.getEnd(), eventTypesReferenced, startCondition.getMatches(), startCondition.getAllTags());
             overlap.setStart(startCondition.getCondition());
             overlap.setEnd(endCondition.getCondition());
         }
         else if (contextDetail instanceof ContextDetailNested) {
             ContextDetailNested nested = (ContextDetailNested) contextDetail;
             for (CreateContextDesc nestedContext : nested.getContexts()) {
-                validateContextDetail(eventTypesReferenced, nestedContext.getContextDetail());
+                validateContextDetail(servicesContext, statementContext, eventTypesReferenced, nestedContext.getContextDetail());
             }
         }
         else {
@@ -135,7 +133,7 @@ public class EPStatementStartMethodCreateContext extends EPStatementStartMethodB
         }
     }
 
-    private ContextDetailMatchPair validateRewriteContextCondition(ContextDetailCondition endpoint, Set<String> eventTypesReferenced, MatchEventSpec priorMatches, Set<String> priorAllTags) throws ExprValidationException {
+    private ContextDetailMatchPair validateRewriteContextCondition(EPServicesContext servicesContext, StatementContext statementContext, ContextDetailCondition endpoint, Set<String> eventTypesReferenced, MatchEventSpec priorMatches, Set<String> priorAllTags) throws ExprValidationException {
         if (endpoint instanceof ContextDetailConditionCrontab) {
             ContextDetailConditionCrontab crontab = (ContextDetailConditionCrontab) endpoint;
             ScheduleSpec schedule = ExprNodeUtility.toCrontabSchedule(crontab.getCrontab(), statementContext);
@@ -145,14 +143,14 @@ public class EPStatementStartMethodCreateContext extends EPStatementStartMethodB
 
         if (endpoint instanceof ContextDetailConditionTimePeriod) {
             ContextDetailConditionTimePeriod timePeriod = (ContextDetailConditionTimePeriod) endpoint;
-            ExprValidationContext validationContext = new ExprValidationContext(new StreamTypeServiceImpl(services.getEngineURI(), false), statementContext.getMethodResolutionService(), null, statementContext.getSchedulingService(), statementContext.getVariableService(), getDefaultAgentInstanceContext(), statementContext.getEventAdapterService(), statementContext.getStatementName(), statementContext.getStatementId(), statementContext.getAnnotations(), statementContext.getContextDescriptor());
-            timePeriod.getTimePeriod().validate(validationContext);
+            ExprValidationContext validationContext = new ExprValidationContext(new StreamTypeServiceImpl(servicesContext.getEngineURI(), false), statementContext.getMethodResolutionService(), null, statementContext.getSchedulingService(), statementContext.getVariableService(), getDefaultAgentInstanceContext(statementContext), statementContext.getEventAdapterService(), statementContext.getStatementName(), statementContext.getStatementId(), statementContext.getAnnotations(), statementContext.getContextDescriptor());
+            ExprNodeUtility.getValidatedSubtree(timePeriod.getTimePeriod(), validationContext);
             return new ContextDetailMatchPair(timePeriod, new MatchEventSpec(), new LinkedHashSet<String>());
         }
 
         if (endpoint instanceof ContextDetailConditionPattern) {
             ContextDetailConditionPattern pattern = (ContextDetailConditionPattern) endpoint;
-            Pair<MatchEventSpec, Set<String>> matches = validatePatternContextConditionPattern(pattern, eventTypesReferenced, priorMatches, priorAllTags);
+            Pair<MatchEventSpec, Set<String>> matches = validatePatternContextConditionPattern(statementContext, pattern, eventTypesReferenced, priorMatches, priorAllTags);
             return new ContextDetailMatchPair(pattern, matches.getFirst(), matches.getSecond());
         }
 
@@ -175,9 +173,9 @@ public class EPStatementStartMethodCreateContext extends EPStatementStartMethodB
             }
 
             // compile as pattern if there are prior matches to consider, since this is a type of followed-by relationship
-            EvalFactoryNode factoryNode = services.getPatternNodeFactory().makeFilterNode(filter.getFilterSpecRaw(), filter.getOptionalFilterAsName(), 0);
+            EvalFactoryNode factoryNode = servicesContext.getPatternNodeFactory().makeFilterNode(filter.getFilterSpecRaw(), filter.getOptionalFilterAsName(), 0);
             ContextDetailConditionPattern pattern = new ContextDetailConditionPattern(factoryNode, true);
-            Pair<MatchEventSpec, Set<String>> matches = validatePatternContextConditionPattern(pattern, eventTypesReferenced, priorMatches, priorAllTags);
+            Pair<MatchEventSpec, Set<String>> matches = validatePatternContextConditionPattern(statementContext, pattern, eventTypesReferenced, priorMatches, priorAllTags);
             return new ContextDetailMatchPair(pattern, matches.getFirst(), matches.getSecond());
         }
         else {
@@ -185,7 +183,7 @@ public class EPStatementStartMethodCreateContext extends EPStatementStartMethodB
         }
     }
 
-    private Pair<MatchEventSpec, Set<String>> validatePatternContextConditionPattern(ContextDetailConditionPattern pattern, Set<String> eventTypesReferenced, MatchEventSpec priorMatches, Set<String> priorAllTags)
+    private Pair<MatchEventSpec, Set<String>> validatePatternContextConditionPattern(StatementContext statementContext, ContextDetailConditionPattern pattern, Set<String> eventTypesReferenced, MatchEventSpec priorMatches, Set<String> priorAllTags)
         throws ExprValidationException {
         PatternStreamSpecRaw raw = new PatternStreamSpecRaw(pattern.getPatternRaw(), Collections.<EvalFactoryNode, String>emptyMap(), Collections.<ViewSpec>emptyList(), null, new StreamSpecOptions());
         PatternStreamSpecCompiled compiled = raw.compile(statementContext, eventTypesReferenced, false, Collections.<Integer>emptyList(), priorMatches, priorAllTags);

@@ -34,6 +34,11 @@ public class UnindexedEventTable implements EventTable
         eventSet.clear();
     }
 
+    public void addRemove(EventBean[] newData, EventBean[] oldData) {
+        add(newData);
+        remove(oldData);
+    }
+
     public void add(EventBean[] addEvents)
     {
         if (addEvents == null)

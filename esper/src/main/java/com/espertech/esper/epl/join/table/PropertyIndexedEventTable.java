@@ -26,7 +26,7 @@ import java.util.*;
  */
 public class PropertyIndexedEventTable implements EventTable
 {
-    private final int streamNum;
+    protected final int streamNum;
     protected final EventPropertyGetter[] propertyGetters;
     protected final Map<MultiKeyUntyped, Set<EventBean>> propertyIndex;
 
@@ -44,6 +44,11 @@ public class PropertyIndexedEventTable implements EventTable
     protected MultiKeyUntyped getMultiKey(EventBean theEvent)
     {
         return EventBeanUtility.getMultiKey(theEvent, propertyGetters);
+    }
+
+    public void addRemove(EventBean[] newData, EventBean[] oldData) {
+        add(newData);
+        remove(oldData);
     }
 
     /**

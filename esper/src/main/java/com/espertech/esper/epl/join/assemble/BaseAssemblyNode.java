@@ -8,13 +8,11 @@
  **************************************************************************************/
 package com.espertech.esper.epl.join.assemble;
 
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.epl.join.rep.Node;
 import com.espertech.esper.util.IndentWriter;
 
-import java.util.List;
-import java.util.LinkedList;
-import java.util.TreeMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Represents a node in a tree responsible for assembling outer join query results.
@@ -67,8 +65,10 @@ public abstract class BaseAssemblyNode implements ResultAssembler
     /**
      * Process results.
      * @param result is a list of result nodes per stream
+     * @param resultFinalRows
+     * @param resultRootEvent
      */
-    public abstract void process(List<Node>[] result);
+    public abstract void process(List<Node>[] result, Collection<EventBean[]> resultFinalRows, EventBean resultRootEvent);
 
     /**
      * Output this node using writer, not outputting child nodes.

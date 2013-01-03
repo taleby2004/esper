@@ -16,6 +16,7 @@ import com.espertech.esper.support.epl.join.SupportJoinResultNodeFactory;
 import com.espertech.esper.epl.join.rep.Node;
 import com.espertech.esper.client.EventBean;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -39,17 +40,18 @@ public class TestSingleOptionalAssemblyNode extends TestCase
 
     public void testProcessMultipleEvents()
     {
+        List<EventBean[]> resultFinalRows = new ArrayList<EventBean[]>();
         optAssemblyNode.init(resultMultipleEvents);
 
         // generate an event row originating from a child for 1 of the 2 events in the result
         EventBean[] childRow = new EventBean[4];
         Node nodeOne = resultMultipleEvents[1].get(0);
         EventBean eventOne = nodeOne.getEvents().iterator().next();
-        optAssemblyNode.result(childRow, 3, eventOne, nodeOne);
+        optAssemblyNode.result(childRow, 3, eventOne, nodeOne, resultFinalRows, null);
 
         // test that the node indeed manufactures event rows for any event not received from a child
         parentNode.getRowsList().clear();
-        optAssemblyNode.process(resultMultipleEvents);
+        optAssemblyNode.process(resultMultipleEvents, resultFinalRows, null);
 
         // check generated row
         assertEquals(1, parentNode.getRowsList().size());
@@ -64,7 +66,8 @@ public class TestSingleOptionalAssemblyNode extends TestCase
         optAssemblyNode.init(resultSingleEvent);
 
         // test that the node indeed manufactures event rows for any event not received from a child
-        optAssemblyNode.process(resultMultipleEvents);
+        List<EventBean[]> resultFinalRows = new ArrayList<EventBean[]>();
+        optAssemblyNode.process(resultMultipleEvents, resultFinalRows, null);
 
         // check generated row
         assertEquals(1, parentNode.getRowsList().size());
@@ -89,7 +92,8 @@ public class TestSingleOptionalAssemblyNode extends TestCase
         Node myNode = SupportJoinResultNodeFactory.makeNode(3, 1);
 
         // indicate child result
-        nodeUnderTest.result(childRow, 3, myEvent, myNode);
+        List<EventBean[]> resultFinalRows = new ArrayList<EventBean[]>();
+        nodeUnderTest.result(childRow, 3, myEvent, myNode, resultFinalRows, null);
 
         // assert parent node got the row
         assertEquals(1, mockParentNode.getRowsList().size());

@@ -110,4 +110,8 @@ public class EvalFollowedByFactoryNode extends EvalNodeFactoryBase
     public boolean isFilterChildNonQuitting() {
         return false;
     }
+
+    public boolean isStateful() {
+        return true;
+    }
 }

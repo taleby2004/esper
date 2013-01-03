@@ -54,6 +54,11 @@ public class PropertyCompositeEventTable implements EventTable
         return index;
     }
 
+    public void addRemove(EventBean[] newData, EventBean[] oldData) {
+        add(newData);
+        remove(oldData);
+    }
+
     /**
      * Add an array of events. Same event instance is not added twice. Event properties should be immutable.
      * Allow null passed instead of an empty array.

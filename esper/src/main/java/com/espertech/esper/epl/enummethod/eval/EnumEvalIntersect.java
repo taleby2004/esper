@@ -20,31 +20,31 @@ import java.util.Collection;
 
 public class EnumEvalIntersect implements EnumEval {
 
-    private final EventBean[] events;
+    private final int numStreams;
     private final ExprEvaluatorEnumeration evaluator;
     private final boolean scalar;
 
     public EnumEvalIntersect(int numStreams, ExprEvaluatorEnumeration evaluator, boolean scalar) {
-        this.events = new EventBean[numStreams];
+        this.numStreams = numStreams;
         this.evaluator = evaluator;
         this.scalar = scalar;
     }
 
-    public EventBean[] getEventsPrototype() {
-        return events;
+    public int getStreamNumSize() {
+        return numStreams;
     }
 
-    public Object evaluateEnumMethod(Collection target, boolean isNewData, ExprEvaluatorContext context) {
+    public Object evaluateEnumMethod(EventBean[] eventsLambda, Collection target, boolean isNewData, ExprEvaluatorContext context) {
         if (target == null) {
             return null;
         }
 
         Collection set;
         if (scalar) {
-            set = evaluator.evaluateGetROCollectionScalar(events, isNewData, context);
+            set = evaluator.evaluateGetROCollectionScalar(eventsLambda, isNewData, context);
         }
         else {
-            set = evaluator.evaluateGetROCollectionEvents(events, isNewData, context);
+            set = evaluator.evaluateGetROCollectionEvents(eventsLambda, isNewData, context);
         }
         
         if (set == null || set.isEmpty() || target.isEmpty()) {

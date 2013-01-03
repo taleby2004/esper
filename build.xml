@@ -4,7 +4,7 @@
 	<property name="Name" value="Esper"/>
 	<property name="name" value="esper"/>
 	<property name="nameio" value="esperio"/>
-	<property name="version" value="4.7.0"/>
+	<property name="version" value="4.8.0"/>
 	<property name="patchlevel" value=""/>
 	<property name="fullversion" value="${version}${patchlevel}"/>
 	<property name="fullname" value="${name}-${fullversion}"/>
@@ -25,7 +25,7 @@
 	    esper/lib/**, esper/etc/*.*, esper/doc/grammar/**,
 	    esperio/lib/**, esperio/etc/*.*,
 	    examples/**"/>
-	<property name="dist_includes_exceptions" value="examples/**/target/*.jar"/>
+	<property name="dist_includes_exceptions" value="examples/**/target/*.jar,examples/**/target/*.war"/>
     <!-- examples has specific excludes -->
     <!-- doc is handled separately for folder remapping (remove of build/en) -->
     <property name="dist_excludes" value="

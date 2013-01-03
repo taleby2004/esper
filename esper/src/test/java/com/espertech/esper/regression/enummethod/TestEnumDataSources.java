@@ -21,9 +21,7 @@ import com.espertech.esper.support.bean.lrreport.LocationReportFactory;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import junit.framework.TestCase;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
+import java.util.*;
 
 public class TestEnumDataSources extends TestCase {
 
@@ -38,6 +36,7 @@ public class TestEnumDataSources extends TestCase {
         config.addEventType("SupportBean_ST0", SupportBean_ST0.class);
         config.addEventType("SupportBean_ST0_Container", SupportBean_ST0_Container.class);
         config.addEventType("SupportCollection", SupportCollection.class);
+        config.addEventType(MyEvent.class);
         config.addImport(LocationReportFactory.class);
         config.getEngineDefaults().getExpression().setUdfCache(false);
         config.addPlugInSingleRowFunction("makeSampleList", SupportBean_ST0_Container.class.getName(), "makeSampleList");
@@ -51,6 +50,21 @@ public class TestEnumDataSources extends TestCase {
 
     protected void tearDown() throws Exception {
         listener = null;
+    }
+
+    public void testJoin() {
+        epService.getEPAdministrator().getConfiguration().addEventType(SelectorEvent.class);
+        epService.getEPAdministrator().getConfiguration().addEventType(ContainerEvent.class);
+
+        EPStatement stmt = epService.getEPAdministrator().createEPL("" +
+                "select * from SelectorEvent.win:keepall() as sel, ContainerEvent.win:keepall() as cont " +
+                "where cont.items.anyOf(i => sel.selector = i.selected)");
+        SupportUpdateListener listener = new SupportUpdateListener();
+        stmt.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SelectorEvent("S1", "sel1"));
+        epService.getEPRuntime().sendEvent(new ContainerEvent("C1", new ContainedItem("I1", "sel1")));
+        assertTrue(listener.isInvoked());
     }
 
     public void testPrevWindowSorted() {
@@ -187,6 +201,16 @@ public class TestEnumDataSources extends TestCase {
         stmtSubselectScalarCorrlated.destroy();
     }
 
+    public void testVariable() {
+        epService.getEPAdministrator().createEPL("create variable string[] myvar = { 'E1', 'E3' }");
+        epService.getEPAdministrator().createEPL("select * from SupportBean(myvar.anyOf(v => v = theString))").addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        assertTrue(listener.getAndClearIsInvoked());
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 1));
+        assertFalse(listener.getAndClearIsInvoked());
+    }
+
     public void testAccessAggregation() {
         String[] fields = new String[] {"val0", "val1", "val2", "val3", "val4"};
 
@@ -271,6 +295,30 @@ public class TestEnumDataSources extends TestCase {
         Map<String, Object> event = Collections.<String, Object>singletonMap("books", new BookDesc[]{new BookDesc("1", "book1", "dave", 1.00, null)});
         epService.getEPRuntime().sendEvent(event, "MySchema");
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "mymax".split(","), new Object[] {1.0});
+
+        // test method invocation variations returning list/array of string and test UDF +property as well
+        runAssertionMethodInvoke("select e.getTheList().anyOf(v => v = selector) as flag from MyEvent e");
+        epService.getEPAdministrator().getConfiguration().addPlugInSingleRowFunction("convertToArray", MyEvent.class.getName(), "convertToArray");
+        runAssertionMethodInvoke("select convertToArray(theList).anyOf(v => v = selector) as flag from MyEvent e");
+        runAssertionMethodInvoke("select theArray.anyOf(v => v = selector) as flag from MyEvent e");
+        runAssertionMethodInvoke("select e.getTheArray().anyOf(v => v = selector) as flag from MyEvent e");
+        runAssertionMethodInvoke("select e.theList.anyOf(v => v = e.selector) as flag from pattern[every e=MyEvent]");
+        runAssertionMethodInvoke("select e.nestedMyEvent.myNestedList.anyOf(v => v = e.selector) as flag from pattern[every e=MyEvent]");
+        runAssertionMethodInvoke("select " + MyEvent.class.getName() + ".convertToArray(theList).anyOf(v => v = selector) as flag from MyEvent e");
+    }
+
+    private void runAssertionMethodInvoke(String epl) {
+        String[] fields = "flag".split(",");
+        EPStatement stmtMethodAnyOf = epService.getEPAdministrator().createEPL(epl);
+        stmtMethodAnyOf.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new MyEvent("1"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {true});
+
+        epService.getEPRuntime().sendEvent(new MyEvent("4"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false});
+
+        stmtMethodAnyOf.destroy();
     }
 
     public void testPrevFuncs() {
@@ -396,5 +444,105 @@ public class TestEnumDataSources extends TestCase {
             fail("Iterator provides EventBean instances");
         }
         return it.toArray(new SupportBean_ST0[it.size()]);
+    }
+
+    public static class SelectorEvent {
+        private final String selectorId;
+        private final String selector;
+
+        public SelectorEvent(String selectorId, String selector) {
+            this.selectorId = selectorId;
+            this.selector = selector;
+        }
+
+        public String getSelectorId() {
+            return selectorId;
+        }
+
+        public String getSelector() {
+            return selector;
+        }
+    }
+
+    public static class ContainerEvent {
+        private final String containerId;
+        private final ContainedItem[] items;
+
+        public ContainerEvent(String containerId, ContainedItem... items) {
+            this.containerId = containerId;
+            this.items = items;
+        }
+
+        public String getContainerId() {
+            return containerId;
+        }
+
+        public ContainedItem[] getItems() {
+            return items;
+        }
+    }
+
+    public static class ContainedItem {
+        private final String itemId;
+        private final String selected;
+
+        public ContainedItem(String itemId, String selected) {
+            this.itemId = itemId;
+            this.selected = selected;
+        }
+
+        public String getItemId() {
+            return itemId;
+        }
+
+        public String getSelected() {
+            return selected;
+        }
+    }
+
+    public static class MyEvent {
+        private final String selector;
+        private final List<String> myList;
+
+        public MyEvent(String selector) {
+            this.selector = selector;
+
+            myList = new ArrayList<String>();
+            myList.add("1");
+            myList.add("2");
+            myList.add("3");
+        }
+
+        public String getSelector() {
+            return selector;
+        }
+
+        public List<String> getTheList(){
+            return myList;
+        }
+
+        public String[] getTheArray(){
+            return myList.toArray(new String[myList.size()]);
+        }
+
+        public NestedMyEvent getNestedMyEvent(){
+            return new NestedMyEvent(myList);
+        }
+
+        public static String[] convertToArray(List<String> list) {
+            return list.toArray(new String[list.size()]);
+        }
+    }
+
+    public static class NestedMyEvent {
+        private final List<String> myNestedList;
+
+        public NestedMyEvent(List<String> myList) {
+            this.myNestedList = myList;
+        }
+
+        public List<String> getMyNestedList() {
+            return myNestedList;
+        }
     }
 }

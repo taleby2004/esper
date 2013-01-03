@@ -97,27 +97,14 @@ public class JoinSetComposerStreamToWinImpl implements JoinSetComposer
     {
         newResults.clear();
 
-        // add new data to indexes
-        for (int i = 0; i < newDataPerStream.length; i++)
-        {
-            if ((newDataPerStream[i] != null) && (i != streamNumber))
-            {
-                for (int j = 0; j < repositories[i].length; j++)
+        // We add and remove data in one call to each index.
+        // Most indexes will add first then remove as newdata and olddata may contain the same event.
+        // Unique indexes may remove then add.
+        for (int stream = 0; stream < newDataPerStream.length; stream++) {
+            if (stream != streamNumber) {
+                for (int j = 0; j < repositories[stream].length; j++)
                 {
-                    repositories[i][j].add((newDataPerStream[i]));
-                }
-            }
-        }
-
-        // remove old data from indexes
-        // adding first and then removing as the events added may be remove right away
-        for (int i = 0; i < oldDataPerStream.length; i++)
-        {
-            if ((oldDataPerStream[i] != null) && (i != streamNumber))
-            {
-                for (int j = 0; j < repositories[i].length; j++)
-                {
-                    repositories[i][j].remove(oldDataPerStream[i]);
+                    repositories[stream][j].addRemove(newDataPerStream[stream], oldDataPerStream[stream]);
                 }
             }
         }

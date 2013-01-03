@@ -34,8 +34,8 @@ public class EnumMethodEnumParams {
 
     public static final DotMethodFP[] AGGREGATE_FP = new DotMethodFP[] {
                     new DotMethodFP(DotMethodFPInputEnum.ANY,
-                                            new DotMethodFPParam(0, "initialization-value", DotMethodFPParamTypeEnum.ANY),
-                                            new DotMethodFPParam(2, "(result, next)", DotMethodFPParamTypeEnum.ANY)),
+                            new DotMethodFPParam(0, "initialization-value", DotMethodFPParamTypeEnum.ANY),
+                            new DotMethodFPParam(2, "(result, next)", DotMethodFPParamTypeEnum.ANY)),
             };
 
     public static final DotMethodFP[] ALLOF_ANYOF = new DotMethodFP[] {
@@ -44,42 +44,56 @@ public class EnumMethodEnumParams {
 
     public static final DotMethodFP[] MIN_MAX = new DotMethodFP[] {
                     new DotMethodFP(DotMethodFPInputEnum.SCALAR_ANY),
-                    new DotMethodFP(DotMethodFPInputEnum.EVENTCOLL, new DotMethodFPParam(1, "predicate", DotMethodFPParamTypeEnum.ANY)),
+                    new DotMethodFP(DotMethodFPInputEnum.SCALAR_ANY, new DotMethodFPParam(1, "value-selector", DotMethodFPParamTypeEnum.ANY)),
+                    new DotMethodFP(DotMethodFPInputEnum.EVENTCOLL, new DotMethodFPParam(1, "value-selector", DotMethodFPParamTypeEnum.ANY)),
             };
 
     public static final DotMethodFP[] SELECTFROM_MINBY_MAXBY = new DotMethodFP[] {
-                    new DotMethodFP(DotMethodFPInputEnum.EVENTCOLL, new DotMethodFPParam(1, "predicate", DotMethodFPParamTypeEnum.ANY)),
+                    new DotMethodFP(DotMethodFPInputEnum.SCALAR_ANY, new DotMethodFPParam(1, "value-selector", DotMethodFPParamTypeEnum.ANY)),
+                    new DotMethodFP(DotMethodFPInputEnum.EVENTCOLL, new DotMethodFPParam(1, "value-selector", DotMethodFPParamTypeEnum.ANY)),
             };
 
     public static final DotMethodFP[] AVERAGE_SUMOF = new DotMethodFP[] {
                     new DotMethodFP(DotMethodFPInputEnum.SCALAR_NUMERIC),
-                    new DotMethodFP(DotMethodFPInputEnum.EVENTCOLL, new DotMethodFPParam(1, "predicate", DotMethodFPParamTypeEnum.NUMERIC))
+                    new DotMethodFP(DotMethodFPInputEnum.SCALAR_ANY, new DotMethodFPParam(1, "value-selector", DotMethodFPParamTypeEnum.NUMERIC)),
+                    new DotMethodFP(DotMethodFPInputEnum.EVENTCOLL, new DotMethodFPParam(1, "value-selector", DotMethodFPParamTypeEnum.NUMERIC))
             };
 
     public static final DotMethodFP[] MOST_LEAST_FREQ = new DotMethodFP[] {
                     new DotMethodFP(DotMethodFPInputEnum.SCALAR_ANY),
-                    new DotMethodFP(DotMethodFPInputEnum.EVENTCOLL, new DotMethodFPParam(1, "predicate", DotMethodFPParamTypeEnum.ANY))
+                    new DotMethodFP(DotMethodFPInputEnum.SCALAR_ANY, new DotMethodFPParam(1, "value-selector", DotMethodFPParamTypeEnum.ANY)),
+                    new DotMethodFP(DotMethodFPInputEnum.EVENTCOLL, new DotMethodFPParam(1, "value-selector", DotMethodFPParamTypeEnum.ANY))
             };
 
     public static final DotMethodFP[] MAP = new DotMethodFP[] {
-                    new DotMethodFP(DotMethodFPInputEnum.EVENTCOLL, new DotMethodFPParam(1, "key-selector", DotMethodFPParamTypeEnum.ANY),
-                                            new DotMethodFPParam(1, "value-selector", DotMethodFPParamTypeEnum.ANY)),
+                    new DotMethodFP(DotMethodFPInputEnum.SCALAR_ANY,
+                            new DotMethodFPParam(1, "key-selector", DotMethodFPParamTypeEnum.ANY),
+                            new DotMethodFPParam(1, "value-selector", DotMethodFPParamTypeEnum.ANY)),
+                    new DotMethodFP(DotMethodFPInputEnum.EVENTCOLL,
+                            new DotMethodFPParam(1, "key-selector", DotMethodFPParamTypeEnum.ANY),
+                            new DotMethodFPParam(1, "value-selector", DotMethodFPParamTypeEnum.ANY)),
             };
 
     public static final DotMethodFP[] GROUP = new DotMethodFP[] {
+                    new DotMethodFP(DotMethodFPInputEnum.SCALAR_ANY, new DotMethodFPParam(1, "key-selector", DotMethodFPParamTypeEnum.ANY)),
                     new DotMethodFP(DotMethodFPInputEnum.EVENTCOLL, new DotMethodFPParam(1, "key-selector", DotMethodFPParamTypeEnum.ANY)),
-                    new DotMethodFP(DotMethodFPInputEnum.EVENTCOLL, new DotMethodFPParam(1, "key-selector", DotMethodFPParamTypeEnum.ANY),
-                                            new DotMethodFPParam(1, "value-selector", DotMethodFPParamTypeEnum.ANY)),
+                    new DotMethodFP(DotMethodFPInputEnum.SCALAR_ANY,
+                            new DotMethodFPParam(1, "key-selector", DotMethodFPParamTypeEnum.ANY),
+                            new DotMethodFPParam(1, "value-selector", DotMethodFPParamTypeEnum.ANY)),
+                    new DotMethodFP(DotMethodFPInputEnum.EVENTCOLL,
+                            new DotMethodFPParam(1, "key-selector", DotMethodFPParamTypeEnum.ANY),
+                            new DotMethodFPParam(1, "value-selector", DotMethodFPParamTypeEnum.ANY)),
             };
 
     public static final DotMethodFP[] ORDERBY = new DotMethodFP[] {
                     new DotMethodFP(DotMethodFPInputEnum.SCALAR_ANY),
+                    new DotMethodFP(DotMethodFPInputEnum.SCALAR_ANY, new DotMethodFPParam(1, "compare-selector", DotMethodFPParamTypeEnum.ANY)),
                     new DotMethodFP(DotMethodFPInputEnum.EVENTCOLL, new DotMethodFPParam(1, "compare-selector", DotMethodFPParamTypeEnum.ANY)),
             };
 
     public static final DotMethodFP[] WHERE_FP = new DotMethodFP[] {
-                    new DotMethodFP(DotMethodFPInputEnum.ANY, new DotMethodFPParam(1, "predictate", DotMethodFPParamTypeEnum.BOOLEAN)),
-                    new DotMethodFP(DotMethodFPInputEnum.ANY, new DotMethodFPParam(2, "(predictate, index)", DotMethodFPParamTypeEnum.BOOLEAN))
+                    new DotMethodFP(DotMethodFPInputEnum.ANY, new DotMethodFPParam(1, "predicate", DotMethodFPParamTypeEnum.BOOLEAN)),
+                    new DotMethodFP(DotMethodFPInputEnum.ANY, new DotMethodFPParam(2, "(predicate, index)", DotMethodFPParamTypeEnum.BOOLEAN))
             };
 
     public static final DotMethodFP[] SET_LOGIC_FP = new DotMethodFP[] {

@@ -26,6 +26,8 @@ public class PropertyIndexedEventTableFactory implements EventTableFactory
 {
     protected final int streamNum;
     protected final String[] propertyNames;
+    protected final boolean unique;
+    protected final String optionalIndexName;
 
     /**
      * Getters for properties.
@@ -37,11 +39,15 @@ public class PropertyIndexedEventTableFactory implements EventTableFactory
      * @param streamNum - the stream number that is indexed
      * @param eventType - types of events indexed
      * @param propertyNames - property names to use for indexing
+     * @param unique
+     * @param optionalIndexName
      */
-    public PropertyIndexedEventTableFactory(int streamNum, EventType eventType, String[] propertyNames)
+    public PropertyIndexedEventTableFactory(int streamNum, EventType eventType, String[] propertyNames, boolean unique, String optionalIndexName)
     {
         this.streamNum = streamNum;
         this.propertyNames = propertyNames;
+        this.unique = unique;
+        this.optionalIndexName = optionalIndexName;
 
         // Init getters
         propertyGetters = new EventPropertyGetter[propertyNames.length];
@@ -52,12 +58,27 @@ public class PropertyIndexedEventTableFactory implements EventTableFactory
     }
 
     public EventTable makeEventTable() {
-        return new PropertyIndexedEventTable(streamNum, propertyGetters);
+        if (unique) {
+            return new PropertyIndexedEventTableUnique(streamNum, propertyGetters, optionalIndexName);
+        }
+        else {
+            return new PropertyIndexedEventTable(streamNum, propertyGetters);
+        }
+    }
+
+    public Class getEventTableClass() {
+        if (unique) {
+            return PropertyIndexedEventTableUnique.class;
+        }
+        else {
+            return PropertyIndexedEventTable.class;
+        }
     }
 
     public String toQueryPlan()
     {
         return this.getClass().getSimpleName() +
+                (unique ? " unique" : " non-unique") +
                 " streamNum=" + streamNum +
                 " propertyNames=" + Arrays.toString(propertyNames);
     }

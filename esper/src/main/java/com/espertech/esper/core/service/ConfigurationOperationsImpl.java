@@ -9,6 +9,7 @@
 package com.espertech.esper.core.service;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.core.EngineImportException;
 import com.espertech.esper.epl.core.EngineImportService;
 import com.espertech.esper.epl.core.EngineSettingsService;
@@ -132,21 +133,25 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
     }
 
     public void addPlugInSingleRowFunction(String functionName, String className, String methodName) throws ConfigurationException {
-        addPlugInSingleRowFunction(functionName, className, methodName, ConfigurationPlugInSingleRowFunction.ValueCache.DISABLED, ConfigurationPlugInSingleRowFunction.FilterOptimizable.ENABLED);
+        internalAddPlugInSingleRowFunction(functionName, className, methodName, ConfigurationPlugInSingleRowFunction.ValueCache.DISABLED, ConfigurationPlugInSingleRowFunction.FilterOptimizable.ENABLED, false);
     }
 
     public void addPlugInSingleRowFunction(String functionName, String className, String methodName, ConfigurationPlugInSingleRowFunction.ValueCache valueCache) throws ConfigurationException {
-        addPlugInSingleRowFunction(functionName, className, methodName, valueCache, ConfigurationPlugInSingleRowFunction.FilterOptimizable.ENABLED);
+        internalAddPlugInSingleRowFunction(functionName, className, methodName, valueCache, ConfigurationPlugInSingleRowFunction.FilterOptimizable.ENABLED, false);
     }
 
     public void addPlugInSingleRowFunction(String functionName, String className, String methodName, ConfigurationPlugInSingleRowFunction.FilterOptimizable filterOptimizable) throws ConfigurationException {
-        addPlugInSingleRowFunction(functionName, className, methodName, ConfigurationPlugInSingleRowFunction.ValueCache.DISABLED, filterOptimizable);
+        internalAddPlugInSingleRowFunction(functionName, className, methodName, ConfigurationPlugInSingleRowFunction.ValueCache.DISABLED, filterOptimizable, false);
     }
 
-    private void addPlugInSingleRowFunction(String functionName, String className, String methodName, ConfigurationPlugInSingleRowFunction.ValueCache valueCache, ConfigurationPlugInSingleRowFunction.FilterOptimizable filterOptimizable) throws ConfigurationException {
+    public void addPlugInSingleRowFunction(String functionName, String className, String methodName, ConfigurationPlugInSingleRowFunction.ValueCache valueCache, ConfigurationPlugInSingleRowFunction.FilterOptimizable filterOptimizable, boolean rethrowExceptions) throws ConfigurationException {
+        internalAddPlugInSingleRowFunction(functionName, className, methodName, valueCache, filterOptimizable, rethrowExceptions);
+    }
+
+    private void internalAddPlugInSingleRowFunction(String functionName, String className, String methodName, ConfigurationPlugInSingleRowFunction.ValueCache valueCache, ConfigurationPlugInSingleRowFunction.FilterOptimizable filterOptimizable, boolean rethrowExceptions) throws ConfigurationException {
         try
         {
-            engineImportService.addSingleRow(functionName, className, methodName, valueCache, filterOptimizable);
+            engineImportService.addSingleRow(functionName, className, methodName, valueCache, filterOptimizable, rethrowExceptions);
         }
         catch (EngineImportException e)
         {
@@ -324,7 +329,8 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
     public void addVariable(String variableName, String type, Object initializationValue, boolean constant) throws ConfigurationException {
         try
         {
-            variableService.createNewVariable(variableName, type, initializationValue, constant, null);
+            Pair<String, Boolean> arrayType = JavaClassHelper.isGetArrayType(type);
+            variableService.createNewVariable(variableName, arrayType.getFirst(), initializationValue, constant, arrayType.getSecond(), null, engineImportService);
             statementVariableRef.addConfiguredVariable(variableName);
         }
         catch (VariableExistsException e)

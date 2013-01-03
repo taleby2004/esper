@@ -149,7 +149,7 @@ public class ExprPlugInSingleRowNode extends ExprNodeBase implements ExprNodeInn
         ExprDotEvalTypeInfo typeInfo = optionalLambdaWrap != null ? optionalLambdaWrap.getTypeInfo() : ExprDotEvalTypeInfo.scalarOrUnderlying(staticMethodDesc.getReflectionMethod().getReturnType());
 
         ExprDotEval[] eval = ExprDotNodeUtility.getChainEvaluators(typeInfo, chainList, validationContext, false, new ExprDotNodeFilterAnalyzerInputStatic()).getChainWithUnpack();
-        evaluator = new ExprDotEvalStaticMethod(validationContext.getStatementName(), clazz.getName(), staticMethodDesc.getFastMethod(), staticMethodDesc.getChildEvals(), allowValueCache && staticMethodDesc.isAllConstants(), optionalLambdaWrap, eval);
+        evaluator = new ExprDotEvalStaticMethod(validationContext.getStatementName(), clazz.getName(), staticMethodDesc.getFastMethod(), staticMethodDesc.getChildEvals(), allowValueCache && staticMethodDesc.isAllConstants(), optionalLambdaWrap, eval, config.isRethrowExceptions());
 
         // If caching the result, evaluate now and return the result.
         if (isReturnsConstantResult) {

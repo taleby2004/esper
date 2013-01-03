@@ -21,6 +21,7 @@ public class VirtualDataWindowEventStartIndex extends VirtualDataWindowEvent {
     private final String namedWindowName;
     private final String indexName;
     private final List<VDWCreateIndexField> fields;
+    private final boolean unique;
 
     /**
      * Ctor.
@@ -28,10 +29,11 @@ public class VirtualDataWindowEventStartIndex extends VirtualDataWindowEvent {
      * @param indexName index name
      * @param fields index fields
      */
-    public VirtualDataWindowEventStartIndex(String namedWindowName, String indexName, List<VDWCreateIndexField> fields) {
+    public VirtualDataWindowEventStartIndex(String namedWindowName, String indexName, List<VDWCreateIndexField> fields, boolean unique) {
         this.namedWindowName = namedWindowName;
         this.indexName = indexName;
         this.fields = fields;
+        this.unique = unique;
     }
 
     /**
@@ -56,6 +58,10 @@ public class VirtualDataWindowEventStartIndex extends VirtualDataWindowEvent {
      */
     public String getNamedWindowName() {
         return namedWindowName;
+    }
+
+    public boolean isUnique() {
+        return unique;
     }
 
     /**

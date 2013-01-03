@@ -189,7 +189,7 @@ public class WorkerThread extends Thread {
 
         EventBeanManufacturer eventBeanManufacturer;
         try {
-            eventBeanManufacturer = engine.getEventAdapterService().getManufacturer(eventType, writableProperties, methods);
+            eventBeanManufacturer = engine.getEventAdapterService().getManufacturer(eventType, writableProperties, methods.getEngineImportService());
         }
         catch (EventBeanManufactureException e) {
             log.info("Unable to create manufacturer for event type: " + e.getMessage(), e);

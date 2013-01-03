@@ -611,4 +611,8 @@ public class StreamTypeServiceImpl implements StreamTypeService
         }
         return false;
     }
+
+    public void setStreamZeroUnambigous(boolean streamZeroUnambigous) {
+        isStreamZeroUnambigous = streamZeroUnambigous;
+    }
 }

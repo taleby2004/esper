@@ -42,6 +42,17 @@ public class TestFileSourceGraphs extends TestCase
         epService.getEPAdministrator().getConfiguration().addEventType("MyMapEvent", propertyTypes);
     }
 
+    public void testCSVZipFile() {
+        String graph = "create dataflow ReadCSV " +
+                "FileSource -> mystream<MyMapEvent> { file: 'regression/noTimestampOne.zip', classpathFile: true, propertyNames: ['myInt','myDouble','myString'], numLoops: 2}" +
+                "DefaultSupportCaptureOp(mystream) {}";
+        List<List<Object>> received = runDataFlow(graph);
+        assertEquals(2, received.size());
+        for (List<Object> aReceived : received) {
+            EPAssertionUtil.assertPropsPerRow(aReceived.toArray(), "myInt,myDouble,myString".split(","), new Object[][]{{1, 1.1, "noTimestampOne.one"}, {2, 2.2, "noTimestampOne.two"}, {3, 3.3, "noTimestampOne.three"}});
+        }
+    }
+
     public void testCSVGraph() throws Exception {
         runAssertionCSVGraphSchema(EventRepresentationEnum.OBJECTARRAY);
         runAssertionCSVGraphSchema(EventRepresentationEnum.MAP);
@@ -131,13 +142,6 @@ public class TestFileSourceGraphs extends TestCase
                 "DefaultSupportCaptureOp(mystream) {}";
         tryInvalidRun("FlowOne", graph, "Exception encountered opening data flow 'FlowOne' in operator FileSourceCSV: Resource 'nonExistentFile' not found in classpath");
 
-        // invalid type for populating (no matching ctor or factory etc)
-        epService.getEPAdministrator().getConfiguration().addEventType("MyArgCtorClass", MyArgCtorClass.class);
-        graph = "create dataflow FlowOne " +
-                "FileSource -> mystream<MyArgCtorClass> { file: 'regression/noTimestampOne.csv', classpathFile: true}" +
-                "DefaultSupportCaptureOp(mystream) {}";
-        tryInvalid("FlowOne", graph, "Failed to instantiate data flow 'FlowOne': Failed initialization for operator 'FileSource': Event type 'MyArgCtorClass' cannot be written to: Failed to instantiate class 'com.espertech.esperio.regression.adapter.TestFileSourceGraphs$MyArgCtorClass', define a factory method if the class has no suitable constructors");
-
         // has-title-line and actual column names don't match the expected event type (no properties match)
         graph = "create dataflow FlowOne " +
                 "FileSource -> mystream<MyMapEvent> { file: 'regression/differentMap.csv', hasTitleLine:true, classpathFile: true}" +
@@ -166,7 +170,7 @@ public class TestFileSourceGraphs extends TestCase
         graph = "create dataflow FlowOne " +
                 "FileSource -> mystream<MyMapEvent> {format: 'line', file: 'nonExistentFile'}" +
                 "DefaultSupportCaptureOp(mystream) {}";
-        tryInvalid("FlowOne", graph, "Failed to instantiate data flow 'FlowOne': Failed initialization for operator 'FileSource': Expecting an output event type that is an object-array event type with a single property that is of type string");
+        tryInvalid("FlowOne", graph, "Failed to instantiate data flow 'FlowOne': Failed initialization for operator 'FileSource': Expecting an output event type that has a single property that is of type string, or alternatively specify the 'propertyNameLine' parameter");
     }
 
     private void tryInvalid(String dataflowName, String epl, String message) {

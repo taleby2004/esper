@@ -18,6 +18,9 @@ import com.espertech.esper.client.EventBean;
 
 import junit.framework.TestCase;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class TestRootCartProdAssemblyNode extends TestCase
 {
     private SupportJoinProcNode parentNode;
@@ -46,7 +49,8 @@ public class TestRootCartProdAssemblyNode extends TestCase
         parentNode.addChild(rootCartNodeAllOpt);
 
         rootCartNodeAllOpt.init(null);
-        rootCartNodeAllOpt.process(null);
+        List<EventBean[]> resultFinalRows = new ArrayList<EventBean[]>();
+        rootCartNodeAllOpt.process(null, resultFinalRows, null);
 
         // 5 generated rows: 2 (stream 2) + 2 (stream 3) + 1 (self, Node 2)
         assertEquals(1, parentNode.getRowsList().size());
@@ -65,31 +69,32 @@ public class TestRootCartProdAssemblyNode extends TestCase
         EventBean[] stream4Events = SupportJoinResultNodeFactory.makeEvents(2); // for identifying rows in cartesian product
 
         // Post result from 3, send 2 rows
+        List<EventBean[]> resultFinalRows = new ArrayList<EventBean[]>();
         EventBean[] childRow = new EventBean[5];
         childRow[3] = stream3Events[0];
-        rootCartNodeOneReq.result(childRow, 3, null, null);
+        rootCartNodeOneReq.result(childRow, 3, null, null, resultFinalRows, null);
         childRow = new EventBean[5];
         childRow[3] = stream3Events[1];
-        rootCartNodeOneReq.result(childRow, 3, null, null);
+        rootCartNodeOneReq.result(childRow, 3, null, null, resultFinalRows, null);
 
         // Post result from 2, send 2 rows
         childRow = new EventBean[5];
         childRow[2] = stream2Events[0];
-        rootCartNodeOneReq.result(childRow, 2, null, null);
+        rootCartNodeOneReq.result(childRow, 2, null, null, resultFinalRows, null);
         childRow = new EventBean[5];
         childRow[2] = stream2Events[1];
-        rootCartNodeOneReq.result(childRow, 2, null, null);
+        rootCartNodeOneReq.result(childRow, 2, null, null, resultFinalRows, null);
 
         // Post result from 4
         childRow = new EventBean[5];
         childRow[4] = stream4Events[0];
-        rootCartNodeOneReq.result(childRow, 4, null, null);
+        rootCartNodeOneReq.result(childRow, 4, null, null, resultFinalRows, null);
         childRow = new EventBean[5];
         childRow[4] = stream4Events[1];
-        rootCartNodeOneReq.result(childRow, 4, null, null);
+        rootCartNodeOneReq.result(childRow, 4, null, null, resultFinalRows, null);
 
         // process posted rows (child rows were stored and are compared to find other rows to generate)
-        rootCartNodeOneReq.process(null);
+        rootCartNodeOneReq.process(null, resultFinalRows, null);
 
         // 5 generated rows: 2 (stream 2) + 2 (stream 3) + 1 (self, Node 2)
         assertEquals(8, parentNode.getRowsList().size());

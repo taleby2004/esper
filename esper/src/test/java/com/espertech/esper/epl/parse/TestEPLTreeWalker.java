@@ -232,7 +232,7 @@ public class TestEPLTreeWalker extends TestCase
     public void testWalkOnSet() throws Exception
     {
         VariableService variableService = new VariableServiceImpl(0, new SchedulingServiceImpl(new TimeSourceServiceImpl()), SupportEventAdapterService.getService(), null);
-        variableService.createNewVariable("var1", Long.class.getName(), 100L, false, null);
+        variableService.createNewVariable("var1", Long.class.getName(), 100L, false, false, null, null);
 
         String expression = "on com.MyClass as myevent set var1 = 'a', var2 = 2*3, var3 = var1";
         EPLTreeWalker walker = parseAndWalkEPL(expression, null, variableService);
@@ -680,7 +680,7 @@ public class TestEPLTreeWalker extends TestCase
         EPLTreeWalker walker = parseAndWalkEPL(expression);
 
         InsertIntoDesc desc = walker.getStatementSpec().getInsertIntoDesc();
-        assertTrue(desc.isIStream());
+        assertEquals(SelectClauseStreamSelectorEnum.ISTREAM_ONLY, desc.getStreamSelector());
         assertEquals("MyAlias", desc.getEventTypeName());
         assertEquals(0, desc.getColumnNames().size());
 
@@ -691,17 +691,17 @@ public class TestEPLTreeWalker extends TestCase
         walker = parseAndWalkEPL(expression);
 
         desc = walker.getStatementSpec().getInsertIntoDesc();
-        assertFalse(desc.isIStream());
+        assertEquals(SelectClauseStreamSelectorEnum.RSTREAM_ONLY, desc.getStreamSelector());
         assertEquals("MyAlias", desc.getEventTypeName());
         assertEquals(3, desc.getColumnNames().size());
         assertEquals("a", desc.getColumnNames().get(0));
         assertEquals("b", desc.getColumnNames().get(1));
         assertEquals("c", desc.getColumnNames().get(2));
 
-        expression = "insert istream into Test2 select * from " + CLASSNAME + "().win:length(10)";
+        expression = "insert irstream into Test2 select * from " + CLASSNAME + "().win:length(10)";
         walker = parseAndWalkEPL(expression);
         desc = walker.getStatementSpec().getInsertIntoDesc();
-        assertTrue(desc.isIStream());
+        assertEquals(SelectClauseStreamSelectorEnum.RSTREAM_ISTREAM_BOTH, desc.getStreamSelector());
         assertEquals("Test2", desc.getEventTypeName());
         assertEquals(0, desc.getColumnNames().size());
     }

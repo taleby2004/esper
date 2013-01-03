@@ -70,23 +70,23 @@ public class TestEnumInvalid extends TestCase {
 
         // invalid too many lambda parameter
         epl = "select contained.where((x,y,z) => true) from SupportBean_ST0_Container";
-        tryInvalid(epl, "Error starting statement: Parameters mismatch for enumeration method 'where', the method requires a lambda expression providing predictate, but receives a 3-parameter lambda expression [select contained.where((x,y,z) => true) from SupportBean_ST0_Container]");
+        tryInvalid(epl, "Error starting statement: Parameters mismatch for enumeration method 'where', the method requires a lambda expression providing predicate, but receives a 3-parameter lambda expression [select contained.where((x,y,z) => true) from SupportBean_ST0_Container]");
 
         // invalid no parameter
         epl = "select contained.where() from SupportBean_ST0_Container";
-        tryInvalid(epl, "Error starting statement: Parameters mismatch for enumeration method 'where', the method has multiple footprints accepting a lambda expression providing predictate, or a 2-parameter lambda expression providing (predictate, index), but receives no parameters [select contained.where() from SupportBean_ST0_Container]");
+        tryInvalid(epl, "Error starting statement: Parameters mismatch for enumeration method 'where', the method has multiple footprints accepting a lambda expression providing predicate, or a 2-parameter lambda expression providing (predicate, index), but receives no parameters [select contained.where() from SupportBean_ST0_Container]");
 
         // invalid wrong parameter
         epl = "select contained.where(x=>true,y=>true) from SupportBean_ST0_Container";
-        tryInvalid(epl, "Error starting statement: Parameters mismatch for enumeration method 'where', the method has multiple footprints accepting a lambda expression providing predictate, or a 2-parameter lambda expression providing (predictate, index), but receives a lambda expression and a lambda expression [select contained.where(x=>true,y=>true) from SupportBean_ST0_Container]");
+        tryInvalid(epl, "Error starting statement: Parameters mismatch for enumeration method 'where', the method has multiple footprints accepting a lambda expression providing predicate, or a 2-parameter lambda expression providing (predicate, index), but receives a lambda expression and a lambda expression [select contained.where(x=>true,y=>true) from SupportBean_ST0_Container]");
 
         // invalid wrong parameter
         epl = "select contained.where(1) from SupportBean_ST0_Container";
-        tryInvalid(epl, "Error starting statement: Parameters mismatch for enumeration method 'where', the method requires a lambda expression providing predictate, but receives an (non-lambda) expression [select contained.where(1) from SupportBean_ST0_Container]");
+        tryInvalid(epl, "Error starting statement: Parameters mismatch for enumeration method 'where', the method requires a lambda expression providing predicate, but receives an (non-lambda) expression [select contained.where(1) from SupportBean_ST0_Container]");
 
         // invalid too many parameter
         epl = "select contained.where(1,2) from SupportBean_ST0_Container";
-        tryInvalid(epl, "Error starting statement: Parameters mismatch for enumeration method 'where', the method has multiple footprints accepting a lambda expression providing predictate, or a 2-parameter lambda expression providing (predictate, index), but receives an (non-lambda) expression and an (non-lambda) expression [select contained.where(1,2) from SupportBean_ST0_Container]");
+        tryInvalid(epl, "Error starting statement: Parameters mismatch for enumeration method 'where', the method has multiple footprints accepting a lambda expression providing predicate, or a 2-parameter lambda expression providing (predicate, index), but receives an (non-lambda) expression and an (non-lambda) expression [select contained.where(1,2) from SupportBean_ST0_Container]");
 
         // subselect multiple columns
         epl = "select (select theString, intPrimitive from SupportBean.std:lastevent()).where(x=>x.boolPrimitive) from SupportBean_ST0";
@@ -119,10 +119,6 @@ public class TestEnumInvalid extends TestCase {
         // not a property
         epl = "select contained.firstof().dummy from SupportBean_ST0_Container";
         tryInvalid(epl, "Error starting statement: Could not find enumeration method, date-time method or instance method named 'dummy' in class 'com.espertech.esper.support.bean.SupportBean_ST0' taking no parameters [select contained.firstof().dummy from SupportBean_ST0_Container]");
-
-        // not a property
-        epl = "select contained.selectFrom(x => key0).toMap(x=>x, y=>y) from SupportBean_ST0_Container";
-        tryInvalid(epl, "Error starting statement: Invalid input for built-in enumeration method 'toMap' and 2-parameter footprint, expecting collection of events as input, received collection of String [select contained.selectFrom(x => key0).toMap(x=>x, y=>y) from SupportBean_ST0_Container]");
     }
 
     private void tryInvalid(String epl, String message) {

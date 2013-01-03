@@ -15,4 +15,6 @@ import com.espertech.esper.epl.expression.ExprValidationException;
 
 public interface ContextControllerFactoryService {
     public ContextControllerFactory[] getFactory(ContextControllerFactoryServiceContext context) throws ExprValidationException;
+
+    public ContextPartitionIdManager allocatePartitionIdMgr(String contextName, String contextStmtId);
 }

@@ -66,4 +66,8 @@ public class ExprIdentNodeEvaluatorImpl implements ExprIdentNodeEvaluator
     public int getStreamNum() {
         return streamNum;
     }
+
+    public boolean isContextEvaluated() {
+        return false;
+    }
 }

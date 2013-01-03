@@ -44,7 +44,7 @@ public class PollResultIndexingStrategyIndexSingle implements PollResultIndexing
         {
             return new UnindexedEventTableList(pollResult);
         }
-        PropertyIndexedEventTableSingleFactory factory = new PropertyIndexedEventTableSingleFactory(streamNum, eventType, propertyName);
+        PropertyIndexedEventTableSingleFactory factory = new PropertyIndexedEventTableSingleFactory(streamNum, eventType, propertyName, false, null);
         EventTable table = factory.makeEventTable();
         table.add(pollResult.toArray(new EventBean[pollResult.size()]));
         return table;

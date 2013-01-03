@@ -15,6 +15,9 @@ public class RandomAccessByIndexGetter implements RandomAccessByIndexObserver
 {
     private RandomAccessByIndex randomAccessByIndex;
 
+    public RandomAccessByIndexGetter() {
+    }
+
     /**
      * Returns the index for access.
      * @return index

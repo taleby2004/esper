@@ -23,7 +23,7 @@ public class EnumEvalCountOfSelectorEvents extends EnumEvalBase implements EnumE
         super(innerExpression, streamCountIncoming);
     }
 
-    public Object evaluateEnumMethod(Collection target, boolean isNewData, ExprEvaluatorContext context) {
+    public Object evaluateEnumMethod(EventBean[] eventsLambda, Collection target, boolean isNewData, ExprEvaluatorContext context) {
         int count = 0;
 
         Collection<EventBean> beans = (Collection<EventBean>) target;

@@ -27,10 +27,14 @@ import com.espertech.esper.epl.core.ViewResourceDelegateUnverified;
 import com.espertech.esper.epl.core.ViewResourceDelegateVerified;
 import com.espertech.esper.epl.declexpr.ExprDeclaredNode;
 import com.espertech.esper.epl.expression.*;
+import com.espertech.esper.epl.join.hint.IndexHint;
 import com.espertech.esper.epl.join.plan.CoercionDesc;
 import com.espertech.esper.epl.join.plan.CoercionUtil;
 import com.espertech.esper.epl.join.plan.QueryPlanIndexBuilder;
 import com.espertech.esper.epl.join.table.*;
+import com.espertech.esper.epl.join.util.QueryPlanIndexDescSubquery;
+import com.espertech.esper.epl.join.util.QueryPlanIndexHook;
+import com.espertech.esper.epl.join.util.QueryPlanIndexHookUtil;
 import com.espertech.esper.epl.lookup.*;
 import com.espertech.esper.epl.named.NamedWindowProcessor;
 import com.espertech.esper.epl.named.NamedWindowProcessorInstance;
@@ -40,8 +44,7 @@ import com.espertech.esper.util.AuditPath;
 import com.espertech.esper.util.CollectionUtil;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.util.StopCallback;
-import com.espertech.esper.view.ViewFactoryChain;
-import com.espertech.esper.view.ViewProcessingException;
+import com.espertech.esper.view.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -130,6 +133,7 @@ public class EPStatementStartMethodHelperSubselect
     {
         int subqueryNum = -1;
         SubSelectStrategyCollection collection = new SubSelectStrategyCollection();
+        IndexHint indexHint = IndexHint.getIndexHint(statementContext.getAnnotations());
 
         for (Map.Entry<ExprSubselectNode, SubSelectActivationHolder> entry : subSelectStreamDesc.getSubqueries().entrySet())
         {
@@ -347,8 +351,16 @@ public class EPStatementStartMethodHelperSubselect
             ExprEvaluator assignedFilterExpr = aggregationServiceFactoryDesc != null ? null : filterExprEval;
             subselect.setFilterExpr(assignedFilterExpr);
 
-            // Determine strategy factories
+            // validation for correlated subqueries against named windows contained-event syntax
+            if ((filterStreamSpec instanceof NamedWindowConsumerStreamSpec && correlatedSubquery)) {
+                NamedWindowConsumerStreamSpec namedSpec = (NamedWindowConsumerStreamSpec) filterStreamSpec;
+                if (namedSpec.getOptPropertyEvaluator() != null) {
+                    throw new ExprValidationException("Failed to validate named window use in subquery, contained-event is only allowed for named windows when not correlated");
+                }
+            }
 
+            // Determine strategy factories
+            //
             // handle named window index share first
             boolean disableIndexShare = HintEnum.DISABLE_WINDOW_SUBQUERY_INDEXSHARE.getHint(annotations) != null;
             if ((filterStreamSpec instanceof NamedWindowConsumerStreamSpec) && (!disableIndexShare)) {
@@ -365,7 +377,7 @@ public class EPStatementStartMethodHelperSubselect
                         boolean fullTableScan = HintEnum.SET_NOINDEX.getHint(annotations) != null;
                         SubordPropPlan joinedPropPlan = QueryPlanIndexBuilder.getJoinProps(filterExpr, outerEventTypes.length, subselectTypeService.getEventTypes());
                         NamedWindowProcessorInstance processorInstanceSubq = processor.getProcessorInstance(null);
-                        SubordTableLookupStrategy namedWindowSubqueryLookup = processorInstanceSubq.getRootViewInstance().getAddSubqueryLookupStrategy(statementContext.getStatementName(), statementContext.getStatementId(), statementContext.getAnnotations(), outerEventTypesSelect, joinedPropPlan, fullTableScan);
+                        SubordTableLookupStrategy namedWindowSubqueryLookup = processorInstanceSubq.getRootViewInstance().getAddSubqueryLookupStrategy(statementContext.getStatementName(), statementContext.getStatementId(), statementContext.getAnnotations(), outerEventTypesSelect, joinedPropPlan, fullTableScan, subqueryNum, indexHint);
                         stopCallbacks.add(new NamedWindowSubqueryStopCallback(processorInstanceSubq, namedWindowSubqueryLookup));
                         SubSelectStrategyFactory factory = new SubSelectStrategyFactoryNamedWinIndexShare(namedWindowSubqueryLookup, filterExprEval, aggregationServiceFactoryDesc);
                         SubSelectStrategyFactoryDesc factoryDesc = new SubSelectStrategyFactoryDesc(subSelectActivation, factory, aggregationServiceFactoryDesc, priorNodes, previousNodes);
@@ -375,10 +387,21 @@ public class EPStatementStartMethodHelperSubselect
                 }
             }
 
+            // determine unique keys, if any
+            Set<String> optionalUniqueProps = null;
+            if (viewFactoryChain.getDataWindowViewFactoryCount() > 0) {
+                optionalUniqueProps = ViewServiceHelper.getUniqueCandidateProperties(viewFactoryChain.getViewFactoryChain());
+            }
+            if (filterStreamSpec instanceof NamedWindowConsumerStreamSpec) {
+                NamedWindowConsumerStreamSpec namedSpec = (NamedWindowConsumerStreamSpec) filterStreamSpec;
+                NamedWindowProcessor processor = services.getNamedWindowService().getProcessor(namedSpec.getWindowName());
+                optionalUniqueProps = processor.getOptionalUniqueKeyProps();
+            }
+
             // handle local stream + named-window-stream
             boolean fullTableScan = HintEnum.SET_NOINDEX.getHint(annotations) != null;
             Pair<EventTableFactory, SubordTableLookupStrategyFactory> indexPair = determineSubqueryIndexFactory(filterExpr, eventType,
-                    outerEventTypes, subselectTypeService, fullTableScan, queryPlanLogging);
+                    outerEventTypes, subselectTypeService, fullTableScan, queryPlanLogging, optionalUniqueProps, annotations, subqueryNum);
 
             SubSelectStrategyFactory factory = new SubSelectStrategyFactoryLocalViewPreloaded(subqueryNum, subSelectActivation, indexPair, filterExprEval, correlatedSubquery, aggregationServiceFactoryDesc, viewResourceDelegateVerified);
             SubSelectStrategyFactoryDesc factoryDesc = new SubSelectStrategyFactoryDesc(subSelectActivation, factory, aggregationServiceFactoryDesc, priorNodes, previousNodes);
@@ -450,15 +473,23 @@ public class EPStatementStartMethodHelperSubselect
                                                                                  EventType[] outerEventTypes,
                                                                                  StreamTypeService subselectTypeService,
                                                                                  boolean fullTableScan,
-                                                                                 boolean queryPlanLogging)
+                                                                                 boolean queryPlanLogging,
+                                                                                 Set<String> optionalUniqueProps,
+                                                                                 Annotation[] annotations,
+                                                                                 int subqueryNum)
             throws ExprValidationException
     {
-        Pair<EventTableFactory, SubordTableLookupStrategyFactory> result = determineSubqueryIndexInternalFactory(filterExpr, viewableEventType, outerEventTypes, subselectTypeService, fullTableScan);
+        Pair<EventTableFactory, SubordTableLookupStrategyFactory> result = determineSubqueryIndexInternalFactory(filterExpr, viewableEventType, outerEventTypes, subselectTypeService, fullTableScan, optionalUniqueProps);
 
         if (queryPlanLogging && queryPlanLog.isInfoEnabled()) {
             queryPlanLog.info("local index");
             queryPlanLog.info("strategy " + result.getSecond().toQueryPlan());
             queryPlanLog.info("table " + result.getFirst().toQueryPlan());
+
+            QueryPlanIndexHook hook = QueryPlanIndexHookUtil.getHook(annotations);
+            if (hook != null) {
+                hook.subquery(new QueryPlanIndexDescSubquery(null, result.getFirst().getEventTableClass().getSimpleName(), subqueryNum));
+            }
         }
 
         return result;
@@ -468,7 +499,8 @@ public class EPStatementStartMethodHelperSubselect
                                                                                  EventType viewableEventType,
                                                                                  EventType[] outerEventTypes,
                                                                                  StreamTypeService subselectTypeService,
-                                                                                 boolean fullTableScan)
+                                                                                 boolean fullTableScan,
+                                                                                 Set<String> optionalUniqueProps)
             throws ExprValidationException
     {
         // No filter expression means full table scan
@@ -485,6 +517,30 @@ public class EPStatementStartMethodHelperSubselect
         Map<String, SubordPropRangeKey> rangeKeys = joinPropDesc.getRangeProps();
         List<SubordPropHashKey> hashKeyList = new ArrayList<SubordPropHashKey>(hashKeys.values());
         List<SubordPropRangeKey> rangeKeyList = new ArrayList<SubordPropRangeKey>(rangeKeys.values());
+        boolean unique = false;
+
+        // If this is a unique-view and there are unique criteria, use these
+        if (optionalUniqueProps != null && !optionalUniqueProps.isEmpty()) {
+            boolean found = true;
+            for (String uniqueProp : optionalUniqueProps) {
+                if (!hashKeys.containsKey(uniqueProp)) {
+                    found = false;
+                    break;
+                }
+            }
+            if (found) {
+                String[] hashKeysArray = hashKeys.keySet().toArray(new String[hashKeys.keySet().size()]);
+                for (String hashKey : hashKeysArray) {
+                    if (!optionalUniqueProps.contains(hashKey)) {
+                        hashKeys.remove(hashKey);
+                    }
+                }
+                hashKeyList = new ArrayList<SubordPropHashKey>(hashKeys.values());
+                unique = true;
+                rangeKeyList.clear();
+                rangeKeys.clear();
+            }
+        }
 
         // build table (local table)
         EventTableFactory eventTable;
@@ -498,7 +554,7 @@ public class EPStatementStartMethodHelperSubselect
 
             if (hashKeys.size() == 1) {
                 if (!hashCoercionDesc.isCoerce()) {
-                    eventTable = new PropertyIndexedEventTableSingleFactory(0, viewableEventType, indexedProps[0]);
+                    eventTable = new PropertyIndexedEventTableSingleFactory(0, viewableEventType, indexedProps[0], unique, null);
                 }
                 else {
                     eventTable = new PropertyIndexedEventTableSingleCoerceAddFactory(0, viewableEventType, indexedProps[0], hashCoercionDesc.getCoercionTypes()[0]);
@@ -507,7 +563,7 @@ public class EPStatementStartMethodHelperSubselect
             else {
                 if (!hashCoercionDesc.isCoerce())
                 {
-                    eventTable = new PropertyIndexedEventTableFactory(0, viewableEventType, indexedProps);
+                    eventTable = new PropertyIndexedEventTableFactory(0, viewableEventType, indexedProps, unique, null);
                 }
                 else
                 {

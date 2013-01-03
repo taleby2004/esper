@@ -13,6 +13,7 @@ package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
+import com.espertech.esper.support.util.SupportModelHelper;
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
@@ -70,6 +71,8 @@ public class TestVariablesCreate extends TestCase
         String[] fieldsVar = new String[] {"var1", "var2"};
         sendSupportBean("E1", 10);
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsVar, new Object[]{null, "abc"});
+
+        SupportModelHelper.compileCreate(epService, "create variable double[] arrdouble = {1.0d, 2.0d}");
     }
 
     public void testCompileStartStop()
@@ -232,7 +235,7 @@ public class TestVariablesCreate extends TestCase
         tryInvalid(stmt, "Error starting statement: Cannot create variable: Cannot create variable 'myvar', type 'somedummy' is not a recognized type [create variable somedummy myvar = 10]");
 
         stmt = "create variable string myvar = 5";
-        tryInvalid(stmt, "Error starting statement: Cannot create variable: Variable 'myvar' of declared type 'java.lang.String' cannot be initialized by a value of type 'java.lang.Integer' [create variable string myvar = 5]");
+        tryInvalid(stmt, "Error starting statement: Cannot create variable: Variable 'myvar' of declared type java.lang.String cannot be initialized by a value of type java.lang.Integer [create variable string myvar = 5]");
 
         stmt = "create variable string myvar = 'a'";
         epService.getEPAdministrator().createEPL("create variable string myvar = 'a'");

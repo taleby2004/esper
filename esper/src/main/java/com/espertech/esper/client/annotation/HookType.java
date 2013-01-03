@@ -24,5 +24,10 @@ public enum HookType
     /**
      * For use when installing a callback for converting SQL row results to a POJO object.
      */
-    SQLROW
+    SQLROW,
+
+    /**
+     * For internal use, query planning reporting.
+     */
+    INTERNAL_QUERY_PLAN
 }

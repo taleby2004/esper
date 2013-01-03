@@ -20,6 +20,8 @@ import com.espertech.esper.support.bean.lambda.LambdaAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import junit.framework.TestCase;
 
+import java.math.BigDecimal;
+
 public class TestEnumMinMax extends TestCase {
 
     private EPServiceProvider epService;
@@ -37,6 +39,34 @@ public class TestEnumMinMax extends TestCase {
 
     protected void tearDown() throws Exception {
         listener = null;
+    }
+
+    public void testMinMaxScalarWithLambda() {
+
+        epService.getEPAdministrator().getConfiguration().addPlugInSingleRowFunction("extractNum", MyService.class.getName(), "extractNum");
+
+        String[] fields = "val0,val1,val2,val3".split(",");
+        String eplFragment = "select " +
+                "strvals.min(v => extractNum(v)) as val0, " +
+                "strvals.max(v => extractNum(v)) as val1, " +
+                "strvals.min(v => v) as val2, " +
+                "strvals.max(v => v) as val3 " +
+                "from SupportCollection";
+        EPStatement stmtFragment = epService.getEPAdministrator().createEPL(eplFragment);
+        stmtFragment.addListener(listener);
+        LambdaAssertionUtil.assertTypes(stmtFragment.getEventType(), fields, new Class[]{Integer.class, Integer.class, String.class, String.class});
+
+        epService.getEPRuntime().sendEvent(SupportCollection.makeString("E2,E1,E5,E4"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{1, 5, "E1", "E5"});
+
+        epService.getEPRuntime().sendEvent(SupportCollection.makeString("E1"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{1, 1, "E1", "E1"});
+
+        epService.getEPRuntime().sendEvent(SupportCollection.makeString(null));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, null, null, null});
+
+        epService.getEPRuntime().sendEvent(SupportCollection.makeString(""));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, null, null, null});
     }
 
     public void testMinMaxEvents() {
@@ -90,9 +120,6 @@ public class TestEnumMinMax extends TestCase {
     public void testInvalid() {
         String epl;
 
-        epl = "select strvals.min(x=> x) from SupportCollection";
-        tryInvalid(epl, "Error starting statement: Invalid input for built-in enumeration method 'min' and 1-parameter footprint, expecting collection of events as input, received collection of String [select strvals.min(x=> x) from SupportCollection]");
-
         epl = "select contained.min() from Bean";
         tryInvalid(epl, "Error starting statement: Invalid input for built-in enumeration method 'min' and 0-parameter footprint, expecting collection of values (typically scalar values) as input, received collection of events of type 'com.espertech.esper.support.bean.SupportBean_ST0' [select contained.min() from Bean]");
     }
@@ -106,5 +133,10 @@ public class TestEnumMinMax extends TestCase {
         catch (EPStatementException ex) {
             assertEquals(message, ex.getMessage());
         }
+    }
+
+    public static class MyService {
+        public static int extractNum(String arg) { return Integer.parseInt(arg.substring(1)); }
+        public static BigDecimal extractBigDecimal(String arg) { return new BigDecimal(arg.substring(1)); }
     }
 }

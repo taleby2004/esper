@@ -21,5 +21,5 @@ import java.util.Set;
  */
 public interface JoinSetComposerPrototype
 {
-    public JoinSetComposerDesc create(Viewable[] streamViews);
+    public JoinSetComposerDesc create(Viewable[] streamViews, boolean isFireAndForget);
 }

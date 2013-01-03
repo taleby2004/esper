@@ -19,7 +19,7 @@ public class ExpressionDeclDesc implements Serializable {
 
     private static final long serialVersionUID = -8155216999087913248L;
 
-    private List<ExpressionDeclItem> expressions = new ArrayList<ExpressionDeclItem>();
+    private List<ExpressionDeclItem> expressions = new ArrayList<ExpressionDeclItem>(1);
 
     public List<ExpressionDeclItem> getExpressions() {
         return expressions;

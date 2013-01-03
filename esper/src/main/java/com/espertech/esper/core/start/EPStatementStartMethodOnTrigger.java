@@ -62,11 +62,13 @@ public class EPStatementStartMethodOnTrigger extends EPStatementStartMethodBase
 {
     private static final Log log = LogFactory.getLog(EPStatementStartMethodOnTrigger.class);
 
-    public EPStatementStartMethodOnTrigger(StatementSpecCompiled statementSpec, EPServicesContext services, StatementContext statementContext) {
-        super(statementSpec, services, statementContext);
+    public static final String INITIAL_VALUE_STREAM_NAME = "initial";
+
+    public EPStatementStartMethodOnTrigger(StatementSpecCompiled statementSpec) {
+        super(statementSpec);
     }
 
-    public EPStatementStartResult startInternal(boolean isNewStatement, boolean isRecoveringStatement, boolean isRecoveringResilient) throws ExprValidationException, ViewProcessingException {
+    public EPStatementStartResult startInternal(final EPServicesContext services, final StatementContext statementContext, boolean isNewStatement, boolean isRecoveringStatement, boolean isRecoveringResilient) throws ExprValidationException, ViewProcessingException {
         // define stop
         final List<StopCallback> stopCallbacks = new LinkedList<StopCallback>();
         final EPStatementStopMethod stopMethod = new EPStatementStopMethodImpl(statementContext, stopCallbacks);
@@ -99,7 +101,7 @@ public class EPStatementStartMethodOnTrigger extends EPStatementStartMethodBase
 
             EvalRootFactoryNode rootNode = services.getPatternNodeFactory().makeRootNode();
             rootNode.addChildNode(patternStreamSpec.getEvalFactoryNode());
-            PatternContext patternContext = statementContext.getPatternContextFactory().createContext(statementContext, 0, rootNode, patternStreamSpec.getMatchedEventMapMeta());
+            PatternContext patternContext = statementContext.getPatternContextFactory().createContext(statementContext, 0, rootNode, patternStreamSpec.getMatchedEventMapMeta(), true);
             activator = new ViewableActivatorPattern(patternContext, rootNode, eventType, EPStatementStartMethodHelperUtil.isConsumingFilters(patternStreamSpec.getEvalFactoryNode()));
             activatorResultEventType = eventType;
         }
@@ -164,12 +166,24 @@ public class EPStatementStartMethodOnTrigger extends EPStatementStartMethodBase
             // Materialize sub-select views
             // 0 - named window stream
             // 1 - arriving stream
-            subSelectStrategyCollection = EPStatementStartMethodHelperSubselect.planSubSelect(services, statementContext, queryPlanLogging, subSelectStreamDesc, new String[]{namedWindowName, streamSpec.getOptionalStreamName()}, new EventType[]{processor.getNamedWindowType(), activatorResultEventType}, new String[]{namedWindowTypeName, triggereventTypeName}, stopCallbacks, statementSpec.getAnnotations(), statementSpec.getDeclaredExpressions(), contextPropertyRegistry);
+            // 2 - initial value before update
+            subSelectStrategyCollection = EPStatementStartMethodHelperSubselect.planSubSelect(services, statementContext, isQueryPlanLogging(services), subSelectStreamDesc, new String[]{namedWindowName, streamSpec.getOptionalStreamName()}, new EventType[]{processor.getNamedWindowType(), activatorResultEventType}, new String[]{namedWindowTypeName, triggereventTypeName}, stopCallbacks, statementSpec.getAnnotations(), statementSpec.getDeclaredExpressions(), contextPropertyRegistry);
 
-            StreamTypeService typeService = new StreamTypeServiceImpl(new EventType[] {namedWindowType, activatorResultEventType}, new String[] {namedWindowName, streamName}, new boolean[] {false, true}, services.getEngineURI(), false);
+            StreamTypeServiceImpl typeService = new StreamTypeServiceImpl(new EventType[] {namedWindowType, activatorResultEventType}, new String[] {namedWindowName, streamName}, new boolean[] {false, true}, services.getEngineURI(), true);
+
+            // allow "initial" as a prefix to properties
+            StreamTypeServiceImpl assignmentTypeService;
+            if (namedWindowName.equals(INITIAL_VALUE_STREAM_NAME) || streamName.equals(INITIAL_VALUE_STREAM_NAME)) {
+                assignmentTypeService = typeService;
+            }
+            else {
+                assignmentTypeService = new StreamTypeServiceImpl(new EventType[] {namedWindowType, activatorResultEventType, namedWindowType}, new String[] {namedWindowName, streamName, INITIAL_VALUE_STREAM_NAME}, new boolean[] {false, true, true}, services.getEngineURI(), false);
+                assignmentTypeService.setStreamZeroUnambigous(true);
+            }
+
             if (onTriggerDesc instanceof OnTriggerWindowUpdateDesc) {
                 OnTriggerWindowUpdateDesc updateDesc = (OnTriggerWindowUpdateDesc) onTriggerDesc;
-                ExprValidationContext validationContext = new ExprValidationContext(typeService, statementContext.getMethodResolutionService(), null, statementContext.getSchedulingService(), statementContext.getVariableService(), getDefaultAgentInstanceContext(), statementContext.getEventAdapterService(), statementContext.getStatementName(), statementContext.getStatementId(), statementContext.getAnnotations(), statementContext.getContextDescriptor());
+                ExprValidationContext validationContext = new ExprValidationContext(assignmentTypeService, statementContext.getMethodResolutionService(), null, statementContext.getSchedulingService(), statementContext.getVariableService(), getDefaultAgentInstanceContext(statementContext), statementContext.getEventAdapterService(), statementContext.getStatementName(), statementContext.getStatementId(), statementContext.getAnnotations(), statementContext.getContextDescriptor());
                 for (OnTriggerSetAssignment assignment : updateDesc.getAssignments())
                 {
                     ExprNode validated = ExprNodeUtility.getValidatedSubtree(assignment.getExpression(), validationContext);
@@ -183,7 +197,7 @@ public class EPStatementStartMethodOnTrigger extends EPStatementStartMethodBase
             }
 
             // validate join expression
-            validatedJoin = validateJoinNamedWindow(statementSpec.getFilterRootNode(),
+            validatedJoin = validateJoinNamedWindow(services.getEngineURI(), statementContext, statementSpec.getFilterRootNode(),
                     namedWindowType, namedWindowName, namedWindowTypeName,
                     activatorResultEventType, streamName, triggereventTypeName);
 
@@ -196,7 +210,6 @@ public class EPStatementStartMethodOnTrigger extends EPStatementStartMethodBase
             if (statementSpec.getSelectClauseSpec().getSelectExprList().size() == 0) {
                 statementSpec.getSelectClauseSpec().add(new SelectClauseElementWildcard());
             }
-            AgentInstanceContext agentInstanceContext = getDefaultAgentInstanceContext();
             resultSetProcessorPrototype = ResultSetProcessorFactoryFactory.getProcessorPrototype(
                     statementSpec, statementContext, typeService, null, new boolean[0], true, contextPropertyRegistry, null);
 
@@ -223,10 +236,10 @@ public class EPStatementStartMethodOnTrigger extends EPStatementStartMethodBase
         {
             OnTriggerSetDesc desc = (OnTriggerSetDesc) statementSpec.getOnTriggerDesc();
             StreamTypeService typeService = new StreamTypeServiceImpl(new EventType[] {activatorResultEventType}, new String[] {streamSpec.getOptionalStreamName()}, new boolean[] {true}, services.getEngineURI(), false);
-            ExprValidationContext validationContext = new ExprValidationContext(typeService, statementContext.getMethodResolutionService(), null, statementContext.getSchedulingService(), statementContext.getVariableService(), getDefaultAgentInstanceContext(), statementContext.getEventAdapterService(), statementContext.getStatementName(), statementContext.getStatementId(), statementContext.getAnnotations(), statementContext.getContextDescriptor());
+            ExprValidationContext validationContext = new ExprValidationContext(typeService, statementContext.getMethodResolutionService(), null, statementContext.getSchedulingService(), statementContext.getVariableService(), getDefaultAgentInstanceContext(statementContext), statementContext.getEventAdapterService(), statementContext.getStatementName(), statementContext.getStatementId(), statementContext.getAnnotations(), statementContext.getContextDescriptor());
 
             // Materialize sub-select views
-            subSelectStrategyCollection = EPStatementStartMethodHelperSubselect.planSubSelect(services, statementContext, queryPlanLogging, subSelectStreamDesc, new String[]{streamSpec.getOptionalStreamName()}, new EventType[]{activatorResultEventType}, new String[]{triggereventTypeName}, stopCallbacks, statementSpec.getAnnotations(), statementSpec.getDeclaredExpressions(), contextPropertyRegistry);
+            subSelectStrategyCollection = EPStatementStartMethodHelperSubselect.planSubSelect(services, statementContext, isQueryPlanLogging(services), subSelectStreamDesc, new String[]{streamSpec.getOptionalStreamName()}, new EventType[]{activatorResultEventType}, new String[]{triggereventTypeName}, stopCallbacks, statementSpec.getAnnotations(), statementSpec.getDeclaredExpressions(), contextPropertyRegistry);
 
             for (OnTriggerSetAssignment assignment : desc.getAssignments()) {
                 ExprNode validated = ExprNodeUtility.getValidatedSubtree(assignment.getExpression(), validationContext);
@@ -263,11 +276,10 @@ public class EPStatementStartMethodOnTrigger extends EPStatementStartMethodBase
             }
 
             // Materialize sub-select views
-            subSelectStrategyCollection = EPStatementStartMethodHelperSubselect.planSubSelect(services, statementContext, queryPlanLogging, subSelectStreamDesc, new String[]{streamSpec.getOptionalStreamName()}, new EventType[]{activatorResultEventType}, new String[]{triggereventTypeName}, stopCallbacks, statementSpec.getAnnotations(), statementSpec.getDeclaredExpressions(), contextPropertyRegistry);
+            subSelectStrategyCollection = EPStatementStartMethodHelperSubselect.planSubSelect(services, statementContext, isQueryPlanLogging(services), subSelectStreamDesc, new String[]{streamSpec.getOptionalStreamName()}, new EventType[]{activatorResultEventType}, new String[]{triggereventTypeName}, stopCallbacks, statementSpec.getAnnotations(), statementSpec.getDeclaredExpressions(), contextPropertyRegistry);
 
             EPStatementStartMethodHelperValidate.validateNodes(statementSpec, statementContext, typeService, null);
 
-            AgentInstanceContext agentInstanceContext = getDefaultAgentInstanceContext();
             ResultSetProcessorFactoryDesc[] processorFactories = new ResultSetProcessorFactoryDesc[desc.getSplitStreams().size() + 1];
             ExprNode[] whereClauses = new ExprNode[desc.getSplitStreams().size() + 1];
             processorFactories[0] = ResultSetProcessorFactoryFactory.getProcessorPrototype(
@@ -358,7 +370,7 @@ public class EPStatementStartMethodOnTrigger extends EPStatementStartMethodBase
         }
         // Without context - start here
         else {
-            AgentInstanceContext agentInstanceContext = getDefaultAgentInstanceContext();
+            AgentInstanceContext agentInstanceContext = getDefaultAgentInstanceContext(statementContext);
             final StatementAgentInstanceFactoryOnTriggerResult resultOfStart = contextFactory.newContext(agentInstanceContext, false);
             finalViewable = resultOfStart.getFinalView();
             stopStatementMethod = new EPStatementStopMethod() {
@@ -370,6 +382,10 @@ public class EPStatementStartMethodOnTrigger extends EPStatementStartMethodBase
             destroyStatementMethod = null;
             aggregationService = resultOfStart.getOptionalAggegationService();
             subselectStrategyInstances = resultOfStart.getSubselectStrategies();
+
+            if (statementContext.getExtensionServicesContext() != null) {
+                statementContext.getExtensionServicesContext().startContextPartition(resultOfStart, 0);
+            }
         }
 
         // initialize aggregation expression nodes
@@ -392,11 +408,21 @@ public class EPStatementStartMethodOnTrigger extends EPStatementStartMethodBase
         for (OnTriggerMergeMatched matchedItem : mergeDesc.getItems()) {
 
             EventType dummyTypeNoProperties = new MapEventType(EventTypeMetadata.createAnonymous("merge_named_window_insert"), "merge_named_window_insert", 0, null, Collections.<String, Object>emptyMap(), null, null, null);
-            StreamTypeService twoStreamTypeSvc = new StreamTypeServiceImpl(new EventType[] {namedWindowType, triggerStreamType},
-                    new String[] {namedWindowName, triggerStreamName}, new boolean[] {true, true}, statementContext.getEngineURI(), false);
+            StreamTypeServiceImpl twoStreamTypeSvc = new StreamTypeServiceImpl(new EventType[] {namedWindowType, triggerStreamType},
+                    new String[] {namedWindowName, triggerStreamName}, new boolean[] {true, true}, statementContext.getEngineURI(), true);
             StreamTypeService insertOnlyTypeSvc = new StreamTypeServiceImpl(new EventType[] {dummyTypeNoProperties, triggerStreamType},
-                    new String[] {UuidGenerator.generate(), triggerStreamName}, new boolean[] {true, true}, statementContext.getEngineURI(), false);
+                    new String[] {UuidGenerator.generate(), triggerStreamName}, new boolean[] {true, true}, statementContext.getEngineURI(), true);
 
+            // we may provide an additional stream "initial" for the prior value, unless already defined
+            StreamTypeServiceImpl assignmentStreamTypeSvc;
+            if (namedWindowName.equals(INITIAL_VALUE_STREAM_NAME) || triggerStreamName.equals(INITIAL_VALUE_STREAM_NAME)) {
+                assignmentStreamTypeSvc = twoStreamTypeSvc;
+            }
+            else {
+                assignmentStreamTypeSvc = new StreamTypeServiceImpl(new EventType[] {namedWindowType, triggerStreamType, namedWindowType},
+                        new String[] {namedWindowName, triggerStreamName, INITIAL_VALUE_STREAM_NAME}, new boolean[] {true, true, true}, statementContext.getEngineURI(), false);
+                assignmentStreamTypeSvc.setStreamZeroUnambigous(true);
+            }
 
             if (matchedItem.getOptionalMatchCond() != null) {
                 StreamTypeService matchValidStreams = matchedItem.isMatchedUnmatched() ? twoStreamTypeSvc : insertOnlyTypeSvc;
@@ -420,7 +446,7 @@ public class EPStatementStartMethodOnTrigger extends EPStatementStartMethodBase
                     }
                     for (OnTriggerSetAssignment assignment : update.getAssignments())
                     {
-                        assignment.setExpression(EPStatementStartMethodHelperValidate.validateExprNoAgg(assignment.getExpression(), twoStreamTypeSvc, statementContext, evaluatorContextStmt, exprNodeErrorMessage));
+                        assignment.setExpression(EPStatementStartMethodHelperValidate.validateExprNoAgg(assignment.getExpression(), assignmentStreamTypeSvc, statementContext, evaluatorContextStmt, exprNodeErrorMessage));
                     }
                 }
                 else if (item instanceof OnTriggerMergeActionInsert) {
@@ -496,7 +522,9 @@ public class EPStatementStartMethodOnTrigger extends EPStatementStartMethodBase
     }
 
     // For delete actions from named windows
-    protected ExprNode validateJoinNamedWindow(ExprNode deleteJoinExpr,
+    protected ExprNode validateJoinNamedWindow(String engineURI,
+                                               StatementContext statementContext,
+                                         ExprNode deleteJoinExpr,
                                          EventType namedWindowType,
                                          String namedWindowStreamName,
                                          String namedWindowName,
@@ -512,7 +540,7 @@ public class EPStatementStartMethodOnTrigger extends EPStatementStartMethodBase
         LinkedHashMap<String, Pair<EventType, String>> namesAndTypes = new LinkedHashMap<String, Pair<EventType, String>>();
         namesAndTypes.put(namedWindowStreamName, new Pair<EventType, String>(namedWindowType, namedWindowName));
         namesAndTypes.put(filterStreamName, new Pair<EventType, String>(filteredType, filteredTypeName));
-        StreamTypeService typeService = new StreamTypeServiceImpl(namesAndTypes, services.getEngineURI(), false, false);
+        StreamTypeService typeService = new StreamTypeServiceImpl(namesAndTypes, engineURI, false, false);
 
         ExprEvaluatorContextStatement evaluatorContextStmt = new ExprEvaluatorContextStatement(statementContext);
         ExprValidationContext validationContext = new ExprValidationContext(typeService, statementContext.getMethodResolutionService(), null, statementContext.getSchedulingService(), statementContext.getVariableService(), evaluatorContextStmt, statementContext.getEventAdapterService(), statementContext.getStatementName(), statementContext.getStatementId(), statementContext.getAnnotations(), statementContext.getContextDescriptor());

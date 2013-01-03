@@ -9,10 +9,14 @@
 package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.client.EventPropertyGetter;
-import com.espertech.esper.epl.datetime.eval.*;
-import com.espertech.esper.epl.datetime.eval.ExprDotNodeFilterAnalyzerDTIntervalDesc;
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.epl.datetime.eval.DatetimeMethodEnum;
+import com.espertech.esper.epl.datetime.eval.ExprDotEvalDTFactory;
+import com.espertech.esper.epl.datetime.eval.ExprDotEvalDTMethodDesc;
+import com.espertech.esper.epl.datetime.eval.ExprDotNodeFilterAnalyzerDesc;
 import com.espertech.esper.epl.enummethod.dot.*;
 import com.espertech.esper.event.EventTypeMetadata;
+import com.espertech.esper.event.arr.ObjectArrayEventType;
 import com.espertech.esper.event.map.MapEventType;
 import com.espertech.esper.util.JavaClassHelper;
 import net.sf.cglib.reflect.FastClass;
@@ -137,7 +141,13 @@ public class ExprDotNodeUtility
 
                     ExprDotEval eval;
                     if (currentInputType.isScalar()) {
-                        eval = new ExprDotMethodEvalNoDuck(validationContext.getStatementName(), fastMethod, paramEvals);
+                        // if followed by an enumeration method, convert array to collection
+                        if (fastMethod.getReturnType().isArray() && !chainSpecStack.isEmpty() && EnumMethodEnum.isEnumerationMethod(chainSpecStack.getFirst().getName())) {
+                            eval = new ExprDotMethodEvalNoDuckWrapArray(validationContext.getStatementName(), fastMethod, paramEvals);
+                        }
+                        else {
+                            eval = new ExprDotMethodEvalNoDuck(validationContext.getStatementName(), fastMethod, paramEvals);
+                        }
                     }
                     else {
                         eval = new ExprDotMethodEvalNoDuckUnderlying(validationContext.getStatementName(), fastMethod, paramEvals);
@@ -179,10 +189,19 @@ public class ExprDotNodeUtility
         return new ExprDotNodeRealizedChain(intermediateEvals, unpackingEvals, filterAnalyzerDesc);
     }
 
-    public static MapEventType makeTransientMapType(String enumMethod, String propertyName, Class type) {
+    public static ObjectArrayEventType makeTransientOAType(String enumMethod, String propertyName, Class type) {
         Map<String, Object> propsResult = new HashMap<String, Object>();
         propsResult.put(propertyName, type);
         String typeName = enumMethod + "__" + propertyName;
-        return new MapEventType(EventTypeMetadata.createAnonymous(typeName), typeName, 0, null, propsResult, null, null, null);
+        return new ObjectArrayEventType(EventTypeMetadata.createAnonymous(typeName), typeName, 0, null, propsResult, null, null, null);
+    }
+
+    public static EventType[] getSingleLambdaParamEventType(String enumMethodUsedName, List<String> goesToNames, EventType inputEventType, Class collectionComponentType) {
+        if (inputEventType != null) {
+            return new EventType[] {inputEventType};
+        }
+        else {
+            return new EventType[] {ExprDotNodeUtility.makeTransientOAType(enumMethodUsedName, goesToNames.get(0), collectionComponentType)};
+        }
     }
 }

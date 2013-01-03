@@ -20,30 +20,29 @@ import java.io.Serializable;
  */
 public class InsertIntoDesc implements MetaDefItem, Serializable
 {
-    private final boolean isIStream;
+    private final SelectClauseStreamSelectorEnum streamSelector;
     private final String eventTypeName;
     private List<String> columnNames;
     private static final long serialVersionUID = 6204369134039715720L;
 
     /**
      * Ctor.
-     * @param isIStream is true if insert (new data) events are fed, or false for remove (old data) events are fed
+     * @param streamSelector selects insert, remove or insert+remove stream
      * @param eventTypeName is the event type name
      */
-    public InsertIntoDesc(boolean isIStream, String eventTypeName)
+    public InsertIntoDesc(SelectClauseStreamSelectorEnum streamSelector, String eventTypeName)
     {
-        this.isIStream = isIStream;
+        this.streamSelector = streamSelector;
         this.eventTypeName = eventTypeName;
         columnNames = new LinkedList<String>();
     }
 
     /**
-     * Returns true if insert (new data) events are fed, or false for remove (old data) events are fed.
-     * @return true for insert stream, false for remove stream
+     * Returns the stream(s) selected for inserting into.
+     * @return stream selector
      */
-    public boolean isIStream()
-    {
-        return isIStream;
+    public SelectClauseStreamSelectorEnum getStreamSelector() {
+        return streamSelector;
     }
 
     /**

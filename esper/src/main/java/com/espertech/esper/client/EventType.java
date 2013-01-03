@@ -153,6 +153,10 @@ public interface EventType
      * and only returns the descriptor for the event type's known properties.  
      * <p>
      * The method does not return property information of inner or nested types.
+     * <p>
+     * For returning a property descriptor for nested, indexed or mapped properties
+     * use {@link com.espertech.esper.event.EventTypeUtility}.
+     * </p>
      * @param propertyName property name
      * @return descriptor for the named property
      */

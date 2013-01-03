@@ -12,6 +12,7 @@ import com.espertech.esper.epl.join.rep.Node;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.util.IndentWriter;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -34,7 +35,7 @@ public class LeafAssemblyNode extends BaseAssemblyNode
     {
     }
 
-    public void process(List<Node>[] result)
+    public void process(List<Node>[] result, Collection<EventBean[]> resultFinalRows, EventBean resultRootEvent)
     {
         List<Node> nodes = result[streamNum];
         if (nodes == null)
@@ -47,19 +48,19 @@ public class LeafAssemblyNode extends BaseAssemblyNode
             Set<EventBean> events = node.getEvents();
             for (EventBean theEvent : events)
             {
-                processEvent(theEvent, node);
+                processEvent(theEvent, node, resultFinalRows, resultRootEvent);
             }
         }
     }
 
-    private void processEvent(EventBean theEvent, Node currentNode)
+    private void processEvent(EventBean theEvent, Node currentNode, Collection<EventBean[]> resultFinalRows, EventBean resultRootEvent)
     {
         EventBean[] row = new EventBean[numStreams];
         row[streamNum] = theEvent;
-        parentNode.result(row, streamNum, currentNode.getParentEvent(), currentNode.getParent());
+        parentNode.result(row, streamNum, currentNode.getParentEvent(), currentNode.getParent(), resultFinalRows, resultRootEvent);
     }
 
-    public void result(EventBean[] row, int streamNum, EventBean myEvent, Node myNode)
+    public void result(EventBean[] row, int streamNum, EventBean myEvent, Node myNode, Collection<EventBean[]> resultFinalRows, EventBean resultRootEvent)
     {
         throw new UnsupportedOperationException("Leaf node cannot process child results");
     }

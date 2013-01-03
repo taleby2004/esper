@@ -21,7 +21,7 @@ import java.util.*;
  */
 public class PropertyIndexedEventTableSingle implements EventTable
 {
-    private final int streamNum;
+    protected final int streamNum;
     protected final EventPropertyGetter propertyGetter;
     protected final Map<Object, Set<EventBean>> propertyIndex;
 
@@ -40,6 +40,11 @@ public class PropertyIndexedEventTableSingle implements EventTable
     protected Object getKey(EventBean theEvent)
     {
         return propertyGetter.get(theEvent);
+    }
+
+    public void addRemove(EventBean[] newData, EventBean[] oldData) {
+        add(newData);
+        remove(oldData);
     }
 
     /**

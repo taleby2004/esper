@@ -11,6 +11,7 @@
 
 package com.espertech.esper.dataflow.core;
 
+import com.espertech.esper.client.annotation.AuditEnum;
 import com.espertech.esper.client.dataflow.EPDataFlowExceptionHandler;
 import com.espertech.esper.client.dataflow.EPDataFlowInstantiationOptions;
 import com.espertech.esper.client.dataflow.EPDataFlowSignal;
@@ -29,7 +30,7 @@ public class RealizationFactoryInterface {
 
     private static final Log log = LogFactory.getLog(RealizationFactoryInterface.class);
 
-    public static GraphStartDesc realize(String dataFlowName,
+    public static DataflowStartDesc realize(String dataFlowName,
                                          Map<Integer, Object> operators,
                                          Map<Integer, OperatorMetadataDescriptor> operatorMetadata,
                                          Set<Integer> operatorBuildOrder,
@@ -47,6 +48,7 @@ public class RealizationFactoryInterface {
             statisticsProvider = new OperatorStatisticsProvider(operatorMetadata);
         }
 
+        boolean audit = AuditEnum.DATAFLOW_OP.getAudit(statementContext.getAnnotations()) != null;
         for (int producerOpNum : operatorBuildOrder) {
             String operatorPrettyPrint = operatorMetadata.get(producerOpNum).getOperatorPrettyPrint();
             if (log.isDebugEnabled()) {
@@ -58,7 +60,7 @@ public class RealizationFactoryInterface {
             int numOutputStreams = operatorMetadata.get(producerOpNum).getOperatorSpec().getOutput().getItems().size();
             List<ObjectBindingPair>[] targets = getOperatorConsumersPerStream(numOutputStreams, producerOpNum, operators, operatorMetadata, bindings);
 
-            EPDataFlowEmitter runtimeContext = generateRuntimeContext(dataFlowName, producerOpNum, operatorPrettyPrint, dataFlowSignalManager, targets, options);
+            EPDataFlowEmitter runtimeContext = generateRuntimeContext(statementContext.getEngineURI(), statementContext.getStatementName(), audit, dataFlowName, producerOpNum, operatorPrettyPrint, dataFlowSignalManager, targets, options);
 
             if (options.isOperatorStatistics()) {
                 runtimeContext = new EPDataFlowEmitterWrapperWStatistics(runtimeContext, producerOpNum, statisticsProvider, options.isCpuStatistics());
@@ -98,7 +100,7 @@ public class RealizationFactoryInterface {
             }
         }
 
-        return new GraphStartDesc(statisticsProvider);
+        return new DataflowStartDesc(statisticsProvider);
     }
 
     private static List<ObjectBindingPair>[] getOperatorConsumersPerStream(int numOutputStreams, int producingOperator, Map<Integer, Object> operators, Map<Integer, OperatorMetadataDescriptor> operatorMetadata, List<LogicalChannelBinding> bindings) {
@@ -141,13 +143,13 @@ public class RealizationFactoryInterface {
         }
     }
 
-    private static SubmitHandler getSubmitHandler(String dataflowName, int producerOpNum, String operatorPrettyPrint, DataFlowSignalManager dataFlowSignalManager, ObjectBindingPair target, EPDataFlowExceptionHandler optionalExceptionHandler) {
+    private static SubmitHandler getSubmitHandler(String engineURI, String statementName, boolean audit, String dataflowName, int producerOpNum, String operatorPrettyPrint, DataFlowSignalManager dataFlowSignalManager, ObjectBindingPair target, EPDataFlowExceptionHandler optionalExceptionHandler) {
         SignalHandler signalHandler = getSignalHandler(producerOpNum, target.getTarget(), target.getBinding().getConsumingSignalBindingDesc());
 
         int receivingOpNum = target.getBinding().getLogicalChannel().getConsumingOpNum();
         String receivingOpPretty = target.getBinding().getLogicalChannel().getConsumingOpPrettyPrint();
         String receivingOpName = target.getBinding().getLogicalChannel().getConsumingOpName();
-        EPDataFlowEmitterExceptionHandler exceptionHandler = new EPDataFlowEmitterExceptionHandler(dataflowName, receivingOpName, receivingOpNum, receivingOpPretty, optionalExceptionHandler);
+        EPDataFlowEmitterExceptionHandler exceptionHandler = new EPDataFlowEmitterExceptionHandler(engineURI, statementName, audit, dataflowName, receivingOpName, receivingOpNum, receivingOpPretty, optionalExceptionHandler);
 
         LogicalChannelBindingType bindingType = target.getBinding().getConsumingBindingDesc().getBindingType();
         if (bindingType instanceof LogicalChannelBindingTypePassAlong) {
@@ -165,7 +167,10 @@ public class RealizationFactoryInterface {
         }
     }
 
-    private static EPDataFlowEmitter generateRuntimeContext(String dataflowName,
+    private static EPDataFlowEmitter generateRuntimeContext(String engineURI,
+                                                            String statementName,
+                                                            boolean audit,
+                                                            String dataflowName,
                                                             int producerOpNum,
                                                             String operatorPrettyPrint,
                                                             DataFlowSignalManager dataFlowSignalManager,
@@ -183,12 +188,12 @@ public class RealizationFactoryInterface {
             // handle single-stream single target case
             if (targets.size() == 1) {
                 ObjectBindingPair target = targets.get(0);
-                return getSubmitHandler(dataflowName, producerOpNum, operatorPrettyPrint, dataFlowSignalManager, target, options.getExceptionHandler());
+                return getSubmitHandler(engineURI, statementName, audit, dataflowName, producerOpNum, operatorPrettyPrint, dataFlowSignalManager, target, options.getExceptionHandler());
             }
 
             SubmitHandler[] handlers = new SubmitHandler[targets.size()];
             for (int i = 0; i < handlers.length; i++) {
-                handlers[i] = getSubmitHandler(dataflowName, producerOpNum, operatorPrettyPrint, dataFlowSignalManager, targets.get(i), options.getExceptionHandler());
+                handlers[i] = getSubmitHandler(engineURI, statementName, audit, dataflowName, producerOpNum, operatorPrettyPrint, dataFlowSignalManager, targets.get(i), options.getExceptionHandler());
             }
             return new EPDataFlowEmitter1StreamNTarget(producerOpNum, dataFlowSignalManager, handlers);
         }
@@ -199,7 +204,7 @@ public class RealizationFactoryInterface {
                 SubmitHandler[] handlers = new SubmitHandler[targetsPerStream[streamNum].size()];
                 handlersPerStream[streamNum] = handlers;
                 for (int i = 0; i < handlers.length; i++) {
-                    handlers[i] = getSubmitHandler(dataflowName, producerOpNum, operatorPrettyPrint, dataFlowSignalManager, targetsPerStream[streamNum].get(i), options.getExceptionHandler());
+                    handlers[i] = getSubmitHandler(engineURI, statementName, audit, dataflowName, producerOpNum, operatorPrettyPrint, dataFlowSignalManager, targetsPerStream[streamNum].get(i), options.getExceptionHandler());
                 }
             }
             return new EPDataFlowEmitterNStreamNTarget(producerOpNum, dataFlowSignalManager, handlersPerStream);

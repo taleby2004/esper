@@ -93,6 +93,32 @@ public class TestEnumAverage extends TestCase {
 
         epService.getEPRuntime().sendEvent(SupportCollection.makeNumeric("4"));
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{4d, new BigDecimal(4d)});
+        stmtFragment.destroy();
+
+        // test average with lambda
+        epService.getEPAdministrator().getConfiguration().addPlugInSingleRowFunction("extractNum", TestEnumMinMax.MyService.class.getName(), "extractNum");
+        epService.getEPAdministrator().getConfiguration().addPlugInSingleRowFunction("extractBigDecimal", TestEnumMinMax.MyService.class.getName(), "extractBigDecimal");
+
+        String[] fieldsLambda = "val0,val1".split(",");
+        String eplLambda = "select " +
+                "strvals.average(v => extractNum(v)) as val0, " +
+                "strvals.average(v => extractBigDecimal(v)) as val1 " +
+                "from SupportCollection";
+        EPStatement stmtLambda = epService.getEPAdministrator().createEPL(eplLambda);
+        stmtLambda.addListener(listener);
+        LambdaAssertionUtil.assertTypes(stmtLambda.getEventType(), fieldsLambda, new Class[]{Double.class, BigDecimal.class});
+
+        epService.getEPRuntime().sendEvent(SupportCollection.makeString("E2,E1,E5,E4"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsLambda, new Object[]{(2+1+5+4)/4d, new BigDecimal((2+1+5+4)/4d)});
+
+        epService.getEPRuntime().sendEvent(SupportCollection.makeString("E1"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsLambda, new Object[]{1d, new BigDecimal(1)});
+
+        epService.getEPRuntime().sendEvent(SupportCollection.makeString(null));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsLambda, new Object[]{null, null});
+
+        epService.getEPRuntime().sendEvent(SupportCollection.makeString(""));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsLambda, new Object[]{null, null});
     }
 
     public void testInvalid() {
@@ -100,9 +126,6 @@ public class TestEnumAverage extends TestCase {
 
         epl = "select strvals.average() from SupportCollection";
         tryInvalid(epl, "Error starting statement: Invalid input for built-in enumeration method 'average' and 0-parameter footprint, expecting collection of numeric values as input, received collection of String [select strvals.average() from SupportCollection]");
-
-        epl = "select intvals.average(x => x*2) from SupportCollection";
-        tryInvalid(epl, "Error starting statement: Invalid input for built-in enumeration method 'average' and 1-parameter footprint, expecting collection of events as input, received collection of Integer [select intvals.average(x => x*2) from SupportCollection]");
 
         epl = "select beans.average() from Bean";
         tryInvalid(epl, "Error starting statement: Invalid input for built-in enumeration method 'average' and 0-parameter footprint, expecting collection of values (typically scalar values) as input, received collection of events of type 'com.espertech.esper.support.bean.SupportBean' [select beans.average() from Bean]");

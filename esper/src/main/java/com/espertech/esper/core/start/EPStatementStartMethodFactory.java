@@ -8,9 +8,8 @@
  **************************************************************************************/
 package com.espertech.esper.core.start;
 
-import com.espertech.esper.core.service.EPServicesContext;
 import com.espertech.esper.core.service.StatementContext;
-import com.espertech.esper.epl.spec.*;
+import com.espertech.esper.epl.spec.StatementSpecCompiled;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -25,48 +24,48 @@ public class EPStatementStartMethodFactory
      * Ctor.
      * @param statementSpec is a container for the definition of all statement constructs that
      * may have been used in the statement, i.e. if defines the select clauses, insert into, outer joins etc.
-     * @param services is the service instances for dependency injection
-     * @param statementContext is statement-level information and statement services
      */
-    public static EPStatementStartMethod makeStartMethod(StatementSpecCompiled statementSpec,
-                                                         EPServicesContext services,
-                                                         StatementContext statementContext)
+    public static EPStatementStartMethod makeStartMethod(StatementSpecCompiled statementSpec)
     {
         if (statementSpec.getUpdateSpec() != null)
         {
-            return new EPStatementStartMethodUpdate(statementSpec, services, statementContext);
+            return new EPStatementStartMethodUpdate(statementSpec);
         }
         if (statementSpec.getOnTriggerDesc() != null)
         {
-            return new EPStatementStartMethodOnTrigger(statementSpec, services, statementContext);
+            return new EPStatementStartMethodOnTrigger(statementSpec);
         }
         else if (statementSpec.getCreateWindowDesc() != null)
         {
-            return new EPStatementStartMethodCreateWindow(statementSpec, services, statementContext);
+            return new EPStatementStartMethodCreateWindow(statementSpec);
         }
         else if (statementSpec.getCreateIndexDesc() != null)
         {
-            return new EPStatementStartMethodCreateIndex(statementSpec, services, statementContext);
+            return new EPStatementStartMethodCreateIndex(statementSpec);
         }
         else if (statementSpec.getCreateGraphDesc() != null)
         {
-            return new EPStatementStartMethodCreateGraph(statementSpec, services, statementContext);
+            return new EPStatementStartMethodCreateGraph(statementSpec);
         }
         else if (statementSpec.getCreateSchemaDesc() != null)
         {
-            return new EPStatementStartMethodCreateSchema(statementSpec, services, statementContext);
+            return new EPStatementStartMethodCreateSchema(statementSpec);
         }
         else if (statementSpec.getCreateVariableDesc() != null)
         {
-            return new EPStatementStartMethodCreateVariable(statementSpec, services, statementContext);
+            return new EPStatementStartMethodCreateVariable(statementSpec);
         }
         else if (statementSpec.getContextDesc() != null)
         {
-            return new EPStatementStartMethodCreateContext(statementSpec, services, statementContext);
+            return new EPStatementStartMethodCreateContext(statementSpec);
+        }
+        else if (statementSpec.getCreateExpressionDesc() != null)
+        {
+            return new EPStatementStartMethodCreateExpression(statementSpec);
         }
         else
         {
-            return new EPStatementStartMethodSelect(statementSpec, services, statementContext);
+            return new EPStatementStartMethodSelect(statementSpec);
         }
     }
 }

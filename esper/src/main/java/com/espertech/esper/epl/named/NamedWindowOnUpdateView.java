@@ -38,7 +38,7 @@ public class NamedWindowOnUpdateView extends NamedWindowOnExprBaseView
         if ((matchingEvents == null) || (matchingEvents.length == 0)){
             return;
         }
-        EventBean[] eventsPerStream = new EventBean[2];
+        EventBean[] eventsPerStream = new EventBean[3];
 
         OneEventCollection newData = new OneEventCollection();
         OneEventCollection oldData = new OneEventCollection();

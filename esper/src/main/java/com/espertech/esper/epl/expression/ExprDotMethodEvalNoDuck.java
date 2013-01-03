@@ -25,7 +25,7 @@ public class ExprDotMethodEvalNoDuck implements ExprDotEval
     private static final Log log = LogFactory.getLog(ExprDotMethodEvalNoDuck.class);
 
     protected final String statementName;
-    private final FastMethod method;
+    protected final FastMethod method;
     private final ExprEvaluator[] parameters;
 
     public ExprDotMethodEvalNoDuck(String statementName, FastMethod method, ExprEvaluator[] parameters)
@@ -59,6 +59,6 @@ public class ExprDotMethodEvalNoDuck implements ExprDotEval
     }
 
     public ExprDotEvalTypeInfo getTypeInfo() {
-        return ExprDotEvalTypeInfo.scalarOrUnderlying(method.getReturnType());
+        return ExprDotEvalTypeInfo.fromMethod(method.getJavaMethod());
     }
 }

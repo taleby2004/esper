@@ -29,4 +29,12 @@ public class TableLookupKeyDesc {
     public List<QueryGraphValueEntryRange> getRanges() {
         return ranges;
     }
+
+    public String toString() {
+
+        return "TableLookupKeyDesc{" +
+                "hashes=" + QueryGraphValueEntryHashKeyed.toQueryPlan(hashes) +
+                ", ranges=" + QueryGraphValueEntryRange.toQueryPlan(ranges) +
+                '}';
+    }
 }

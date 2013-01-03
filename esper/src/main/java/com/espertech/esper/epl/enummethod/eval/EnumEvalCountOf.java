@@ -18,17 +18,17 @@ import java.util.Collection;
 
 public class EnumEvalCountOf implements EnumEval {
 
-    private EventBean[] events;
-    
-    public EnumEvalCountOf(int numEvents) {
-        events = new EventBean[numEvents];
+    private int numStreams;
+
+    public EnumEvalCountOf(int numStreams) {
+        this.numStreams = numStreams;
     }
 
-    public EventBean[] getEventsPrototype() {
-        return events;
+    public int getStreamNumSize() {
+        return numStreams;
     }
 
-    public Object evaluateEnumMethod(Collection target, boolean isNewData, ExprEvaluatorContext context) {
+    public Object evaluateEnumMethod(EventBean[] eventsLambda, Collection target, boolean isNewData, ExprEvaluatorContext context) {
         return target.size();
     }
 }

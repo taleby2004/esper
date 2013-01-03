@@ -16,6 +16,7 @@ import com.espertech.esper.client.context.*;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
+import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.core.service.EPServiceProviderSPI;
 import com.espertech.esper.filter.FilterServiceSPI;
 import com.espertech.esper.support.bean.*;
@@ -23,9 +24,6 @@ import com.espertech.esper.support.client.SupportConfigFactory;
 import junit.framework.TestCase;
 
 import java.util.*;
-
-// Test invalid:
-// - segmented context: validate if statement indeed has such filters
 
 public class TestContextPartitioned extends TestCase {
 
@@ -48,6 +46,41 @@ public class TestContextPartitioned extends TestCase {
 
     public void tearDown() {
         listener = null;
+    }
+
+    public void testJoinRemoveStream() {
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
+        epService.getEPAdministrator().getConfiguration().addEventType(WebEvent.class);
+
+        String stmtContext = "create context SegmentedBySession partition by sessionId from WebEvent";
+        epService.getEPAdministrator().createEPL(stmtContext);
+
+        String epl = " context SegmentedBySession " +
+                " select rstream A.pageName as pageNameA , A.sessionId as sessionIdA, B.pageName as pageNameB, C.pageName as pageNameC from " +
+                "WebEvent(pageName='Start').win:time(30) A " +
+                "full outer join " +
+                "WebEvent(pageName='Middle').win:time(30) B on A.sessionId = B.sessionId " +
+                "full outer join " +
+                "WebEvent(pageName='End').win:time(30) C on A.sessionId  = C.sessionId " +
+                "where A.pageName is not null and (B.pageName is null or C.pageName is null) "
+                ;
+        EPStatement statement = epService.getEPAdministrator().createEPL(epl);
+        statement.addListener(listener);
+
+        // Set up statement for finding missing events
+        sendWebEventsComplete(0);
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(20000));
+        sendWebEventsComplete(1);
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(40000));
+        assertFalse(listener.isInvoked());
+        sendWebEventsComplete(2);
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(60000));
+        sendWebEventsIncomplete(3);
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(80000));
+        assertFalse(listener.isInvoked());
+
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(100000));
+        assertTrue(listener.isInvoked());
     }
 
     public void testIterateTargetedCP() {
@@ -122,7 +155,7 @@ public class TestContextPartitioned extends TestCase {
         // validate statement not applicable filters
         epService.getEPAdministrator().createEPL("create context SegmentedByAString partition by theString from SupportBean");
         epl = "context SegmentedByAString select * from SupportBean_S0";
-        tryInvalid(epl, "Error starting statement: Segmented context 'SegmentedByAString' requires that any of the event types that are listed in the segmented context also appear in any of the filter expressions of the statement [");
+        tryInvalid(epl, "Error starting statement: Segmented context 'SegmentedByAString' requires that any of the event types that are listed in the segmented context also appear in any of the filter expressions of the statement, type 'SupportBean_S0' is not one of the types listed [");
     }
 
     private void tryInvalid(String epl, String expected) {
@@ -156,7 +189,7 @@ public class TestContextPartitioned extends TestCase {
         }
     }
 
-    public void testAdditionalFilters() {
+    public void testAdditionalFilters() throws Exception {
         FilterServiceSPI filterSPI = (FilterServiceSPI) spi.getFilterService();
         epService.getEPAdministrator().createEPL("@Name('context') create context SegmentedByAString " +
                 "partition by theString from SupportBean(intPrimitive>0), p00 from SupportBean_S0(id > 0)");
@@ -198,6 +231,13 @@ public class TestContextPartitioned extends TestCase {
 
         epService.getEPAdministrator().destroyAllStatements();
         assertEquals(0, filterSPI.getFilterCountApprox());
+
+        // Test unnecessary filter
+        String epl = "create context CtxSegmented partition by theString from SupportBean;" +
+                     "context CtxSegmented select * from pattern [every a=SupportBean -> c=SupportBean(c.theString=a.theString)];";
+        epService.getEPAdministrator().getDeploymentAdmin().parseDeploy(epl);
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 2));
     }
 
     public void testMultiStatementFilterCount() {
@@ -335,7 +375,7 @@ public class TestContextPartitioned extends TestCase {
             fail();
         }
         catch (EPException ex) {
-            assertEquals("Error starting statement: Segmented context 'Ctx' requires that any of the event types that are listed in the segmented context also appear in any of the filter expressions of the statement [context Ctx create window MyInvalidWindow.std:unique(p00) as SupportBean_S0]", ex.getMessage());
+            assertEquals("Error starting statement: Segmented context 'Ctx' requires that any of the event types that are listed in the segmented context also appear in any of the filter expressions of the statement, type 'SupportBean_S0' is not one of the types listed [context Ctx create window MyInvalidWindow.std:unique(p00) as SupportBean_S0]", ex.getMessage());
         }
     }
 
@@ -739,4 +779,33 @@ public class TestContextPartitioned extends TestCase {
    		}
 
    	}
+
+    private void sendWebEventsIncomplete(int id) {
+        epService.getEPRuntime().sendEvent(new WebEvent("Start", String.valueOf(id)));
+        epService.getEPRuntime().sendEvent(new WebEvent("End", String.valueOf(id)));
+    }
+
+    private void sendWebEventsComplete(int id) {
+        epService.getEPRuntime().sendEvent(new WebEvent("Start", String.valueOf(id)));
+        epService.getEPRuntime().sendEvent(new WebEvent("Middle", String.valueOf(id)));
+        epService.getEPRuntime().sendEvent(new WebEvent("End", String.valueOf(id)));
+    }
+
+    public static class WebEvent {
+        private final String pageName;
+        private final String sessionId;
+
+        public WebEvent(String pageName, String sessionId) {
+            this.pageName = pageName;
+            this.sessionId = sessionId;
+        }
+
+        public String getSessionId() {
+            return sessionId;
+        }
+
+        public String getPageName() {
+            return pageName;
+        }
+    }
 }

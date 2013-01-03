@@ -311,7 +311,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
                     isInsertInto, isPattern, isDistinct, isForClause, statementContext.getEpStatementHandle().getMetricsHandle());
 
             // create start method
-            startMethod = EPStatementStartMethodFactory.makeStartMethod(compiledSpec, services, statementContext);
+            startMethod = EPStatementStartMethodFactory.makeStartMethod(compiledSpec);
 
             // keep track of the insert-into statements supplying streams.
             // these may need to lock to get more predictable behavior for multithreaded processing.
@@ -629,7 +629,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         EPStatementStartResult startResult;
         try
         {
-            startResult = desc.getStartMethod().start(isNewStatement, isRecoveringStatement, isResilient);
+            startResult = desc.getStartMethod().start(services, desc.getStatementContext(), isNewStatement, isRecoveringStatement, isResilient);
         }
         catch (EPStatementException ex)
         {
@@ -1018,7 +1018,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         // compile each stream used
         try
         {
-            compiledStreams = new ArrayList<StreamSpecCompiled>();
+            compiledStreams = new ArrayList<StreamSpecCompiled>(spec.getStreamSpecs().size());
             int streamNum = 0;
             for (StreamSpecRaw rawSpec : spec.getStreamSpecs())
             {
@@ -1138,8 +1138,8 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
                 spec.getSqlParameters(),
                 spec.getCreateContextDesc(),
                 spec.getOptionalContextName(),
-                spec.getCreateDataFlowDesc()
-                );
+                spec.getCreateDataFlowDesc(),
+                spec.getCreateExpressionDesc());
     }
 
     private static boolean determineStatelessSelect(StatementSpecRaw spec, boolean hasSubselects, boolean isPattern) {
@@ -1159,6 +1159,9 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             return false;
         }
         if (singleStream.getViewSpecs() != null && !singleStream.getViewSpecs().isEmpty()) {
+            return false;
+        }
+        if (spec.getOutputLimitSpec() != null) {
             return false;
         }
 
@@ -1307,7 +1310,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         boolean isWildcard = spec.getSelectClauseSpec().isUsingWildcard();
         if (statementContext.getValueAddEventService().isRevisionTypeName(selectFromTypeName))
         {
-            targetType = statementContext.getValueAddEventService().createRevisionType(typeName, selectFromTypeName, statementContext.getStatementStopService(), statementContext.getEventAdapterService(), statementContext.getEventTypeIdGenerator());
+            targetType = statementContext.getValueAddEventService().createRevisionType(typeName, selectFromTypeName, statementContext.getStatementStopService(), statementContext.getEventAdapterService(), servicesContext.getEventTypeIdGenerator());
         }
         else if (isWildcard && !isOnlyWildcard)
         {
@@ -1419,13 +1422,12 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
      */
     public static class EPStatementDesc
     {
-        private EPStatementSPI epStatement;
-        private EPStatementStartMethod startMethod;
+        private final EPStatementSPI epStatement;
+        private final EPStatementStartMethod startMethod;
         private EPStatementStopMethod stopMethod;
         private EPStatementDestroyMethod destroyMethod;
-        private String optInsertIntoStream;
-        private EPStatementHandle statementHandle;
-        private StatementContext statementContext;
+        private final EPStatementHandle statementHandle;
+        private final StatementContext statementContext;
 
         /**
          * Ctor.
@@ -1443,7 +1445,6 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             this.startMethod = startMethod;
             this.stopMethod = stopMethod;
             this.destroyMethod = destroyMethod;
-            this.optInsertIntoStream = optInsertIntoStream;
             this.statementHandle = statementHandle;
             this.statementContext = statementContext;
         }
@@ -1473,15 +1474,6 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         public EPStatementStopMethod getStopMethod()
         {
             return stopMethod;
-        }
-
-        /**
-         * Return the insert-into stream name, or null if no insert-into
-         * @return stream name
-         */
-        public String getOptInsertIntoStream()
-        {
-            return optInsertIntoStream;
         }
 
         /**

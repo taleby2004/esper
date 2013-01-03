@@ -31,8 +31,9 @@ public class EvalAuditNode extends EvalNodeBase
     }
 
     public EvalStateNode newState(Evaluator parentNode,
-                                  EvalStateNodeNumber stateNodeNumber, long stateNodeId)
+                                  EvalStateNodeNumber stateNodeNumber,
+                                  long stateNodeId)
     {
-        return new EvalAuditStateNode(parentNode, this);
+        return new EvalAuditStateNode(parentNode, this, stateNodeNumber, stateNodeId);
     }
 }

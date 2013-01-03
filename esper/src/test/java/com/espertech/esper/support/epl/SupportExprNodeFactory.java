@@ -368,8 +368,8 @@ public class SupportExprNodeFactory
         ViewResourceDelegateUnverified viewResources = new ViewResourceDelegateUnverified();
 
         VariableService variableService = new VariableServiceImpl(0, new SchedulingServiceImpl(new TimeSourceServiceImpl()), SupportEventAdapterService.getService(), null);
-        variableService.createNewVariable("intPrimitive", Integer.class.getName(), 10, false, null);
-        variableService.createNewVariable("var1", String.class.getName(), "my_variable_value", false, null);
+        variableService.createNewVariable("intPrimitive", Integer.class.getName(), 10, false, false, null, null);
+        variableService.createNewVariable("var1", String.class.getName(), "my_variable_value", false, false, null, null);
 
         ExprNodeUtility.getValidatedSubtree(topNode, new ExprValidationContext(streamTypeService, getMethodResService(), viewResources, null, variableService, null, null, null, null, null, null));
     }

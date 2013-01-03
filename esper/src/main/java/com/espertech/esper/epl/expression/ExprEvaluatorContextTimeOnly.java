@@ -10,6 +10,7 @@ package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.core.service.ExpressionResultCacheService;
+import com.espertech.esper.core.service.ExpressionResultCacheServiceThreadlocal;
 import com.espertech.esper.epl.script.AgentInstanceScriptContext;
 import com.espertech.esper.core.service.StatementAgentInstanceLock;
 import com.espertech.esper.schedule.TimeProvider;
@@ -24,7 +25,7 @@ public class ExprEvaluatorContextTimeOnly implements ExprEvaluatorContext
 
     public ExprEvaluatorContextTimeOnly(TimeProvider timeProvider) {
         this.timeProvider = timeProvider;
-        this.expressionResultCacheService = new ExpressionResultCacheService();
+        this.expressionResultCacheService = new ExpressionResultCacheServiceThreadlocal();
     }
 
     /**

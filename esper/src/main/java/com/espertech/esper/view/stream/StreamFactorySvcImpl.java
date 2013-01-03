@@ -94,7 +94,14 @@ public class StreamFactorySvcImpl implements StreamFactoryService
      */
     public Pair<EventStream, StatementAgentInstanceLock> createStream(final String statementId, final FilterSpecCompiled filterSpec, FilterService filterService,
                                                                       EPStatementAgentInstanceHandle epStatementAgentInstanceHandle,
-                                                                      boolean isJoin, final boolean isSubSelect, final ExprEvaluatorContext exprEvaluatorContext, boolean isNamedWindowTrigger, boolean filterWithSameTypeSubselect, Annotation[] annotations)
+                                                                      boolean isJoin,
+                                                                      final boolean isSubSelect,
+                                                                      final ExprEvaluatorContext exprEvaluatorContext,
+                                                                      boolean isNamedWindowTrigger,
+                                                                      boolean filterWithSameTypeSubselect,
+                                                                      Annotation[] annotations,
+                                                                      boolean stateless
+    )
     {
         if (log.isDebugEnabled())
         {
@@ -103,7 +110,7 @@ public class StreamFactorySvcImpl implements StreamFactoryService
 
         // Check if a stream for this filter already exists
         Pair<EventStream, EPStatementHandleCallback> pair;
-        boolean forceNewStream = isJoin || (!isReuseViews) || isSubSelect || isNamedWindowTrigger || filterWithSameTypeSubselect;
+        boolean forceNewStream = isJoin || (!isReuseViews) || isSubSelect || isNamedWindowTrigger || filterWithSameTypeSubselect || stateless;
         if (forceNewStream)
         {
             pair = eventStreamsIdentity.get(filterSpec);
@@ -210,10 +217,10 @@ public class StreamFactorySvcImpl implements StreamFactoryService
      * See the method of the same name in {@link com.espertech.esper.view.stream.StreamFactoryService}.
      * @param filterSpec is the filter definition
      */
-    public void dropStream(FilterSpecCompiled filterSpec, FilterService filterService, boolean isJoin, boolean isSubSelect, boolean isNamedWindowTrigger, boolean filterWithSameTypeSubselect)
+    public void dropStream(FilterSpecCompiled filterSpec, FilterService filterService, boolean isJoin, boolean isSubSelect, boolean isNamedWindowTrigger, boolean filterWithSameTypeSubselect, boolean stateless)
     {
         Pair<EventStream, EPStatementHandleCallback> pair;
-        boolean forceNewStream = isJoin || (!isReuseViews) || isSubSelect || isNamedWindowTrigger || filterWithSameTypeSubselect;
+        boolean forceNewStream = isJoin || (!isReuseViews) || isSubSelect || isNamedWindowTrigger || filterWithSameTypeSubselect || stateless;
 
         if (forceNewStream)
         {

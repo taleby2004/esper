@@ -131,8 +131,12 @@ public class TestDataFlowOpFilter extends TestCase {
         DefaultSupportSourceOp source = new DefaultSupportSourceOp(events);
         DefaultSupportCaptureOp<Object> capture = new DefaultSupportCaptureOp<Object>(2);
         EPDataFlowInstantiationOptions options = new EPDataFlowInstantiationOptions();
+        options.setDataFlowInstanceUserObject("myuserobject");
+        options.setDataFlowInstanceId("myinstanceid");
         options.operatorProvider(new DefaultSupportGraphOpProvider(source, capture));
         EPDataFlowInstance instance = epService.getEPRuntime().getDataFlowRuntime().instantiate("MySelect", options);
+        assertEquals("myuserobject", instance.getUserObject());
+        assertEquals("myinstanceid", instance.getInstanceId());
 
         instance.run();
 

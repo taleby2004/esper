@@ -14,17 +14,18 @@ package com.espertech.esper.epl.enummethod.eval;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
-import com.espertech.esper.event.map.MapEventType;
+import com.espertech.esper.event.arr.ObjectArrayEventBean;
+import com.espertech.esper.event.arr.ObjectArrayEventType;
 
 import java.util.Collection;
 
 public class EnumEvalAggregateEvents extends EnumEvalAggregateBase implements EnumEval {
 
-    public EnumEvalAggregateEvents(ExprEvaluator initialization, ExprEvaluator innerExpression, int streamNumLambda, MapEventType resultEventType, String resultPropertyName) {
-        super(initialization, innerExpression, streamNumLambda, resultEventType, resultPropertyName);
+    public EnumEvalAggregateEvents(ExprEvaluator initialization, ExprEvaluator innerExpression, int streamNumLambda, ObjectArrayEventType resultEventType) {
+        super(initialization, innerExpression, streamNumLambda, resultEventType);
     }
 
-    public Object evaluateEnumMethod(Collection target, boolean isNewData, ExprEvaluatorContext context) {
+    public Object evaluateEnumMethod(EventBean[] eventsLambda, Collection target, boolean isNewData, ExprEvaluatorContext context) {
         Object initializationValue = initialization.evaluate(eventsLambda, isNewData, context);
 
         if (target.isEmpty()) {
@@ -32,11 +33,13 @@ public class EnumEvalAggregateEvents extends EnumEvalAggregateBase implements En
         }
 
         Collection<EventBean> beans = (Collection<EventBean>) target;
+        ObjectArrayEventBean resultEvent = new ObjectArrayEventBean(new Object[1], resultEventType);
+
         for (EventBean next : beans) {
 
-            this.resultEvent.getProperties().put(resultPropertyName, initializationValue);
+            resultEvent.getProperties()[0] = initializationValue;
             eventsLambda[streamNumLambda + 1] = next;
-            eventsLambda[streamNumLambda] = this.resultEvent;
+            eventsLambda[streamNumLambda] = resultEvent;
 
             initializationValue = innerExpression.evaluate(eventsLambda, isNewData, context);
         }

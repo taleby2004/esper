@@ -25,7 +25,7 @@ import java.io.IOException;
 
 @DataFlowOperator
 public class AMQPSink implements DataFlowOpLifecycle {
-    private static final Log log = LogFactory.getLog(AMQPSource.class);
+    private static final Log log = LogFactory.getLog(AMQPSink.class);
 
     @DataFlowOpPropertyHolder
     private AMQPSettingsSink settings;
@@ -81,10 +81,12 @@ public class AMQPSink implements DataFlowOpLifecycle {
             }
 
             final String queueName = queue.getQueue();
-            log.info("AMQP producting queue " + queueName + (settings.isLogMessages() ? " with logging" : ""));
+            log.info("AMQP producing queue is " + queueName + (settings.isLogMessages() ? " with logging" : ""));
         }
         catch (IOException e) {
-            log.error("AMQP setup failed", e);
+            String message = "AMQP setup failed: " + e.getMessage();
+            log.error(message, e);
+            throw new RuntimeException(message, e);
         }
     }
 
@@ -92,18 +94,40 @@ public class AMQPSink implements DataFlowOpLifecycle {
 
         ObjectToAMQPCollectorContext holder = collectorDataTL.get();
         if (holder == null) {
-            holder = new ObjectToAMQPCollectorContext(new AMQPEmitter() {
-                public void send(byte[] bytes) {
-                    try {
-                        channel.basicPublish("", settings.getQueueName(), null, bytes);
-                    }
-                    catch (IOException e) {
-                        String message = "Failed to publish to AMQP: " + e.getMessage();
-                        log.error(message, e);
-                        throw new RuntimeException(message);
-                    }
+            if (settings.getExchange() != null && settings.getRoutingKey() != null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Using exchange " + settings.getExchange() + " routing-key " + settings.getRoutingKey());
                 }
-            }, event);
+                holder = new ObjectToAMQPCollectorContext(new AMQPEmitter() {
+                    public void send(byte[] bytes) {
+                        try {
+                            channel.basicPublish(settings.getExchange(), settings.getRoutingKey(), null, bytes);
+                        }
+                        catch (IOException e) {
+                            String message = "Failed to publish to AMQP: " + e.getMessage();
+                            log.error(message, e);
+                            throw new RuntimeException(message);
+                        }
+                    }
+                }, event);
+            }
+            else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Using queue " + settings.getQueueName());
+                }
+                holder = new ObjectToAMQPCollectorContext(new AMQPEmitter() {
+                    public void send(byte[] bytes) {
+                        try {
+                            channel.basicPublish("", settings.getQueueName(), null, bytes);
+                        }
+                        catch (IOException e) {
+                            String message = "Failed to publish to AMQP: " + e.getMessage();
+                            log.error(message, e);
+                            throw new RuntimeException(message);
+                        }
+                    }
+                }, event);
+            }
             collectorDataTL.set(holder);
         }
         else {

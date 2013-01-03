@@ -83,7 +83,7 @@ public class OutputProcessViewConditionFirst extends OutputProcessViewBaseWAfter
 
             witnessedFirst = true;
 
-            if (parent.isDistinct())
+            if (parent.isDistinct() && newOldEvents != null)
             {
                 newOldEvents.setFirst(EventBeanUtility.getDistinctByProp(newOldEvents.getFirst(), parent.getEventBeanReader()));
                 newOldEvents.setSecond(EventBeanUtility.getDistinctByProp(newOldEvents.getSecond(), parent.getEventBeanReader()));
@@ -174,7 +174,7 @@ public class OutputProcessViewConditionFirst extends OutputProcessViewBaseWAfter
 
             witnessedFirst = true;
 
-            if (parent.isDistinct())
+            if (parent.isDistinct()  && newOldEvents != null)
             {
                 newOldEvents.setFirst(EventBeanUtility.getDistinctByProp(newOldEvents.getFirst(), parent.getEventBeanReader()));
                 newOldEvents.setSecond(EventBeanUtility.getDistinctByProp(newOldEvents.getSecond(), parent.getEventBeanReader()));

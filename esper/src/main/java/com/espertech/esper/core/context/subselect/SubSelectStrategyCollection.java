@@ -10,6 +10,7 @@ package com.espertech.esper.core.context.subselect;
 
 import com.espertech.esper.epl.expression.ExprSubselectNode;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,7 +26,6 @@ public class SubSelectStrategyCollection
      */
     public SubSelectStrategyCollection()
     {
-        subqueries = new HashMap<ExprSubselectNode, SubSelectStrategyFactoryDesc>();
     }
 
     /**
@@ -34,10 +34,16 @@ public class SubSelectStrategyCollection
      */
     public void add(ExprSubselectNode subselectNode, SubSelectStrategyFactoryDesc prototypeHolder)
     {
+        if (subqueries == null) {
+            subqueries = new HashMap<ExprSubselectNode, SubSelectStrategyFactoryDesc>();
+        }
         subqueries.put(subselectNode, prototypeHolder);
     }
 
     public Map<ExprSubselectNode, SubSelectStrategyFactoryDesc> getSubqueries() {
+        if (subqueries == null) {
+            return Collections.emptyMap();
+        }
         return subqueries;
     }
 }

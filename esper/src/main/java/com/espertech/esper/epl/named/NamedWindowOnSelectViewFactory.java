@@ -35,8 +35,9 @@ public class NamedWindowOnSelectViewFactory extends NamedWindowOnExprBaseViewFac
     private final EventType outputEventType;
     private final StatementResultService statementResultService;
     private final InternalEventRouteDest internalEventRouteDest;
+    private final boolean deleteAndSelect;
 
-    public NamedWindowOnSelectViewFactory(EventType namedWindowEventType, InternalEventRouter internalEventRouter, boolean addToFront, EPStatementHandle statementHandle, EventBeanReader eventBeanReader, boolean distinct, EventType outputEventType, StatementResultService statementResultService, InternalEventRouteDest internalEventRouteDest) {
+    public NamedWindowOnSelectViewFactory(EventType namedWindowEventType, InternalEventRouter internalEventRouter, boolean addToFront, EPStatementHandle statementHandle, EventBeanReader eventBeanReader, boolean distinct, EventType outputEventType, StatementResultService statementResultService, InternalEventRouteDest internalEventRouteDest, boolean deleteAndSelect) {
         super(namedWindowEventType);
         this.internalEventRouter = internalEventRouter;
         this.addToFront = addToFront;
@@ -46,11 +47,12 @@ public class NamedWindowOnSelectViewFactory extends NamedWindowOnExprBaseViewFac
         this.outputEventType = outputEventType;
         this.statementResultService = statementResultService;
         this.internalEventRouteDest = internalEventRouteDest;
+        this.deleteAndSelect = deleteAndSelect;
     }
 
     public NamedWindowOnExprBaseView make(NamedWindowLookupStrategy lookupStrategy, NamedWindowRootViewInstance namedWindowRootViewInstance, AgentInstanceContext agentInstanceContext, ResultSetProcessor resultSetProcessor) {
         boolean audit = AuditEnum.INSERT.getAudit(agentInstanceContext.getStatementContext().getAnnotations()) != null;
-        return new NamedWindowOnSelectView(lookupStrategy, namedWindowRootViewInstance, agentInstanceContext, this, resultSetProcessor, audit);
+        return new NamedWindowOnSelectView(lookupStrategy, namedWindowRootViewInstance, agentInstanceContext, this, resultSetProcessor, audit, deleteAndSelect);
     }
 
     public InternalEventRouter getInternalEventRouter() {

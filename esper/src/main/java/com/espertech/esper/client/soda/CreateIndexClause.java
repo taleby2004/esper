@@ -23,6 +23,7 @@ public class CreateIndexClause implements Serializable
     private String indexName;
     private String windowName;
     private List<CreateIndexColumn> columns = new ArrayList<CreateIndexColumn>();
+    private boolean unique;
 
     /**
      * Ctor.
@@ -43,15 +44,39 @@ public class CreateIndexClause implements Serializable
     }
 
     /**
+     * Creates a clause to create a named window.
+     * @param windowName is the name of the named window
+     * @param properties properties to index
+     * @param indexName name of index
+     * @return create variable clause
+     */
+    public static CreateIndexClause create(boolean unique, String indexName, String windowName, String... properties)
+    {
+        return new CreateIndexClause(indexName, windowName, properties, unique);
+    }
+
+    /**
      * Ctor.
      * @param indexName index name
      * @param windowName named window name
      * @param columns columns indexed
      */
     public CreateIndexClause(String indexName, String windowName, List<CreateIndexColumn> columns) {
+        this(indexName, windowName, columns, false);
+    }
+
+    /**
+     * Ctor.
+     * @param indexName index name
+     * @param windowName named window name
+     * @param columns columns indexed
+     * @param unique unique indicator
+     */
+    public CreateIndexClause(String indexName, String windowName, List<CreateIndexColumn> columns, boolean unique) {
         this.indexName = indexName;
         this.windowName = windowName;
         this.columns = columns;
+        this.unique = unique;
     }
 
     /**
@@ -62,11 +87,23 @@ public class CreateIndexClause implements Serializable
      */
     public CreateIndexClause(String indexName, String windowName, String[] properties)
     {
+        this(indexName, windowName, properties, false);
+    }
+
+    /**
+     * Ctor.
+     * @param windowName is the name of the window to create
+     * @param indexName index name
+     * @param properties properties to index
+     */
+    public CreateIndexClause(String indexName, String windowName, String[] properties, boolean unique)
+    {
         this.indexName = indexName;
         this.windowName = windowName;
         for (String prop : properties) {
             columns.add(new CreateIndexColumn(prop));
         }
+        this.unique = unique;
     }
 
     /**
@@ -75,7 +112,11 @@ public class CreateIndexClause implements Serializable
      */
     public void toEPL(StringWriter writer)
     {
-        writer.write("create index ");
+        writer.write("create ");
+        if (unique) {
+            writer.write("unique ");
+        }
+        writer.write("index ");
         writer.write(indexName);
         writer.write(" on ");
         writer.write(windowName);
@@ -142,5 +183,13 @@ public class CreateIndexClause implements Serializable
     public void setColumns(List<CreateIndexColumn> columns)
     {
         this.columns = columns;
+    }
+
+    public boolean isUnique() {
+        return unique;
+    }
+
+    public void setUnique(boolean unique) {
+        this.unique = unique;
     }
 }

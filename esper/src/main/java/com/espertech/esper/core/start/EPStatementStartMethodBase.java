@@ -29,21 +29,15 @@ public abstract class EPStatementStartMethodBase implements EPStatementStartMeth
     private static final Log queryPlanLog = LogFactory.getLog(AuditPath.QUERYPLAN_LOG);
 
     protected final StatementSpecCompiled statementSpec;
-    protected final EPServicesContext services;
-    protected final StatementContext statementContext;
-    protected final boolean queryPlanLogging;
 
-    protected EPStatementStartMethodBase(StatementSpecCompiled statementSpec, EPServicesContext services, StatementContext statementContext) {
+    protected EPStatementStartMethodBase(StatementSpecCompiled statementSpec) {
         this.statementSpec = statementSpec;
-        this.services = services;
-        this.statementContext = statementContext;
-        this.queryPlanLogging = services.getConfigSnapshot().getEngineDefaults().getLogging().isEnableQueryPlan();
     }
 
-    public abstract EPStatementStartResult startInternal(boolean isNewStatement, boolean isRecoveringStatement, boolean isRecoveringResilient)
+    public abstract EPStatementStartResult startInternal(EPServicesContext services, StatementContext statementContext, boolean isNewStatement, boolean isRecoveringStatement, boolean isRecoveringResilient)
         throws ExprValidationException, ViewProcessingException;
 
-    public EPStatementStartResult start(boolean isNewStatement, boolean isRecoveringStatement, boolean isRecoveringResilient) throws ExprValidationException, ViewProcessingException {
+    public EPStatementStartResult start(EPServicesContext services, StatementContext statementContext, boolean isNewStatement, boolean isRecoveringStatement, boolean isRecoveringResilient) throws ExprValidationException, ViewProcessingException {
         statementContext.getVariableService().setLocalVersion();    // get current version of variables
 
         boolean queryPlanLogging = services.getConfigSnapshot().getEngineDefaults().getLogging().isEnableQueryPlan();
@@ -56,15 +50,19 @@ public abstract class EPStatementStartMethodBase implements EPStatementStartMeth
             throw new ExprValidationException("Context by name '" + statementSpec.getOptionalContextName() + "' has not been declared");
         }
 
-        return startInternal(isNewStatement, isRecoveringStatement, isRecoveringResilient);
+        return startInternal(services, statementContext, isNewStatement, isRecoveringStatement, isRecoveringResilient);
     }
 
-    protected EPStatementAgentInstanceHandle getDefaultAgentInstanceHandle() {
+    protected EPStatementAgentInstanceHandle getDefaultAgentInstanceHandle(StatementContext statementContext) {
         return new EPStatementAgentInstanceHandle(statementContext.getEpStatementHandle(), statementContext.getDefaultAgentInstanceLock(), -1, new StatementAgentInstanceFilterVersion());
     }
 
-    protected AgentInstanceContext getDefaultAgentInstanceContext() {
-        EPStatementAgentInstanceHandle handle = getDefaultAgentInstanceHandle();
+    protected AgentInstanceContext getDefaultAgentInstanceContext(StatementContext statementContext) {
+        EPStatementAgentInstanceHandle handle = getDefaultAgentInstanceHandle(statementContext);
         return new AgentInstanceContext(statementContext, handle, -1, null, null, statementContext.getDefaultAgentInstanceScriptContext());
+    }
+
+    protected boolean isQueryPlanLogging(EPServicesContext services) {
+        return services.getConfigSnapshot().getEngineDefaults().getLogging().isEnableQueryPlan();
     }
 }

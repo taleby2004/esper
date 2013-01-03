@@ -72,7 +72,7 @@ public class IndexedTableLookupPlanMulti extends TableLookupPlan
 
     public String toString()
     {
-        return "IndexedTableLookupPlan " +
+        return this.getClass().getSimpleName() + " " +
                 super.toString() +
                " keyProperties=" + QueryGraphValueEntryHashKeyed.toQueryPlan(keyProperties);
     }

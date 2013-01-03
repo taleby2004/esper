@@ -10,6 +10,7 @@ package com.espertech.esper.epl.parse;
 
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.generated.EsperEPL2GrammarParser;
+import com.espertech.esper.type.*;
 import org.antlr.runtime.tree.Tree;
 
 /**
@@ -84,7 +85,7 @@ public class ASTFilterSpecHelper
             return null;
         }
         return new Pair<String, String>(escapeDot(node.getChild(0).getChild(0).getText()),
-                node.getChild(0).getChild(1).getText());
+                StringValue.parseString(node.getChild(0).getChild(1).getText()));
     }
 
     /**

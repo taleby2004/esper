@@ -13,8 +13,11 @@ import com.espertech.esper.client.annotation.AuditEnum;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
 import com.espertech.esper.core.service.StatementContext;
+import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.epl.expression.ExprNodeUtility;
 import com.espertech.esper.epl.spec.ViewSpec;
 import com.espertech.esper.view.ext.IStreamSortRankRandomAccess;
+import com.espertech.esper.view.std.GroupByViewFactoryMarker;
 import com.espertech.esper.view.window.IStreamRandomAccess;
 import com.espertech.esper.view.window.IStreamRelativeAccess;
 import com.espertech.esper.view.window.RandomAccessByIndexGetter;
@@ -29,6 +32,33 @@ import java.util.*;
  */
 public class ViewServiceHelper
 {
+    public static Set<String> getUniqueCandidateProperties(List<ViewFactory> viewFactory) {
+        if (viewFactory == null || viewFactory.isEmpty()) {
+            return null;
+        }
+        if (viewFactory.get(0) instanceof GroupByViewFactoryMarker) {
+            ExprNode[] criteria = ((GroupByViewFactoryMarker) viewFactory.get(0)).getCriteriaExpressions();
+            Set<String> groupedCriteria = ExprNodeUtility.getPropertyNamesIfAllProps(criteria);
+            if (groupedCriteria == null) {
+                return null;
+            }
+            if (viewFactory.get(1) instanceof DataWindowViewFactoryUniqueCandidate) {
+                DataWindowViewFactoryUniqueCandidate uniqueFactory = (DataWindowViewFactoryUniqueCandidate) viewFactory.get(1);
+                Set<String> uniqueCandidates = uniqueFactory.getUniquenessCandidatePropertyNames();
+                uniqueCandidates.addAll(groupedCriteria);
+                return uniqueCandidates;
+            }
+            return null;
+        }
+        else {
+            if (viewFactory.get(0) instanceof DataWindowViewFactoryUniqueCandidate) {
+                DataWindowViewFactoryUniqueCandidate uniqueFactory = (DataWindowViewFactoryUniqueCandidate) viewFactory.get(0);
+                return uniqueFactory.getUniquenessCandidatePropertyNames();
+            }
+        }
+        return null;
+    }
+
     public static IStreamRandomAccess getOptPreviousExprRandomAccess(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext) {
         IStreamRandomAccess randomAccess = null;
         if (agentInstanceViewFactoryContext.getPreviousNodeGetter() != null)

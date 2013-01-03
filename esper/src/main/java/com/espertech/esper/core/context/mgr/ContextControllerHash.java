@@ -76,7 +76,7 @@ public class ContextControllerHash implements ContextController, ContextControll
         if (factoryContext.getNestingLevel() == 1) {
             controllerState = ContextControllerStateUtil.getRecoveryStates(factory.getStateCache(), factoryContext.getOutermostContextName());
         }
-        if (controllerState == null || factory.getHashedSpec().isPreallocate()) {
+        if (controllerState == null) {
 
             // handle preallocate
             if (factory.getHashedSpec().isPreallocate()) {
@@ -93,6 +93,8 @@ public class ContextControllerHash implements ContextController, ContextControll
 
                     ContextControllerInstanceHandle handle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, this, optionalTriggeringEvent, null, i, properties, controllerState, filterAddendumToUse, factory.getFactoryContext().isRecoveringResilient());
                     partitionKeys.put(i, handle);
+
+                    factory.getStateCache().addContextPath(factory.getFactoryContext().getOutermostContextName(), factory.getFactoryContext().getNestingLevel(), pathId, currentSubpathId, handle.getContextPartitionOrPathId(), i, factory.getBinding());
                 }
                 return;
             }
@@ -107,7 +109,6 @@ public class ContextControllerHash implements ContextController, ContextControll
         TreeMap<ContextStatePathKey, ContextStatePathValue> states = controllerState.getStates();
         NavigableMap<ContextStatePathKey, ContextStatePathValue> childContexts = ContextControllerStateUtil.getChildContexts(factoryContext, pathId, states);
 
-        // Not preallocated, match existing path ids to
         int maxSubpathId = Integer.MIN_VALUE;
         for (Map.Entry<ContextStatePathKey, ContextStatePathValue> entry : childContexts.entrySet()) {
 
@@ -132,7 +133,9 @@ public class ContextControllerHash implements ContextController, ContextControll
         currentSubpathId = maxSubpathId != Integer.MIN_VALUE ? maxSubpathId : 0;
 
         // activate filters
-        activateFilters(null);
+        if (!factory.getHashedSpec().isPreallocate()) {
+            activateFilters(null);
+        }
     }
 
     protected void activateFilters(EventBean optionalTriggeringEvent) {

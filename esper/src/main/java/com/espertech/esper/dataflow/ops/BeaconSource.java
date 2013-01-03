@@ -83,7 +83,7 @@ public class BeaconSource implements DataFlowSourceOperator {
             Set<String> props = allProperties.keySet();
             props.removeAll(PARAMETER_PROPERTIES);
             WriteablePropertyDescriptor[] writables = setupProperties(props.toArray(new String[props.size()]), outputEventType, context.getStatementContext());
-            manufacturer = context.getServicesContext().getEventAdapterService().getManufacturer(outputEventType, writables, context.getStatementContext().getMethodResolutionService());
+            manufacturer = context.getServicesContext().getEventAdapterService().getManufacturer(outputEventType, writables, context.getServicesContext().getEngineImportService());
 
             int index = 0;
             evaluators = new ExprEvaluator[outputEventType.getPropertyDescriptors().length];

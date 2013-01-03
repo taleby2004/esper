@@ -9,6 +9,7 @@
 package com.espertech.esper.core.service;
 
 import com.espertech.esper.core.context.factory.StatementAgentInstanceFactoryResult;
+import com.espertech.esper.core.context.mgr.ContextStatePathKey;
 import com.espertech.esper.pattern.EvalRootState;
 
 /**
@@ -19,6 +20,6 @@ public interface StatementExtensionSvcContext
     public void startContextPartition(StatementAgentInstanceFactoryResult startResult, int agentInstanceId);
     public void endContextPartition(int agentInstanceId);
 
-    public void startContextPattern(EvalRootState patternStopCallback, boolean startEndpoint, int subPathId);
-    public void stopContextPattern(EvalRootState patternStopCallback, boolean startEndpoint, int subPathId);
+    public void startContextPattern(EvalRootState patternStopCallback, boolean startEndpoint, ContextStatePathKey path);
+    public void stopContextPattern(EvalRootState patternStopCallback, boolean startEndpoint, ContextStatePathKey path);
 }

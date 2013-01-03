@@ -34,7 +34,7 @@ public class TestTableLookupExecNode extends TestCase
     public void setUp()
     {
         EventType eventTypeIndex = SupportEventTypeFactory.createBeanType(SupportBean.class);
-        PropertyIndexedEventTableFactory factory = new PropertyIndexedEventTableFactory(0, eventTypeIndex, new String[] {"theString"});
+        PropertyIndexedEventTableFactory factory = new PropertyIndexedEventTableFactory(0, eventTypeIndex, new String[] {"theString"}, false, null);
         index = (PropertyIndexedEventTable) factory.makeEventTable();
 
         EventType eventTypeKeyGen = SupportEventTypeFactory.createBeanType(SupportMarketDataBean.class);

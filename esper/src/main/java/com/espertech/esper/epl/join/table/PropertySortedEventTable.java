@@ -65,6 +65,11 @@ public class PropertySortedEventTable implements EventTable
         return propertyGetter.get(theEvent);
     }
 
+    public void addRemove(EventBean[] newData, EventBean[] oldData) {
+        add(newData);
+        remove(oldData);
+    }
+
     /**
      * Add an array of events. Same event instance is not added twice. Event properties should be immutable.
      * Allow null passed instead of an empty array.

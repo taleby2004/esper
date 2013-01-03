@@ -95,7 +95,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         routedExternal = new AtomicLong();
         engineFilterAndDispatchTimeContext = new ExprEvaluatorContext()
         {
-            private ExpressionResultCacheService expressionResultCacheService = new ExpressionResultCacheService();
+            private ExpressionResultCacheService expressionResultCacheService = services.getExpressionResultCacheSharable();
 
             public TimeProvider getTimeProvider() {
                 return services.getSchedulingService();
@@ -764,34 +764,14 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
             {
                 // Dispatch results to listeners
                 dispatch();
+
                 if (!queues.getFrontQueue().isEmpty()) {
-                    processThreadWorkQueue();
+                    processThreadWorkQueueFront(queues);
                 }
             }
         }
         else {
-            Object item;
-            while ( (item = queues.getFrontQueue().poll()) != null)
-            {
-                if (item instanceof InsertIntoLatchSpin)
-                {
-                    processThreadWorkQueueLatchedSpin((InsertIntoLatchSpin) item);
-                }
-                else if (item instanceof InsertIntoLatchWait)
-                {
-                    processThreadWorkQueueLatchedWait((InsertIntoLatchWait) item);
-                }
-                else
-                {
-                    processThreadWorkQueueUnlatched(item);
-                }
-
-                boolean haveDispatched = services.getNamedWindowService().dispatch(engineFilterAndDispatchTimeContext);
-                if (haveDispatched)
-                {
-                    dispatch();
-                }
-            }
+            processThreadWorkQueueFront(queues);
         }
 
         Object item;
@@ -818,6 +798,31 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
 
             if (!queues.getFrontQueue().isEmpty()) {
                 processThreadWorkQueue();
+            }
+        }
+    }
+
+    private void processThreadWorkQueueFront(DualWorkQueue queues) {
+        Object item;
+        while ( (item = queues.getFrontQueue().poll()) != null)
+        {
+            if (item instanceof InsertIntoLatchSpin)
+            {
+                processThreadWorkQueueLatchedSpin((InsertIntoLatchSpin) item);
+            }
+            else if (item instanceof InsertIntoLatchWait)
+            {
+                processThreadWorkQueueLatchedWait((InsertIntoLatchWait) item);
+            }
+            else
+            {
+                processThreadWorkQueueUnlatched(item);
+            }
+
+            boolean haveDispatched = services.getNamedWindowService().dispatch(engineFilterAndDispatchTimeContext);
+            if (haveDispatched)
+            {
+                dispatch();
             }
         }
     }
@@ -1530,7 +1535,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
     }
 
     public EPDataFlowRuntime getDataFlowRuntime() {
-        return services.getGraphService();
+        return services.getDataFlowService();
     }
 
     private void removeFromThreadLocals() {

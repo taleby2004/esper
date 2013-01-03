@@ -91,6 +91,7 @@ public class ExprAccessAggNode extends ExprAggregateNodeBase implements ExprEval
                 throw new ExprValidationException(getErrorPrefix() + " requires that the aggregated events provide a remove stream; Defined a data window onto the stream or use 'firstever', 'lastever' or 'nth' instead");
             }
             EventType type = streamTypeService.getEventTypes()[streamNum];
+            containedType = type;
             resultType = type.getUnderlyingType();
             final int streamNumUsed = streamNum;
             final Class returnType = resultType;

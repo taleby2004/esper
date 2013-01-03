@@ -253,13 +253,21 @@ public class PropertyUtility
     }
 
     private static PropertyAccessException getMismatchException(Class declared, Object object, ClassCastException e) {
-        String message = "Mismatched getter instance to event bean type, expected " + JavaClassHelper.getClassNameFullyQualPretty(declared) + " but received ";
+        String classNameExpected = JavaClassHelper.getClassNameFullyQualPretty(declared);
+        String classNameReceived;
         if (object != null) {
-            message += JavaClassHelper.getClassNameFullyQualPretty(object.getClass());
+            classNameReceived = JavaClassHelper.getClassNameFullyQualPretty(object.getClass());
         }
         else {
-            message += "null";
+            classNameReceived = "null";
         }
+
+        if (classNameExpected.equals(classNameReceived)) {
+            classNameExpected = JavaClassHelper.getClassNameFullyQualPrettyWithClassloader(declared);
+            classNameReceived = object != null ? JavaClassHelper.getClassNameFullyQualPrettyWithClassloader(object.getClass()) : "null";
+        }
+
+        String message = "Mismatched getter instance to event bean type, expected " + classNameExpected + " but received " + classNameReceived;
         throw new PropertyAccessException(message, e);
     }
 

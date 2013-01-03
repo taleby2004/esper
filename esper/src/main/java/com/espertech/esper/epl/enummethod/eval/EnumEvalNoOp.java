@@ -17,17 +17,15 @@ import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import java.util.Collection;
 
 public class EnumEvalNoOp implements EnumEval {
-    private EventBean[] events;
 
     public EnumEvalNoOp(int numEvents) {
-        events = new EventBean[numEvents];
     }
 
-    public EventBean[] getEventsPrototype() {
-        return events;
+    public int getStreamNumSize() {
+        return 0;
     }
 
-    public Object evaluateEnumMethod(Collection target, boolean isNewData, ExprEvaluatorContext context) {
+    public Object evaluateEnumMethod(EventBean[] eventsLambda, Collection target, boolean isNewData, ExprEvaluatorContext context) {
         return target;
     }
 }

@@ -9,15 +9,13 @@
 package com.espertech.esper.example.servershell;
 
 import com.espertech.esper.client.EPRuntime;
-import com.espertech.esper.example.servershell.SampleEvent;
-
-import javax.jms.MessageListener;
-import javax.jms.Message;
-import javax.jms.BytesMessage;
-import javax.jms.JMSException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import javax.jms.BytesMessage;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageListener;
 
 public class SampleJMSMessageListener implements MessageListener
 {

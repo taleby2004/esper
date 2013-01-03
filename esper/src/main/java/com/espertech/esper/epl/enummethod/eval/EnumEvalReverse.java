@@ -20,17 +20,17 @@ import java.util.Collections;
 
 public class EnumEvalReverse implements EnumEval {
 
-    private EventBean[] events;
+    private int numStreams;
 
     public EnumEvalReverse(int numStreams) {
-        this.events = new EventBean[numStreams];
+        this.numStreams = numStreams;
     }
 
-    public EventBean[] getEventsPrototype() {
-        return events;
+    public int getStreamNumSize() {
+        return numStreams;
     }
 
-    public Object evaluateEnumMethod(Collection target, boolean isNewData, ExprEvaluatorContext context) {
+    public Object evaluateEnumMethod(EventBean[] eventsLambda, Collection target, boolean isNewData, ExprEvaluatorContext context) {
         if (target.isEmpty()) {
             return target;
         }

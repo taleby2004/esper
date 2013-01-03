@@ -14,7 +14,9 @@ package com.espertech.esper.epl.enummethod.eval;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.enummethod.dot.*;
+import com.espertech.esper.epl.expression.ExprDotNodeUtility;
 import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.event.arr.ObjectArrayEventType;
 import com.espertech.esper.util.JavaClassHelper;
 
 import java.util.List;
@@ -22,27 +24,26 @@ import java.util.List;
 public class ExprDotEvalMinMax extends ExprDotEvalEnumMethodBase {
 
     public EventType[] getAddStreamTypes(String enumMethodUsedName, List<String> goesToNames, EventType inputEventType, Class collectionComponentType, List<ExprDotEvalParam> bodiesAndParameters) {
-        return new EventType[] {inputEventType};
+        return ExprDotNodeUtility.getSingleLambdaParamEventType(enumMethodUsedName, goesToNames, inputEventType, collectionComponentType);
     }
 
     public EnumEval getEnumEval(EventAdapterService eventAdapterService, StreamTypeService streamTypeService, String statementId, String enumMethodUsedName, List<ExprDotEvalParam> bodiesAndParameters, EventType inputEventType, Class collectionComponentType, int numStreamsIncoming) {
+        boolean max = this.getEnumMethodEnum() == EnumMethodEnum.MAX;
 
         if (bodiesAndParameters.isEmpty()) {
             Class returnType = JavaClassHelper.getBoxedType(collectionComponentType);
             super.setTypeInfo(ExprDotEvalTypeInfo.scalarOrUnderlying(returnType));
-            if (this.getEnumMethodEnum() == EnumMethodEnum.MAX) {
-                return new EnumEvalMaxScalar(numStreamsIncoming);
-            }
-            return new EnumEvalMinScalar(numStreamsIncoming);
+            return new EnumEvalMinMaxScalar(numStreamsIncoming, max);
         }
 
         ExprDotEvalParamLambda first = (ExprDotEvalParamLambda) bodiesAndParameters.get(0);
         Class returnType = JavaClassHelper.getBoxedType(first.getBodyEvaluator().getType());
         super.setTypeInfo(ExprDotEvalTypeInfo.scalarOrUnderlying(returnType));
 
-        if (this.getEnumMethodEnum() == EnumMethodEnum.MAX) {
-            return new EnumEvalMax(first.getBodyEvaluator(), first.getStreamCountIncoming());
+        if (inputEventType == null) {
+            return new EnumEvalMinMaxScalarLambda(first.getBodyEvaluator(), first.getStreamCountIncoming(), max,
+                    (ObjectArrayEventType) first.getGoesToTypes()[0]);
         }
-        return new EnumEvalMin(first.getBodyEvaluator(), first.getStreamCountIncoming());
+        return new EnumEvalMinMaxEvents(first.getBodyEvaluator(), first.getStreamCountIncoming(), max);
     }
 }

@@ -37,4 +37,6 @@ public interface EvalFactoryNode
 
     public short getFactoryNodeId();
     public void setFactoryNodeId(short factoryNodeId);
+
+    public boolean isStateful();
 }

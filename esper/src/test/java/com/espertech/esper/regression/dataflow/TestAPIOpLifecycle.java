@@ -44,7 +44,7 @@ public class TestAPIOpLifecycle extends TestCase {
         epService.getEPAdministrator().createEPL("create schema MySchema(key string, value int)");
         epService.getEPAdministrator().createEPL("create dataflow MyDataFlowOne MyCaptureOutputPortOp -> outstream<EventBean<MySchema>> {}");
 
-        EPDataFlowInstance df = epService.getEPRuntime().getDataFlowRuntime().instantiate("MyDataFlowOne");
+        epService.getEPRuntime().getDataFlowRuntime().instantiate("MyDataFlowOne");
         assertEquals("MySchema", MyCaptureOutputPortOp.getPort().getOptionalDeclaredType().getEventType().getName());
     }
 

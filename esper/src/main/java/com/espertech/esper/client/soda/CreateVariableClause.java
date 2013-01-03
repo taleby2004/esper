@@ -22,6 +22,7 @@ public class CreateVariableClause implements Serializable
     private String variableName;
     private Expression optionalAssignment;
     private boolean constant;
+    private boolean array;
 
     /**
      * Ctor.
@@ -138,6 +139,14 @@ public class CreateVariableClause implements Serializable
         this.constant = constant;
     }
 
+    public boolean isArray() {
+        return array;
+    }
+
+    public void setArray(boolean array) {
+        this.array = array;
+    }
+
     /**
      * Render as EPL.
      * @param writer to output to
@@ -150,6 +159,9 @@ public class CreateVariableClause implements Serializable
         }
         writer.append(" variable ");
         writer.append(variableType);
+        if (array) {
+            writer.append("[]");
+        }
         writer.append(" ");
         writer.append(variableName);
         if (optionalAssignment != null)

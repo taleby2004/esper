@@ -35,6 +35,47 @@ public class EventTypeUtility {
 
     private static final Log log = LogFactory.getLog(EventTypeUtility.class);
 
+    public static EventPropertyDescriptor getNestablePropertyDescriptor(EventType target, String propertyName) {
+        EventPropertyDescriptor descriptor = target.getPropertyDescriptor(propertyName);
+        if (descriptor != null) {
+            return descriptor;
+        }
+        int index = ASTFilterSpecHelper.unescapedIndexOfDot(propertyName);
+        if (index == -1) {
+            return null;
+        }
+        // parse, can be an nested property
+        Property property = PropertyParser.parse(propertyName, false);
+        if (property instanceof PropertyBase) {
+            return target.getPropertyDescriptor(((PropertyBase) property).getPropertyNameAtomic());
+        }
+        if (!(property instanceof NestedProperty)) {
+            return null;
+        }
+        NestedProperty nested = (NestedProperty) property;
+        Deque<Property> properties = new ArrayDeque<Property>(nested.getProperties());
+        return getNestablePropertyDescriptor(target, properties);
+    }
+
+    public static EventPropertyDescriptor getNestablePropertyDescriptor(EventType target, Deque<Property> stack) {
+
+        Property topProperty = stack.removeFirst();
+        if (stack.isEmpty()) {
+            return target.getPropertyDescriptor(((PropertyBase) topProperty).getPropertyNameAtomic());
+        }
+
+        if (!(topProperty instanceof SimpleProperty)) {
+            return null;
+        }
+        SimpleProperty simple = (SimpleProperty) topProperty;
+
+        FragmentEventType fragmentEventType = target.getFragmentType(simple.getPropertyNameAtomic());
+        if (fragmentEventType == null || fragmentEventType.getFragmentType() == null) {
+            return null;
+        }
+        return getNestablePropertyDescriptor(fragmentEventType.getFragmentType(), stack);
+    }
+
     public static LinkedHashMap<String, Object> buildType(List<ColumnDesc> columns, EventAdapterService eventAdapterService, Set<String> copyFrom) throws ExprValidationException {
         LinkedHashMap<String, Object> typing = new LinkedHashMap<String, Object>();
         Set<String> columnNames = new HashSet<String>();

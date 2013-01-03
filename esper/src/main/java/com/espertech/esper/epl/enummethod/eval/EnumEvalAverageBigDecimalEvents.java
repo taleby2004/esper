@@ -24,7 +24,7 @@ public class EnumEvalAverageBigDecimalEvents extends EnumEvalBase implements Enu
         super(innerExpression, streamCountIncoming);
     }
 
-    public Object evaluateEnumMethod(Collection target, boolean isNewData, ExprEvaluatorContext context) {
+    public Object evaluateEnumMethod(EventBean[] eventsLambda, Collection target, boolean isNewData, ExprEvaluatorContext context) {
 
         AggregatorAvgBigDecimal agg = new AggregatorAvgBigDecimal();
 

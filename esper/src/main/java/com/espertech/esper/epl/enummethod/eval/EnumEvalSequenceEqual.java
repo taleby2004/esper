@@ -11,13 +11,13 @@
 
 package com.espertech.esper.epl.enummethod.eval;
 
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -29,7 +29,7 @@ public class EnumEvalSequenceEqual extends EnumEvalBase implements EnumEval {
         super(innerExpression, streamCountIncoming);
     }
 
-    public Object evaluateEnumMethod(Collection target, boolean isNewData, ExprEvaluatorContext context) {
+    public Object evaluateEnumMethod(EventBean[] eventsLambda, Collection target, boolean isNewData, ExprEvaluatorContext context) {
         Object otherObj = this.getInnerExpression().evaluate(eventsLambda, isNewData, context);
 
         if (otherObj == null) {

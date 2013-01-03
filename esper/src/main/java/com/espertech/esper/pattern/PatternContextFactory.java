@@ -27,7 +27,8 @@ public interface PatternContextFactory
     public PatternContext createContext(StatementContext statementContext,
                                         int streamId,
                                         EvalRootFactoryNode rootNode,
-                                        MatchedEventMapMeta matchedEventMapMeta);
+                                        MatchedEventMapMeta matchedEventMapMeta,
+                                        boolean allowResilient);
 
     public PatternAgentInstanceContext createPatternAgentContext(PatternContext patternContext,
                                                                  AgentInstanceContext agentInstanceContext,

@@ -767,7 +767,7 @@ output all every 1 minutes]]></programlisting>
 				</para>
 
 				<para>
-					The application can be deployed by copying the ear file in the "examples/terminalsvc/terminalsvc-ear" folder to your JBoss deployment directory located under the JBoss home directory under "server/default/deploy".
+					The application can be deployed by copying the ear file in the "examples/terminalsvc/terminalsvc-ear" folder to your JBoss deployment directory located under the JBoss home directory under "standalone/deployments".
 				</para>
 
 				<para>
@@ -779,7 +779,7 @@ output all every 1 minutes]]></programlisting>
 				<title>Building the Example</title>
 
 				<para>
-					This example requires Maven 2 to build. To build the example, change directory to the folder "examples/terminalsvc" and type "mvn package". The instructions have been tested with JBoss AS 4.0.4.GA and Maven 2.0.4.
+					This example requires Maven 2 to build. To build the example, change directory to the folder "examples/terminalsvc" and type "mvn package". The instructions have been tested with JBoss AS 7.1.1  and Maven 3.0.4.
 				</para>
 
 				<para>
@@ -795,8 +795,32 @@ output all every 1 minutes]]></programlisting>
 					</para>
 
 					<para>
-						The event receiver listens to the MDB-outcoming queue for alerts and prints these out to console. The receiver can be run from the directory "examples/terminalsvc/etc" via the command "run_terminalsvc_receiver.bat" (Windows) and "run_terminalsvc_receiver.sh" (Linux). 
+						The event receiver listens to the MDB-outcoming queue for alerts and prints these out to console. The receiver can be run from the directory "examples/terminalsvc/etc" via the command "run_terminalsvc_receiver.bat" (Windows) and "run_terminalsvc_receiver.sh" (Linux). Before running please copy the <literal>jboss-client.jar</literal> file from your JBoss AS installation bin directory to the "terminalsvc/lib" folder.
 					</para>
+					
+					<para>
+					  The receiver and sender code use "guest" as user and "pass" as password. Add the "guest" user using the Jboss "add-user" script and assign the role "guest".
+					  Your JBoss server may need to start with "-c standalone-full.xml" to have the messaging subsystem available.
+					</para>
+					
+					<para>
+					  Add queue configurations to the messaging subsystem configuration as follows:
+					</para>
+
+<programlisting><![CDATA[<jms-queue name="queue_a">
+  <entry name="queue_a"/>
+  <entry name="java:jboss/exported/jms/queue/queue_a"/>
+</jms-queue>
+<jms-queue name="queue_b">
+  <entry name="queue_b"/>
+  <entry name="java:jboss/exported/jms/queue/queue_b"/>
+</jms-queue>]]></programlisting>
+
+					<para>
+					  Disable persistence in the messaging subsystem for this example so we are not running out of disk space:
+					</para>
+<programlisting><![CDATA[<persistence-enabled>false</persistence-enabled>]]></programlisting>
+
 			</sect3>	
 		</sect2>
     </sect1>

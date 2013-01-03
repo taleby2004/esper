@@ -33,7 +33,7 @@ public class ExprEvaluatorContextStatement implements ExprEvaluatorContext
     }
 
     public ExpressionResultCacheService getExpressionResultCacheService() {
-        return statementContext.getExpressionResultCacheService();
+        return statementContext.getExpressionResultCacheServiceSharable();
     }
 
     public int getAgentInstanceId() {

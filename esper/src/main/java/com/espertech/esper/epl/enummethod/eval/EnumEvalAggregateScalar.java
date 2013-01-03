@@ -11,37 +11,38 @@
 
 package com.espertech.esper.epl.enummethod.eval;
 
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
-import com.espertech.esper.event.map.MapEventBean;
-import com.espertech.esper.event.map.MapEventType;
+import com.espertech.esper.event.arr.ObjectArrayEventBean;
+import com.espertech.esper.event.arr.ObjectArrayEventType;
 
 import java.util.Collection;
-import java.util.HashMap;
 
 public class EnumEvalAggregateScalar extends EnumEvalAggregateBase implements EnumEval {
 
-    private MapEventBean evalEvent;
-    private String evalPropertyName;
+    private final ObjectArrayEventType evalEventType;
 
-    public EnumEvalAggregateScalar(ExprEvaluator initialization, ExprEvaluator innerExpression, int streamNumLambda, MapEventType resultEventType, String resultPropertyName, MapEventType evalEventType, String evalPropertyName) {
-        super(initialization, innerExpression, streamNumLambda, resultEventType, resultPropertyName);
-        this.evalEvent = new MapEventBean(new HashMap<String, Object>(), evalEventType);
-        this.evalPropertyName = evalPropertyName;
+    public EnumEvalAggregateScalar(ExprEvaluator initialization, ExprEvaluator innerExpression, int streamNumLambda, ObjectArrayEventType resultEventType, ObjectArrayEventType evalEventType) {
+        super(initialization, innerExpression, streamNumLambda, resultEventType);
+        this.evalEventType = evalEventType;
     }
 
-    public Object evaluateEnumMethod(Collection target, boolean isNewData, ExprEvaluatorContext context) {
+    public Object evaluateEnumMethod(EventBean[] eventsLambda, Collection target, boolean isNewData, ExprEvaluatorContext context) {
         Object initializationValue = initialization.evaluate(eventsLambda, isNewData, context);
 
         if (target.isEmpty()) {
             return initializationValue;
         }
 
+        ObjectArrayEventBean resultEvent = new ObjectArrayEventBean(new Object[1], resultEventType);
+        ObjectArrayEventBean evalEvent = new ObjectArrayEventBean(new Object[1], evalEventType);
+
         for (Object next : target) {
 
-            this.resultEvent.getProperties().put(resultPropertyName, initializationValue);
-            this.evalEvent.getProperties().put(evalPropertyName, next);
-            eventsLambda[streamNumLambda] = this.resultEvent;
+            resultEvent.getProperties()[0] = initializationValue;
+            evalEvent.getProperties()[0] = next;
+            eventsLambda[streamNumLambda] = resultEvent;
             eventsLambda[streamNumLambda + 1] = evalEvent;
 
             initializationValue = innerExpression.evaluate(eventsLambda, isNewData, context);

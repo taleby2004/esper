@@ -1108,6 +1108,23 @@ group by account.id</programlisting>
 		   <para>
 			   The supertype of a <literal>Object[]</literal> event type must also be an object-array event type. All property names and types of a supertype are also available on a subtype and override such same-name properties of the subtype. In addition, anywhere within EPL that an event type name of an Object-array supertype is used, any of its Object-array subtypes also matches that expression (similar to the concept of interface or superclass).
 		   </para>
+		   
+		   <para>
+		     The properties provided by the top-most supertype must occur first in the object array. Subtypes each append to the object array. The number of values appended must match the 
+		     number of properties declared by the subtype.
+		   </para>
+		   
+			<para>
+			  For example, assume your application declares the following two types:
+			</para>
+			<programlisting><![CDATA[create objectarray schema SuperType (p0 string)]]></programlisting>
+			<programlisting><![CDATA[create objectarray schema SubType (p1 string) inherits SuperType]]></programlisting>
+
+			<para>
+			  The object array event objects that your application can send into the engine are shown by the next code snippet:
+			</para>
+			<programlisting><![CDATA[epRuntime.sendEvent(new Object[] {"p0_value", "p1_value"}, "SubType");
+epRuntime.sendEvent(new Object[] {"p0_value"}, "SuperType");]]></programlisting>		   
 	   </sect2>
 
 		<sect2 xml:id="eventrep-objectarray-advanced">

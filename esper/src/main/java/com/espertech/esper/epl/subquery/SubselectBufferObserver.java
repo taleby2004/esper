@@ -9,8 +9,8 @@
 package com.espertech.esper.epl.subquery;
 
 import com.espertech.esper.collection.FlushedEventBuffer;
-import com.espertech.esper.view.internal.BufferObserver;
 import com.espertech.esper.epl.join.table.EventTable;
+import com.espertech.esper.view.internal.BufferObserver;
 
 /**
  * Observer to a buffer that is filled by a subselect view when it posts events,
@@ -30,7 +30,6 @@ public class SubselectBufferObserver implements BufferObserver
 
     public void newData(int streamId, FlushedEventBuffer newEventBuffer, FlushedEventBuffer oldEventBuffer)
     {
-        eventIndex.add(newEventBuffer.getAndFlush());
-        eventIndex.remove(oldEventBuffer.getAndFlush());
+        eventIndex.addRemove(newEventBuffer.getAndFlush(), oldEventBuffer.getAndFlush());
     }
 }

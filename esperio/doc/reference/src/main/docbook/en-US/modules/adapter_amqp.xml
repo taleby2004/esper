@@ -97,7 +97,7 @@
 						<entry>Host name string</entry>
 					</row>
 					<row>
-						<entry>queueName (required)</entry>
+						<entry>queueName</entry>
 						<entry>Queue name string</entry>
 					</row>
 					<row>
@@ -157,6 +157,10 @@
 		</table>
 		
 		<para>
+		  Either the <literal>queueName</literal> or the combination of <literal>exchange</literal> and <literal>routingKey</literal> are required parameters.
+		</para>
+		
+		<para>
 		  The collector is required and must be specified to transform events to AMQP messages. The collector instance must implement the interface <literal>ObjectToAMQPCollector</literal>. The adapter provides a default implementation <literal>ObjectToAMQPCollectorSerializable</literal> that 
 		  employs default serialization.
 		</para>
@@ -165,7 +169,7 @@
 			The following example declares a data flow that is triggered by <literal>MyMapEventType</literal> events from the event bus (type not declared here) that sends serialized messages to an AMQP queue:
 		</para>
 		<programlisting><![CDATA[create dataflow AMQPOutgoingDataFlow
-   EventBusSink -> outstream<MyMapEventType> {}
+   EventBusSource -> outstream<MyMapEventType> {}
    AMQPSink(outstream) {
      host: 'localhost',
      queueName: 'myqueue',
@@ -292,6 +296,6 @@
     collector: {class: 'AMQPToObjectCollectorSerializable'},
     logMessages: true
   }
-  EventBusSource(outstream){}]]></programlisting>			
+  EventBusSink(outstream){}]]></programlisting>			
 	</sect1>
 </chapter>

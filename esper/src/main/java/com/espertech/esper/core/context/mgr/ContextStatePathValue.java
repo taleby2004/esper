@@ -27,5 +27,12 @@ public class ContextStatePathValue {
     public byte[] getBlob() {
         return blob;
     }
+
+    public String toString() {
+        return "ContextStatePathValue{" +
+                "optionalContextPartitionId=" + optionalContextPartitionId +
+                ", blob=" + blob +
+                '}';
+    }
 }
 

@@ -12,19 +12,29 @@
 package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_A;
+import com.espertech.esper.support.bean.SupportSimpleBeanOne;
+import com.espertech.esper.support.bean.SupportSimpleBeanTwo;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.support.epl.SupportQueryPlanIndexHook;
+import com.espertech.esper.support.util.IndexAssertion;
+import com.espertech.esper.support.util.IndexAssertionFAF;
+import com.espertech.esper.support.util.IndexBackingTableInfo;
 import junit.framework.TestCase;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-public class TestNamedWindowIndexFAFPerf extends TestCase
+public class TestNamedWindowIndexFAFPerf extends TestCase implements IndexBackingTableInfo
 {
+    private static Log log = LogFactory.getLog(TestNamedWindowIndexFAFPerf.class);
+
     private EPServiceProvider epService;
 
     public void setUp()
     {
         Configuration config = SupportConfigFactory.getConfiguration();
-        config.getEngineDefaults().getLogging().setEnableQueryPlan(false);
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
     }

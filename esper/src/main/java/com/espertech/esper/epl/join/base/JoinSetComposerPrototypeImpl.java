@@ -50,6 +50,7 @@ public class JoinSetComposerPrototypeImpl implements JoinSetComposerPrototype {
     private final QueryPlan queryPlan;
     private final HistoricalStreamIndexList[] historicalStreamIndexLists;
     private final boolean joinRemoveStream;
+    private final boolean isOuterJoins;
 
     public JoinSetComposerPrototypeImpl(String statementName,
                                         String statementId,
@@ -64,7 +65,8 @@ public class JoinSetComposerPrototypeImpl implements JoinSetComposerPrototype {
                                         QueryPlanIndex[] indexSpecs,
                                         QueryPlan queryPlan,
                                         HistoricalStreamIndexList[] historicalStreamIndexLists,
-                                        boolean joinRemoveStream) {
+                                        boolean joinRemoveStream,
+                                        boolean isOuterJoins) {
         this.statementName = statementName;
         this.statementId = statementId;
         this.outerJoinDescList = outerJoinDescList;
@@ -79,9 +81,10 @@ public class JoinSetComposerPrototypeImpl implements JoinSetComposerPrototype {
         this.queryPlan = queryPlan;
         this.historicalStreamIndexLists = historicalStreamIndexLists;
         this.joinRemoveStream = joinRemoveStream;
+        this.isOuterJoins = isOuterJoins;
     }
 
-    public JoinSetComposerDesc create(Viewable[] streamViews) {
+    public JoinSetComposerDesc create(Viewable[] streamViews, boolean isFireAndForget) {
 
         // Build indexes
         Map<String, EventTable>[] indexesPerStream = new HashMap[indexSpecs.length];
@@ -101,7 +104,7 @@ public class JoinSetComposerPrototypeImpl implements JoinSetComposerPrototype {
                     index = streamJoinAnalysisResult.getViewExternal()[streamNo].getJoinIndexTable(items.get(entry.getKey()));
                 }
                 else {
-                    index = EventTableUtil.buildIndex(streamNo, items.get(entry.getKey()), streamTypes[streamNo], false);
+                    index = EventTableUtil.buildIndex(streamNo, items.get(entry.getKey()), streamTypes[streamNo], false, entry.getValue().isUnique(), null);
                 }
                 indexesPerStream[streamNo].put(entry.getKey(), index);
             }
@@ -142,7 +145,12 @@ public class JoinSetComposerPrototypeImpl implements JoinSetComposerPrototype {
             }
             else
             {
-                composer = new JoinSetComposerImpl(indexesPerStream, queryStrategies, streamJoinAnalysisResult.isPureSelfJoin(), exprEvaluatorContext, joinRemoveStream);
+                if (isFireAndForget) {
+                    composer = new JoinSetComposerFAFImpl(indexesPerStream, queryStrategies, streamJoinAnalysisResult.isPureSelfJoin(), exprEvaluatorContext, joinRemoveStream, isOuterJoins);
+                }
+                else {
+                    composer = new JoinSetComposerImpl(indexesPerStream, queryStrategies, streamJoinAnalysisResult.isPureSelfJoin(), exprEvaluatorContext, joinRemoveStream);
+                }
             }
 
             // rewrite the filter expression for all-inner joins in case "on"-clause outer join syntax was used to include those expressions

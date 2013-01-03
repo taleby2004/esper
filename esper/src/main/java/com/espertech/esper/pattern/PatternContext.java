@@ -124,15 +124,6 @@ public class PatternContext
     }
 
     /**
-     * Returns the engine instance id.
-     * @return engine instance id
-     */
-    public String getEngineInstanceId()
-    {
-        return statementContext.getEngineInstanceId();
-    }
-
-    /**
      * Returns extension services context for statement (statement-specific).
      * @return extension services
      */
@@ -157,10 +148,6 @@ public class PatternContext
 
     public ExceptionHandlingService getExceptionHandlingService() {
         return statementContext.getExceptionHandlingService();
-    }
-
-    public ExpressionResultCacheService getExpressionResultCacheService() {
-        return statementContext.getExpressionResultCacheService();
     }
 
     public StatementContext getStatementContext() {

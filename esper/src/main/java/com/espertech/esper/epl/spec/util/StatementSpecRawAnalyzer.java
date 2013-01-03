@@ -198,6 +198,12 @@ public class StatementSpecRawAnalyzer
             }
         }
 
+        if (raw.getCreateExpressionDesc() != null) {
+            if (raw.getCreateExpressionDesc().getExpression() != null) {
+                expressions.add(raw.getCreateExpressionDesc().getExpression().getInner());
+            }
+        }
+
         if (raw.getCreateContextDesc() != null) {
             ContextDetail detail = raw.getCreateContextDesc().getContextDetail();
             if (detail instanceof ContextDetailPartitioned) {

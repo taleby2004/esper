@@ -14,14 +14,16 @@ package com.espertech.esper.epl.enummethod.eval;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.enummethod.dot.*;
+import com.espertech.esper.epl.expression.ExprDotNodeUtility;
 import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.event.arr.ObjectArrayEventType;
 
 import java.util.List;
 
 public class ExprDotEvalOrderByAscDesc extends ExprDotEvalEnumMethodBase {
 
     public EventType[] getAddStreamTypes(String enumMethodUsedName, List<String> goesToNames, EventType inputEventType, Class collectionComponentType, List<ExprDotEvalParam> bodiesAndParameters) {
-        return new EventType[] {inputEventType};
+        return ExprDotNodeUtility.getSingleLambdaParamEventType(enumMethodUsedName, goesToNames, inputEventType, collectionComponentType);
     }
 
     public EnumEval getEnumEval(EventAdapterService eventAdapterService, StreamTypeService streamTypeService, String statementId, String enumMethodUsedName, List<ExprDotEvalParam> bodiesAndParameters, EventType inputEventType, Class collectionComponentType, int numStreamsIncoming) {
@@ -34,6 +36,11 @@ public class ExprDotEvalOrderByAscDesc extends ExprDotEvalEnumMethodBase {
         }
 
         ExprDotEvalParamLambda first = (ExprDotEvalParamLambda) bodiesAndParameters.get(0);
+        if (inputEventType == null) {
+            super.setTypeInfo(ExprDotEvalTypeInfo.componentColl(collectionComponentType));
+            return new EnumEvalOrderByAscDescScalarLambda(first.getBodyEvaluator(), first.getStreamCountIncoming(), isDescending,
+                    (ObjectArrayEventType) first.getGoesToTypes()[0]);
+        }
         super.setTypeInfo(ExprDotEvalTypeInfo.eventColl(inputEventType));
         return new EnumEvalOrderByAscDescEvents(first.getBodyEvaluator(), first.getStreamCountIncoming(), isDescending);
     }

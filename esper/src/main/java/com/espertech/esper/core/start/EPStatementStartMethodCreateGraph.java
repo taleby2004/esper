@@ -29,29 +29,29 @@ public class EPStatementStartMethodCreateGraph extends EPStatementStartMethodBas
 {
     private static final Log log = LogFactory.getLog(EPStatementStartMethodCreateGraph.class);
 
-    public EPStatementStartMethodCreateGraph(StatementSpecCompiled statementSpec, EPServicesContext services, StatementContext statementContext) {
-        super(statementSpec, services, statementContext);
+    public EPStatementStartMethodCreateGraph(StatementSpecCompiled statementSpec) {
+        super(statementSpec);
     }
 
-    public EPStatementStartResult startInternal(boolean isNewStatement, boolean isRecoveringStatement, boolean isRecoveringResilient) throws ExprValidationException, ViewProcessingException {
+    public EPStatementStartResult startInternal(final EPServicesContext services, StatementContext statementContext, boolean isNewStatement, boolean isRecoveringStatement, boolean isRecoveringResilient) throws ExprValidationException, ViewProcessingException {
         final CreateDataFlowDesc createGraphDesc = statementSpec.getCreateGraphDesc();
-        final AgentInstanceContext agentInstanceContext = getDefaultAgentInstanceContext();
+        final AgentInstanceContext agentInstanceContext = getDefaultAgentInstanceContext(statementContext);
 
         // define output event type
         String typeName = "EventType_Graph_" + createGraphDesc.getGraphName();
         EventType resultType = services.getEventAdapterService().createAnonymousMapType(typeName, Collections.<String, Object>emptyMap());
 
-        services.getGraphService().addStartGraph(createGraphDesc, statementContext, services, agentInstanceContext, isNewStatement);
+        services.getDataFlowService().addStartGraph(createGraphDesc, statementContext, services, agentInstanceContext, isNewStatement);
 
         EPStatementStopMethod stopMethod = new EPStatementStopMethod() {
             public void stop() {
-                services.getGraphService().stopGraph(createGraphDesc.getGraphName());
+                services.getDataFlowService().stopGraph(createGraphDesc.getGraphName());
             }
         };
 
         EPStatementDestroyMethod destroyMethod = new EPStatementDestroyMethod() {
             public void destroy() {
-                services.getGraphService().removeGraph(createGraphDesc.getGraphName());
+                services.getDataFlowService().removeGraph(createGraphDesc.getGraphName());
             }
         };
         return new EPStatementStartResult(new ZeroDepthStream(resultType), stopMethod, destroyMethod);

@@ -12,7 +12,7 @@ import com.espertech.esper.client.*;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.core.service.EPRuntimeEventSender;
 import com.espertech.esper.core.thread.ThreadingService;
-import com.espertech.esper.epl.core.MethodResolutionService;
+import com.espertech.esper.epl.core.EngineImportService;
 import com.espertech.esper.event.arr.ObjectArrayEventBean;
 import com.espertech.esper.event.arr.ObjectArrayEventType;
 import com.espertech.esper.event.bean.BeanEventAdapter;
@@ -101,10 +101,10 @@ public class EventAdapterServiceImpl implements EventAdapterService
         return EventAdapterServiceHelper.getWriteableProperties(eventType);
     }
 
-    public EventBeanManufacturer getManufacturer(EventType eventType, WriteablePropertyDescriptor[] properties, MethodResolutionService methodResolutionService)
+    public EventBeanManufacturer getManufacturer(EventType eventType, WriteablePropertyDescriptor[] properties, EngineImportService engineImportService)
             throws EventBeanManufactureException
     {
-        return EventAdapterServiceHelper.getManufacturer(this, eventType, properties, methodResolutionService);
+        return EventAdapterServiceHelper.getManufacturer(this, eventType, properties, engineImportService);
     }
 
     public EventType[] getAllTypes()
@@ -522,6 +522,9 @@ public class EventAdapterServiceImpl implements EventAdapterService
 
     public synchronized EventType addNestableObjectArrayType(String eventTypeName, Map<String, Object> propertyTypes, ConfigurationEventTypeObjectArray optionalConfig, boolean isPreconfiguredStatic, boolean isPreconfigured, boolean isConfigured, boolean namedWindow, boolean insertInto) throws EventAdapterException
     {
+        if (optionalConfig != null && optionalConfig.getSuperTypes().size() > 1) {
+            throw new EventAdapterException(ConfigurationEventTypeObjectArray.SINGLE_SUPERTYPE_MSG);
+        }
         Pair<EventType[], Set<EventType>> mapSuperTypes = getSuperTypesDepthFirst(optionalConfig != null ? optionalConfig.getSuperTypes() : null, false);
         EventTypeMetadata metadata = EventTypeMetadata.createNonPojoApplicationType(EventTypeMetadata.ApplicationType.OBJECTARR, eventTypeName, isPreconfiguredStatic, isPreconfigured, isConfigured, namedWindow, insertInto);
 

@@ -12,7 +12,6 @@
 package com.espertech.esper.epl.datetime.eval;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventType;
 import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.datetime.calop.CalendarOp;
 import com.espertech.esper.epl.datetime.calop.CalendarOpFactory;
@@ -23,6 +22,7 @@ import com.espertech.esper.epl.datetime.reformatop.ReformatOpFactory;
 import com.espertech.esper.epl.enummethod.dot.ExprDotEvalTypeInfo;
 import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.epl.methodbase.DotMethodFPProvided;
+import com.espertech.esper.epl.methodbase.DotMethodInputTypeMatcher;
 import com.espertech.esper.epl.methodbase.DotMethodTypeEnum;
 import com.espertech.esper.epl.methodbase.DotMethodUtil;
 import com.espertech.esper.util.JavaClassHelper;
@@ -72,7 +72,7 @@ public class ExprDotEvalDTFactory {
             DotMethodFPProvided footprintProvided = DotMethodUtil.getProvidedFootprint(currentParameters);
 
             // validate parameters
-            DotMethodUtil.validateParameters(currentMethod.getFootprints(), DotMethodTypeEnum.DATETIME, currentMethodName, footprintProvided);
+            DotMethodUtil.validateParametersDetermineFootprint(currentMethod.getFootprints(), DotMethodTypeEnum.DATETIME, currentMethodName, footprintProvided, DotMethodInputTypeMatcher.DEFAULT_ALL);
 
             if (opFactory instanceof CalendarOpFactory) {
                 CalendarOp calendarOp = ((CalendarOpFactory) currentMethod.getOpFactory()).getOp(currentMethod, currentMethodName, currentParameters, evaluators);

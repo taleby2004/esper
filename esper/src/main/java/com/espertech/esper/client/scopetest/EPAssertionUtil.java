@@ -559,7 +559,16 @@ public class EPAssertionUtil
                 String name = propertyNames[j];
                 Object value = propertiesThisRow[j];
                 Object eventProp = actual[i].get(name);
-                assertEqualsAllowArray("Error asserting property named " + name + " for row " + i + " for " + streamName, value, eventProp);
+                StringWriter writer = new StringWriter();
+                writer.append("Error asserting property named ");
+                writer.append(name);
+                writer.append(" for row ");
+                writer.append(Integer.toString(i));
+                if (streamName != null && streamName.trim().length() != 0) {
+                    writer.append(" for stream ");
+                    writer.append(streamName);
+                }
+                assertEqualsAllowArray(writer.toString(), value, eventProp);
             }
         }
     }
@@ -1405,7 +1414,7 @@ public class EPAssertionUtil
         if ((expected != null) && (expected.getClass().isArray()) && (actual != null) && (actual.getClass().isArray())) {
             Object[] valueArray = toObjectArray(expected);
             Object[] eventPropArray = toObjectArray(actual);
-            assertEqualsExactOrder(valueArray, eventPropArray);
+            assertEqualsExactOrder(eventPropArray, valueArray);
             return;
         }
         ScopeTestHelper.assertEquals(message, expected, actual);
@@ -1474,11 +1483,16 @@ public class EPAssertionUtil
         else {
             int expectedLength = Array.getLength(expected);
             int actualLength = Array.getLength(actual);
-            ScopeTestHelper.assertEquals("Mismatch in the number of expected and actual length", expectedLength, actualLength);
+            ScopeTestHelper.assertEquals("Mismatch in the number of expected and actual number of values asserted", expectedLength, actualLength);
         }
         return false;
     }
 
+    /**
+     * Compare two strings removing all newline characters.
+     * @param expected expected value
+     * @param received received value
+     */
     public static void assertEqualsIgnoreNewline(String expected, String received) {
         String expectedClean = removeNewline(expected);
         String receivedClean = removeNewline(received);
@@ -1489,10 +1503,42 @@ public class EPAssertionUtil
         }
     }
 
+    /**
+     * Assert that a map of collections (Map<String, Collection>) has expected keys and values.
+     * @param map of string keys and collection-type values
+     * @param keys array of key values
+     * @param expectedList for each key a string that is a comma-separated list of values
+     * @param collectionValue the function to apply to each collection value to convert to a string
+     */
+    public static void assertMapOfCollection(Map map, String[] keys, String[] expectedList, AssertionCollectionValueString collectionValue) {
+        ScopeTestHelper.assertEquals(expectedList.length, keys.length);
+        if (keys.length == 0 && map.isEmpty()) {
+            return;
+        }
+
+        ScopeTestHelper.assertEquals(map.size(), keys.length);
+
+        for (int i = 0; i < keys.length; i++) {
+            Collection value = (Collection) map.get(keys[i]);
+            String[] itemsExpected = expectedList[i].split(",");
+            ScopeTestHelper.assertEquals(itemsExpected.length, value.size());
+
+            Iterator it = value.iterator();
+            for (int j = 0; j < itemsExpected.length; j++) {
+                String received = collectionValue.extractValue(it.next());
+                ScopeTestHelper.assertEquals(itemsExpected[j], received);
+            }
+        }
+    }
+
     private static String removeNewline(String raw) {
         raw = raw.replaceAll("\t", "");
         raw = raw.replaceAll("\n", "");
         raw = raw.replaceAll("\r", "");
         return raw;
+    }
+
+    public static interface AssertionCollectionValueString {
+        public String extractValue(Object collectionItem);
     }
 }

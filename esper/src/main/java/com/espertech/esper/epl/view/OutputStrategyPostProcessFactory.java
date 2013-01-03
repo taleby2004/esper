@@ -8,15 +8,10 @@
  **************************************************************************************/
 package com.espertech.esper.epl.view;
 
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.core.context.util.AgentInstanceContext;
 import com.espertech.esper.core.service.EPStatementHandle;
 import com.espertech.esper.core.service.InternalEventRouter;
-import com.espertech.esper.core.service.UpdateDispatchView;
-import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.spec.SelectClauseStreamSelectorEnum;
-import com.espertech.esper.event.NaturalEventBean;
 
 /**
  * An output strategy that handles routing (insert-into) and stream selection.
@@ -24,15 +19,15 @@ import com.espertech.esper.event.NaturalEventBean;
 public class OutputStrategyPostProcessFactory
 {
     private final boolean isRoute;
-    private final boolean isRouteRStream;
+    private final SelectClauseStreamSelectorEnum insertIntoStreamSelector;
     private final SelectClauseStreamSelectorEnum selectStreamDirEnum;
     private final InternalEventRouter internalEventRouter;
     private final EPStatementHandle epStatementHandle;
     private final boolean addToFront;
 
-    public OutputStrategyPostProcessFactory(boolean route, boolean routeRStream, SelectClauseStreamSelectorEnum selectStreamDirEnum, InternalEventRouter internalEventRouter, EPStatementHandle epStatementHandle, boolean addToFront) {
+    public OutputStrategyPostProcessFactory(boolean route, SelectClauseStreamSelectorEnum insertIntoStreamSelector, SelectClauseStreamSelectorEnum selectStreamDirEnum, InternalEventRouter internalEventRouter, EPStatementHandle epStatementHandle, boolean addToFront) {
         isRoute = route;
-        isRouteRStream = routeRStream;
+        this.insertIntoStreamSelector = insertIntoStreamSelector;
         this.selectStreamDirEnum = selectStreamDirEnum;
         this.internalEventRouter = internalEventRouter;
         this.epStatementHandle = epStatementHandle;
@@ -47,8 +42,8 @@ public class OutputStrategyPostProcessFactory
         return isRoute;
     }
 
-    public boolean isRouteRStream() {
-        return isRouteRStream;
+    public SelectClauseStreamSelectorEnum getInsertIntoStreamSelector() {
+        return insertIntoStreamSelector;
     }
 
     public SelectClauseStreamSelectorEnum getSelectStreamDirEnum() {

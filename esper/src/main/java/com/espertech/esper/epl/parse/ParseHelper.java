@@ -141,11 +141,13 @@ public class ParseHelper {
 
         for (int i = 0; i < tokens.size(); i++) {
             if (tokens.get(i).getType() == EsperEPL2Ast.EXPRESSIONDECL) {
+                Token tokenBefore = getTokenBefore(i, tokens);
+                boolean isCreateExpressionClause = tokenBefore != null && tokenBefore.getType() == EsperEPL2Ast.CREATE;
                 Pair<String, Integer> nameAndNameStart = findScriptName(i + 1, tokens);
 
                 int startIndex = findStartTokenScript(nameAndNameStart.getSecond(), tokens, EsperEPL2Ast.LBRACK);
                 if (startIndex != -1) {
-                    int endIndex = findEndTokenScript(startIndex + 1, tokens, EsperEPL2Ast.RBRACK, EsperEPL2GrammarParser.getAfterScriptTokens());
+                    int endIndex = findEndTokenScript(startIndex + 1, tokens, EsperEPL2Ast.RBRACK, EsperEPL2GrammarParser.getAfterScriptTokens(), !isCreateExpressionClause);
                     if (endIndex != -1) {
 
                         StringWriter writer = new StringWriter();
@@ -162,6 +164,18 @@ public class ParseHelper {
 
         String rewrittenEPL = tokens.toString();
         return new ScriptResult(rewrittenEPL, scripts);
+    }
+
+    private static Token getTokenBefore(int i, TokenRewriteStream tokens) {
+        int position = i-1;
+        while (position >= 0) {
+            Token t = tokens.get(position);
+            if (t.getChannel() != 99) {
+                return t;
+            }
+            position--;
+        }
+        return null;
     }
 
     private static Pair<String, Integer> findScriptName(int start, TokenRewriteStream tokens) {
@@ -224,10 +238,13 @@ public class ParseHelper {
         return found;
     }
 
-    private static int findEndTokenScript(int startIndex, TokenRewriteStream tokens, int tokenTypeSearch, Set<Integer> afterScriptTokens) {
+    private static int findEndTokenScript(int startIndex, TokenRewriteStream tokens, int tokenTypeSearch, Set<Integer> afterScriptTokens, boolean requireAfterScriptToken) {
         int found = -1;
         for (int i = startIndex; i < tokens.size(); i++) {
             if (tokens.get(i).getType() == tokenTypeSearch) {
+                if (!requireAfterScriptToken) {
+                    return i;
+                }
                 // The next non-comment token must be among the afterScriptTokens, i.e. SELECT/INSERT/ON/DELETE/UPDATE
                 // Find next non-comment token.
                 for (int j = i + 1; j < tokens.size(); j++) {

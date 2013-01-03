@@ -323,7 +323,7 @@ having amount > 1000]]></programlisting>
 
 		<indexterm><primary>views</primary><secondary>batch window processing</secondary></indexterm>		
 		<para>
-			The built-in data windows that act on batches of events are the <literal>win:time_batch</literal> and the <literal>win:length_batch</literal> views. The <literal>win:time_batch</literal> data window collects events arriving during a given time interval and posts collected events as a batch to listeners at the end of the time interval. The <literal>win:length_batch</literal> data window collects a given number of events and posts collected events as a batch to listeners when the given number of events has collected.
+			The built-in data windows that act on batches of events are the <literal>win:time_batch</literal> and the <literal>win:length_batch</literal> views, among others. The <literal>win:time_batch</literal> data window collects events arriving during a given time interval and posts collected events as a batch to listeners at the end of the time interval. The <literal>win:length_batch</literal> data window collects a given number of events and posts collected events as a batch to listeners when the given number of events has collected.
 		</para>
 		
 		<para>

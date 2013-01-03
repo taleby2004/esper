@@ -37,12 +37,14 @@ public class NamedWindowOnSelectView extends NamedWindowOnExprBaseView
     private EventBean[] lastResult;
     private Set<MultiKey<EventBean>> oldEvents = new HashSet<MultiKey<EventBean>>();
     private final boolean audit;
+    private final boolean isDelete;
 
-    public NamedWindowOnSelectView(NamedWindowLookupStrategy lookupStrategy, NamedWindowRootViewInstance rootView, ExprEvaluatorContext exprEvaluatorContext, NamedWindowOnSelectViewFactory parent, ResultSetProcessor resultSetProcessor, boolean audit) {
+    public NamedWindowOnSelectView(NamedWindowLookupStrategy lookupStrategy, NamedWindowRootViewInstance rootView, ExprEvaluatorContext exprEvaluatorContext, NamedWindowOnSelectViewFactory parent, ResultSetProcessor resultSetProcessor, boolean audit, boolean isDelete) {
         super(lookupStrategy, rootView, exprEvaluatorContext);
         this.parent = parent;
         this.resultSetProcessor = resultSetProcessor;
         this.audit = audit;
+        this.isDelete = isDelete;
     }
 
     public void handleMatching(EventBean[] triggerEvents, EventBean[] matchingEvents)
@@ -106,6 +108,11 @@ public class NamedWindowOnSelectView extends NamedWindowOnExprBaseView
 
         // clear state from prior results
         resultSetProcessor.clear();
+
+        // Events to delete are indicated via old data
+        if (isDelete) {
+            this.rootView.update(null, matchingEvents);
+        }
     }
 
     public EventType getEventType()

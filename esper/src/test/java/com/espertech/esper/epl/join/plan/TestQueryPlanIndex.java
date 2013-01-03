@@ -19,9 +19,9 @@ public class TestQueryPlanIndex extends TestCase
 
     public void setUp()
     {
-        QueryPlanIndexItem itemOne = new QueryPlanIndexItem(new String[] { "p01", "p02"}, null, null, null);
-        QueryPlanIndexItem itemTwo = new QueryPlanIndexItem(new String[] { "p21"}, new Class[0], null, null);
-        QueryPlanIndexItem itemThree = new QueryPlanIndexItem(new String[0], new Class[0], null, null);
+        QueryPlanIndexItem itemOne = new QueryPlanIndexItem(new String[] { "p01", "p02"}, null, null, null, false);
+        QueryPlanIndexItem itemTwo = new QueryPlanIndexItem(new String[] { "p21"}, new Class[0], null, null, false);
+        QueryPlanIndexItem itemThree = new QueryPlanIndexItem(new String[0], new Class[0], null, null, false);
         indexSpec = QueryPlanIndex.makeIndex(itemOne, itemTwo, itemThree);
     }
 
@@ -51,6 +51,6 @@ public class TestQueryPlanIndex extends TestCase
     {
         String indexNum = indexSpec.addIndex(new String[] {"a", "b"}, null);
         assertNotNull(indexNum);
-        assertEquals(indexNum, indexSpec.getIndexNum(new String[] { "a", "b"}, null));
+        assertEquals(indexNum, indexSpec.getIndexNum(new String[] { "a", "b"}, null).getFirst());
     }
 }

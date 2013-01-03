@@ -92,6 +92,14 @@ public class DefaultSupportCaptureOp<T> implements EPDataFlowSignalHandler, Futu
         return getCurrent();
     }
 
+    public Object[] getPunctuated() throws InterruptedException, ExecutionException, TimeoutException {
+        boolean result = numRowLatch.await(1, TimeUnit.SECONDS);
+        if (!result) {
+            throw new TimeoutException("latch timed out");
+        }
+        return received.get(0).toArray();
+    }
+
     /**
      * Wait for the listener invocation for up to the given number of milliseconds.
      * @param msecWait to wait

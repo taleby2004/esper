@@ -19,7 +19,8 @@ public class PatternContextFactoryDefault implements PatternContextFactory
     public PatternContext createContext(StatementContext statementContext,
                                         int streamId,
                                         EvalRootFactoryNode rootNode,
-                                        MatchedEventMapMeta matchedEventMapMeta) {
+                                        MatchedEventMapMeta matchedEventMapMeta,
+                                        boolean allowResilient) {
         return new PatternContext(statementContext, streamId, matchedEventMapMeta, false);
     }
 

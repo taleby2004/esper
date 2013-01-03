@@ -27,17 +27,21 @@ public final class EvalAuditStateNode extends EvalStateNode implements Evaluator
     private final EvalAuditNode evalAuditNode;
     private EvalStateNode childState;
 
+
     /**
      * Constructor.
      * @param parentNode is the parent evaluator to call to indicate truth value
      * @param evalAuditNode is the factory node associated to the state
      */
     public EvalAuditStateNode(Evaluator parentNode,
-                              EvalAuditNode evalAuditNode)
+                              EvalAuditNode evalAuditNode,
+                              EvalStateNodeNumber stateNodeNumber,
+                              long stateNodeId)
     {
         super(parentNode);
 
         this.evalAuditNode = evalAuditNode;
+        childState = evalAuditNode.getChildNode().newState(this, stateNodeNumber, stateNodeId);
     }
 
     public EvalNode getFactoryNode() {
@@ -46,8 +50,6 @@ public final class EvalAuditStateNode extends EvalStateNode implements Evaluator
 
     public final void start(MatchedEventMap beginState)
     {
-        EvalNode child = evalAuditNode.getChildNode();
-        childState = child.newState(this, null, 0L);
         childState.start(beginState);
         evalAuditNode.getFactoryNode().increaseRefCount(this, evalAuditNode.getContext().getPatternContext());
     }
@@ -59,13 +61,12 @@ public final class EvalAuditStateNode extends EvalStateNode implements Evaluator
             AuditPath.auditLog(evalAuditNode.getContext().getStatementContext().getEngineURI(), evalAuditNode.getContext().getPatternContext().getStatementName(), AuditEnum.PATTERN, message);
         }
 
+        this.getParentEvaluator().evaluateTrue(matchEvent, this, isQuitted);
+
         if (isQuitted)
         {
-            childState = null;
             evalAuditNode.getFactoryNode().decreaseRefCount(this, evalAuditNode.getContext().getPatternContext());
         }
-
-        this.getParentEvaluator().evaluateTrue(matchEvent, this, isQuitted);
     }
 
     public final void evaluateFalse(EvalStateNode fromNode)
@@ -83,7 +84,6 @@ public final class EvalAuditStateNode extends EvalStateNode implements Evaluator
         if (childState != null) {
             childState.quit();
         }
-        childState = null;
         evalAuditNode.getFactoryNode().decreaseRefCount(this, evalAuditNode.getContext().getPatternContext());
     }
 
@@ -98,6 +98,10 @@ public final class EvalAuditStateNode extends EvalStateNode implements Evaluator
             childState.accept(visitor, data);
         }
         return data;
+    }
+
+    public EvalStateNode getChildState() {
+        return childState;
     }
 
     public final String toString()

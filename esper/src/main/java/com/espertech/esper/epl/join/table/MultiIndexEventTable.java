@@ -43,6 +43,11 @@ public class MultiIndexEventTable implements EventTable
         return tables;
     }
 
+    public void addRemove(EventBean[] newData, EventBean[] oldData) {
+        add(newData);
+        remove(oldData);
+    }
+
     public void add(EventBean[] events)
     {
         throw new UnsupportedOperationException();

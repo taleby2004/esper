@@ -44,7 +44,7 @@ public class TestQueryPlanIndexBuilder extends TestCase
 
     public void testBuildIndexSpec()
     {
-        QueryPlanIndex[] indexes = QueryPlanIndexBuilder.buildIndexSpec(queryGraph, types);
+        QueryPlanIndex[] indexes = QueryPlanIndexBuilder.buildIndexSpec(queryGraph, types, new String[queryGraph.getNumStreams()][][]);
 
         String[][] expected = new String[][] { {"p00"}, {"p01"} };
         EPAssertionUtil.assertEqualsExactOrder(expected, indexes[0].getIndexProps());
@@ -63,7 +63,7 @@ public class TestQueryPlanIndexBuilder extends TestCase
 
         // Test no index, should have a single entry with a zero-length property name array
         queryGraph = new QueryGraph(3);
-        indexes = QueryPlanIndexBuilder.buildIndexSpec(queryGraph, types);
+        indexes = QueryPlanIndexBuilder.buildIndexSpec(queryGraph, types, new String[queryGraph.getNumStreams()][][]);
         assertEquals(1, indexes[1].getIndexProps().length);
     }
 
@@ -73,7 +73,7 @@ public class TestQueryPlanIndexBuilder extends TestCase
         queryGraph.addStrictEquals(0, "p00", null, 1, "p10", null);
         queryGraph.addStrictEquals(0, "p00", null, 2, "p20", null);
 
-        QueryPlanIndex[] indexes = QueryPlanIndexBuilder.buildIndexSpec(queryGraph, types);
+        QueryPlanIndex[] indexes = QueryPlanIndexBuilder.buildIndexSpec(queryGraph, types, new String[queryGraph.getNumStreams()][][]);
 
         String[][] expected = new String[][] { {"p00"} };
         EPAssertionUtil.assertEqualsExactOrder(expected, indexes[0].getIndexProps());

@@ -73,5 +73,9 @@ public class EvalObserverFactoryNode extends EvalNodeFactoryBase
         return false;
     }
 
+    public boolean isStateful() {
+        return false;
+    }
+
     private static final Log log = LogFactory.getLog(EvalObserverFactoryNode.class);
 }

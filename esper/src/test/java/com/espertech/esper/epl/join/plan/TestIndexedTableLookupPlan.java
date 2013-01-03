@@ -12,7 +12,6 @@
 package com.espertech.esper.epl.join.plan;
 
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.epl.expression.ExprIdentNode;
 import com.espertech.esper.epl.expression.ExprIdentNodeImpl;
 import com.espertech.esper.epl.join.exec.base.IndexedTableLookupStrategy;
 import com.espertech.esper.epl.join.exec.base.JoinExecTableLookupStrategy;
@@ -35,7 +34,7 @@ public class TestIndexedTableLookupPlan extends TestCase
     {
         types = new EventType[] { SupportEventTypeFactory.createBeanType(SupportBean.class) };
 
-        PropertyIndexedEventTableFactory factory = new PropertyIndexedEventTableFactory(1, types[0], new String[] {"intBoxed"});
+        PropertyIndexedEventTableFactory factory = new PropertyIndexedEventTableFactory(1, types[0], new String[] {"intBoxed"}, false, null);
         propertyMapEventIndex = (PropertyIndexedEventTable) factory.makeEventTable();
     }
 

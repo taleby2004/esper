@@ -122,6 +122,10 @@ public class FileSinkCSV implements DataFlowOpLifecycle, EPDataFlowSignalHandler
             eventShell.setUnderlying(object);
             recursiveRender(eventShell, buf, 0, rendererMeta, rendererOptions);
             writer.write(buf.toString());
+            writer.flush();
+            fos.flush();
+            fos.getChannel().force(true);
+            fos.getFD().sync();
         }
         catch (IOException e) {
             if (writer != null) {

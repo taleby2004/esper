@@ -11,29 +11,26 @@
 
 package com.espertech.esper.epl.enummethod.eval;
 
-import com.espertech.esper.epl.agg.aggregator.AggregationMethod;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
 import java.util.Collection;
 
 public class EnumEvalSumScalar extends EnumEvalBase implements EnumEval {
 
-    private final AggregationMethod aggregationMethod;
+    private final ExprDotEvalSumMethodFactory sumMethodFactory;
 
-    public EnumEvalSumScalar(int streamCountIncoming, AggregationMethod aggregationMethod) {
+    public EnumEvalSumScalar(int streamCountIncoming, ExprDotEvalSumMethodFactory sumMethodFactory) {
         super(streamCountIncoming);
-        this.aggregationMethod = aggregationMethod;
+        this.sumMethodFactory = sumMethodFactory;
     }
 
-    public Object evaluateEnumMethod(Collection target, boolean isNewData, ExprEvaluatorContext context) {
+    public Object evaluateEnumMethod(EventBean[] eventsLambda, Collection target, boolean isNewData, ExprEvaluatorContext context) {
 
-        aggregationMethod.clear();
-        
+        ExprDotEvalSumMethod method = sumMethodFactory.getSumAggregator();
         for (Object next : target) {
-
-            aggregationMethod.enter(next);
+            method.enter(next);
         }
-
-        return aggregationMethod.getValue();
+        return method.getValue();
     }
 }

@@ -696,7 +696,7 @@ public class SelectExprProcessorHelper
                             }
                         }
 
-                        existingTypeProcessor = SelectExprInsertEventBeanFactory.getInsertUnderlyingNonJoin(eventAdapterService, existingType, isUsingWildcard, typeService, exprEvaluators, columnNames, expressionReturnTypes, methodResolutionService, insertIntoDesc, columnNamesAsProvided);
+                        existingTypeProcessor = SelectExprInsertEventBeanFactory.getInsertUnderlyingNonJoin(eventAdapterService, existingType, isUsingWildcard, typeService, exprEvaluators, columnNames, expressionReturnTypes, methodResolutionService.getEngineImportService(), insertIntoDesc, columnNamesAsProvided);
                     }
 
                     if (existingTypeProcessor != null) {
@@ -860,7 +860,7 @@ public class SelectExprProcessorHelper
 
                     SelectExprProcessor selectExprInsertEventBean = null;
                     if (existingType != null) {
-                        selectExprInsertEventBean = SelectExprInsertEventBeanFactory.getInsertUnderlyingNonJoin(eventAdapterService, existingType, isUsingWildcard, typeService, exprEvaluators, columnNames, expressionReturnTypes, methodResolutionService, insertIntoDesc, columnNamesAsProvided);
+                        selectExprInsertEventBean = SelectExprInsertEventBeanFactory.getInsertUnderlyingNonJoin(eventAdapterService, existingType, isUsingWildcard, typeService, exprEvaluators, columnNames, expressionReturnTypes, methodResolutionService.getEngineImportService(), insertIntoDesc, columnNamesAsProvided);
                     }
                     if (selectExprInsertEventBean != null) {
                         return selectExprInsertEventBean;

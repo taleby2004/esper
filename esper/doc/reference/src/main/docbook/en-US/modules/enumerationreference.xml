@@ -685,12 +685,12 @@ from LocationReport]]></programlisting>
 			<title>Input, Output and Limitations</title>
 
 			<para>
-				It is not necessary to use classes for event representation. The example above applies the same to Map or XML underlying events.
+				It is not necessary to use classes for event representation. The example above applies the same to Object-array, Map or XML underlying events.
 			</para>		
 			
 			<para>
 			   For most enumeration methods the input can be any collection of events, scalar values or objects. For some enumeration methods limitations apply that are documented below. For example, the <literal>sumOf</literal> enumeration method requires a collection of numeric scalar values if used without parameters.
-			   If the input to <literal>sumOf</literal> is a collection of events the enumeration method requires a lambda expression as parameter that yields the numeric value to use to compute the sum.
+			   If the input to <literal>sumOf</literal> is a collection of events or scalar values the enumeration method requires a lambda expression as parameter that yields the numeric value to use to compute the sum.
 			</para>
 	
 			<para>
@@ -776,6 +776,16 @@ from LocationReport]]></programlisting>
 			<listitem>
 				<para>
 					An array returned by the <literal>{}</literal> array operator.
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					A collection or array returned by a method call on an event.
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					A variable. Usually variables declared as an array.
 				</para>
 			</listitem>
 		</orderedlist>
@@ -1053,6 +1063,25 @@ from LocationReport lr]]></programlisting>
 			<para>
 				The engine applies caching techniques to avoid re-evaluating the declared expression multiple times.
 			</para>
+		</sect2>
+
+		<sect2 xml:id="enumeration-ds-variable">
+			<title>Variables</title>
+			
+			<para>
+				A variable may provide input data for an enumeration method.
+			</para>
+
+			<para>
+				This constant of array type carries a list of invalid zones:
+			</para>
+			<programlisting><![CDATA[create constant variable string[] invalid_zones = { 'Z1', 'Z2' };]]></programlisting>	
+
+			<para>
+				Sample query:
+			</para>
+			<programlisting><![CDATA[select invalid_zones.anyOf(v => v = name) as flagged from Zone]]></programlisting>	
+
 		</sect2>
 	</sect1>
 

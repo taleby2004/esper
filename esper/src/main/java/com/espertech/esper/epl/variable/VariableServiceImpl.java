@@ -13,6 +13,8 @@ import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.VariableValueException;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.core.service.StatementExtensionSvcContext;
+import com.espertech.esper.epl.core.EngineImportException;
+import com.espertech.esper.epl.core.EngineImportService;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.schedule.TimeProvider;
 import com.espertech.esper.util.JavaClassHelper;
@@ -91,12 +93,6 @@ public class VariableServiceImpl implements VariableService
      * For use in roll-over when the current version number overflows the ROLLOVER_WRITER_BOUNDARY.
      */
     protected final static int ROLLOVER_READER_BOUNDARY = Integer.MAX_VALUE - 100000;
-
-    /**
-     * Sets the boundary above which a write transaction rolls over all variable's
-     * version lists.
-     */
-    protected final static int ROLLOVER_WRITER_BOUNDARY = ROLLOVER_READER_BOUNDARY + 10000;
 
     /**
      * Applicable for each variable if more then the number of versions accumulated, check
@@ -215,10 +211,11 @@ public class VariableServiceImpl implements VariableService
         }
     }
 
-    public void createNewVariable(String variableName, String variableType, Object value, boolean constant, StatementExtensionSvcContext extensionServicesContext) throws VariableExistsException, VariableTypeException
+    public void createNewVariable(String variableName, String variableType, Object value, boolean constant, boolean array, StatementExtensionSvcContext extensionServicesContext, EngineImportService engineImportService) throws VariableExistsException, VariableTypeException
     {
         // Determime the variable type
         Class type = JavaClassHelper.getClassForSimpleName(variableType);
+        Class arrayType = null;
         EventType eventType = null;
         if (type == null) {
             if (variableType.toLowerCase().equals("object")) {
@@ -231,15 +228,42 @@ public class VariableServiceImpl implements VariableService
                 }
             }
             if (type == null) {
+                try {
+                    type = engineImportService.resolveClass(variableType);
+                    if (array) {
+                        arrayType = JavaClassHelper.getArrayType(type);
+                    }
+                } catch (EngineImportException e) {
+                    log.debug("Not found '" + type + "': " + e.getMessage(), e);
+                    // expected
+                }
+            }
+            if (type == null) {
                 throw new VariableTypeException("Cannot create variable '" + variableName + "', type '" +
                     variableType + "' is not a recognized type");
             }
+            if (array && eventType != null) {
+                throw new VariableTypeException("Cannot create variable '" + variableName + "', type '" +
+                        variableType + "' cannot be declared as an array type");
+            }
+        }
+        else {
+            if (array) {
+                arrayType = JavaClassHelper.getArrayType(type);
+            }
         }
 
-        if ((eventType == null) && (!JavaClassHelper.isJavaBuiltinDataType(type)) && (type != Object.class)) {
+        if ((eventType == null) && (!JavaClassHelper.isJavaBuiltinDataType(type)) && (type != Object.class) && !type.isArray() && !type.isEnum()) {
+            if (array) {
+                throw new VariableTypeException("Cannot create variable '" + variableName + "', type '" +
+                    variableType + "' cannot be declared as an array, only scalar types can be array");
+            }
             eventType = eventAdapterService.addBeanType(type.getName(), type, false, false, false);
         }
 
+        if (arrayType != null) {
+            type = arrayType;
+        }
         createNewVariable(variableName, type, eventType, value, constant, extensionServicesContext);
     }
 
@@ -275,8 +299,8 @@ public class VariableServiceImpl implements VariableService
                 catch (Exception ex)
                 {
                     throw new VariableTypeException("Variable '" + variableName
-                        + "' of declared type '" + variableType.getName() +
-                            "' cannot be initialized by value '" + coercedValue + "': " + ex.toString());
+                        + "' of declared type " + JavaClassHelper.getClassNameFullyQualPretty(variableType) +
+                            " cannot be initialized by value '" + coercedValue + "': " + ex.toString());
                 }
             }
 
@@ -287,16 +311,12 @@ public class VariableServiceImpl implements VariableService
                 if ((!JavaClassHelper.isNumeric(variableType)) ||
                     (!(coercedValue instanceof Number)))
                 {
-                    throw new VariableTypeException("Variable '" + variableName
-                        + "' of declared type '" + variableType.getName() +
-                            "' cannot be initialized by a value of type '" + coercedValue.getClass().getName() + "'");
+                    throw getVariableTypeException(variableName, variableType, coercedValue.getClass());
                 }
 
                 if (!(JavaClassHelper.canCoerce(coercedValue.getClass(), variableType)))
                 {
-                    throw new VariableTypeException("Variable '" + variableName
-                        + "' of declared type '" + variableType.getName() +
-                            "' cannot be initialized by a value of type '" + coercedValue.getClass().getName() + "'");
+                    throw getVariableTypeException(variableName, variableType, coercedValue.getClass());
                 }
 
                 // coerce
@@ -472,7 +492,7 @@ public class VariableServiceImpl implements VariableService
         VariableReader variableReader = variables.get(variableName);
 
         if (variableReader.getEventType() != null) {
-            if ((newValue != null) && (!JavaClassHelper.isSubclassOrImplementsInterface(newValue.getClass(), variableReader.getEventType().getUnderlyingType()))) {
+            if ((!JavaClassHelper.isSubclassOrImplementsInterface(newValue.getClass(), variableReader.getEventType().getUnderlyingType()))) {
                 throw new VariableValueException("Variable '" + variableName
                     + "' of declared event type '" + variableReader.getEventType().getName() + "' underlying type '" + variableReader.getEventType().getUnderlyingType().getName() +
                         "' cannot be assigned a value of type '" + valueType.getName() + "'");
@@ -492,17 +512,13 @@ public class VariableServiceImpl implements VariableService
         if ((!JavaClassHelper.isNumeric(variableType)) ||
             (!JavaClassHelper.isNumeric(valueType)))
         {
-            throw new VariableValueException("Variable '" + variableName
-                + "' of declared type '" + variableType.getName() +
-                    "' cannot be assigned a value of type '" + valueType.getName() + "'");
+            throw new VariableValueException(getAssigmentExMessage(variableName, variableType, valueType));
         }
 
         // determine if the expression type can be assigned
         if (!(JavaClassHelper.canCoerce(valueType, variableType)))
         {
-            throw new VariableValueException("Variable '" + variableName
-                + "' of declared type '" + variableType.getName() +
-                    "' cannot be assigned a value of type '" + valueType.getName() + "'");
+            throw new VariableValueException(getAssigmentExMessage(variableName, variableType, valueType));
         }
 
         Object valueCoerced = JavaClassHelper.coerceBoxed((Number) newValue, variableType);
@@ -526,5 +542,17 @@ public class VariableServiceImpl implements VariableService
         Map<String, VariableReader> variables = new HashMap<String, VariableReader>();
         variables.putAll(this.variables);
         return variables;
+    }
+
+    private static VariableTypeException getVariableTypeException(String variableName, Class variableType, Class initValueClass) {
+        return new VariableTypeException("Variable '" + variableName
+                + "' of declared type " + JavaClassHelper.getClassNameFullyQualPretty(variableType) +
+                " cannot be initialized by a value of type " + JavaClassHelper.getClassNameFullyQualPretty(initValueClass));
+    }
+
+    public static String getAssigmentExMessage(String variableName, Class variableType, Class initValueClass) {
+        return "Variable '" + variableName
+                + "' of declared type " + JavaClassHelper.getClassNameFullyQualPretty(variableType) +
+                " cannot be assigned a value of type " + JavaClassHelper.getClassNameFullyQualPretty(initValueClass);
     }
 }

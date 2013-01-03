@@ -29,17 +29,17 @@ public class EPStatementStartMethodCreateIndex extends EPStatementStartMethodBas
 {
     private static final Log log = LogFactory.getLog(EPStatementStartMethodCreateIndex.class);
 
-    public EPStatementStartMethodCreateIndex(StatementSpecCompiled statementSpec, EPServicesContext services, StatementContext statementContext) {
-        super(statementSpec, services, statementContext);
+    public EPStatementStartMethodCreateIndex(StatementSpecCompiled statementSpec) {
+        super(statementSpec);
     }
 
-    public EPStatementStartResult startInternal(boolean isNewStatement, boolean isRecoveringStatement, boolean isRecoveringResilient) throws ExprValidationException, ViewProcessingException {
+    public EPStatementStartResult startInternal(EPServicesContext services, StatementContext statementContext, boolean isNewStatement, boolean isRecoveringStatement, boolean isRecoveringResilient) throws ExprValidationException, ViewProcessingException {
         final CreateIndexDesc spec = statementSpec.getCreateIndexDesc();
         final NamedWindowProcessor processor = services.getNamedWindowService().getProcessor(spec.getWindowName());
         if (processor == null) {
             throw new ExprValidationException("A named window by name '" + spec.getWindowName() + "' does not exist");
         }
-        final NamedWindowProcessorInstance processorInstance = processor.getProcessorInstance(getDefaultAgentInstanceContext());
+        final NamedWindowProcessorInstance processorInstance = processor.getProcessorInstance(getDefaultAgentInstanceContext(statementContext));
 
         EPStatementStopMethod stopMethod;
         if (processor.isVirtualDataWindow()) {
@@ -52,7 +52,7 @@ public class EPStatementStartMethodCreateIndex extends EPStatementStartMethodBas
             };
         }
         else {
-            processorInstance.getRootViewInstance().addExplicitIndex(spec.getWindowName(), spec.getIndexName(), spec.getColumns());
+            processorInstance.getRootViewInstance().addExplicitIndex(spec.isUnique(), spec.getWindowName(), spec.getIndexName(), spec.getColumns());
             stopMethod = new EPStatementStopMethod() {
                 public void stop()
                 {

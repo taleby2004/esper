@@ -31,6 +31,7 @@ public class EPServiceMDBAdapter
 
         // Get engine instance - same engine instance for all MDB instances
         epService = EPServiceProviderManager.getDefaultProvider(config);
+        epService.initialize(); // since this test is running as part of a larger test suite, reset to make sure its a clean engine
         System.out.println(TerminalMDB.class.getName() + "::instance this=" + this.toString() + " engine=" + epService.toString());
 
         EPStatement statement = null;

@@ -11,38 +11,24 @@
 
 package com.espertech.esper.epl.enummethod.eval;
 
-import com.espertech.esper.client.EventBean;
 import com.espertech.esper.epl.expression.ExprEvaluator;
-import com.espertech.esper.epl.expression.ExprEvaluatorContext;
-import com.espertech.esper.event.map.MapEventBean;
-import com.espertech.esper.event.map.MapEventType;
-
-import java.util.ArrayDeque;
-import java.util.Collection;
-import java.util.HashMap;
+import com.espertech.esper.event.arr.ObjectArrayEventType;
 
 public abstract class EnumEvalBaseScalarIndex implements EnumEval {
 
     protected final ExprEvaluator innerExpression;
     protected final int streamNumLambda;
-    protected final String evalPropertyName;
-    protected final MapEventBean evalEvent;
-    protected final String indexPropertyName;
-    protected final MapEventBean indexEvent;
+    protected final ObjectArrayEventType evalEventType;
+    protected final ObjectArrayEventType indexEventType;
 
-    protected EventBean[] eventsLambda;
-
-    public EnumEvalBaseScalarIndex(ExprEvaluator innerExpression, int streamNumLambda, MapEventType evalEventType, String evalPropertyName, MapEventType indexEventType, String indexPropertyName) {
+    public EnumEvalBaseScalarIndex(ExprEvaluator innerExpression, int streamNumLambda, ObjectArrayEventType evalEventType, ObjectArrayEventType indexEventType) {
         this.innerExpression = innerExpression;
         this.streamNumLambda = streamNumLambda;
-        this.evalPropertyName = evalPropertyName;
-        this.evalEvent = new MapEventBean(new HashMap<String, Object>(), evalEventType);
-        this.indexPropertyName = indexPropertyName;
-        this.indexEvent = new MapEventBean(new HashMap<String, Object>(), indexEventType);
-        this.eventsLambda = new EventBean[streamNumLambda + 2];
+        this.evalEventType = evalEventType;
+        this.indexEventType = indexEventType;
     }
 
-    public EventBean[] getEventsPrototype() {
-        return eventsLambda;
+    public int getStreamNumSize() {
+        return streamNumLambda + 2;
     }
 }

@@ -121,10 +121,10 @@ public class ExpressionDeclaration implements Serializable {
         writer.append("expression ");
         writer.append(name);
         writer.append(" {");
-        if (parameterNames.size() == 1) {
+        if (parameterNames != null && parameterNames.size() == 1) {
             writer.append(parameterNames.get(0));
         }
-        else if (!parameterNames.isEmpty()) {
+        else if (parameterNames != null && !parameterNames.isEmpty()) {
             String delimiter = "";
             writer.append("(");
             for (String name : parameterNames) {
@@ -135,10 +135,12 @@ public class ExpressionDeclaration implements Serializable {
             writer.append(")");
         }
 
-        if (!parameterNames.isEmpty()) {
+        if (parameterNames != null && !parameterNames.isEmpty()) {
             writer.append(" => ");
         }
-        expression.toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
+        if (expression != null) {
+            expression.toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
+        }
         writer.append("}");
     }
 }

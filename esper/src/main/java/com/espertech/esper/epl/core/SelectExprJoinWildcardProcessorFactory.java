@@ -69,7 +69,7 @@ public class SelectExprJoinWildcardProcessorFactory
 
             SelectExprProcessor processor = null;
             if (existingType != null) {
-                processor = SelectExprInsertEventBeanFactory.getInsertUnderlyingJoinWildcard(eventAdapterService, existingType, streamNames, streamTypes, methodResolutionService);
+                processor = SelectExprInsertEventBeanFactory.getInsertUnderlyingJoinWildcard(eventAdapterService, existingType, streamNames, streamTypes, methodResolutionService.getEngineImportService());
             }
 
             if (processor != null) {

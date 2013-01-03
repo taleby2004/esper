@@ -8,6 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.epl.join.plan;
 
+import com.espertech.esper.collection.Pair;
 import com.espertech.esper.util.UuidGenerator;
 
 import java.util.Arrays;
@@ -54,12 +55,23 @@ public class QueryPlanIndex
      * @param indexProps - property names to search for
      * @return -1 if not found, or offset within indexes if found
      */
-    protected String getIndexNum(String[] indexProps, String[] rangeProps)
+    protected Pair<String, int[]> getIndexNum(String[] indexProps, String[] rangeProps)
     {
-        QueryPlanIndexItem proposed = new QueryPlanIndexItem(indexProps, null, rangeProps, null);
+        // find an exact match first
+        QueryPlanIndexItem proposed = new QueryPlanIndexItem(indexProps, null, rangeProps, null, false);
         for (Map.Entry<String, QueryPlanIndexItem> entry : items.entrySet()) {
             if (entry.getValue().equalsCompareSortedProps(proposed)) {
-                return entry.getKey();
+                return new Pair<String, int[]>(entry.getKey(), null);
+            }
+        }
+
+        // find partial match second, i.e. for unique indexes where the where-clause is overspecific
+        for (Map.Entry<String, QueryPlanIndexItem> entry : items.entrySet()) {
+            if (entry.getValue().getRangeProps() == null || entry.getValue().getRangeProps().length == 0) {
+                int[] indexes = QueryPlanIndexUniqueHelper.checkSufficientGetAssignment(entry.getValue().getIndexProps(), indexProps);
+                if (indexes != null && indexes.length != 0) {
+                    return new Pair<String, int[]>(entry.getKey(), indexes);
+                }
             }
         }
 
@@ -79,7 +91,7 @@ public class QueryPlanIndex
     public String addIndex(String[] indexProperties, Class[] coercionTypes)
     {
         String uuid = UuidGenerator.generate();
-        items.put(uuid, new QueryPlanIndexItem(indexProperties, coercionTypes, null, null));
+        items.put(uuid, new QueryPlanIndexItem(indexProperties, coercionTypes, null, null, false));
         return uuid;
     }
 

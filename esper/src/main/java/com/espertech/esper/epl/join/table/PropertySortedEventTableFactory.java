@@ -44,6 +44,10 @@ public class PropertySortedEventTableFactory implements EventTableFactory
         return new PropertySortedEventTable(streamNum, propertyGetter);
     }
 
+    public Class getEventTableClass() {
+        return PropertySortedEventTable.class;
+    }
+
     public String toQueryPlan() {
         return this.getClass().getSimpleName() +
                 " streamNum=" + streamNum +

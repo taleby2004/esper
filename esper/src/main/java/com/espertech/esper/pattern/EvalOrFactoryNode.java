@@ -35,5 +35,14 @@ public class EvalOrFactoryNode extends EvalNodeFactoryBase
         return false;
     }
 
+    public boolean isStateful() {
+        for (EvalFactoryNode child : this.getChildNodes()) {
+            if (child.isStateful()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private static final Log log = LogFactory.getLog(EvalOrFactoryNode.class);
 }

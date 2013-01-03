@@ -11,19 +11,22 @@
 
 package com.espertech.esper.multithread;
 
-import junit.framework.TestCase;
+import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.client.Configuration;
 import com.espertech.esper.support.bean.SupportBean;
+import com.espertech.esper.support.bean.SupportCollection;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import junit.framework.TestCase;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.Future;
-import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Test for multithread-safety for a simple aggregation case using count(*).
@@ -45,21 +48,33 @@ public class TestMTStmtFilter extends TestCase
 
     public void testCount() throws Exception
     {
-        tryCount(2, 1000);
-        tryCount(4, 1000);
+        String plainFilter = "select count(*) as mycount from " + SupportBean.class.getName();
+        tryCount(2, 1000, plainFilter, GeneratorIterator.DEFAULT_SUPPORTEBEAN_CB);
+        tryCount(4, 1000, plainFilter, GeneratorIterator.DEFAULT_SUPPORTEBEAN_CB);
+
+        GeneratorIteratorCallback enumCallback = new GeneratorIteratorCallback() {
+            private final Collection<String> vals = Arrays.asList("a", "b", "c", "d", "e", "f", "g", "h", "i", "j");
+            public Object getObject(int numEvent) {
+                SupportCollection bean = new SupportCollection();
+                bean.setStrvals(vals);
+                return bean;
+            }
+        };
+        String enumFilter = "select count(*) as mycount from " + SupportCollection.class.getName() + "(strvals.anyOf(v => v = 'j'))";
+        tryCount(4, 1000, enumFilter, enumCallback);
     }
 
-    public void tryCount(int numThreads, int numMessages) throws Exception
+    public void tryCount(int numThreads, int numMessages, String epl, GeneratorIteratorCallback generatorIteratorCallback) throws Exception
     {
         ExecutorService threadPool = Executors.newFixedThreadPool(numThreads);
-        EPStatement stmt = engine.getEPAdministrator().createEPL("select count(*) as mycount from " + SupportBean.class.getName());
+        EPStatement stmt = engine.getEPAdministrator().createEPL(epl);
         MTListener listener = new MTListener("mycount");
         stmt.addListener(listener);
 
         Future future[] = new Future[numThreads];
         for (int i = 0; i < numThreads; i++)
         {
-            future[i] = threadPool.submit(new SendEventCallable(i, engine, new GeneratorIterator(numMessages)));
+            future[i] = threadPool.submit(new SendEventCallable(i, engine, new GeneratorIterator(numMessages, generatorIteratorCallback)));
         }
 
         threadPool.shutdown();

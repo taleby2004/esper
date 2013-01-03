@@ -44,13 +44,12 @@ public class OutputProcessViewFactoryFactory
         OutputStrategyPostProcessFactory outputStrategyPostProcessFactory = null;
         if ((statementSpec.getInsertIntoDesc() != null) || (statementSpec.getSelectStreamSelectorEnum() == SelectClauseStreamSelectorEnum.RSTREAM_ONLY))
         {
-            boolean isRouteRStream = false;
-            if (statementSpec.getInsertIntoDesc() != null)
-            {
-                isRouteRStream = !statementSpec.getInsertIntoDesc().isIStream();
+            SelectClauseStreamSelectorEnum insertIntoStreamSelector = null;
+            if (statementSpec.getInsertIntoDesc() != null) {
+                insertIntoStreamSelector = statementSpec.getInsertIntoDesc().getStreamSelector();
             }
 
-            outputStrategyPostProcessFactory = new OutputStrategyPostProcessFactory(isRouted, isRouteRStream, statementSpec.getSelectStreamSelectorEnum(), internalEventRouter, statementContext.getEpStatementHandle(), routeToFront);
+            outputStrategyPostProcessFactory = new OutputStrategyPostProcessFactory(isRouted, insertIntoStreamSelector, statementSpec.getSelectStreamSelectorEnum(), internalEventRouter, statementContext.getEpStatementHandle(), routeToFront);
         }
 
         // Do we need to enforce an output policy?

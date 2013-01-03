@@ -93,7 +93,7 @@ public class NamedWindowOnMergeHelper
         // Compile insert-into info
         String streamName = desc.getOptionalStreamName() != null ? desc.getOptionalStreamName() : eventTypeNamedWindow.getName();
         List<SelectClauseElementCompiled> selectClause = desc.getSelectClauseCompiled();
-        InsertIntoDesc insertIntoDesc = new InsertIntoDesc(true, streamName);
+        InsertIntoDesc insertIntoDesc = new InsertIntoDesc(SelectClauseStreamSelectorEnum.ISTREAM_ONLY, streamName);
         for (String col : desc.getColumns()) {
             insertIntoDesc.add(col);
         }

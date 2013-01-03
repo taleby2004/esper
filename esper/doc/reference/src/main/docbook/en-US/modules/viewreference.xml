@@ -74,6 +74,11 @@
 						<entry>Tumbling window that batches events and releases them every specified time interval, with flow control options.</entry>
 					</row>
 					<row>
+						<entry>Externally-timed Batch Window</entry>
+						<entry>win:ext_timed_batch(<emphasis>timestamp expression</emphasis>, <emphasis>time period</emphasis>[,<emphasis>optional reference point</emphasis>])</entry>
+						<entry>Tumbling window that batches events and releases them every specified time interval based on the millisecond value supplied by an expression.</entry>
+					</row>
+					<row>
 						<entry>Time-Length Combination Batch Window</entry>
 						<entry>win:time_length_batch(<emphasis>time period, size [, flow control]</emphasis>)</entry>
 						<entry>Tumbling multi-policy time and length batch window with flow control options.</entry>
@@ -234,7 +239,7 @@
 		</sect1>
 
         <sect1 xml:id="win-views" >
-           <title>Window views</title>
+           <title>Data Window Views</title>
 
 			<para>
 				All the views explained below are data window views, as are <literal>std:unique</literal>, <literal>std:firstunique</literal>, <literal>std:lastevent</literal> and <literal>std:firstevent</literal>.
@@ -358,9 +363,13 @@ win:time(MYINTERVAL)  // MYINTERVAL defined as a variable</programlisting>
 				<programlisting><![CDATA[select * from StockTickEvent.win:ext_timed(timestamp, 10 seconds)]]></programlisting>
 
 				<para>
-					The externally-timed data window expects strict ordering of the timestamp values returned by the timestamp expression. The view is not useful for ordering events in time order, please us the time-order view instead.
+					The externally-timed data window expects strict ordering of the timestamp values returned by the timestamp expression. The view is not useful for ordering events in time order, please use the time-order view instead.
 				</para>
-
+				
+				<para>
+				  On a related subject, engine time itself can be entirely under control of the application as described in <xref linkend="api-controlling-time"/>, allowing control over all time-based aspects of processing
+				  in one place.
+				</para>
 			</sect2>
 
 			<sect2 xml:id="view-win-time-batch" >
@@ -383,7 +392,7 @@ win:time(MYINTERVAL)  // MYINTERVAL defined as a variable</programlisting>
 				</para>
 
 				<para>
-					Note that using this view means that the engine keeps events in the memory until the time is up: Consider your event arrival rate and determine if this is the behavior you want. Use <literal>output snapshot</literal> as described in output rate limiting as an alternative.
+					Note that using this view means that the engine keeps events in memory until the time is up: Consider your event arrival rate and determine if this is the behavior you want. Use context declaration or output rate limiting such as <literal>output snapshot</literal> as an alternative.
 				</para>	
 
 				<para>
@@ -391,11 +400,7 @@ win:time(MYINTERVAL)  // MYINTERVAL defined as a variable</programlisting>
 					posted by this view receive updated information only every 5 seconds.
 				</para>	
 				<programlisting><![CDATA[select * from StockTickEvent.win:time_batch(5 sec)]]></programlisting>
-				
-				<para>
-				  In alternative to batching events and releasing events all-at-once, consider using output rate limiting instead as described in <xref linkend="epl-output-rate"/>.
-				</para>
-				
+								
 				<para>
 					By default, if there are no events arriving in the current interval (insert stream), and no events remain from the prior batch (remove stream), then the view does not post results to listeners. The view allows overriding this
 					default behavior via flow control keywords.
@@ -434,6 +439,68 @@ win:time(MYINTERVAL)  // MYINTERVAL defined as a variable</programlisting>
 				  The following example statement sets the reference point to 5 seconds and the batch size to 1 hour, so that each batch output is 5 seconds after each hour:
 				</para>
 				<programlisting><![CDATA[select * from OrderSummaryEvent.win:time_batch(1 hour, 5000L)]]></programlisting>			
+			</sect2>
+
+			<sect2 xml:id="view-win-ext-time-batch" >
+			   <title>Externally-timed batch window (<literal>win:ext_timed_batch</literal>)</title>
+		
+				<indexterm><primary>externally-timed batch window</primary></indexterm>
+				<indexterm><primary>views</primary><secondary>externally-time batch window</secondary></indexterm>
+				<indexterm><primary>data window views</primary><secondary>externally-time batch window</secondary></indexterm>
+
+				<para>
+				    Similar to the time batch window, this view buffers events (tumbling) and releases them every specified time interval in one update, 
+				    but based on the millisecond time value supplied by a timestamp expression.
+					The view has two required parameters taking an expression that returns long-typed timestamp values and a time period or constant-value expression that provides a number of seconds:
+				</para>
+
+				<synopsis>win:ext_timed_batch(<emphasis>timestamp_expression</emphasis>, <emphasis>time_period</emphasis> [,<emphasis>optional_reference_point</emphasis>])</synopsis>
+				<synopsis>win:ext_timed_batch(<emphasis>timestamp_expression</emphasis>, <emphasis>seconds_interval_expression</emphasis> [,<emphasis>optional_reference_point</emphasis>])</synopsis>
+
+				<para>
+					The externally-timed batch window takes a third, optional parameter that serves as a reference point to batch flush times. If not specified, the arrival of the first event into the batch window sets the 
+					reference point. Therefore if the reference point is not specified and the first event arrives at time t<subscript>1</subscript>, then the batch flushes at time t<subscript>1</subscript> plus <emphasis>time_period</emphasis> and every <emphasis>time_period</emphasis> thereafter.
+				</para>
+
+				<para>
+				   The key difference comparing the externally-timed batch window to the regular time batch window is that the window tumbles not based on the engine time, 
+				   but strictly based on the result of the timestamp expression when evaluated against the events entering the window.
+				</para>
+				
+				<para>
+					The algorithm underlying the view compares the timestamp value returned by the expression when the oldest event arrived with the timestamp value returned by the expression for the 
+					newest arriving event on event arrival. If the time interval between the timestamp values is larger then the timer period parameter, then the algorithm posts the current batch of events. 
+					The window therefore posts batches only when events arrive and only considers each event's timestamp property (or other expression value returned) and not engine time.
+				</para>
+				
+				<para>
+					Note that using this view means that the engine keeps events in memory until the time is up: Consider your event arrival rate and determine if this is the behavior you want. Use context declaration or output rate limiting such as <literal>output snapshot</literal> as an alternative.
+				</para>
+
+				<para>
+					The below example batches events into a 5 second window releasing new batches every 5 seconds. Listeners to updates
+					posted by this view receive updated information only when event arrive with timestamps that indicate the start of a new batch:
+				</para>	
+				<programlisting><![CDATA[select * from StockTickEvent.win:ext_timed_batch(timestamp, 5 sec)]]></programlisting>
+												
+				<para>
+				  The optional reference point is provided as a long-value of milliseconds relative to January 1, 1970 and time 00:00:00.
+				</para>
+				
+				<para>
+				  The following example statement sets the reference point to 5 seconds and the batch size to 1 hour, so that each batch output is 5 seconds after each hour:
+				</para>
+				<programlisting><![CDATA[select * from OrderSummaryEvent.win:ext_timed_batch(timestamp, 1 hour, 5000L)]]></programlisting>			
+				
+				<para>
+				  The externally-timed data window expects strict ordering of the timestamp values returned by the timestamp expression. 
+				  The view is not useful for ordering events in time order, please use the timeorder view instead.
+				</para>
+
+				<para>
+				  On a related subject, engine time itself can be entirely under control of the application as described in <xref linkend="api-controlling-time"/>, allowing control over all time-based aspects of processing
+				  in one place.
+				</para>
 			</sect2>
 
 			<sect2 xml:id="view-win-time-length-batch" >

@@ -19,10 +19,12 @@ import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean_ST0;
 import com.espertech.esper.support.bean.SupportBean_ST0_Container;
+import com.espertech.esper.support.bean.SupportCollection;
 import com.espertech.esper.support.bean.lambda.LambdaAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import junit.framework.TestCase;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
@@ -35,6 +37,7 @@ public class TestEnumToMap extends TestCase {
 
         Configuration config = SupportConfigFactory.getConfiguration();
         config.addEventType("Bean", SupportBean_ST0_Container.class);
+        config.addEventType("SupportCollection", SupportCollection.class);
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
         listener = new SupportUpdateListener();
@@ -62,5 +65,28 @@ public class TestEnumToMap extends TestCase {
 
         epService.getEPRuntime().sendEvent(new SupportBean_ST0_Container(Collections.singletonList(new SupportBean_ST0(null, null))));
         EPAssertionUtil.assertPropsMap((Map) listener.assertOneGetNewAndReset().get("val"), "E1,E2,E3".split(","), new Object[]{null, null, null});
+        stmtFragment.destroy();
+
+        // test scalar-coll with lambda
+        String[] fields = "val0".split(",");
+        epService.getEPAdministrator().getConfiguration().addPlugInSingleRowFunction("extractNum", TestEnumMinMax.MyService.class.getName(), "extractNum");
+        String eplLambda = "select " +
+                "strvals.toMap(c => c, c => extractNum(c)) as val0 " +
+                "from SupportCollection";
+        EPStatement stmtLambda = epService.getEPAdministrator().createEPL(eplLambda);
+        stmtLambda.addListener(listener);
+        LambdaAssertionUtil.assertTypes(stmtLambda.getEventType(), fields, new Class[]{Map.class});
+
+        epService.getEPRuntime().sendEvent(SupportCollection.makeString("E2,E1,E3"));
+        EPAssertionUtil.assertPropsMap((Map) listener.assertOneGetNewAndReset().get("val0"), "E1,E2,E3".split(","), new Object[]{1, 2, 3});
+
+        epService.getEPRuntime().sendEvent(SupportCollection.makeString("E1"));
+        EPAssertionUtil.assertPropsMap((Map) listener.assertOneGetNewAndReset().get("val0"), "E1".split(","), new Object[]{1});
+
+        epService.getEPRuntime().sendEvent(SupportCollection.makeString(null));
+        assertNull(listener.assertOneGetNewAndReset().get("val0"));
+
+        epService.getEPRuntime().sendEvent(SupportCollection.makeString(""));
+        assertEquals(0, ((Map) listener.assertOneGetNewAndReset().get("val0")).size());
     }
 }

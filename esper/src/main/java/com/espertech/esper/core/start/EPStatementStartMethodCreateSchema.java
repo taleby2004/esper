@@ -27,14 +27,14 @@ import java.util.Collections;
  */
 public class EPStatementStartMethodCreateSchema extends EPStatementStartMethodBase
 {
-    public EPStatementStartMethodCreateSchema(StatementSpecCompiled statementSpec, EPServicesContext services, StatementContext statementContext) {
-        super(statementSpec, services, statementContext);
+    public EPStatementStartMethodCreateSchema(StatementSpecCompiled statementSpec) {
+        super(statementSpec);
     }
 
-    public EPStatementStartResult startInternal(boolean isNewStatement, boolean isRecoveringStatement, boolean isRecoveringResilient) throws ExprValidationException, ViewProcessingException {
+    public EPStatementStartResult startInternal(final EPServicesContext services, final StatementContext statementContext, boolean isNewStatement, boolean isRecoveringStatement, boolean isRecoveringResilient) throws ExprValidationException, ViewProcessingException {
         final CreateSchemaDesc spec = statementSpec.getCreateSchemaDesc();
 
-        EventType eventType = handleCreateSchema(spec);
+        EventType eventType = handleCreateSchema(services, statementContext, spec);
 
         // enter a reference
         services.getStatementEventTypeRefService().addReferences(statementContext.getStatementName(), Collections.singleton(spec.getSchemaName()));
@@ -54,7 +54,7 @@ public class EPStatementStartMethodCreateSchema extends EPStatementStartMethodBa
         return new EPStatementStartResult(viewable, stopMethod, null);
     }
 
-    private EventType handleCreateSchema(CreateSchemaDesc spec)
+    private EventType handleCreateSchema(EPServicesContext services, StatementContext statementContext, CreateSchemaDesc spec)
         throws ExprValidationException {
 
         EventType eventType;

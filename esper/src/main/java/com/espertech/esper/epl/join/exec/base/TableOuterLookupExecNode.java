@@ -12,8 +12,8 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.util.IndentWriter;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
+import java.util.Collection;
 import java.util.Set;
-import java.util.List;
 
 /**
  * Execution node for lookup in a table for outer joins. This execution node thus generates
@@ -45,7 +45,7 @@ public class TableOuterLookupExecNode extends ExecNode
         return lookupStrategy;
     }
 
-    public void process(EventBean lookupEvent, EventBean[] prefillPath, List<EventBean[]> result, ExprEvaluatorContext exprEvaluatorContext)
+    public void process(EventBean lookupEvent, EventBean[] prefillPath, Collection<EventBean[]> result, ExprEvaluatorContext exprEvaluatorContext)
     {
         // Lookup events
         Set<EventBean> joinedEvents = lookupStrategy.lookup(lookupEvent, null, exprEvaluatorContext);

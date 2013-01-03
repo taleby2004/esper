@@ -22,6 +22,8 @@ public class PropertyIndexedEventTableSingleFactory implements EventTableFactory
 {
     protected final int streamNum;
     protected final String propertyName;
+    protected final boolean unique;
+    protected final String optionalIndexName;
 
     protected final EventPropertyGetter propertyGetter;
 
@@ -30,21 +32,38 @@ public class PropertyIndexedEventTableSingleFactory implements EventTableFactory
      * @param streamNum - the stream number that is indexed
      * @param eventType - types of events indexed
      */
-    public PropertyIndexedEventTableSingleFactory(int streamNum, EventType eventType, String propertyName)
+    public PropertyIndexedEventTableSingleFactory(int streamNum, EventType eventType, String propertyName, boolean unique, String optionalIndexName)
     {
         this.streamNum = streamNum;
         this.propertyName = propertyName;
+        this.unique = unique;
+        this.optionalIndexName = optionalIndexName;
 
         // Init getters
         propertyGetter = EventBeanUtility.getAssertPropertyGetter(eventType, propertyName);
     }
 
     public EventTable makeEventTable() {
-        return new PropertyIndexedEventTableSingle(streamNum, propertyGetter);
+        if (unique) {
+            return new PropertyIndexedEventTableSingleUnique(streamNum, propertyGetter, optionalIndexName);
+        }
+        else {
+            return new PropertyIndexedEventTableSingle(streamNum, propertyGetter);
+        }
+    }
+
+    public Class getEventTableClass() {
+        if (unique) {
+            return PropertyIndexedEventTableSingleUnique.class;
+        }
+        else {
+            return PropertyIndexedEventTableSingle.class;
+        }
     }
 
     public String toQueryPlan() {
         return this.getClass().getSimpleName() +
+                (unique ? " unique" : " non-unique") +
                 " streamNum=" + streamNum +
                 " propertyName=" + propertyName;
     }

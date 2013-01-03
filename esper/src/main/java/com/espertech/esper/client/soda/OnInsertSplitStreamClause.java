@@ -72,7 +72,7 @@ public class OnInsertSplitStreamClause extends OnClause
         {
             writer.append(delimiter);
             item.getInsertInto().toEPL(writer, formatter, true);
-            item.getSelectClause().toEPL(writer, formatter, true);
+            item.getSelectClause().toEPL(writer, formatter, true, false);
             if (item.getWhereClause() != null)
             {
                 writer.append(" where ");

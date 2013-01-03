@@ -157,6 +157,8 @@ public final class TimerServiceImpl implements TimerService
 			}
 		});
 		timer.setMaximumPoolSize(timer.getCorePoolSize());
+        timer.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
+        timer.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
 	}    
 
     private static final Log log = LogFactory.getLog(TimerServiceImpl.class);

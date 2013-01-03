@@ -20,10 +20,14 @@ import com.espertech.esper.event.ObjectArrayBackedEventBean;
 public class ObjectArrayEventBean implements EventBeanSPI, ObjectArrayBackedEventBean {
 
     private Object[] propertyValues;
-    private final EventType eventType;
+    private EventType eventType;
 
     public ObjectArrayEventBean(Object[] propertyValues, EventType eventType) {
         this.propertyValues = propertyValues;
+        this.eventType = eventType;
+    }
+
+    public void setEventType(EventType eventType) {
         this.eventType = eventType;
     }
 

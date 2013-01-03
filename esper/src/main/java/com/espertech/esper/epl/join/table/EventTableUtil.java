@@ -10,21 +10,26 @@ package com.espertech.esper.epl.join.table;
 
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.epl.join.plan.QueryPlanIndexItem;
+import com.espertech.esper.util.CollectionUtil;
+
+import java.util.Collections;
 
 public class EventTableUtil
 {
     /**
      * Build an index/table instance using the event properties for the event type.
+     *
      * @param indexedStreamNum - number of stream indexed
      * @param eventType - type of event to expect
+     * @param optionalIndexName
      * @return table build
      */
-    public static EventTable buildIndex(int indexedStreamNum, QueryPlanIndexItem item, EventType eventType, boolean coerceOnAddOnly)
+    public static EventTable buildIndex(int indexedStreamNum, QueryPlanIndexItem item, EventType eventType, boolean coerceOnAddOnly, boolean unique, String optionalIndexName)
     {
         String[] indexProps = item.getIndexProps();
-        Class[] indexCoercionTypes = item.getOptIndexCoercionTypes();
+        Class[] indexCoercionTypes = normalize(item.getOptIndexCoercionTypes());
         String[] rangeProps = item.getRangeProps();
-        Class[] rangeCoercionTypes = item.getOptRangeCoercionTypes();
+        Class[] rangeCoercionTypes = normalize(item.getOptRangeCoercionTypes());
 
         EventTable table;
         if (rangeProps == null || rangeProps.length == 0) {
@@ -38,7 +43,7 @@ public class EventTableUtil
                 if (indexProps.length == 1) {
                     if (indexCoercionTypes == null || indexCoercionTypes.length == 0)
                     {
-                        PropertyIndexedEventTableSingleFactory factory = new PropertyIndexedEventTableSingleFactory(indexedStreamNum, eventType, indexProps[0]);
+                        PropertyIndexedEventTableSingleFactory factory = new PropertyIndexedEventTableSingleFactory(indexedStreamNum, eventType, indexProps[0], unique, optionalIndexName);
                         table = factory.makeEventTable();
                     }
                     else
@@ -57,7 +62,7 @@ public class EventTableUtil
                 else {
                     if (indexCoercionTypes == null || indexCoercionTypes.length == 0)
                     {
-                        PropertyIndexedEventTableFactory factory = new PropertyIndexedEventTableFactory(indexedStreamNum, eventType, indexProps);
+                        PropertyIndexedEventTableFactory factory = new PropertyIndexedEventTableFactory(indexedStreamNum, eventType, indexProps, unique, optionalIndexName);
                         table = factory.makeEventTable();
                     }
                     else
@@ -91,5 +96,15 @@ public class EventTableUtil
             }
         }
         return table;
-    }    
+    }
+
+    private static Class[] normalize(Class[] types) {
+        if (types == null) {
+            return null;
+        }
+        if (CollectionUtil.isAllNullArray(types)) {
+            return null;
+        }
+        return types;
+    }
 }

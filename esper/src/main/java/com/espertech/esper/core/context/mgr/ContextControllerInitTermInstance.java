@@ -19,12 +19,14 @@ public class ContextControllerInitTermInstance {
     private final Map<String, Object> startProperties;
     private final long startTime;
     private final Long endTime;
+    private final int subPathId;
 
-    public ContextControllerInitTermInstance(ContextControllerInstanceHandle instanceHandle, Map<String, Object> startProperties, long startTime, Long endTime) {
+    public ContextControllerInitTermInstance(ContextControllerInstanceHandle instanceHandle, Map<String, Object> startProperties, long startTime, Long endTime, int subPathId) {
         this.instanceHandle = instanceHandle;
         this.startProperties = startProperties;
         this.startTime = startTime;
         this.endTime = endTime;
+        this.subPathId = subPathId;
     }
 
     public ContextControllerInstanceHandle getInstanceHandle() {
@@ -41,5 +43,9 @@ public class ContextControllerInitTermInstance {
 
     public Long getEndTime() {
         return endTime;
+    }
+
+    public int getSubPathId() {
+        return subPathId;
     }
 }

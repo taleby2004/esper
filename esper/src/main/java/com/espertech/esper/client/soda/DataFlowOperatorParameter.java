@@ -21,8 +21,8 @@ public class DataFlowOperatorParameter implements Serializable {
 
     private static final long serialVersionUID = 6902224639315413025L;
 
-    public String parameterName;
-    public Object parameterValue;
+    private String parameterName;
+    private Object parameterValue;
 
     /**
      * Ctor.

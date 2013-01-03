@@ -31,6 +31,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
+import java.util.Set;
 
 /**
  * The root window in a named window plays multiple roles: It holds the indexes for deleting rows, if any on-delete statement
@@ -46,12 +47,20 @@ public class NamedWindowRootView
     private final boolean queryPlanLogging;
     private final EventType eventType;
     private final boolean isChildBatching;
+    private final boolean isEnableIndexShare;
+    private final Set<String> optionalUniqueKeyProps;
 
-    public NamedWindowRootView(ValueAddEventProcessor revisionProcessor, boolean queryPlanLogging, MetricReportingService metricReportingService, EventType eventType, boolean childBatching) {
+    public NamedWindowRootView(ValueAddEventProcessor revisionProcessor, boolean queryPlanLogging, MetricReportingService metricReportingService, EventType eventType, boolean childBatching, boolean isEnableIndexShare, Set<String> optionalUniqueKeyProps) {
         this.revisionProcessor = revisionProcessor;
         this.queryPlanLogging = queryPlanLogging;
         this.eventType = eventType;
-        isChildBatching = childBatching;
+        this.isChildBatching = childBatching;
+        this.isEnableIndexShare = isEnableIndexShare;
+        this.optionalUniqueKeyProps = optionalUniqueKeyProps;
+    }
+
+    public Set<String> getOptionalUniqueKeyProps() {
+        return optionalUniqueKeyProps;
     }
 
     public ValueAddEventProcessor getRevisionProcessor() {
@@ -72,5 +81,9 @@ public class NamedWindowRootView
 
     public EventType getEventType() {
         return eventType;
+    }
+
+    public boolean isEnableIndexShare() {
+        return isEnableIndexShare;
     }
 }

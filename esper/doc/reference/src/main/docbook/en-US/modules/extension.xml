@@ -563,6 +563,20 @@ AgentInstanceContext agentInstanceContext;  // Other EPL statement information i
 </esper-configuration>]]></programlisting>
 		</sect2>
 
+		<sect2 xml:id="custom-single-rethrowex" revision="1">
+			<title>Exception Handling</title>
+
+			<para>
+			  By default the engine logs any exceptions thrown by the single row function and returns a null value. 
+			  To have exceptions be re-thrown instead, which makes exceptions visible to any registered exception handler,
+			  please configure as discussed herein. 
+			</para>
+						
+			<para>
+				Set the <literal>rethrow-exceptions</literal> flag in the XML configuration or the <literal>rethrowExceptions</literal> flag in the API
+				when registering the single row function to have the engine re-throw any exceptions that the single row function may throw.
+			</para>
+		</sect2>
 	</sect1>
 
     <sect1 xml:id="custom-views" revision="1">

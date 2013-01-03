@@ -179,7 +179,7 @@ public class CoercionUtil {
         boolean mustCoerce = false;
         for (int i = 0; i < hashKeys.size(); i++)
         {
-            Class keyPropType = hashKeys.get(i).getHashKey().getKeyExpr().getExprEvaluator().getType();
+            Class keyPropType = JavaClassHelper.getBoxedType(hashKeys.get(i).getHashKey().getKeyExpr().getExprEvaluator().getType());
             Class indexedPropType = JavaClassHelper.getBoxedType(viewableEventType.getPropertyType(indexProps[i]));
             Class coercionType = indexedPropType;
             if (keyPropType != indexedPropType)

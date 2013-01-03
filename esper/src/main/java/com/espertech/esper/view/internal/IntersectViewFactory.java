@@ -19,11 +19,12 @@ import com.espertech.esper.view.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Factory for union-views.
  */
-public class IntersectViewFactory implements ViewFactory, DataWindowViewFactory
+public class IntersectViewFactory implements ViewFactory, DataWindowViewFactory, DataWindowViewFactoryUniqueCandidate
 {
     /**
      * The event type.
@@ -104,5 +105,18 @@ public class IntersectViewFactory implements ViewFactory, DataWindowViewFactory
     public boolean canReuse(View view)
     {
         return false;
+    }
+
+    public Set<String> getUniquenessCandidatePropertyNames() {
+        for (ViewFactory viewFactory : viewFactories) {
+            if (viewFactory instanceof DataWindowViewFactoryUniqueCandidate) {
+                DataWindowViewFactoryUniqueCandidate unique = (DataWindowViewFactoryUniqueCandidate) viewFactory;
+                Set<String> props = unique.getUniquenessCandidatePropertyNames();
+                if (props != null) {
+                    return props;
+                }
+            }
+        }
+        return null;
     }
 }

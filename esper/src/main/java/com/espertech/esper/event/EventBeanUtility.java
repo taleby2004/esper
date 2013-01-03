@@ -554,7 +554,7 @@ public class EventBeanUtility
      * @param eventsToAdd elements to add
      * @return resized array
      */
-    public static EventBean[] addToArray(EventBean[] array, List<EventBean> eventsToAdd)
+    public static EventBean[] addToArray(EventBean[] array, Collection<EventBean> eventsToAdd)
     {
         EventBean[] newArray = new EventBean[array.length + eventsToAdd.size()];
         System.arraycopy(array, 0, newArray, 0, array.length);

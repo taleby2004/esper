@@ -23,7 +23,7 @@ public class EnumEvalFirstOfPredicateEvents extends EnumEvalBase implements Enum
         super(innerExpression, streamCountIncoming);
     }
 
-    public Object evaluateEnumMethod(Collection target, boolean isNewData, ExprEvaluatorContext context) {
+    public Object evaluateEnumMethod(EventBean[] eventsLambda, Collection target, boolean isNewData, ExprEvaluatorContext context) {
         Collection<EventBean> beans = (Collection<EventBean>) target;
         for (EventBean next : beans) {
             eventsLambda[streamNumLambda] = next;

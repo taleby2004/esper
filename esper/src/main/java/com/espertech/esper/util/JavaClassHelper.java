@@ -11,6 +11,7 @@ package com.espertech.esper.util;
 import com.espertech.esper.client.ConfigurationException;
 import com.espertech.esper.client.annotation.Hook;
 import com.espertech.esper.client.annotation.HookType;
+import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.core.EngineImportException;
 import com.espertech.esper.epl.core.EngineImportService;
 import com.espertech.esper.epl.core.MethodResolutionService;
@@ -1407,7 +1408,7 @@ public class JavaClassHelper
      * @param annotations to search
      * @param hookType type to look for
      * @param interfaceExpected interface required
-     * @param resolution for resolving references
+     * @param resolution for resolving references, optional, if not provided then using Class.forName
      * @return hook instance
      * @throws ExprValidationException if instantiation failed
      */
@@ -1435,9 +1436,14 @@ public class JavaClassHelper
         Class clazz;
         try
         {
-            clazz = resolution.resolveClass(hookClass);
+            if (resolution == null) {
+                clazz = Class.forName(hookClass);
+            }
+            else {
+                clazz = resolution.resolveClass(hookClass);
+            }
         }
-        catch (EngineImportException e)
+        catch (Exception e)
         {
             throw new ExprValidationException("Failed to resolve hook provider of hook type '" + hookType +
                     "' import '" + hookClass + "' :" + e.getMessage());
@@ -1540,6 +1546,19 @@ public class JavaClassHelper
         return clazz.getName();
     }
 
+    public static String getClassNameFullyQualPrettyWithClassloader(Class clazz) {
+        String name = getClassNameFullyQualPretty(clazz);
+        String classloader = getClassLoaderId(clazz.getClassLoader());
+        return name + "(loaded by " + classloader + ")";
+    }
+
+    public static String getClassLoaderId(ClassLoader classLoader) {
+        if (classLoader == null) {
+            return "(classloader is null)";
+        }
+        return classLoader.getClass().getName() + "@" + System.identityHashCode(classLoader);
+    }
+
     public static Method getMethodByName(Class clazz, String methodName) {
         for (Method m : clazz.getMethods()) {
             if (m.getName().equals(methodName)) {
@@ -1547,6 +1566,15 @@ public class JavaClassHelper
             }
         }
         throw new IllegalStateException("Expected '" + methodName + "' method not found on interface '" + clazz.getName());
+    }
+
+    public static String printInstance(Object instance, boolean fullyQualified) {
+        if (instance == null) {
+            return "(null)";
+        }
+        StringWriter writer = new StringWriter();
+        writeInstance(writer, instance, fullyQualified);
+        return writer.toString();
     }
 
     public static void writeInstance(StringWriter writer, Object instance, boolean fullyQualified) {
@@ -1577,9 +1605,6 @@ public class JavaClassHelper
     }
 
     public static String getMessageInvocationTarget(String statementName, Method method, String classOrPropertyName, Object[] args, InvocationTargetException e) {
-        if (!(e.getCause() instanceof NullPointerException)) {
-            return null;
-        }
 
         String parameters = args == null ? "null" : Arrays.toString(args);
         if (args != null) {
@@ -1797,5 +1822,14 @@ public class JavaClassHelper
             }
         }
         return found;
+    }
+
+    public static Pair<String, Boolean> isGetArrayType(String type) {
+        int index = type.indexOf('[');
+        if (index == -1){
+            return new Pair<String, Boolean>(type, false);
+        }
+        String typeOnly = type.substring(0, index);
+        return new Pair<String, Boolean>(typeOnly.trim(), true);
     }
 }

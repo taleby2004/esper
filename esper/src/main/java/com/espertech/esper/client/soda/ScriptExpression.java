@@ -161,16 +161,17 @@ public class ScriptExpression implements Serializable
             writer.append(":");
         }
         writer.append(name);
-        String delimiter = "";
         writer.append("(");
-        for (String name : parameterNames) {
-            writer.append(delimiter);
-            writer.append(name);
-            delimiter = ", ";
+        if (parameterNames != null && !parameterNames.isEmpty()) {
+            String delimiter = "";
+            for (String name : parameterNames) {
+                writer.append(delimiter);
+                writer.append(name);
+                delimiter = ", ";
+            }
         }
-        writer.append(") ");
-
-        writer.append("[");
+        writer.append(")");
+        writer.append(" [");
         writer.append(expressionText);
         writer.append("]");
     }

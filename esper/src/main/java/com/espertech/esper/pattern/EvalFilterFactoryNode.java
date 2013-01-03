@@ -107,5 +107,9 @@ public class EvalFilterFactoryNode extends EvalNodeFactoryBase
         this.eventAsTagNumber = eventAsTagNumber;
     }
 
+    public boolean isStateful() {
+        return false;
+    }
+
     private static final Log log = LogFactory.getLog(EvalFilterFactoryNode.class);
 }

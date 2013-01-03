@@ -16,6 +16,7 @@ import com.espertech.esper.epl.join.rep.Node;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.util.IndentWriter;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.LinkedList;
 
@@ -36,12 +37,12 @@ public class SupportJoinProcNode extends BaseAssemblyNode
 
     }
 
-    public void process(List<Node>[] result)
+    public void process(List<Node>[] result, Collection<EventBean[]> resultFinalRows, EventBean resultRootEvent)
     {
 
     }
 
-    public void result(EventBean[] row, int streamNum, EventBean myEvent, Node myNode)
+    public void result(EventBean[] row, int streamNum, EventBean myEvent, Node myNode, Collection<EventBean[]> resultFinalRows, EventBean resultRootEvent)
     {
         rowsList.add(row);
         streamNumList.add(streamNum);

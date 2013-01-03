@@ -92,5 +92,9 @@ public class EvalMatchUntilFactoryNode extends EvalNodeFactoryBase
         return true;
     }
 
+    public boolean isStateful() {
+        return true;
+    }
+
     private static final Log log = LogFactory.getLog(EvalMatchUntilFactoryNode.class);
 }

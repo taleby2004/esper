@@ -14,6 +14,7 @@ import com.espertech.esper.client.EPStatementException;
 import com.espertech.esper.client.EPStatementSyntaxException;
 import com.espertech.esper.core.context.mgr.ContextManagementService;
 import com.espertech.esper.epl.core.EngineImportService;
+import com.espertech.esper.epl.declexpr.ExprDeclaredService;
 import com.espertech.esper.epl.generated.EsperEPL2GrammarParser;
 import com.espertech.esper.epl.parse.*;
 import com.espertech.esper.epl.spec.PatternStreamSpecRaw;
@@ -86,7 +87,7 @@ public class EPAdministratorHelper
      */
     public static StatementSpecRaw compileEPL(String eplStatement, String eplStatementForErrorMsg, boolean addPleaseCheck, String statementName, EPServicesContext services, SelectClauseStreamSelectorEnum defaultStreamSelector) {
         return compileEPL(eplStatement, eplStatementForErrorMsg, addPleaseCheck, statementName, defaultStreamSelector,
-                services.getEngineImportService(), services.getVariableService(), services.getSchedulingService(), services.getEngineURI(), services.getConfigSnapshot(), services.getPatternNodeFactory(), services.getContextManagementService());
+                services.getEngineImportService(), services.getVariableService(), services.getSchedulingService(), services.getEngineURI(), services.getConfigSnapshot(), services.getPatternNodeFactory(), services.getContextManagementService(), services.getExprDeclaredService());
     }
 
     /**
@@ -105,7 +106,8 @@ public class EPAdministratorHelper
                                               String engineURI,
                                               ConfigurationInformation configSnapshot,
                                               PatternNodeFactory patternNodeFactory,
-                                              ContextManagementService contextManagementService)
+                                              ContextManagementService contextManagementService,
+                                              ExprDeclaredService exprDeclaredService)
     {
         if (log.isDebugEnabled())
         {
@@ -116,7 +118,7 @@ public class EPAdministratorHelper
         Tree ast = parseResult.getTree();
         CommonTreeNodeStream nodes = new CommonTreeNodeStream(ast);
 
-        EPLTreeWalker walker = new EPLTreeWalker(nodes, parseResult.getTokenStream(), engineImportService, variableService, schedulingService, defaultStreamSelector, engineURI, configSnapshot, patternNodeFactory, contextManagementService, parseResult.getScripts());
+        EPLTreeWalker walker = new EPLTreeWalker(nodes, parseResult.getTokenStream(), engineImportService, variableService, schedulingService, defaultStreamSelector, engineURI, configSnapshot, patternNodeFactory, contextManagementService, parseResult.getScripts(), exprDeclaredService);
 
         try
         {
@@ -154,7 +156,7 @@ public class EPAdministratorHelper
         ParseResult parseResult = ParseHelper.parse(expression, expressionForErrorMessage, addPleaseCheck, patternParseRule, true);
         Tree ast = parseResult.getTree();
         CommonTreeNodeStream nodes = new CommonTreeNodeStream(ast);
-        EPLTreeWalker walker = new EPLTreeWalker(nodes, parseResult.getTokenStream(), services.getEngineImportService(), services.getVariableService(), services.getSchedulingService(), defaultStreamSelector, services.getEngineURI(), services.getConfigSnapshot(), services.getPatternNodeFactory(), services.getContextManagementService(), parseResult.getScripts());
+        EPLTreeWalker walker = new EPLTreeWalker(nodes, parseResult.getTokenStream(), services.getEngineImportService(), services.getVariableService(), services.getSchedulingService(), defaultStreamSelector, services.getEngineURI(), services.getConfigSnapshot(), services.getPatternNodeFactory(), services.getContextManagementService(), parseResult.getScripts(), services.getExprDeclaredService());
 
         try
         {

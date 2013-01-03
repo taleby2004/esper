@@ -45,6 +45,8 @@ public class StatementContextFactoryDefault implements StatementContextFactory
     private final PluggableObjectCollection patternObjectClasses;
     private final Class systemVirtualDWViewFactory;
 
+    private StatementContextEngineServices stmtEngineServices;
+
     /**
      * Ctor.
      * @param viewPlugIns is the view plug-in object descriptions
@@ -59,6 +61,26 @@ public class StatementContextFactoryDefault implements StatementContextFactory
         patternObjectClasses = new PluggableObjectCollection();
         patternObjectClasses.addObjects(plugInPatternObj);
         patternObjectClasses.addObjects(PatternObjectHelper.getBuiltinPatternObjects());
+    }
+
+    public void setStmtEngineServices(EPServicesContext services) {
+        stmtEngineServices = getStmtCtxEngineServices(services);
+    }
+
+    public static StatementContextEngineServices getStmtCtxEngineServices(EPServicesContext services) {
+        return new StatementContextEngineServices(
+                services.getEngineURI(),
+                services.getEventAdapterService(),
+                services.getNamedWindowService(),
+                services.getVariableService(),
+                services.getEngineSettingsService(),
+                services.getValueAddEventService(),
+                services.getConfigSnapshot(),
+                services.getMetricsReportingService(),
+                services.getViewService(),
+                services.getExceptionHandlingService(),
+                services.getExpressionResultCacheSharable()
+                );
     }
 
     public StatementContext makeContext(String statementId,
@@ -163,15 +185,13 @@ public class StatementContextFactoryDefault implements StatementContextFactory
         }
 
         // Create statement context
-        return new StatementContext(engineServices.getEngineURI(),
-                engineServices.getEngineInstanceId(),
+        return new StatementContext(stmtEngineServices,
                 statementId,
                 null, 
                 statementName,
                 expression,
                 schedulingService,
                 scheduleBucket,
-                engineServices.getEventAdapterService(),
                 epStatementHandle,
                 viewResolutionService,
                 patternResolutionService,
@@ -180,19 +200,9 @@ public class StatementContextFactoryDefault implements StatementContextFactory
                 methodResolutionService,
                 patternContextFactory,
                 filterService,
-                engineServices.getNamedWindowService(),
-                engineServices.getVariableService(),
                 new StatementResultServiceImpl(statementName, engineServices.getStatementLifecycleSvc(), engineServices.getMetricsReportingService(), engineServices.getThreadingService()),
-                engineServices.getEngineSettingsService().getPlugInEventTypeResolutionURIs(),
-                engineServices.getValueAddEventService(),
-                engineServices.getConfigSnapshot(),
                 engineServices.getInternalEventEngineRouteDest(),
-                engineServices.getMetricsReportingService(),
-                engineServices.getViewService(),
                 annotations,
-                engineServices.getExceptionHandlingService(),
-                new ExpressionResultCacheService(),
-                engineServices.getEventTypeIdGenerator(),
                 statementAgentInstanceRegistry,
                 defaultStatementAgentInstanceLock,
                 contextDescriptor,

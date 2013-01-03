@@ -11,12 +11,12 @@
 
 package com.espertech.esper.regression.dataflow;
 
-import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPServiceProviderManager;
-import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.client.EPStatementException;
+import com.espertech.esper.client.*;
+import com.espertech.esper.client.dataflow.EPDataFlowDescriptor;
 import com.espertech.esper.client.dataflow.EPDataFlowInstantiationException;
+import com.espertech.esper.client.dataflow.EPDataFlowRuntime;
 import com.espertech.esper.client.deploy.Module;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.dataflow.util.DefaultSupportSourceOp;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
@@ -32,21 +32,32 @@ public class TestAPICreateStartStopDestroy extends TestCase {
     }
 
     public void testCreateStartStop() throws Exception {
-        String epl = "create dataflow MyGraph Emitter -> outstream<?> {}";
+        String epl = "@Name('Create-A-Flow') create dataflow MyGraph Emitter -> outstream<?> {}";
         EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
-        epService.getEPRuntime().getDataFlowRuntime().instantiate("MyGraph");
+
+        EPDataFlowRuntime dfruntime = epService.getEPRuntime().getDataFlowRuntime();
+        EPAssertionUtil.assertEqualsAnyOrder(new String[] {"MyGraph"}, dfruntime.getDataFlows());
+        EPDataFlowDescriptor desc = dfruntime.getDataFlow("MyGraph");
+        assertEquals("MyGraph", desc.getDataFlowName());
+        assertEquals(EPStatementState.STARTED, desc.getStatementState());
+        assertEquals("Create-A-Flow", desc.getStatementName());
+
+        dfruntime.instantiate("MyGraph");
 
         // test duplicate
         tryInvalidCompile(epl, "Error starting statement: Data flow by name 'MyGraph' has already been declared [");
 
         // stop - can no longer instantiate but still exists
         stmt.stop();    // not removed
+        assertEquals(EPStatementState.STOPPED, dfruntime.getDataFlow("MyGraph").getStatementState());
         tryInvalidCompile(epl, "Error starting statement: Data flow by name 'MyGraph' has already been declared [");
         tryInstantiate("MyGraph", "Data flow by name 'MyGraph' is currently in STOPPED statement state");
         tryInstantiate("DUMMY", "Data flow by name 'DUMMY' has not been defined");
 
         // destroy - should be gone
         stmt.destroy(); // removed, create again
+        assertEquals(null, dfruntime.getDataFlow("MyGraph"));
+        assertEquals(0, dfruntime.getDataFlows().length);
         tryInstantiate("MyGraph", "Data flow by name 'MyGraph' has not been defined");
         try {
             stmt.start();
@@ -60,7 +71,8 @@ public class TestAPICreateStartStopDestroy extends TestCase {
         stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.stop();
         stmt.start();
-        epService.getEPRuntime().getDataFlowRuntime().instantiate("MyGraph");
+        dfruntime.instantiate("MyGraph");
+
     }
 
     public void testDeploymentAdmin() throws Exception {

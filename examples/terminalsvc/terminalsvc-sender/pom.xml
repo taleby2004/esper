@@ -1,6 +1,6 @@
 <project>
 	<modelVersion>4.0.0</modelVersion>
-	<name>Esper Examples TerminalSvc - Client</name>
+	<name>Esper Examples TerminalSvc - Sender</name>
 	<artifactId>example-terminalsvc-sender</artifactId>
 	<groupId>com.espertech</groupId>
 	<version>1.0</version>
@@ -48,9 +48,9 @@
 			<version>4.8.1</version>
 		</dependency>
 		<dependency>
-			<groupId>jboss</groupId>
-			<artifactId>jboss-j2ee</artifactId>
-			<version>4.0.2</version>
+			<groupId>org.jboss.spec.javax.jms</groupId>
+			<artifactId>jboss-jms-api_1.1_spec</artifactId>
+			<version>1.0.0.Final</version>
 		</dependency>
 	</dependencies>
 	<build>

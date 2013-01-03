@@ -33,6 +33,7 @@ public abstract class ExprDotEvalEnumMethodBase implements ExprDotEvalEnumMethod
     private String enumMethodUsedName;
     private int streamCountIncoming;
     private EnumEval enumEval;
+    private int enumEvalNumRequiredEvents;
     private ExprDotEvalTypeInfo typeInfo;
 
     private boolean cache;
@@ -50,9 +51,9 @@ public abstract class ExprDotEvalEnumMethodBase implements ExprDotEvalEnumMethod
 
     public void init(EnumMethodEnum enumMethodEnum, String enumMethodUsedName, ExprDotEvalTypeInfo typeInfo, List<ExprNode> parameters, ExprValidationContext validationContext) throws ExprValidationException {
 
-        EventType eventTypeColl = typeInfo.getEventTypeColl();
-        EventType eventTypeBean = typeInfo.getEventType();
-        Class collectionComponentType = typeInfo.getComponent();
+        final EventType eventTypeColl = typeInfo.getEventTypeColl();
+        final EventType eventTypeBean = typeInfo.getEventType();
+        final Class collectionComponentType = typeInfo.getComponent();
 
         this.enumMethodEnum = enumMethodEnum;
         this.enumMethodUsedName = enumMethodUsedName;
@@ -66,7 +67,18 @@ public abstract class ExprDotEvalEnumMethodBase implements ExprDotEvalEnumMethod
         DotMethodFPProvided footprintProvided = DotMethodUtil.getProvidedFootprint(parameters);
 
         // validate parameters
-        DotMethodFP footprint = DotMethodUtil.validateParameters(enumMethodEnum.getFootprints(), DotMethodTypeEnum.ENUM, enumMethodUsedName, footprintProvided);
+        DotMethodInputTypeMatcher inputTypeMatcher = new DotMethodInputTypeMatcher() {
+            public boolean matches(DotMethodFP footprint) {
+                if (footprint.getInput() == DotMethodFPInputEnum.EVENTCOLL && eventTypeBean == null && eventTypeColl == null) {
+                    return false;
+                }
+                if (footprint.getInput() == DotMethodFPInputEnum.SCALAR_ANY && collectionComponentType == null) {
+                    return false;
+                }
+                return true;
+            }
+        };
+        DotMethodFP footprint = DotMethodUtil.validateParametersDetermineFootprint(enumMethodEnum.getFootprints(), DotMethodTypeEnum.ENUM, enumMethodUsedName, footprintProvided, inputTypeMatcher);
 
         // validate input criteria met for this footprint
         if (footprint.getInput() != DotMethodFPInputEnum.ANY) {
@@ -95,6 +107,7 @@ public abstract class ExprDotEvalEnumMethodBase implements ExprDotEvalEnumMethod
         }
 
         this.enumEval = getEnumEval(validationContext.getEventAdapterService(), validationContext.getStreamTypeService(), validationContext.getStatementId(), enumMethodUsedName, bodiesAndParameters, inputEventType, collectionComponentType, streamCountIncoming);
+        this.enumEvalNumRequiredEvents = enumEval.getStreamNumSize();
 
         // determine the stream ids of event properties asked for in the evaluator(s)
         HashSet<Integer> streamsRequired = new HashSet<Integer>();
@@ -145,9 +158,8 @@ public abstract class ExprDotEvalEnumMethodBase implements ExprDotEvalEnumMethod
             if (coll == null) {
                 return null;
             }
-            EventBean[] eventsLambda = enumEval.getEventsPrototype();
-            EventBeanUtility.safeArrayCopy(eventsPerStream, eventsLambda);
-            Object result = enumEval.evaluateEnumMethod(coll, isNewData, exprEvaluatorContext);
+            EventBean[] eventsLambda = allocateCopyEventLambda(eventsPerStream);
+            Object result = enumEval.evaluateEnumMethod(eventsLambda, coll, isNewData, exprEvaluatorContext);
             exprEvaluatorContext.getExpressionResultCacheService().saveEnumerationMethodLastValue(this, result);
             return result;
         }
@@ -159,13 +171,18 @@ public abstract class ExprDotEvalEnumMethodBase implements ExprDotEvalEnumMethod
             if (coll == null) {
                 return null;
             }
-            EventBean[] eventsLambda = enumEval.getEventsPrototype();
-            EventBeanUtility.safeArrayCopy(eventsPerStream, eventsLambda);
-            return enumEval.evaluateEnumMethod(coll, isNewData, exprEvaluatorContext);
+            EventBean[] eventsLambda = allocateCopyEventLambda(eventsPerStream);
+            return enumEval.evaluateEnumMethod(eventsLambda, coll, isNewData, exprEvaluatorContext);
         }
         finally {
             exprEvaluatorContext.getExpressionResultCacheService().popContext();
         }
+    }
+
+    private EventBean[] allocateCopyEventLambda(EventBean[] eventsPerStream) {
+        EventBean[] eventsLambda = new EventBean[enumEvalNumRequiredEvents];
+        EventBeanUtility.safeArrayCopy(eventsPerStream, eventsLambda);
+        return eventsLambda;
     }
 
     private ExprDotEvalParam getBodyAndParameter(String enumMethodUsedName,

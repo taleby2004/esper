@@ -8,13 +8,15 @@
  **************************************************************************************/
 package com.espertech.esper.example.terminal.recvr;
 
+import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.jms.*;
+import java.util.Hashtable;
 
 public class TerminalServiceReceiver
 {
-    private static final String LISTEN_QUEUE = "queue/A";
+    private static final String LISTEN_QUEUE = "jms/queue/queue_a";
 
     private static Object lock = new Object();
 
@@ -25,13 +27,15 @@ public class TerminalServiceReceiver
 
     public TerminalServiceReceiver(String providerURL) throws NamingException, JMSException
     {
-        System.setProperty("java.naming.factory.initial", "org.jnp.interfaces.NamingContextFactory");
-        System.setProperty("java.naming.provider.url", providerURL);
+        Hashtable env = new Hashtable();
+        env.put(Context.INITIAL_CONTEXT_FACTORY, "org.jboss.naming.remote.client.InitialContextFactory");
+        env.put(Context.PROVIDER_URL, providerURL);
+        env.put(Context.SECURITY_PRINCIPAL, "guest");
+        env.put(Context.SECURITY_CREDENTIALS, "pass");
 
-        InitialContext iniCtx = new InitialContext();
-        Object tmp = iniCtx.lookup("ConnectionFactory");
-        QueueConnectionFactory qcf = (QueueConnectionFactory) tmp;
-        conn = qcf.createQueueConnection();
+        InitialContext iniCtx = new InitialContext(env);
+        QueueConnectionFactory qcf = (QueueConnectionFactory) iniCtx.lookup("jms/RemoteConnectionFactory");
+        conn = qcf.createQueueConnection("guest", "pass");
         queA = (Queue) iniCtx.lookup(LISTEN_QUEUE);
         session = conn.createQueueSession(false, QueueSession.AUTO_ACKNOWLEDGE);
         conn.start();
@@ -50,7 +54,7 @@ public class TerminalServiceReceiver
     public static void main(String args[])
         throws Exception
     {
-        String providerURL = "localhost:1099";
+        String providerURL = "remote://localhost:4447";
         if (args.length > 0)
         {
             providerURL = args[0];

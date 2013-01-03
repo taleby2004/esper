@@ -12,6 +12,7 @@
 package com.espertech.esper.core.context.factory;
 
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.core.context.activator.ViewableActivationResult;
 import com.espertech.esper.core.context.activator.ViewableActivator;
@@ -28,10 +29,7 @@ import com.espertech.esper.core.start.EPStatementStartMethodHelperPrior;
 import com.espertech.esper.core.start.EPStatementStartMethodHelperSubselect;
 import com.espertech.esper.core.start.EPStatementStartMethodHelperUtil;
 import com.espertech.esper.epl.agg.service.AggregationService;
-import com.espertech.esper.epl.core.ResultSetProcessor;
-import com.espertech.esper.epl.core.ResultSetProcessorFactoryDesc;
-import com.espertech.esper.epl.core.StreamTypeService;
-import com.espertech.esper.epl.core.ViewResourceDelegateVerified;
+import com.espertech.esper.epl.core.*;
 import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.epl.join.base.*;
 import com.espertech.esper.epl.named.NamedWindowConsumerView;
@@ -44,6 +42,8 @@ import com.espertech.esper.epl.spec.StreamSpecCompiled;
 import com.espertech.esper.epl.view.FilterExprView;
 import com.espertech.esper.epl.view.OutputProcessViewBase;
 import com.espertech.esper.epl.view.OutputProcessViewFactory;
+import com.espertech.esper.filter.FilterSpecCompiled;
+import com.espertech.esper.filter.FilterSpecCompiler;
 import com.espertech.esper.pattern.EvalRootState;
 import com.espertech.esper.util.StopCallback;
 import com.espertech.esper.view.ViewFactory;
@@ -56,10 +56,7 @@ import com.espertech.esper.view.internal.SingleStreamDispatchView;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class StatementAgentInstanceFactorySelect implements StatementAgentInstanceFactory {
 
@@ -206,6 +203,10 @@ public class StatementAgentInstanceFactorySelect implements StatementAgentInstan
 
             // Replay any named window data, for later consumers of named data windows
             boolean hasNamedWindow = false;
+            FilterSpecCompiled[] namedWindowPostloadFilters = new FilterSpecCompiled[statementSpec.getStreamSpecs().size()];
+            NamedWindowTailViewInstance[] namedWindowTailViews = new NamedWindowTailViewInstance[statementSpec.getStreamSpecs().size()];
+            List<ExprNode>[] namedWindowFilters = new List[statementSpec.getStreamSpecs().size()];
+
             for (int i = 0; i < statementSpec.getStreamSpecs().size(); i++)
             {
                 final int streamNum = i;
@@ -214,12 +215,27 @@ public class StatementAgentInstanceFactorySelect implements StatementAgentInstan
                 if (streamSpec instanceof NamedWindowConsumerStreamSpec)
                 {
                     hasNamedWindow = true;
-                    NamedWindowConsumerStreamSpec namedSpec = (NamedWindowConsumerStreamSpec) streamSpec;
+                    final NamedWindowConsumerStreamSpec namedSpec = (NamedWindowConsumerStreamSpec) streamSpec;
                     NamedWindowProcessor processor = services.getNamedWindowService().getProcessor(namedSpec.getWindowName());
                     NamedWindowProcessorInstance processorInstance = processor.getProcessorInstance(agentInstanceContext);
                     if (processorInstance != null) {
                         final NamedWindowTailViewInstance consumerView = processorInstance.getTailViewInstance();
+                        namedWindowTailViews[i] = consumerView;
                         final NamedWindowConsumerView view = (NamedWindowConsumerView) viewableActivationResult[i].getViewable();
+
+                        // determine preload/postload filter for index access
+                        if (!namedSpec.getFilterExpressions().isEmpty()) {
+                            namedWindowFilters[streamNum] = namedSpec.getFilterExpressions();
+                            try {
+                                StreamTypeServiceImpl types = new StreamTypeServiceImpl(consumerView.getEventType(), consumerView.getEventType().getName(), false, services.getEngineURI());
+                                LinkedHashMap<String, Pair<EventType, String>> tagged = new LinkedHashMap<String, Pair<EventType, String>>();
+                                namedWindowPostloadFilters[i] = FilterSpecCompiler.makeFilterSpec(types.getEventTypes()[0], types.getStreamNames()[0],
+                                        namedSpec.getFilterExpressions(), null, tagged, tagged, types, null, statementContext, Collections.singleton(0));
+                            }
+                            catch (Exception ex) {
+                                log.warn("Unexpected exception analyzing filter paths: " + ex.getMessage(), ex);
+                            }
+                        }
 
                         // preload view for stream unless the expiry policy is batch window
                         Iterator<EventBean> consumerViewIterator = consumerView.iterator();
@@ -231,13 +247,12 @@ public class StatementAgentInstanceFactorySelect implements StatementAgentInstan
                         }
                         if (preload) {
                             final boolean yesRecoveringResilient = isRecoveringResilient;
+                            final FilterSpecCompiled preloadFilterSpec = namedWindowPostloadFilters[i];
                             preloadList.add(new StatementAgentInstancePreload() {
                                 public void executePreload() {
-                                    ArrayList<EventBean> eventsInWindow = new ArrayList<EventBean>();
-                                    for (EventBean aConsumerView : consumerView) {
-                                        eventsInWindow.add(aConsumerView);
-                                    }
-
+                                    Collection<EventBean> snapshot = consumerView.snapshotNoLock(preloadFilterSpec, statementContext.getAnnotations());
+                                    List<EventBean> eventsInWindow = new ArrayList<EventBean>(snapshot.size());
+                                    ExprNodeUtility.applyFilterExpressionsIterable(snapshot, namedSpec.getFilterExpressions(), agentInstanceContext, eventsInWindow);
                                     EventBean[] newEvents = eventsInWindow.toArray(new EventBean[eventsInWindow.size()]);
                                     view.update(newEvents, null);
                                     if (!yesRecoveringResilient && joinPreloadMethod != null && !joinPreloadMethod.isPreloading() && agentInstanceContext.getEpStatementAgentInstanceHandle().getOptionalDispatchable() != null) {
@@ -280,7 +295,7 @@ public class StatementAgentInstanceFactorySelect implements StatementAgentInstan
             }
 
             if (isRecoveringResilient) {
-                postLoadJoin = new StatementAgentInstancePostLoadSelect(streamViews, joinSetComposer);
+                postLoadJoin = new StatementAgentInstancePostLoadSelect(streamViews, joinSetComposer, namedWindowTailViews, namedWindowPostloadFilters, namedWindowFilters, statementContext.getAnnotations(), agentInstanceContext);
             }
         }
         catch (RuntimeException ex) {
@@ -328,7 +343,7 @@ public class StatementAgentInstanceFactorySelect implements StatementAgentInstan
                                                          List<StopCallback> stopCallbacks,
                                                          StreamJoinAnalysisResult joinAnalysisResult)
     {
-        final JoinSetComposerDesc joinSetComposerDesc = joinSetComposerPrototype.create(streamViews);
+        final JoinSetComposerDesc joinSetComposerDesc = joinSetComposerPrototype.create(streamViews, false);
 
         stopCallbacks.add(new StopCallback(){
             public void stop()

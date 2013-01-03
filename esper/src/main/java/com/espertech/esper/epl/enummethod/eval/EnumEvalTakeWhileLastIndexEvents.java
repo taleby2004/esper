@@ -14,7 +14,8 @@ package com.espertech.esper.epl.enummethod.eval;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
-import com.espertech.esper.event.map.MapEventType;
+import com.espertech.esper.event.arr.ObjectArrayEventBean;
+import com.espertech.esper.event.arr.ObjectArrayEventType;
 
 import java.util.ArrayDeque;
 import java.util.Collection;
@@ -22,19 +23,19 @@ import java.util.Collections;
 
 public class EnumEvalTakeWhileLastIndexEvents extends EnumEvalBaseIndex implements EnumEval {
 
-    public EnumEvalTakeWhileLastIndexEvents(ExprEvaluator innerExpression, int streamNumLambda, MapEventType indexEventType, String indexPropertyName) {
-        super(innerExpression, streamNumLambda, indexEventType, indexPropertyName);
+    public EnumEvalTakeWhileLastIndexEvents(ExprEvaluator innerExpression, int streamNumLambda, ObjectArrayEventType indexEventType) {
+        super(innerExpression, streamNumLambda, indexEventType);
     }
 
-    public Object evaluateEnumMethod(Collection target, boolean isNewData, ExprEvaluatorContext context) {
+    public Object evaluateEnumMethod(EventBean[] eventsLambda, Collection target, boolean isNewData, ExprEvaluatorContext context) {
         if (target.isEmpty()) {
             return target;
         }
-
+        ObjectArrayEventBean indexEvent = new ObjectArrayEventBean(new Object[1], indexEventType);
         Collection<EventBean> beans = (Collection<EventBean>) target;
         if (target.size() == 1) {
             EventBean item = beans.iterator().next();
-            indexEvent.getProperties().put(indexPropertyName, 0);
+            indexEvent.getProperties()[0] = 0;
             eventsLambda[streamNumLambda] = item;
             eventsLambda[streamNumLambda + 1] = indexEvent;
 
@@ -56,7 +57,7 @@ public class EnumEvalTakeWhileLastIndexEvents extends EnumEvalBaseIndex implemen
         int index = 0;
         for (int i = all.length - 1; i >= 0; i--) {
 
-            indexEvent.getProperties().put(indexPropertyName, index++);
+            indexEvent.getProperties()[0] = index++;
             eventsLambda[streamNumLambda] = all[i];
             eventsLambda[streamNumLambda + 1] = indexEvent;
 

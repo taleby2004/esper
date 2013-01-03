@@ -18,10 +18,7 @@ import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.client.soda.Expressions;
 import com.espertech.esper.client.soda.UpdateClause;
-import com.espertech.esper.support.bean.SupportBean;
-import com.espertech.esper.support.bean.SupportBeanCopyMethod;
-import com.espertech.esper.support.bean.SupportBeanErrorTestingOne;
-import com.espertech.esper.support.bean.SupportBeanReadOnly;
+import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.util.EventRepresentationEnum;
 import junit.framework.TestCase;
@@ -56,6 +53,20 @@ public class TestUpdate extends TestCase
 
     protected void tearDown() throws Exception {
         listener = null;
+    }
+
+    public void testFieldUpdateOrder() {
+        epService.getEPAdministrator().getConfiguration().addEventType(SupportBean.class);
+        epService.getEPAdministrator().getConfiguration().addVariable("myvar", Integer.class, 10);
+
+        epService.getEPAdministrator().createEPL("update istream SupportBean " +
+                "set intPrimitive=myvar, intBoxed=intPrimitive");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select * from SupportBean");
+        stmt.addListener(listener);
+        String[] fields = "intPrimitive,intBoxed".split(",");
+
+        epService.getEPRuntime().sendEvent(makeSupportBean("E1", 1, 2));
+        EPAssertionUtil.assertProps(listener.getAndResetLastNewData()[0], fields, new Object[]{10, 1});
     }
 
     public void testInvalid()
@@ -777,6 +788,12 @@ public class TestUpdate extends TestCase
         {
             assertEquals(message, ex.getMessage());
         }
+    }
+
+    private SupportBean makeSupportBean(String theString, int intPrimitive, double doublePrimitive) {
+        SupportBean sb = new SupportBean(theString, intPrimitive);
+        sb.setDoublePrimitive(doublePrimitive);
+        return sb;
     }
 
     public static interface BaseInterface extends Serializable

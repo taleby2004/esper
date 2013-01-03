@@ -16,21 +16,14 @@ import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.enummethod.dot.*;
 import com.espertech.esper.epl.expression.ExprDotNodeUtility;
 import com.espertech.esper.event.EventAdapterService;
-import com.espertech.esper.event.map.MapEventType;
+import com.espertech.esper.event.arr.ObjectArrayEventType;
 
 import java.util.List;
 
 public class ExprDotEvalFirstLastOf extends ExprDotEvalEnumMethodBase {
 
     public EventType[] getAddStreamTypes(String enumMethodUsedName, List<String> goesToNames, EventType inputEventType, Class collectionComponentType, List<ExprDotEvalParam> bodiesAndParameters) {
-        EventType firstParamType;
-        if (inputEventType == null) {
-            firstParamType = ExprDotNodeUtility.makeTransientMapType(enumMethodUsedName, goesToNames.get(0), collectionComponentType);
-        }
-        else {
-            firstParamType = inputEventType;
-        }
-        return new EventType[] {firstParamType};
+        return ExprDotNodeUtility.getSingleLambdaParamEventType(enumMethodUsedName, goesToNames, inputEventType, collectionComponentType);
     }
 
     public EnumEval getEnumEval(EventAdapterService eventAdapterService, StreamTypeService streamTypeService, String statementId, String enumMethodUsedName, List<ExprDotEvalParam> bodiesAndParameters, EventType inputEventType, Class collectionComponentType, int numStreamsIncoming) {
@@ -62,10 +55,10 @@ public class ExprDotEvalFirstLastOf extends ExprDotEvalEnumMethodBase {
         }
         super.setTypeInfo(ExprDotEvalTypeInfo.scalarOrUnderlying(collectionComponentType));
         if (this.getEnumMethodEnum() == EnumMethodEnum.FIRST) {
-            return new EnumEvalFirstOfPredicateScalar(first.getBodyEvaluator(), first.getStreamCountIncoming(), (MapEventType) first.getGoesToTypes()[0], first.getGoesToNames().get(0));
+            return new EnumEvalFirstOfPredicateScalar(first.getBodyEvaluator(), first.getStreamCountIncoming(), (ObjectArrayEventType) first.getGoesToTypes()[0]);
         }
         else {
-            return new EnumEvalLastOfPredicateScalar(first.getBodyEvaluator(), first.getStreamCountIncoming(), (MapEventType) first.getGoesToTypes()[0], first.getGoesToNames().get(0));
+            return new EnumEvalLastOfPredicateScalar(first.getBodyEvaluator(), first.getStreamCountIncoming(), (ObjectArrayEventType) first.getGoesToTypes()[0]);
         }
 
     }

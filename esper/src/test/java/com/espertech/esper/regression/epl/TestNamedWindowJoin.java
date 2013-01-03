@@ -16,14 +16,23 @@ import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.support.epl.SupportQueryPlanIndexHook;
+import com.espertech.esper.support.util.IndexAssertion;
+import com.espertech.esper.support.util.IndexAssertionEventSend;
+import com.espertech.esper.support.util.IndexBackingTableInfo;
 import com.espertech.esper.util.EventRepresentationEnum;
 import junit.framework.TestCase;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class TestNamedWindowJoin extends TestCase
+public class TestNamedWindowJoin extends TestCase implements IndexBackingTableInfo
 {
+    private static Log log = LogFactory.getLog(TestNamedWindowJoin.class);
+
     private EPServiceProvider epService;
     private SupportUpdateListener listenerWindow;
     private SupportUpdateListener listenerWindowTwo;
@@ -44,6 +53,171 @@ public class TestNamedWindowJoin extends TestCase
         listenerWindow = null;
         listenerStmtOne = null;
         listenerWindowTwo = null;
+    }
+
+    public void testWindowUnidirectionalJoin() {
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("S0", SupportBean_S0.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("S1", SupportBean_S1.class);
+
+        epService.getEPAdministrator().createEPL("create window MyWindow.win:keepall() as SupportBean");
+        epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportBean");
+        epService.getEPAdministrator().createEPL("on S1 as s1 delete from MyWindow where s1.p10 = theString");
+
+        EPStatement stmt = epService.getEPAdministrator().createEPL(
+                "select window(win.*) as c0," +
+                "window(win.*).where(v => v.intPrimitive < 2) as c1, " +
+                "window(win.*).toMap(k=>k.theString,v=>v.intPrimitive) as c2 " +
+                "from S0 as s0 unidirectional, MyWindow as win");
+        stmt.addListener(listenerStmtOne);
+
+        SupportBean[] beans = new SupportBean[3];
+        for (int i = 0; i < beans.length; i++) {
+            beans[i] = new SupportBean("E" + i, i);
+        }
+
+        epService.getEPRuntime().sendEvent(beans[0]);
+        epService.getEPRuntime().sendEvent(beans[1]);
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(10));
+        assertReceived(beans, new int[]{0, 1}, new int[]{0, 1}, "E0,E1".split(","), new Object[] {0,1});
+
+        // add bean
+        epService.getEPRuntime().sendEvent(beans[2]);
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(10));
+        assertReceived(beans, new int[]{0, 1, 2}, new int[]{0, 1}, "E0,E1,E2".split(","), new Object[] {0,1, 2});
+
+        // delete bean
+        epService.getEPRuntime().sendEvent(new SupportBean_S1(11, "E1"));
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(12));
+        assertReceived(beans, new int[]{0, 2}, new int[]{0}, "E0,E2".split(","), new Object[] {0,2});
+
+        // delete another bean
+        epService.getEPRuntime().sendEvent(new SupportBean_S1(13, "E0"));
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(14));
+        assertReceived(beans, new int[]{2}, new int[0], "E2".split(","), new Object[] {2});
+
+        // delete last bean
+        epService.getEPRuntime().sendEvent(new SupportBean_S1(15, "E2"));
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(16));
+        assertFalse(listenerStmtOne.getAndClearIsInvoked());
+
+        // compile a non-unidirectional query, join and subquery
+        epService.getEPAdministrator().createEPL("select window(win.*) from MyWindow as win");
+        epService.getEPAdministrator().createEPL("select window(win.*) as c0 from S0.std:lastevent() as s0, MyWindow as win");
+        epService.getEPAdministrator().createEPL("select (select window(win.*) from MyWindow as win) from S0");
+    }
+
+    private void assertReceived(SupportBean[] beans, int[] indexesAll, int[] indexesWhere, String[] mapKeys, Object[] mapValues) {
+        EventBean received = listenerStmtOne.assertOneGetNewAndReset();
+        EPAssertionUtil.assertEqualsExactOrder(SupportBean.getBeansPerIndex(beans, indexesAll), (Object[]) received.get("c0"));
+        EPAssertionUtil.assertEqualsExactOrder(SupportBean.getBeansPerIndex(beans, indexesWhere), (Collection) received.get("c1"));
+        EPAssertionUtil.assertPropsMap((Map) received.get("c2"), mapKeys, mapValues);
+    }
+
+    public void testJoinIndexChoice() {
+        epService.getEPAdministrator().getConfiguration().addEventType("SSB1", SupportSimpleBeanOne.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("SSB2", SupportSimpleBeanTwo.class);
+
+        Object[] preloadedEventsOne = new Object[] {new SupportSimpleBeanOne("E1", 10, 11, 12), new SupportSimpleBeanOne("E2", 20, 21, 22)};
+        IndexAssertionEventSend eventSendAssertion = new IndexAssertionEventSend() {
+            public void run() {
+                String[] fields = "ssb2.s2,ssb1.s1,ssb1.i1".split(",");
+                epService.getEPRuntime().sendEvent(new SupportSimpleBeanTwo("E2", 50, 21, 22));
+                EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[]{"E2", "E2", 20});
+                epService.getEPRuntime().sendEvent(new SupportSimpleBeanTwo("E1", 60, 11, 12));
+                EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[] {"E1", "E1", 10});
+            }
+        };
+
+        // no index, since this is "unique(s1)" we don't need one
+        String[] noindexes = new String[] {};
+        assertIndexChoice(noindexes, preloadedEventsOne, "std:unique(s1)",
+                new IndexAssertion[] {
+                        new IndexAssertion(null, "s1 = s2", true, eventSendAssertion),
+                        new IndexAssertion(null, "s1 = s2 and l1 = l2", true, eventSendAssertion),
+                });
+
+        // single index one field (duplicate in essence, since "unique(s1)"
+        String[] indexOneField = new String[] {"create unique index One on MyWindow (s1)"};
+        assertIndexChoice(indexOneField, preloadedEventsOne, "std:unique(s1)",
+                new IndexAssertion[] {
+                        new IndexAssertion(null, "s1 = s2", true, eventSendAssertion),
+                        new IndexAssertion(null, "s1 = s2 and l1 = l2", true, eventSendAssertion),
+                });
+
+        // single index two field (includes "unique(s1)")
+        String[] indexTwoField = new String[] {"create unique index One on MyWindow (s1, l1)"};
+        assertIndexChoice(indexTwoField, preloadedEventsOne, "std:unique(s1)",
+                new IndexAssertion[] {
+                        new IndexAssertion(null, "s1 = s2", true, eventSendAssertion),
+                        new IndexAssertion(null, "d1 = d2", false, eventSendAssertion),
+                        new IndexAssertion(null, "s1 = s2 and l1 = l2", true, eventSendAssertion),
+                });
+
+        // two index one unique ("unique(s1)")
+        String[] indexSetTwo = new String[] {
+                "create index One on MyWindow (s1)",
+                "create unique index Two on MyWindow (s1, d1)"};
+        assertIndexChoice(indexSetTwo, preloadedEventsOne, "std:unique(s1)",
+                new IndexAssertion[] {
+                        new IndexAssertion(null, "d1 = d2", false, eventSendAssertion),
+                        new IndexAssertion(null, "s1 = s2", true, eventSendAssertion),
+                        new IndexAssertion(null, "s1 = s2 and l1 = l2", true, eventSendAssertion),
+                        new IndexAssertion(null, "s1 = s2 and d1 = d2 and l1 = l2", true, eventSendAssertion),
+                });
+
+        // two index one unique ("win:keepall()")
+        assertIndexChoice(indexSetTwo, preloadedEventsOne, "win:keepall()",
+                new IndexAssertion[] {
+                        new IndexAssertion(null, "d1 = d2", false, eventSendAssertion),
+                        new IndexAssertion(null, "s1 = s2", false, eventSendAssertion),
+                        new IndexAssertion(null, "s1 = s2 and l1 = l2", false, eventSendAssertion),
+                        new IndexAssertion(null, "s1 = s2 and d1 = d2 and l1 = l2", true, eventSendAssertion),
+                        new IndexAssertion(null, "d1 = d2 and s1 = s2", true, eventSendAssertion),
+                });
+    }
+
+    private void assertIndexChoice(String[] indexes, Object[] preloadedEvents, String datawindow,
+                                   IndexAssertion ... assertions) {
+        epService.getEPAdministrator().createEPL("create window MyWindow." + datawindow + " as SSB1");
+        epService.getEPAdministrator().createEPL("insert into MyWindow select * from SSB1");
+        for (String index : indexes) {
+            epService.getEPAdministrator().createEPL(index);
+        }
+        for (Object event : preloadedEvents) {
+            epService.getEPRuntime().sendEvent(event);
+        }
+
+        int count = 0;
+        for (IndexAssertion assertion : assertions) {
+            log.info("======= Testing #" + count++);
+            String epl = INDEX_CALLBACK_HOOK +
+                    (assertion.getHint() == null ? "" : assertion.getHint()) +
+                    "select * " +
+                    "from SSB2 as ssb2 unidirectional, MyWindow as ssb1 " +
+                    "where " + assertion.getWhereClause();
+
+            EPStatement stmt;
+            try {
+                stmt = epService.getEPAdministrator().createEPL(epl);
+                stmt.addListener(listenerStmtOne);
+            }
+            catch (EPStatementException ex) {
+                if (assertion.getEventSendAssertion() == null) {
+                    // no assertion, expected
+                    assertTrue(ex.getMessage().contains("index hint busted"));
+                    continue;
+                }
+                throw new RuntimeException("Unexpected statement exception: " + ex.getMessage(), ex);
+            }
+
+            // assert index and access
+            SupportQueryPlanIndexHook.assertJoinOneStreamAndReset(assertion.getUnique());
+            assertion.getEventSendAssertion().run();
+            stmt.destroy();
+        }
+
+        epService.getEPAdministrator().destroyAllStatements();
     }
 
     public void testInnerJoinLateStart() {

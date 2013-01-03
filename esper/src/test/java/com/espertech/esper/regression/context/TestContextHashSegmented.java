@@ -165,7 +165,7 @@ public class TestContextHashSegmented extends TestCase {
         // validate statement not applicable filters
         epService.getEPAdministrator().createEPL("create context ACtx coalesce hash_code(intPrimitive) from SupportBean granularity 10");
         epl = "context ACtx select * from SupportBean_S0";
-        tryInvalid(epl, "Error starting statement: Segmented context 'ACtx' requires that any of the event types that are listed in the segmented context also appear in any of the filter expressions of the statement [");
+        tryInvalid(epl, "Error starting statement: Segmented context 'ACtx' requires that any of the event types that are listed in the segmented context also appear in any of the filter expressions of the statement, type 'SupportBean_S0' is not one of the types listed [");
     }
 
     private void tryInvalid(String epl, String expected) {

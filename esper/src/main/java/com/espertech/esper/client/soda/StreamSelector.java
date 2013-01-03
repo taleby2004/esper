@@ -16,15 +16,25 @@ public enum StreamSelector
     /**
      * Indicates selection of the remove stream only.
      */
-    RSTREAM_ONLY,
+    RSTREAM_ONLY("rstream"),
 
     /**
      * Indicates selection of the insert stream only.
      */
-    ISTREAM_ONLY,
+    ISTREAM_ONLY("istream"),
 
     /**
      * Indicates selection of both the insert and the remove stream.
      */
-    RSTREAM_ISTREAM_BOTH
+    RSTREAM_ISTREAM_BOTH("irstream");
+
+    private final String epl;
+
+    private StreamSelector(String epl) {
+        this.epl = epl;
+    }
+
+    public String getEpl() {
+        return epl;
+    }
 }

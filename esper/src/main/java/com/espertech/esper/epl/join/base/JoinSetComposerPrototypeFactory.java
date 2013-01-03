@@ -18,6 +18,8 @@ import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.join.plan.*;
 import com.espertech.esper.epl.join.pollindex.*;
 import com.espertech.esper.epl.join.table.HistoricalStreamIndexList;
+import com.espertech.esper.epl.join.util.QueryPlanIndexHook;
+import com.espertech.esper.epl.join.util.QueryPlanIndexHookUtil;
 import com.espertech.esper.epl.spec.OuterJoinDesc;
 import com.espertech.esper.type.OuterJoinType;
 import com.espertech.esper.util.AuditPath;
@@ -148,6 +150,11 @@ public class JoinSetComposerPrototypeFactory
 
         if (queryPlanLogging && queryPlanLog.isInfoEnabled()) {
             queryPlanLog.info("Query plan: " + queryPlan.toQueryPlan());
+
+            QueryPlanIndexHook hook = QueryPlanIndexHookUtil.getHook(annotations);
+            if (hook != null) {
+                hook.join(queryPlan);
+            }
         }
 
         boolean joinRemoveStream = selectsRemoveStream || hasAggregations;
@@ -164,7 +171,8 @@ public class JoinSetComposerPrototypeFactory
                                                 indexSpecs,
                                                 queryPlan,
                                                 historicalStreamIndexLists,
-                                                joinRemoveStream);
+                                                joinRemoveStream,
+                                                isOuterJoins);
     }
 
     private static JoinSetComposerPrototype makeComposerHistorical2Stream(List<OuterJoinDesc> outerJoinDescList,

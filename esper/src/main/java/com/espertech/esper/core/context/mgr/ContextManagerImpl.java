@@ -17,7 +17,6 @@ import com.espertech.esper.client.SafeIterator;
 import com.espertech.esper.client.context.ContextPartitionSelector;
 import com.espertech.esper.client.context.ContextPartitionSelectorAll;
 import com.espertech.esper.client.context.ContextPartitionSelectorById;
-import com.espertech.esper.collection.IntegerSetNextId;
 import com.espertech.esper.core.context.factory.StatementAgentInstanceFactoryResult;
 import com.espertech.esper.core.context.stmt.StatementAIResourceRegistryFactory;
 import com.espertech.esper.core.context.util.ContextDescriptor;
@@ -48,16 +47,15 @@ public class ContextManagerImpl implements ContextManager, ContextControllerLife
      * This represents the context declared first.
      */
     private ContextController rootContext;
-
-    private IntegerSetNextId contextPartitionIds;
+    private final ContextPartitionIdManager contextPartitionIdManager;
 
     public ContextManagerImpl(ContextControllerFactoryServiceContext factoryServiceContext)
             throws ExprValidationException {
         this.contextName = factoryServiceContext.getContextName();
         this.servicesContext = factoryServiceContext.getServicesContext();
         this.factory = factoryServiceContext.getAgentInstanceContextCreate().getStatementContext().getContextControllerFactoryService().getFactory(factoryServiceContext)[0];
-        this.contextPartitionIds = new IntegerSetNextId();
         this.rootContext = factory.createNoCallback(0, this);   // single instance: created here and activated/deactivated later
+        this.contextPartitionIdManager = factoryServiceContext.getAgentInstanceContextCreate().getStatementContext().getContextControllerFactoryService().allocatePartitionIdMgr(contextName, factoryServiceContext.getAgentInstanceContextCreate().getStatementContext().getStatementId());
 
         StatementAIResourceRegistryFactory resourceRegistryFactory = factory.getStatementAIResourceRegistryFactory();
 
@@ -65,6 +63,17 @@ public class ContextManagerImpl implements ContextManager, ContextControllerLife
         EventType contextPropsType = servicesContext.getEventAdapterService().createAnonymousMapType(contextName, contextProps);
         ContextPropertyRegistryImpl registry = new ContextPropertyRegistryImpl(factory.getContextDetailPartitionItems(), contextPropsType);
         contextDescriptor = new ContextDescriptor(contextName, factory.isSingleInstanceContext(), registry, resourceRegistryFactory, this, factory.getContextDetail());
+    }
+
+    public void deactivateContextPartitions(Set<Integer> agentInstanceIds) {
+        for (Integer agentInstanceId : agentInstanceIds) {
+            ContextControllerTreeAgentInstanceList list = agentInstances.get(agentInstanceId);
+            StatementAgentInstanceUtil.stopAgentInstances(list.getAgentInstances(), null, servicesContext, false);
+        }
+    }
+
+    public Map<String, ContextControllerStatementDesc> getStatements() {
+        return statements;
     }
 
     public ContextDescriptor getContextDescriptor() {
@@ -117,7 +126,7 @@ public class ContextManagerImpl implements ContextManager, ContextControllerLife
                 StatementAgentInstanceUtil.stopAgentInstances(entryCP.getValue().getAgentInstances(), null, servicesContext, true);
             }
             agentInstances.clear();
-            contextPartitionIds.clear();
+            contextPartitionIdManager.clear();
             statements.clear();
         }
     }
@@ -137,10 +146,10 @@ public class ContextManagerImpl implements ContextManager, ContextControllerLife
         int assignedContextId;
         if (optionalContextPartitionId != null) {
             assignedContextId = optionalContextPartitionId;
+            contextPartitionIdManager.addExisting(optionalContextPartitionId);
         } else {
-            assignedContextId = contextPartitionIds.nextId();
+            assignedContextId = contextPartitionIdManager.allocateId();
         }
-        contextPartitionIds.add(assignedContextId);
 
         // handle leaf creation
         List<AgentInstance> newInstances = new ArrayList<AgentInstance>();
@@ -173,7 +182,7 @@ public class ContextManagerImpl implements ContextManager, ContextControllerLife
         if (entry != null) {
             StatementAgentInstanceUtil.stopAgentInstances(entry.getAgentInstances(), terminationProperties, servicesContext, false);
             entry.getAgentInstances().clear();
-            contextPartitionIds.remove(contextNestedHandle.getContextPartitionOrPathId());
+            contextPartitionIdManager.removeId(contextNestedHandle.getContextPartitionOrPathId());
         }
     }
 

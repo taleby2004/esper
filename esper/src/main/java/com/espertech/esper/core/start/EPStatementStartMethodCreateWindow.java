@@ -19,7 +19,10 @@ import com.espertech.esper.core.context.util.ContextMergeView;
 import com.espertech.esper.core.context.util.EPStatementAgentInstanceHandle;
 import com.espertech.esper.core.service.EPServicesContext;
 import com.espertech.esper.core.service.StatementContext;
-import com.espertech.esper.epl.core.*;
+import com.espertech.esper.epl.core.ResultSetProcessorFactoryDesc;
+import com.espertech.esper.epl.core.ResultSetProcessorFactoryFactory;
+import com.espertech.esper.epl.core.StreamTypeService;
+import com.espertech.esper.epl.core.StreamTypeServiceImpl;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.named.NamedWindowProcessor;
 import com.espertech.esper.epl.named.NamedWindowService;
@@ -38,6 +41,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Starts and provides the stop method for EPL statements.
@@ -46,11 +50,11 @@ public class EPStatementStartMethodCreateWindow extends EPStatementStartMethodBa
 {
     private static final Log log = LogFactory.getLog(EPStatementStartMethodCreateWindow.class);
 
-    public EPStatementStartMethodCreateWindow(StatementSpecCompiled statementSpec, EPServicesContext services, StatementContext statementContext) {
-        super(statementSpec, services, statementContext);
+    public EPStatementStartMethodCreateWindow(StatementSpecCompiled statementSpec) {
+        super(statementSpec);
     }
 
-    public EPStatementStartResult startInternal(boolean isNewStatement, boolean isRecoveringStatement, boolean isRecoveringResilient) throws ExprValidationException, ViewProcessingException {
+    public EPStatementStartResult startInternal(final EPServicesContext services, final StatementContext statementContext, boolean isNewStatement, boolean isRecoveringStatement, boolean isRecoveringResilient) throws ExprValidationException, ViewProcessingException {
 
         // define stop
         final List<StopCallback> stopCallbacks = new ArrayList<StopCallback>();
@@ -61,7 +65,7 @@ public class EPStatementStartMethodCreateWindow extends EPStatementStartMethodBa
         final boolean singleInstanceContext = contextName == null ? false : services.getContextManagementService().getContextDescriptor(contextName).isSingleInstanceContext();
 
         // register agent instance resources for use in HA
-        EPStatementAgentInstanceHandle epStatementAgentInstanceHandle = getDefaultAgentInstanceHandle();
+        EPStatementAgentInstanceHandle epStatementAgentInstanceHandle = getDefaultAgentInstanceHandle(statementContext);
         if (services.getSchedulableAgentInstanceDirectory() != null) {
             services.getSchedulableAgentInstanceDirectory().add(epStatementAgentInstanceHandle);
         }
@@ -89,7 +93,8 @@ public class EPStatementStartMethodCreateWindow extends EPStatementStartMethodBa
         }
         boolean isBatchingDataWindow = determineBatchingDataWindow(unmaterializedViewChain.getViewFactoryChain());
         final VirtualDWViewFactory virtualDataWindowFactory = determineVirtualDataWindow(unmaterializedViewChain.getViewFactoryChain());
-        NamedWindowProcessor processor = services.getNamedWindowService().addProcessor(windowName, contextName, singleInstanceContext, filterStreamSpec.getFilterSpec().getResultEventType(), statementContext.getStatementResultService(), optionalRevisionProcessor, statementContext.getExpression(), statementContext.getStatementName(), isPrioritized, isEnableSubqueryIndexShare, isBatchingDataWindow, virtualDataWindowFactory != null, statementContext.getEpStatementHandle().getMetricsHandle());
+        Set<String> optionalUniqueKeyProps = ViewServiceHelper.getUniqueCandidateProperties(unmaterializedViewChain.getViewFactoryChain());
+        NamedWindowProcessor processor = services.getNamedWindowService().addProcessor(windowName, contextName, singleInstanceContext, filterStreamSpec.getFilterSpec().getResultEventType(), statementContext.getStatementResultService(), optionalRevisionProcessor, statementContext.getExpression(), statementContext.getStatementName(), isPrioritized, isEnableSubqueryIndexShare, isBatchingDataWindow, virtualDataWindowFactory != null, statementContext.getEpStatementHandle().getMetricsHandle(), optionalUniqueKeyProps);
 
         Viewable finalViewable;
         EPStatementStopMethod stopStatementMethod;
@@ -146,7 +151,7 @@ public class EPStatementStartMethodCreateWindow extends EPStatementStartMethodBa
             }
             // Without context - start here
             else {
-                AgentInstanceContext agentInstanceContext = getDefaultAgentInstanceContext();
+                AgentInstanceContext agentInstanceContext = getDefaultAgentInstanceContext(statementContext);
                 final StatementAgentInstanceFactoryCreateWindowResult resultOfStart;
                 try {
                     resultOfStart = contextFactory.newContext(agentInstanceContext, false);

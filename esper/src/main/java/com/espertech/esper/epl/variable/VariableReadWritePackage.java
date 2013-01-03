@@ -137,16 +137,12 @@ public class VariableReadWritePackage
                             if ((!JavaClassHelper.isNumeric(variableType)) ||
                                 (!JavaClassHelper.isNumeric(expressionType)))
                             {
-                                throw new ExprValidationException("Variable '" + variableName
-                                    + "' of declared type '" + variableType.getName() +
-                                        "' cannot be assigned a value of type '" + expressionType.getName() + "'");
+                                throw new ExprValidationException(VariableServiceImpl.getAssigmentExMessage(variableName, variableType, expressionType));
                             }
 
                             if (!(JavaClassHelper.canCoerce(expressionType, variableType)))
                             {
-                                throw new ExprValidationException("Variable '" + variableName
-                                    + "' of declared type '" + variableType.getName() +
-                                        "' cannot be assigned a value of type '" + expressionType.getName() + "'");
+                                throw new ExprValidationException(VariableServiceImpl.getAssigmentExMessage(variableName, variableType, expressionType));
                             }
 
                             mustCoerce[count] = true;
@@ -170,7 +166,7 @@ public class VariableReadWritePackage
             EventBeanCopyMethod copyMethod = entry.getKey().getCopyMethod(props);
             if (copyMethod == null){
                 throw new ExprValidationException("Variable '" + entry.getValue().getVariableName()
-                    + "' of declared type '" + entry.getKey().getName() +
+                    + "' of declared type " + JavaClassHelper.getClassNameFullyQualPretty(entry.getKey().getUnderlyingType()) +
                         "' cannot be assigned to");
             }
             copyMethods.put(entry.getKey(), copyMethod);

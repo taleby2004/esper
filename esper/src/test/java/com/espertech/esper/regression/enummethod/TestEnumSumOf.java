@@ -99,6 +99,35 @@ public class TestEnumSumOf extends TestCase {
 
         epService.getEPRuntime().sendEvent(SupportCollection.makeNumeric(null));
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, null});
+
+        stmtFragment.destroy();
+
+        // test average with lambda
+        epService.getEPAdministrator().getConfiguration().addPlugInSingleRowFunction("extractNum", TestEnumMinMax.MyService.class.getName(), "extractNum");
+        epService.getEPAdministrator().getConfiguration().addPlugInSingleRowFunction("extractBigDecimal", TestEnumMinMax.MyService.class.getName(), "extractBigDecimal");
+
+        // lambda with string-array input
+        String[] fieldsLambda = "val0,val1".split(",");
+        String eplLambda = "select " +
+                "strvals.sumOf(v => extractNum(v)) as val0, " +
+                "strvals.sumOf(v => extractBigDecimal(v)) as val1 " +
+                "from SupportCollection";
+        EPStatement stmtLambda = epService.getEPAdministrator().createEPL(eplLambda);
+        stmtLambda.addListener(listener);
+        LambdaAssertionUtil.assertTypes(stmtLambda.getEventType(), fieldsLambda, new Class[]{Integer.class, BigDecimal.class});
+
+        epService.getEPRuntime().sendEvent(SupportCollection.makeString("E2,E1,E5,E4"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsLambda, new Object[]{2+1+5+4, new BigDecimal(2+1+5+4)});
+
+        epService.getEPRuntime().sendEvent(SupportCollection.makeString("E1"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsLambda, new Object[]{1, new BigDecimal(1)});
+
+        epService.getEPRuntime().sendEvent(SupportCollection.makeString(null));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsLambda, new Object[]{null, null});
+
+        epService.getEPRuntime().sendEvent(SupportCollection.makeString(""));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsLambda, new Object[]{null, null});
+
     }
 
     private SupportBean make(Integer intBoxed, Double doubleBoxed, Long longBoxed, int bigDecimal) {
@@ -112,9 +141,6 @@ public class TestEnumSumOf extends TestCase {
 
     public void testInvalid() {
         String epl;
-
-        epl = "select intvals.sumof(x=> x) from SupportCollection";
-        tryInvalid(epl, "Error starting statement: Invalid input for built-in enumeration method 'sumof' and 1-parameter footprint, expecting collection of events as input, received collection of Integer [select intvals.sumof(x=> x) from SupportCollection]");
 
         epl = "select beans.sumof() from Bean";
         tryInvalid(epl, "Error starting statement: Invalid input for built-in enumeration method 'sumof' and 0-parameter footprint, expecting collection of values (typically scalar values) as input, received collection of events of type 'com.espertech.esper.support.bean.SupportBean' [select beans.sumof() from Bean]");

@@ -19,19 +19,21 @@ import java.util.List;
 public class CreateIndexDesc implements MetaDefItem, Serializable
 {
     private static final long serialVersionUID = -6758785746637089810L;
-    
+
+    private final boolean unique;
     private final String indexName;
     private final String windowName;
     private final List<CreateIndexItem> columns;
 
     /**
      * Ctor.
+     * @param unique indicator whether unique or not
      * @param indexName index name
      * @param windowName window name
      * @param columns properties to index
      */
-    public CreateIndexDesc(String indexName, String windowName, List<CreateIndexItem> columns)
-    {
+    public CreateIndexDesc(boolean unique, String indexName, String windowName, List<CreateIndexItem> columns) {
+        this.unique = unique;
         this.indexName = indexName;
         this.windowName = windowName;
         this.columns = columns;
@@ -62,5 +64,9 @@ public class CreateIndexDesc implements MetaDefItem, Serializable
     public List<CreateIndexItem> getColumns()
     {
         return columns;
+    }
+
+    public boolean isUnique() {
+        return unique;
     }
 }

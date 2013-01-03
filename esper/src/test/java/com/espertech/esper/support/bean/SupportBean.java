@@ -246,4 +246,15 @@ public class SupportBean implements Serializable
     public void setBigDecimal(BigDecimal bigDecimal) {
         this.bigDecimal = bigDecimal;
     }
+
+    public static SupportBean[] getBeansPerIndex(SupportBean[] beans, int[] indexes) {
+        if (indexes == null) {
+            return null;
+        }
+        SupportBean[] array = new SupportBean[indexes.length];
+        for (int i = 0; i < indexes.length; i++) {
+            array[i] = beans[indexes[i]];
+        }
+        return array;
+    }
 }

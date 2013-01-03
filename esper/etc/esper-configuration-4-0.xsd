@@ -2,7 +2,7 @@
 <xs:schema targetNamespace="http://www.espertech.com/schema/esper" elementFormDefault="qualified" xmlns:esper="http://www.espertech.com/schema/esper" xmlns:xs="http://www.w3.org/2001/XMLSchema">
 	<xs:element name="esper-configuration">
 		<xs:complexType>
-			<xs:sequence maxOccurs="unbounded" minOccurs="0">
+			<xs:sequence minOccurs="0" maxOccurs="unbounded">
 				<xs:choice>
 					<xs:element ref="esper:event-type-auto-name" minOccurs="0" maxOccurs="unbounded"/>
 					<xs:element ref="esper:event-type" minOccurs="0" maxOccurs="unbounded"/>
@@ -47,7 +47,7 @@
 	</xs:element>
 	<xs:element name="event-type">
 		<xs:complexType>
-			<xs:sequence maxOccurs="unbounded" minOccurs="0">
+			<xs:sequence minOccurs="0" maxOccurs="unbounded">
 				<xs:choice>
 					<xs:element ref="esper:xml-dom" minOccurs="0"/>
 					<xs:element ref="esper:java-util-map" minOccurs="0"/>
@@ -143,7 +143,7 @@
 	</xs:element>
 	<xs:element name="method-reference">
 		<xs:complexType>
-			<xs:sequence maxOccurs="unbounded" minOccurs="0">
+			<xs:sequence minOccurs="0" maxOccurs="unbounded">
 				<xs:choice>
 					<xs:element ref="esper:lru-cache" minOccurs="0"/>
 					<xs:element ref="esper:expiry-time-cache" minOccurs="0"/>
@@ -154,7 +154,7 @@
 	</xs:element>
 	<xs:element name="legacy-type">
 		<xs:complexType>
-			<xs:sequence maxOccurs="unbounded" minOccurs="0">
+			<xs:sequence minOccurs="0" maxOccurs="unbounded">
 				<xs:choice>
 					<xs:element ref="esper:method-property" minOccurs="0" maxOccurs="unbounded"/>
 					<xs:element ref="esper:field-property" minOccurs="0" maxOccurs="unbounded"/>
@@ -196,7 +196,7 @@
 	</xs:simpleType>
 	<xs:element name="revision-event-type">
 		<xs:complexType>
-			<xs:sequence maxOccurs="unbounded" minOccurs="0">
+			<xs:sequence minOccurs="0" maxOccurs="unbounded">
 				<xs:choice>
 					<xs:element ref="esper:base-event-type" maxOccurs="unbounded"/>
 					<xs:element ref="esper:delta-event-type" maxOccurs="unbounded"/>
@@ -232,7 +232,7 @@
 	</xs:simpleType>
 	<xs:element name="database-reference">
 		<xs:complexType>
-			<xs:sequence maxOccurs="unbounded" minOccurs="0">
+			<xs:sequence minOccurs="0" maxOccurs="unbounded">
 				<xs:choice>
 					<xs:element ref="esper:datasource-connection" minOccurs="0"/>
 					<xs:element ref="esper:datasourcefactory-connection" minOccurs="0"/>
@@ -355,6 +355,7 @@
 			<xs:attribute name="function-method" type="xs:string" use="required"/>
 			<xs:attribute name="value-cache" type="esper:valueCacheEnum" use="optional"/>
 			<xs:attribute name="filter-optimizable" type="esper:filterOptimizableEnum" use="optional"/>
+			<xs:attribute name="rethrow-exceptions" type="xs:boolean" use="optional"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:simpleType name="valueCacheEnum">
@@ -386,10 +387,10 @@
 	</xs:element>
 	<xs:element name="plugin-loader">
 		<xs:complexType>
-			<xs:sequence maxOccurs="unbounded" minOccurs="0">
+			<xs:sequence minOccurs="0" maxOccurs="unbounded">
 				<xs:choice>
 					<xs:element ref="esper:init-arg" minOccurs="0" maxOccurs="unbounded"/>
-					<xs:element ref="esper:config-xml" minOccurs="0" maxOccurs="1"/>
+					<xs:element ref="esper:config-xml" minOccurs="0"/>
 				</xs:choice>
 			</xs:sequence>
 			<xs:attribute name="name" type="xs:string" use="required"/>
@@ -411,7 +412,7 @@
 	</xs:element>
 	<xs:element name="defaults">
 		<xs:complexType>
-			<xs:sequence maxOccurs="unbounded" minOccurs="0">
+			<xs:sequence minOccurs="0" maxOccurs="unbounded">
 				<xs:choice>
 					<xs:element ref="esper:threading" minOccurs="0"/>
 					<xs:element ref="esper:event-meta" minOccurs="0"/>
@@ -434,7 +435,7 @@
 	</xs:element>
 	<xs:element name="threading">
 		<xs:complexType>
-			<xs:sequence maxOccurs="unbounded" minOccurs="0">
+			<xs:sequence minOccurs="0" maxOccurs="unbounded">
 				<xs:choice>
 					<xs:element ref="esper:listener-dispatch" minOccurs="0"/>
 					<xs:element ref="esper:insert-into-dispatch" minOccurs="0"/>
@@ -519,7 +520,7 @@
 	</xs:element>
 	<xs:element name="view-resources">
 		<xs:complexType>
-			<xs:sequence maxOccurs="unbounded" minOccurs="0">
+			<xs:sequence minOccurs="0" maxOccurs="unbounded">
 				<xs:choice>
 					<xs:element ref="esper:share-views" minOccurs="0"/>
 					<xs:element ref="esper:allow-multiple-expiry-policy" minOccurs="0"/>
@@ -539,7 +540,7 @@
 	</xs:element>
 	<xs:element name="logging">
 		<xs:complexType>
-			<xs:sequence maxOccurs="unbounded" minOccurs="0">
+			<xs:sequence minOccurs="0" maxOccurs="unbounded">
 				<xs:choice>
 					<xs:element ref="esper:execution-path" minOccurs="0"/>
 					<xs:element ref="esper:jdbc" minOccurs="0"/>
@@ -707,7 +708,7 @@
 	</xs:element>
 	<xs:element name="plugin-event-type">
 		<xs:complexType>
-			<xs:sequence maxOccurs="unbounded" minOccurs="0">
+			<xs:sequence minOccurs="0" maxOccurs="unbounded">
 				<xs:choice>
 					<xs:element ref="esper:resolution-uri" maxOccurs="unbounded"/>
 					<xs:element ref="esper:initializer" minOccurs="0"/>
@@ -730,20 +731,20 @@
 			<xs:attribute name="value" type="xs:string" use="required"/>
 		</xs:complexType>
 	</xs:element>
-    <xs:element name="initializer">
-      <xs:complexType>
-        <xs:sequence>
-          <xs:any minOccurs="0" processContents="lax"/>
-        </xs:sequence>
-      </xs:complexType>
-    </xs:element>
-    <xs:element name="config-xml">
-      <xs:complexType>
-        <xs:sequence>
-          <xs:any minOccurs="0" processContents="lax"/>
-        </xs:sequence>
-      </xs:complexType>
-    </xs:element>
+	<xs:element name="initializer">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:any processContents="lax" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="config-xml">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:any processContents="lax" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
 	<xs:element name="variant-stream">
 		<xs:complexType>
 			<xs:choice>
@@ -796,16 +797,16 @@
 	</xs:element>
 	<xs:element name="exceptionHandling">
 		<xs:complexType>
-				<xs:sequence>
-					<xs:element ref="esper:handlerFactory" minOccurs="0" maxOccurs="unbounded"/>
-				</xs:sequence>
+			<xs:sequence>
+				<xs:element ref="esper:handlerFactory" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="conditionHandling">
 		<xs:complexType>
-				<xs:sequence>
-					<xs:element ref="esper:handlerFactory" minOccurs="0" maxOccurs="unbounded"/>
-				</xs:sequence>
+			<xs:sequence>
+				<xs:element ref="esper:handlerFactory" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="handlerFactory">
@@ -830,10 +831,10 @@
 	<xs:element name="stmtgroup">
 		<xs:complexType>
 			<xs:choice minOccurs="0" maxOccurs="unbounded">
-					<xs:element name="include-like" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
-					<xs:element name="exclude-like" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
-					<xs:element name="include-regex" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
-					<xs:element name="exclude-regex" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="include-like" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="exclude-like" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="include-regex" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="exclude-regex" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
 			</xs:choice>
 			<xs:attribute name="name" type="xs:string" use="required"/>
 			<xs:attribute name="interval" type="xs:long" use="required"/>

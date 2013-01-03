@@ -11,6 +11,7 @@ package com.espertech.esper.epl.join.plan;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.NumberSetPermutationEnumeration;
 import com.espertech.esper.collection.NumberSetShiftGroupEnumeration;
+import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.join.base.HistoricalViewableDesc;
 import com.espertech.esper.epl.join.table.HistoricalStreamIndexList;
 import com.espertech.esper.util.DependencyGraph;
@@ -114,7 +115,8 @@ public class NStreamQueryPlanBuilder
                                      HistoricalViewableDesc historicalViewableDesc,
                                      DependencyGraph dependencyGraph,
                                      HistoricalStreamIndexList[] historicalStreamIndexLists,
-                                     boolean hasForceNestedIter)
+                                     boolean hasForceNestedIter,
+                                     String[][][] indexedStreamsUniqueProps)
     {
         if (log.isDebugEnabled())
         {
@@ -122,7 +124,7 @@ public class NStreamQueryPlanBuilder
         }
 
         int numStreams = queryGraph.getNumStreams();
-        QueryPlanIndex[] indexSpecs = QueryPlanIndexBuilder.buildIndexSpec(queryGraph, typesPerStream);
+        QueryPlanIndex[] indexSpecs = QueryPlanIndexBuilder.buildIndexSpec(queryGraph, typesPerStream, indexedStreamsUniqueProps);
         if (log.isDebugEnabled())
         {
             log.debug(".build Index build completed, indexes=" + QueryPlanIndex.print(indexSpecs));
@@ -239,11 +241,30 @@ public class NStreamQueryPlanBuilder
     {
         QueryGraphValue queryGraphValue = queryGraph.getGraphValue(currentLookupStream, indexedStream);
         QueryGraphValuePairHashKeyIndex hashKeyProps = queryGraphValue.getHashKeyProps();
-        QueryGraphValuePairRangeIndex rangeProps = queryGraphValue.getRangeProps();
-
+        List<QueryGraphValueEntryHashKeyed> hashKeyPropsKeys = hashKeyProps.getKeys();
         String[] hashIndexProps = hashKeyProps.getIndexed();
+
+        QueryGraphValuePairRangeIndex rangeProps = queryGraphValue.getRangeProps();
+        List<QueryGraphValueEntryRange> rangePropsKeys = rangeProps.getKeys();
         String[] rangeIndexProps = rangeProps.getIndexed();
-        String indexNum = indexSpecs.getIndexNum(hashIndexProps, rangeIndexProps);
+
+        Pair<String, int[]> pairIndexHashRewrite = indexSpecs.getIndexNum(hashIndexProps, rangeIndexProps);
+        String indexNum = pairIndexHashRewrite == null ? null : pairIndexHashRewrite.getFirst();
+
+        // handle index redirection towards unique index
+        if (pairIndexHashRewrite != null && pairIndexHashRewrite.getSecond() != null) {
+            int[] indexes = pairIndexHashRewrite.getSecond();
+            String[] newHashIndexProps = new String[indexes.length];
+            List<QueryGraphValueEntryHashKeyed> newHashKeys = new ArrayList<QueryGraphValueEntryHashKeyed>();
+            for (int i = 0; i < indexes.length; i++) {
+                newHashIndexProps[i] = hashIndexProps[indexes[i]];
+                newHashKeys.add(hashKeyPropsKeys.get(indexes[i]));
+            }
+            hashIndexProps = newHashIndexProps;
+            hashKeyPropsKeys = newHashKeys;
+            rangeIndexProps = new String[0];
+            rangePropsKeys = Collections.emptyList();
+        }
 
         // full table scan - no lookups
         if (hashIndexProps.length == 0 && rangeIndexProps.length == 0) {
@@ -266,7 +287,7 @@ public class NStreamQueryPlanBuilder
         if (hashIndexProps.length > 0 && rangeIndexProps.length == 0)
         {
             // Constructed keyed lookup strategy
-            List<QueryGraphValueEntryHashKeyed> hashKeys = hashKeyProps.getKeys();
+            List<QueryGraphValueEntryHashKeyed> hashKeys = hashKeyPropsKeys;
 
             TableLookupPlan tableLookupPlan;
             if (hashKeys.size() == 1) {
@@ -297,13 +318,13 @@ public class NStreamQueryPlanBuilder
 
         // sorted index lookup
         if (hashIndexProps.length == 0 && rangeIndexProps.length == 1) {
-            QueryGraphValueEntryRange range = rangeProps.getKeys().get(0);
+            QueryGraphValueEntryRange range = rangePropsKeys.get(0);
             return new SortedTableLookupPlan(currentLookupStream, indexedStream, indexNum, range);
         }
         // composite range and index lookup
         else {
-            List<QueryGraphValueEntryHashKeyed> hashKeys = hashKeyProps.getKeys();
-            return new CompositeTableLookupPlan(currentLookupStream, indexedStream, indexNum, hashKeys, rangeProps.getKeys());
+            List<QueryGraphValueEntryHashKeyed> hashKeys = hashKeyPropsKeys;
+            return new CompositeTableLookupPlan(currentLookupStream, indexedStream, indexNum, hashKeys, rangePropsKeys);
         }
     }
 

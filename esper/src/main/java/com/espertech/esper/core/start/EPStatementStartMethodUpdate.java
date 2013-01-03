@@ -42,11 +42,11 @@ public class EPStatementStartMethodUpdate extends EPStatementStartMethodBase
 {
     private static final Log log = LogFactory.getLog(EPStatementStartMethodUpdate.class);
 
-    public EPStatementStartMethodUpdate(StatementSpecCompiled statementSpec, EPServicesContext services, StatementContext statementContext) {
-        super(statementSpec, services, statementContext);
+    public EPStatementStartMethodUpdate(StatementSpecCompiled statementSpec) {
+        super(statementSpec);
     }
 
-    public EPStatementStartResult startInternal(boolean isNewStatement, boolean isRecoveringStatement, boolean isRecoveringResilient) throws ExprValidationException, ViewProcessingException {
+    public EPStatementStartResult startInternal(final EPServicesContext services, final StatementContext statementContext, boolean isNewStatement, boolean isRecoveringStatement, boolean isRecoveringResilient) throws ExprValidationException, ViewProcessingException {
         // define stop
         final List<StopCallback> stopCallbacks = new LinkedList<StopCallback>();
         final EPStatementStopMethod stopMethod = new EPStatementStopMethodImpl(statementContext, stopCallbacks);
@@ -94,7 +94,7 @@ public class EPStatementStartMethodUpdate extends EPStatementStartMethodBase
         statementContext.getStatementResultService().setSelectClause(new Class[] {streamEventType.getUnderlyingType()}, new String[] {"*"}, false, null, evaluatorContextStmt);
 
         // Materialize sub-select views
-        SubSelectStrategyCollection subSelectStrategyCollection = EPStatementStartMethodHelperSubselect.planSubSelect(services, statementContext, queryPlanLogging, subSelectStreamDesc, new String[]{streamName}, new EventType[]{streamEventType}, new String[]{triggereventTypeName}, stopCallbacks, statementSpec.getAnnotations(), statementSpec.getDeclaredExpressions(), null);
+        SubSelectStrategyCollection subSelectStrategyCollection = EPStatementStartMethodHelperSubselect.planSubSelect(services, statementContext, isQueryPlanLogging(services), subSelectStreamDesc, new String[]{streamName}, new EventType[]{streamEventType}, new String[]{triggereventTypeName}, stopCallbacks, statementSpec.getAnnotations(), statementSpec.getDeclaredExpressions(), null);
 
         ExprValidationContext validationContext = new ExprValidationContext(typeService, statementContext.getMethodResolutionService(), null, statementContext.getSchedulingService(), statementContext.getVariableService(), evaluatorContextStmt, statementContext.getEventAdapterService(), statementContext.getStatementName(), statementContext.getStatementId(), statementContext.getAnnotations(), statementContext.getContextDescriptor());
         for (OnTriggerSetAssignment assignment : updateSpec.getAssignments())
@@ -158,7 +158,7 @@ public class EPStatementStartMethodUpdate extends EPStatementStartMethodBase
         }
         // Without context - start here
         else {
-            AgentInstanceContext agentInstanceContext = getDefaultAgentInstanceContext();
+            AgentInstanceContext agentInstanceContext = getDefaultAgentInstanceContext(statementContext);
             final StatementAgentInstanceFactoryUpdateResult resultOfStart = contextFactory.newContext(agentInstanceContext, isRecoveringResilient);
             finalViewable = resultOfStart.getFinalView();
             stopStatementMethod = new EPStatementStopMethod() {

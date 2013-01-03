@@ -144,6 +144,14 @@ for user-controlled imports of classes and packages as outlined in <xref linkend
 						</entry>
 					</row>
 					<row>
+					  <entry><synopsis>istream()</synopsis></entry>
+						<entry>
+							<para>
+								Returns true if the event is part of the insert stream and false if the event is part of the remove stream.
+							</para>
+						</entry>
+					</row>
+					<row>
 						<entry><synopsis>max(<emphasis>expression</emphasis>, <emphasis>expression</emphasis> [, <emphasis>expression</emphasis> ...])</synopsis></entry>
 						<entry>
 							<para>
@@ -416,6 +424,35 @@ select current_timestamp() from MyEvent]]></programlisting>
 			</para>
 		</sect2>
 
+		<sect2 xml:id="epl-single-row-function-istream">
+			<title>The <literal>Istream</literal> Function</title>
+
+			<indexterm><primary>istream</primary></indexterm>
+			<indexterm><primary>functions</primary><secondary>istream</secondary></indexterm>
+			<para>
+				The <literal>istream</literal> function returns a boolean value indicating whether within the context of expression evaluation the current event or set of events (joins) are part of the insert stream (true) or part of the remove stream (false). The function takes no parameters.
+			</para>
+
+			<para>
+				Use the <literal>istream</literal> function with data windows and <literal>select irstream</literal> and <literal>insert irstream into</literal>. 
+			</para>
+
+			<para>
+				In the following example the <literal>istream</literal> function always returns boolean true since no data window is declared:
+			</para>
+			<programlisting>select irstream *, istream() from OrderEvent</programlisting>
+
+			<para>
+				The next example declares a data window. For newly arriving events the function returns boolean true, for events that expire after 10 seconds the function returns boolean false:
+			</para>
+			<programlisting>select irstream *, istream() from OrderEvent.win:time(10 sec)</programlisting>
+			
+			<para>
+			   The <literal>istream</literal> function returns true for all cases where insert or remove stream does not apply, such as when used in parameter expressions to data windows
+			   or in stream filter expressions.
+			</para>
+		</sect2>
+
 		<sect2 xml:id="epl-single-row-function-ref-minmax">
 			<title>The <literal>Min</literal> and <literal>Max</literal> Functions</title>
 
@@ -531,7 +568,7 @@ from Trade.std:groupwin(symbol).ext:sort(1, price asc)</programlisting>
 					</listitem>
 					<listitem>
 						<para>
-							The function requires a data window view, or a <literal>std:groupwin</literal> and data window view, without any additional sub-views. See <xref linkend=" epl-views"/> for built-in data window views.
+							The function requires a data window view, or a <literal>std:groupwin</literal> and data window view, without any additional sub-views. See <xref linkend="win-views"/> for built-in data window views.
 						</para>
 					</listitem>
 				</itemizedlist>
@@ -655,7 +692,7 @@ from Trade.std:groupwin(symbol).win:length(10)</programlisting>
 					</listitem>
 					<listitem>
 						<para>
-							The function requires a data window view, or a <literal>std:groupwin</literal> and data window view, without any additional sub-views. See <xref linkend=" epl-views"/> for built-in data window views.
+							The function requires a data window view, or a <literal>std:groupwin</literal> and data window view, without any additional sub-views. See <xref linkend="win-views"/> for built-in data window views.
 						</para>
 					</listitem>
 				</itemizedlist>
@@ -725,7 +762,7 @@ from Trade.std:groupwin(symbol).win:length(10)</programlisting>
 					</listitem>
 					<listitem>
 						<para>
-							The function requires a data window view, or a <literal>std:groupwin</literal> and data window view, without any additional sub-views. See <xref linkend=" epl-views"/> for built-in data window views.
+							The function requires a data window view, or a <literal>std:groupwin</literal> and data window view, without any additional sub-views. See <xref linkend="win-views"/> for built-in data window views.
 						</para>
 					</listitem>
 				</itemizedlist>
@@ -782,7 +819,7 @@ from Trade.std:groupwin(symbol).win:length(10)</programlisting>
 					</listitem>
 					<listitem>
 						<para>
-							The function requires a data window view, or a <literal>std:groupwin</literal> and data window view, without any additional sub-views. See <xref linkend=" epl-views"/> for built-in data window views.
+							The function requires a data window view, or a <literal>std:groupwin</literal> and data window view, without any additional sub-views. See <xref linkend="win-views"/> for built-in data window views.
 						</para>
 					</listitem>
 				</itemizedlist>
@@ -1072,9 +1109,18 @@ from Trade.std:groupwin(symbol).win:length(10)</programlisting>
 			<title>Data Window Aggregation Functions</title>
 
 			<para>
-				The <literal>first</literal>, <literal>last</literal> and <literal>window</literal> aggregation functions return event properties of events present in a stream's data window. They are useful when information about current data window contents is required.
+				The <literal>first</literal>, <literal>last</literal> and <literal>window</literal> aggregation functions return event properties of events present in a stream's data window or named window. They are useful when information about current data window or named window contents is required.
 			</para>
 			
+			<para>
+			   In connection with named windows, the <literal>first</literal>, <literal>last</literal> and <literal>window</literal> aggregation functions can also be used in <literal>on-select</literal>, 
+			   selects with named window in the <literal>from</literal> clause, subqueries against named windows and on-demand fire-and-forget queries.
+			</para>
+			
+			<para>
+			   The data window aggregation functions are often useful in connection with enumeration methods and they can provide input events for enumeration. Please see <xref linkend="enumerationreference"/> for more information. 
+			</para>
+
 			<para>
 				When comparing the <literal>last</literal> aggregation function to the <literal>prev</literal> function, the differences are as follows. The <literal>prev</literal> function is not an aggregation function and thereby not sensitive to the presence of <literal>group by</literal>. The <literal>prev</literal> function accesses data window contents directly and respects the sort order of the data window. The <literal>last</literal> aggregation function returns results based on arrival order and tracks data window contents in a separate shared data structure.
 			</para>
@@ -1226,10 +1272,15 @@ from SensorEvent.win:time(10 sec)</programlisting>
 				<programlisting>select window(*) from SensorEvent.win:time(10 sec) </programlisting>
 				
 				<para>
-					The <literal>window</literal> aggregation function requires that your stream is bound by a data window. You may not use the <literal>window</literal> aggregation function on unbound streams with the exception of on-demand queries.
+					The <literal>window</literal> aggregation function requires that your stream is bound by a data window or a named window. You may not use the <literal>window</literal> aggregation function on unbound streams with the exception of on-demand queries.
 				</para>
-			</sect3>
 
+				<para>
+					This example statement assumes that the <literal>OrderWindow</literal> named window exists. For each event entering or leaving the <literal>OrderWindow</literal> named window
+					it outputs the total amount removing negative amounts:
+				</para>
+				<programlisting>select window(*).where(v => v.amount > 0).aggregate(0d, (r, v) => r + v.amount) from OrderWindow </programlisting>
+			</sect3>
 		</sect2>
 		
 		<sect2 xml:id="epl-function-aggregation-add">

@@ -66,6 +66,12 @@ public class SODAAnalyzer
     public static List<Expression> analyzeModelExpressions(EPStatementObjectModel model) {
         final List<Expression> expressions = new ArrayList<Expression>();
 
+        if (model.getCreateExpression() != null &&
+            model.getCreateExpression().getExpressionDeclaration() != null &&
+            model.getCreateExpression().getExpressionDeclaration().getExpression() != null) {
+            expressions.add(model.getCreateExpression().getExpressionDeclaration().getExpression());
+        }
+
         if (model.getExpressionDeclarations() != null) {
             for (ExpressionDeclaration decl : model.getExpressionDeclarations()) {
                 expressions.add(decl.getExpression());

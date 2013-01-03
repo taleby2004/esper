@@ -24,7 +24,9 @@ import com.espertech.esper.epl.core.EngineImportService;
 import com.espertech.esper.epl.core.EngineImportSingleRowDesc;
 import com.espertech.esper.epl.core.EngineImportUndefinedException;
 import com.espertech.esper.epl.db.DatabasePollingViewableFactory;
+import com.espertech.esper.epl.declexpr.ExprDeclaredHelper;
 import com.espertech.esper.epl.declexpr.ExprDeclaredNodeImpl;
+import com.espertech.esper.epl.declexpr.ExprDeclaredService;
 import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.epl.generated.EsperEPL2Ast;
 import com.espertech.esper.epl.script.ExprNodeScript;
@@ -92,6 +94,7 @@ public class EPLTreeWalker extends EsperEPL2Ast
     private final ContextManagementService contextManagementService;
     private final CommonTokenStream tokenStream;
     private final List<String> scriptBodies;
+    private final ExprDeclaredService exprDeclaredService;
     private final List<ExpressionScriptProvided> scriptExpressions;
     private final ExpressionDeclDesc expressionDeclarations;
 
@@ -114,7 +117,8 @@ public class EPLTreeWalker extends EsperEPL2Ast
                          ConfigurationInformation configurationInformation,
                          PatternNodeFactory patternNodeFactory,
                          ContextManagementService contextManagementService,
-                         List<String> scriptBodies)
+                         List<String> scriptBodies,
+                         ExprDeclaredService exprDeclaredService)
     {
         super(input);
         this.tokenStream = tokenStream;
@@ -129,6 +133,7 @@ public class EPLTreeWalker extends EsperEPL2Ast
         this.schedulingService = schedulingService;
         this.contextManagementService = contextManagementService;
         this.scriptBodies = scriptBodies;
+        this.exprDeclaredService = exprDeclaredService;
 
         if (defaultStreamSelector == null)
         {
@@ -142,7 +147,7 @@ public class EPLTreeWalker extends EsperEPL2Ast
         // statement-global items
         expressionDeclarations = new ExpressionDeclDesc();
         statementSpec.setExpressionDeclDesc(expressionDeclarations);
-        scriptExpressions = new ArrayList<ExpressionScriptProvided>();
+        scriptExpressions = new ArrayList<ExpressionScriptProvided>(1);
         statementSpec.setScriptExpressions(scriptExpressions);
     }
 
@@ -423,6 +428,9 @@ public class EPLTreeWalker extends EsperEPL2Ast
             case EXISTS:
                 leaveExists(node);
                 break;
+            case ISTREAM:
+                leaveIStreamBuiltin(node);
+                break;
             case CAST:
                 leaveCast(node);
                 break;
@@ -437,6 +445,9 @@ public class EPLTreeWalker extends EsperEPL2Ast
                 break;
             case CREATE_SCHEMA_EXPR:
                 leaveCreateSchema(node);
+                break;
+            case CREATE_EXPR:
+                leaveCreateExpression(node);
                 break;
             case CREATE_WINDOW_SELECT_EXPR:
                 leaveCreateWindowSelect();
@@ -702,6 +713,7 @@ public class EPLTreeWalker extends EsperEPL2Ast
         Tree nodeExpr = node.getChild(2);
         List<CreateIndexItem> columns = new ArrayList<CreateIndexItem>();
 
+        boolean unique = false;
         for (int i = 0; i < nodeExpr.getChildCount(); i++)
         {
             CreateIndexType type = CreateIndexType.HASH;
@@ -722,7 +734,18 @@ public class EPLTreeWalker extends EsperEPL2Ast
             }
         }
 
-        statementSpec.setCreateIndexDesc(new CreateIndexDesc(indexName, windowName, columns));
+        int last = node.getChildCount() - 1;
+        if (node.getChild(last).getType() == IDENT) {
+            String ident = node.getChild(last).getText();
+            if (ident.toLowerCase().trim().equals("unique")) {
+                unique = true;
+            }
+            else {
+                throw new ASTWalkException("Invalid keyword '" + ident + "' in create-index encountered, expected 'unique'");
+            }
+        }
+
+        statementSpec.setCreateIndexDesc(new CreateIndexDesc(unique, indexName, windowName, columns));
     }
 
     private void leaveCreateSchema(Tree node)
@@ -731,6 +754,13 @@ public class EPLTreeWalker extends EsperEPL2Ast
         CreateSchemaDesc createSchema = ASTCreateSchemaHelper.walkCreateSchema(node);
         statementSpec.getStreamSpecs().add(new FilterStreamSpecRaw(new FilterSpecRaw(Object.class.getName(), Collections.<ExprNode>emptyList(), null), Collections.<ViewSpec>emptyList(), null, new StreamSpecOptions()));
         statementSpec.setCreateSchemaDesc(createSchema);
+    }
+
+    private void leaveCreateExpression(Tree node)
+    {
+        log.debug(".leaveCreateExpression");
+        Pair<ExpressionDeclItem, ExpressionScriptProvided> pair = ASTExpressionDeclHelper.walkExpressionDecl(node.getChild(0), scriptBodies, astExprNodeMap);
+        statementSpec.setCreateExpressionDesc(new CreateExpressionDesc(pair));
     }
 
     private void leaveCreateVariable(Tree node)
@@ -744,6 +774,7 @@ public class EPLTreeWalker extends EsperEPL2Ast
 
         int start = 2;
         boolean constant = false;
+        boolean array = false;
         if (node.getChildCount() > start && node.getChild(start).getType() == IDENT) {
             String text = node.getChild(start).getText().toLowerCase().trim();
             if (text.equals("constant") || text.equals("const")) {
@@ -754,6 +785,10 @@ public class EPLTreeWalker extends EsperEPL2Ast
             }
             start++;
         }
+        if (node.getChildCount() > start && node.getChild(start).getType() == LBRACK) {
+            array = true;
+            start++;
+        }
 
         ExprNode assignment = null;
         if (node.getChildCount() > start) {
@@ -761,7 +796,7 @@ public class EPLTreeWalker extends EsperEPL2Ast
             assignment = astExprNodeMap.remove(child);
         }
 
-        CreateVariableDesc desc = new CreateVariableDesc(variableType, variableName, assignment, constant);
+        CreateVariableDesc desc = new CreateVariableDesc(variableType, variableName, assignment, constant, array);
         statementSpec.setCreateVariableDesc(desc);
     }
 
@@ -823,6 +858,7 @@ public class EPLTreeWalker extends EsperEPL2Ast
         {
             // The ON_EXPR_FROM contains the window name
             UniformPair<String> windowName = getWindowName(typeChildNode);
+            boolean deleteAndSelect = typeChildNode.getChild(0).getType() == DELETE;
             if (windowName == null)
             {
                 // on the statement spec, the deepest spec is the outermost
@@ -848,7 +884,7 @@ public class EPLTreeWalker extends EsperEPL2Ast
             }
             else
             {
-                statementSpec.setOnTriggerDesc(new OnTriggerWindowDesc(windowName.getFirst(), windowName.getSecond(), isOnDelete ? OnTriggerType.ON_DELETE : OnTriggerType.ON_SELECT));
+                statementSpec.setOnTriggerDesc(new OnTriggerWindowDesc(windowName.getFirst(), windowName.getSecond(), isOnDelete ? OnTriggerType.ON_DELETE : OnTriggerType.ON_SELECT, deleteAndSelect));
             }
         }
         else
@@ -983,7 +1019,7 @@ public class EPLTreeWalker extends EsperEPL2Ast
         log.debug(".leaveUpdateExpr");
 
         String eventTypeName = node.getChild(0).getText();
-        FilterStreamSpecRaw streamSpec = new FilterStreamSpecRaw(new FilterSpecRaw(eventTypeName, Collections.<ExprNode>emptyList(), null), new ArrayList<ViewSpec>(), eventTypeName, new StreamSpecOptions());
+        FilterStreamSpecRaw streamSpec = new FilterStreamSpecRaw(new FilterSpecRaw(eventTypeName, Collections.<ExprNode>emptyList(), null), new ArrayList<ViewSpec>(1), eventTypeName, new StreamSpecOptions());
         statementSpec.getStreamSpecs().add(streamSpec);
 
         String optionalStreamName = null;
@@ -1086,6 +1122,14 @@ public class EPLTreeWalker extends EsperEPL2Ast
 
         ExprPropertyExistsNode instanceofNode = new ExprPropertyExistsNode();
         astExprNodeMap.put(node, instanceofNode);
+    }
+
+    private void leaveIStreamBuiltin(Tree node)
+    {
+        log.debug(".leaveIStreamBuiltin");
+
+        ExprIStreamNode istreamNode = new ExprIStreamNode();
+        astExprNodeMap.put(node, istreamNode);
     }
 
     private void leaveCast(Tree node)
@@ -1725,7 +1769,7 @@ public class EPLTreeWalker extends EsperEPL2Ast
                     }
                     String toCompile = "select * from java.lang.Object where " + expression;
                     StatementSpecRaw raw = EPAdministratorHelper.compileEPL(toCompile, expression, false, null, SelectClauseStreamSelectorEnum.ISTREAM_ONLY,
-                            engineImportService, variableService, schedulingService, engineURI, configurationInformation, patternNodeFactory, contextManagementService);
+                            engineImportService, variableService, schedulingService, engineURI, configurationInformation, patternNodeFactory, contextManagementService, exprDeclaredService);
 
                     if ((raw.getSubstitutionParameters() != null) && (raw.getSubstitutionParameters().size() > 0)) {
                         throw new ASTWalkException("EPL substitution parameters are not allowed in SQL ${...} expressions, consider using a variable instead");
@@ -1817,10 +1861,10 @@ public class EPLTreeWalker extends EsperEPL2Ast
 
             Pair<String, String> mappedPropertyPair = ASTFilterSpecHelper.getMappedPropertyPair(node);
             if (mappedPropertyPair != null) {
-                ExpressionScriptProvided script = findScript(mappedPropertyPair.getFirst(), 1);
-                if (script != null) {
-                    exprNode = new ExprNodeScript(configurationInformation.getEngineDefaults().getScripts().getDefaultDialect(), script,
-                            Collections.<ExprNode>singletonList(new ExprConstantNodeImpl(mappedPropertyPair.getSecond())));
+                List<ExprNode> params = Collections.<ExprNode>singletonList(new ExprConstantNodeImpl(mappedPropertyPair.getSecond()));
+                ExprNodeScript scriptNode = ExprDeclaredHelper.getExistsScript(getDefaultDialect(), mappedPropertyPair.getFirst(), params, scriptExpressions, exprDeclaredService);
+                if (scriptNode != null) {
+                    exprNode = scriptNode;
                 }
             }
         }
@@ -1952,49 +1996,23 @@ public class EPLTreeWalker extends EsperEPL2Ast
         }
 
         // try expression declaration local statement
-        if (!expressionDeclarations.getExpressions().isEmpty()) {
-            String name = node.getChild(0).getText();
-            List<ExprChainedSpec> chained = getLibFuncChain(parent);
-            for (ExpressionDeclItem declNode : expressionDeclarations.getExpressions()) {
-                if (declNode.getName().equals(name)) {
-                    astExprNodeMap.put(node, new ExprDeclaredNodeImpl(declNode, chained.get(0).getParameters()));
-                    return;
-                }
-            }
+        String expressionName = node.getChild(0).getText();
+        List<ExprChainedSpec> expressionChain = getLibFuncChain(parent);
+        ExprDeclaredNodeImpl declaredNode = ExprDeclaredHelper.getExistsDeclaredExpr(expressionName, expressionChain.get(0).getParameters(), expressionDeclarations.getExpressions(), exprDeclaredService);
+        if (declaredNode != null) {
+            astExprNodeMap.put(node, declaredNode);
+            return;
         }
 
         // try scripting expression
-        if (!scriptExpressions.isEmpty()) {
-            String name = node.getChild(0).getText();
-            List<ExprChainedSpec> chained = getLibFuncChain(parent);
-            ExpressionScriptProvided script = findScript(name, chained.get(0).getParameters().size());
-            if (script != null) {
-                astExprNodeMap.put(node, new ExprNodeScript(configurationInformation.getEngineDefaults().getScripts().getDefaultDialect(), script, chained.get(0).getParameters()));
-                return;
-            }
+        ExprNodeScript scriptNode = ExprDeclaredHelper.getExistsScript(getDefaultDialect(), expressionName, expressionChain.get(0).getParameters(), scriptExpressions, exprDeclaredService);
+        if (scriptNode != null) {
+            astExprNodeMap.put(node, scriptNode);
+            return;
         }
 
         // Could be a mapped property with an expression-parameter "mapped(expr)" or array property with an expression-parameter "array(expr)".
-        List<ExprChainedSpec> spec = new ArrayList<ExprChainedSpec>();
-        List<ExprNode> childExpressions = ASTLibHelper.getExprNodesLibFunc(0, node, astExprNodeMap);
-        spec.add(new ExprChainedSpec(childNodeText, childExpressions, false));
-        astExprNodeMap.put(node, new ExprDotNode(spec, false, false));
-    }
-
-    private ExpressionScriptProvided findScript(String name, int parameterCount) {
-        if (scriptExpressions.isEmpty()) {
-            return null;
-        }
-        ExpressionScriptProvided nameMatchedScript = null;
-        for (ExpressionScriptProvided script : scriptExpressions) {
-            if (script.getName().equals(name) && script.getParameterNames().size() == parameterCount) {
-                return script;
-            }
-            if (script.getName().equals(name)) {
-                nameMatchedScript = script;
-            }
-        }
-        return nameMatchedScript;
+        astExprNodeMap.put(node, new ExprDotNode(Collections.singletonList(expressionChain.get(0)), false, false));
     }
 
     private void leaveDotExpr(Tree node)
@@ -2049,23 +2067,16 @@ public class EPLTreeWalker extends EsperEPL2Ast
         ExprDotNode dotNode = new ExprDotNode(chained, duckType, udfCache);
 
         // try expression declaration local statement
-        if (!expressionDeclarations.getExpressions().isEmpty()) {
-            String name = chained.get(0).getName();
-            for (ExpressionDeclItem declNode : expressionDeclarations.getExpressions()) {
-                if (declNode.getName().equals(name)) {
-                    dotNode.addChildNode(new ExprDeclaredNodeImpl(declNode, chained.get(0).getParameters()));
-                    chained.remove(0);
-                    break;
-                }
-            }
+        String name = chained.get(0).getName();
+        ExprDeclaredNodeImpl declaredNode = ExprDeclaredHelper.getExistsDeclaredExpr(name, chained.get(0).getParameters(), expressionDeclarations.getExpressions(), exprDeclaredService);
+        if (declaredNode != null) {
+            dotNode.addChildNode(declaredNode);
+            chained.remove(0);
         }
-
-        // try scripting expression
-        if (!scriptExpressions.isEmpty()) {
-            String name = chained.get(0).getName();
-            ExpressionScriptProvided script = findScript(name, chained.get(0).getParameters().size());
-            if (script != null) {
-                dotNode.addChildNode(new ExprNodeScript(configurationInformation.getEngineDefaults().getScripts().getDefaultDialect(), script, chained.get(0).getParameters()));
+        else {
+            ExprNodeScript scriptNode = ExprDeclaredHelper.getExistsScript(getDefaultDialect(), name, chained.get(0).getParameters(), scriptExpressions, exprDeclaredService);
+            if (scriptNode != null) {
+                dotNode.addChildNode(scriptNode);
                 chained.remove(0);
             }
         }
@@ -2574,10 +2585,15 @@ public class EPLTreeWalker extends EsperEPL2Ast
         Tree child = node.getChild(count);
 
         // istream or rstream
-        boolean isIStream = true;
+        SelectClauseStreamSelectorEnum selector = SelectClauseStreamSelectorEnum.ISTREAM_ONLY;
         if (child.getType() == RSTREAM)
         {
-            isIStream = false;
+            selector = SelectClauseStreamSelectorEnum.RSTREAM_ONLY;
+            child = node.getChild(++count);
+        }
+        if (child.getType() == IRSTREAM)
+        {
+            selector = SelectClauseStreamSelectorEnum.RSTREAM_ISTREAM_BOTH;
             child = node.getChild(++count);
         }
         if (child.getType() == ISTREAM)
@@ -2587,7 +2603,7 @@ public class EPLTreeWalker extends EsperEPL2Ast
 
         // type name
         String eventTypeName = child.getText();
-        InsertIntoDesc insertIntoDesc = new InsertIntoDesc(isIStream, eventTypeName);
+        InsertIntoDesc insertIntoDesc = new InsertIntoDesc(selector, eventTypeName);
 
         // optional columns
         child = node.getChild(++count);
@@ -2885,43 +2901,13 @@ public class EPLTreeWalker extends EsperEPL2Ast
         {
             log.debug(".leaveExpressionEval");
         }
-
-        String name = node.getChild(0).getText();
-        if (node.getChild(1).getType() == EXPRESSIONDECL) {
-            String expressionText = scriptBodies.remove(0);
-            Tree parametersNode = ASTUtil.findFirstNode(node, EXPRCOL);
-            List<String> parameters = Collections.emptyList();
-            if (parametersNode != null) {
-                parameters = ASTLibHelper.getIdentList(parametersNode);
-            }
-            Tree optionalReturnTypeNode = ASTUtil.findFirstNode(node, CLASS_IDENT);
-            boolean optionalReturnTypeArray = ASTUtil.findFirstNode(node, LBRACK) != null;
-            Tree optionalDialectNode = ASTUtil.findFirstNode(node, COLON);
-            scriptExpressions.add(new ExpressionScriptProvided(name, expressionText, parameters,
-                    optionalReturnTypeNode != null ? optionalReturnTypeNode.getText() : null,
-                    optionalReturnTypeArray,
-                    optionalDialectNode != null ? optionalDialectNode.getChild(0).getText() : null));
-            return;
+        Pair<ExpressionDeclItem, ExpressionScriptProvided> pair = ASTExpressionDeclHelper.walkExpressionDecl(node, scriptBodies, astExprNodeMap);
+        if (pair.getFirst() != null) {
+            expressionDeclarations.add(pair.getFirst());
         }
-
-        Tree parentGoes = node.getChild(1);
-        ExprNode inner = ASTExprHelper.getRemoveExpr(parentGoes.getChild(0), this.astExprNodeMap);
-
-        List<String> parametersNames = Collections.emptyList();
-        if (parentGoes.getChildCount() > 1) {
-            if (parentGoes.getChild(1).getType() == GOES) {
-                Tree paramParent = parentGoes.getChild(1);
-                if (paramParent.getChild(0).getType() == EXPRCOL) {
-                    parametersNames = ASTLibHelper.getIdentList(paramParent.getChild(0));
-                }
-                else {
-                    parametersNames = Collections.singletonList(paramParent.getChild(0).getText());
-                }
-            }
+        else {
+            scriptExpressions.add(pair.getSecond());
         }
-
-        ExpressionDeclItem declNode = new ExpressionDeclItem(name, parametersNames, inner);
-        expressionDeclarations.add(declNode);
     }
 
     private void leaveNewKeyword(Tree node)
@@ -3145,6 +3131,10 @@ public class EPLTreeWalker extends EsperEPL2Ast
             chained.add(chainSpec);
         }
         return chained;
+    }
+
+    private String getDefaultDialect() {
+        return configurationInformation.getEngineDefaults().getScripts().getDefaultDialect();
     }
 
     private static final Log log = LogFactory.getLog(EPLTreeWalker.class);

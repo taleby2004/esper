@@ -8,10 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.example.terminal.recvr;
 
-import javax.jms.MessageListener;
-import javax.jms.Message;
-import javax.jms.TextMessage;
-import javax.jms.JMSException;
+import javax.jms.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -25,8 +22,14 @@ public class TerminalServiceListener implements MessageListener
             DateFormat dateFormat = SimpleDateFormat.getInstance();
             String date = dateFormat.format(new Date());
 
-            TextMessage textMessage = (TextMessage) message;
-            System.out.println(date + " " + textMessage.getText());
+            if (message instanceof TextMessage) {
+                TextMessage textMessage = (TextMessage) message;
+                System.out.println(date + " " + textMessage.getText());
+            }
+            else {
+                ObjectMessage objectMessage = (ObjectMessage) message;
+                System.out.println(date + " " + objectMessage.getObject());
+            }
         }
         catch (JMSException ex)
         {

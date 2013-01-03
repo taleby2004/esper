@@ -249,7 +249,7 @@ public class TestContextSelectionAndFireAndForget extends TestCase {
             fail();
         }
         catch (Exception ex) {
-            assertEquals(ex.getMessage(), expected);
+            assertEquals(expected, ex.getMessage());
         }
     }
 }

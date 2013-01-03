@@ -71,6 +71,21 @@ public class TestNamedWindowIndex extends TestCase
         EPAssertionUtil.assertPropsPerRow(result.getArray(), fields, expected);
     }
 
+    public void testUniqueIndexUniqueView() {
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
+        EPStatement stmtWindow = epService.getEPAdministrator().createEPL("create window MyWindowOne.std:unique(theString) as SupportBean");
+        epService.getEPAdministrator().createEPL("insert into MyWindowOne select * from SupportBean");
+        epService.getEPAdministrator().createEPL("create unique index I1 on MyWindowOne(theString)");
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E0", 1));
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 3));
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 4));
+        epService.getEPRuntime().sendEvent(new SupportBean("E0", 5));
+
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmtWindow.iterator(), "theString,intPrimitive".split(","), new Object[][] {{"E0", 5}, {"E1", 4}, {"E2", 3}});
+    }
+
     public void testHashBTreeWidening() {
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean_A", SupportBean_A.class);
@@ -92,6 +107,13 @@ public class TestNamedWindowIndex extends TestCase
         assertEquals(model.toEPL(), epl);
         EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
         assertEquals(epl, stmt.getText());
+
+        // SODA with unique
+        String eplUnique = "create unique index IX2 on MyWindowOne(f1)";
+        EPStatementObjectModel modelUnique = epService.getEPAdministrator().compileEPL(eplUnique);
+        assertEquals(eplUnique, modelUnique.toEPL());
+        EPStatement stmtUnique = epService.getEPAdministrator().createEPL(eplUnique);
+        assertEquals(eplUnique, stmtUnique.getText());
 
         // coerce to short
         stmtTextCreate = "create window MyWindowTwo.win:keepall() as (f1 short, f2 string)";
@@ -328,6 +350,26 @@ public class TestNamedWindowIndex extends TestCase
 
         tryInvalid("create index IndexTwo on MyWindowX(f1 bubu, f2)",
                    "Invalid column index type 'bubu' encountered, please use any of the following index type names [BTREE, HASH] [create index IndexTwo on MyWindowX(f1 bubu, f2)]");
+
+        tryInvalid("create gugu index IndexTwo on MyWindowOne(f2)",
+                   "Invalid keyword 'gugu' in create-index encountered, expected 'unique' [create gugu index IndexTwo on MyWindowOne(f2)]");
+
+        tryInvalid("create unique index IndexTwo on MyWindowOne(f2 btree)",
+                "Error starting statement: Combination of unique index with btree (range) is not supported [create unique index IndexTwo on MyWindowOne(f2 btree)]");
+
+        // invalid insert-into unique index
+        epService.getEPAdministrator().getConfiguration().addEventType(SupportBean.class);
+        epService.getEPAdministrator().createEPL("@Name('create') create window MyWindowTwo.win:keepall() as SupportBean");
+        epService.getEPAdministrator().createEPL("@Name('insert') insert into MyWindowTwo select * from SupportBean");
+        epService.getEPAdministrator().createEPL("create unique index I1 on MyWindowTwo(theString)");
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        try {
+            epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+            fail();
+        }
+        catch (Exception ex) {
+            assertEquals("Unexpected exception in statement 'create': Unique index violation, index 'I1' is a unique index and key 'E1' already exists", ex.getMessage());
+        }
     }
 
     private void tryInvalid(String epl, String message) {

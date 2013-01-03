@@ -18,12 +18,27 @@ import java.util.NoSuchElementException;
 
 public class GeneratorIterator implements Iterator<Object>
 {
+    public final static GeneratorIteratorCallback DEFAULT_SUPPORTEBEAN_CB = new GeneratorIteratorCallback() {
+        public Object getObject(int numEvent) {
+            return new SupportBean(Integer.toString(numEvent), numEvent);
+        }
+    };
+
     private final int maxNumEvents;
+    private final GeneratorIteratorCallback callback;
+
     private int numEvents;
+
+    public GeneratorIterator(int maxNumEvents, GeneratorIteratorCallback callback)
+    {
+        this.maxNumEvents = maxNumEvents;
+        this.callback = callback;
+    }
 
     public GeneratorIterator(int maxNumEvents)
     {
         this.maxNumEvents = maxNumEvents;
+        this.callback = DEFAULT_SUPPORTEBEAN_CB;
     }
 
     public boolean hasNext()
@@ -41,9 +56,9 @@ public class GeneratorIterator implements Iterator<Object>
         {
             throw new NoSuchElementException();
         }
-        SupportBean bean = new SupportBean(Integer.toString(numEvents), numEvents);
+        Object event = callback.getObject(numEvents);
         numEvents++;
-        return bean;
+        return event;
     }
 
     public void remove()

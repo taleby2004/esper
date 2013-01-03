@@ -41,6 +41,9 @@ public class ExprPreviousEvalStrategyCount implements ExprPreviousEvalStrategy
         {
             EventBean evalEvent = eventsPerStream[streamNumber];
             RelativeAccessByEventNIndex relativeAccess = relativeAccessGetter.getAccessor(evalEvent);
+            if (relativeAccess == null) {
+                return null;
+            }
             size = relativeAccess.getWindowToEventCount(evalEvent);
         }
 

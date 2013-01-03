@@ -18,4 +18,5 @@ public interface ExprIdentNodeEvaluator extends ExprEvaluator
     public boolean evaluatePropertyExists(EventBean[] eventsPerStream, boolean isNewData);
     public int getStreamNum();
     public EventPropertyGetter getGetter();
+    public boolean isContextEvaluated();
 }

@@ -12,7 +12,6 @@
 package com.espertech.esper.epl.enummethod.eval;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
 import java.util.Collection;
@@ -28,7 +27,7 @@ public class EnumEvalMostLeastFrequentScalar extends EnumEvalBase implements Enu
         this.isMostFrequent = isMostFrequent;
     }
 
-    public Object evaluateEnumMethod(Collection target, boolean isNewData, ExprEvaluatorContext context) {
+    public Object evaluateEnumMethod(EventBean[] eventsLambda, Collection target, boolean isNewData, ExprEvaluatorContext context) {
         Map<Object, Integer> items = new LinkedHashMap<Object, Integer>();
 
         for (Object next : target) {
