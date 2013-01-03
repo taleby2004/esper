@@ -160,7 +160,7 @@ public class DataFlowServiceImpl implements DataFlowService {
     public synchronized EPDataFlowInstance instantiateSavedConfiguration(String configurationName) throws EPDataFlowInstantiationException {
         EPDataFlowSavedConfiguration savedConfiguration = configurationState.getSavedConfig(configurationName);
         if (savedConfiguration == null) {
-            throw new EPDataFlowInstantiationException("Dataflow savedConfiguration '" + configurationName + "' could not be found");
+            throw new EPDataFlowInstantiationException("Dataflow saved configuration '" + configurationName + "' could not be found");
         }
         EPDataFlowInstantiationOptions options = savedConfiguration.getOptions();
         if (options == null) {

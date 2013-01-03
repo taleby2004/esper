@@ -61,8 +61,13 @@ public class StatementAgentInstancePostLoadSelect implements StatementAgentInsta
             if (namedWindowTailViews[stream] != null) {
                 NamedWindowTailViewInstance nwtail = namedWindowTailViews[stream];
                 Collection<EventBean> snapshot = nwtail.snapshotNoLock(namedWindowPostloadFilters[stream], annotations);
-                eventsInWindow = new ArrayList<EventBean>(snapshot.size());
-                ExprNodeUtility.applyFilterExpressionsIterable(snapshot, namedWindowFilters[stream], exprEvaluatorContext, eventsInWindow);
+                if (namedWindowFilters[stream] != null) {
+                    eventsInWindow = new ArrayList<EventBean>(snapshot.size());
+                    ExprNodeUtility.applyFilterExpressionsIterable(snapshot, namedWindowFilters[stream], exprEvaluatorContext, eventsInWindow);
+                }
+                else {
+                    eventsInWindow = snapshot;
+                }
             }
             else if (namedWindowFilters[stream] != null && !namedWindowFilters[stream].isEmpty()) {
                 eventsInWindow = new ArrayDeque<EventBean>();
