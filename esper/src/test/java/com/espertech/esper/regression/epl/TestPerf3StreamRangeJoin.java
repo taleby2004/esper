@@ -54,7 +54,7 @@ public class TestPerf3StreamRangeJoin extends TestCase
         epService.getEPAdministrator().createEPL("create window ST0.win:keepall() as SupportBean_ST0");
         epService.getEPAdministrator().createEPL("@Name('I1') insert into ST0 select * from SupportBean_ST0");
         epService.getEPAdministrator().createEPL("create window ST1.win:keepall() as SupportBean_ST1");
-        epService.getEPAdministrator().createEPL("@Name('I1') insert into ST1 select * from SupportBean_ST1");
+        epService.getEPAdministrator().createEPL("@Name('I2') insert into ST1 select * from SupportBean_ST1");
 
         // Preload
         log.info("Preloading events");
@@ -85,7 +85,7 @@ public class TestPerf3StreamRangeJoin extends TestCase
         epService.getEPAdministrator().createEPL("create window ST0.win:keepall() as SupportBean_ST0");
         epService.getEPAdministrator().createEPL("@Name('I1') insert into ST0 select * from SupportBean_ST0");
         epService.getEPAdministrator().createEPL("create window ST1.win:keepall() as SupportBean_ST1");
-        epService.getEPAdministrator().createEPL("@Name('I1') insert into ST1 select * from SupportBean_ST1");
+        epService.getEPAdministrator().createEPL("@Name('I2') insert into ST1 select * from SupportBean_ST1");
 
         // Preload
         log.info("Preloading events");
@@ -127,7 +127,7 @@ public class TestPerf3StreamRangeJoin extends TestCase
         epService.getEPAdministrator().createEPL("create window SBR.win:keepall() as SupportBeanRange");
         epService.getEPAdministrator().createEPL("@Name('I1') insert into SBR select * from SupportBeanRange");
         epService.getEPAdministrator().createEPL("create window ST1.win:keepall() as SupportBean_ST1");
-        epService.getEPAdministrator().createEPL("@Name('I1') insert into ST1 select * from SupportBean_ST1");
+        epService.getEPAdministrator().createEPL("@Name('I2') insert into ST1 select * from SupportBean_ST1");
 
         // Preload
         log.info("Preloading events");

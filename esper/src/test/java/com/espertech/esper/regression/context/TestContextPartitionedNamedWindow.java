@@ -139,10 +139,10 @@ public class TestContextPartitionedNamedWindow extends TestCase {
         epService.getEPAdministrator().createEPL("@Name('named window') context SegmentedByString create window MyWindow.win:keepall() as SupportBean");
         epService.getEPAdministrator().createEPL("@Name('insert') insert into MyWindow select * from SupportBean");
 
-        epService.getEPAdministrator().createEPL("@Name('on-merge') context SegmentedByString select irstream * from MyWindow").addListener(listenerSelect);
+        epService.getEPAdministrator().createEPL("@Name('selectit') context SegmentedByString select irstream * from MyWindow").addListener(listenerSelect);
 
         // Delete testing
-        EPStatement stmtDelete = epService.getEPAdministrator().createEPL("@Name('on-merge') context SegmentedByString on SupportBean_S0 delete from MyWindow");
+        EPStatement stmtDelete = epService.getEPAdministrator().createEPL("@Name('on-delete') context SegmentedByString on SupportBean_S0 delete from MyWindow");
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 1));
         EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fieldsNW, new Object[]{"G1", 1});

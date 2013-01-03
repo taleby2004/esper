@@ -22,6 +22,7 @@ import java.util.Map;
  */
 public class EPDataFlowInstantiationOptions implements Serializable {
 
+    private static final long serialVersionUID = -2935388024377311454L;
     private EPDataFlowOperatorProvider operatorProvider;
     private EPDataFlowOperatorParameterProvider parameterProvider;
     private EPDataFlowExceptionHandler exceptionHandler;
@@ -214,14 +215,27 @@ public class EPDataFlowInstantiationOptions implements Serializable {
         return this;
     }
 
+    /**
+     * Returns the event sender /runtime to use
+     * @return runtime.
+     */
     public EPRuntimeEventSender getSurrogateEventSender() {
         return surrogateEventSender;
     }
 
+    /**
+     * Sets the event sender /runtime to use
+     * @param surrogateEventSender runtime to use for sending
+     */
     public void setSurrogateEventSender(EPRuntimeEventSender surrogateEventSender) {
         this.surrogateEventSender = surrogateEventSender;
     }
 
+    /**
+     * Add a parameter.
+     * @param name is the uri
+     * @param value the value
+     */
     public void addParameterURI(String name, Object value) {
         if (parametersURIs == null) {
             parametersURIs = new HashMap<String, Object>();
@@ -229,10 +243,18 @@ public class EPDataFlowInstantiationOptions implements Serializable {
         parametersURIs.put(name, value);
     }
 
+    /**
+     * Returns parameters.
+     * @return parameters
+     */
     public Map<String, Object> getParametersURIs() {
         return parametersURIs;
     }
 
+    /**
+     * Sets parameters.
+     * @param parametersURIs map of name value pairs
+     */
     public void setParametersURIs(Map<String, Object> parametersURIs) {
         this.parametersURIs = parametersURIs;
     }

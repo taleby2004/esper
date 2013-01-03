@@ -17,6 +17,9 @@ public class ConfigurationEventTypeObjectArray extends ConfigurationEventTypeWit
 {
     private static final long serialVersionUID = -5404892001689512405L;
 
+    /**
+     * Message for single supertype for object-arrays.
+     */
     public static final String SINGLE_SUPERTYPE_MSG = "Object-array event types only allow a single supertype";
 
     /**

@@ -12,7 +12,6 @@
 package com.espertech.esper.core.service;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.event.arr.ObjectArrayEventBean;
 
 import java.lang.ref.SoftReference;
 import java.util.*;
@@ -26,8 +25,6 @@ public class ExpressionResultCacheServiceAgentInstance implements ExpressionResu
 
     private Deque<ExpressionResultCacheStackEntry> callStack;
     private Deque<Long> lastValueCacheStack;
-
-    private ObjectArrayEventBean enumMethodEvaluationBean;
 
     public ExpressionResultCacheServiceAgentInstance() {
     }

@@ -1538,7 +1538,16 @@ public class EPAssertionUtil
         return raw;
     }
 
+    /**
+     * Callback for extracting individual collection items for assertion.
+     */
     public static interface AssertionCollectionValueString {
+
+        /**
+         * Extract value.
+         * @param collectionItem to extract from
+         * @return extracted value
+         */
         public String extractValue(Object collectionItem);
     }
 }

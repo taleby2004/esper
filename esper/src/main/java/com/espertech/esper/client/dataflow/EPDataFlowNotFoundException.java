@@ -18,6 +18,8 @@ import com.espertech.esper.client.EPException;
  */
 public class EPDataFlowNotFoundException extends EPException {
 
+    private static final long serialVersionUID = -4913672758054359149L;
+
     /**
      * Ctor.
      * @param message error message

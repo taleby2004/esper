@@ -817,10 +817,18 @@ public class EPStatementObjectModel implements Serializable
         this.treeObjectName = treeObjectName;
     }
 
+    /**
+     * Returns the create-expression clause, if any
+     * @return clause
+     */
     public CreateExpressionClause getCreateExpression() {
         return createExpression;
     }
 
+    /**
+     * Sets the create-expression clause, if any
+     * @param createExpression clause
+     */
     public void setCreateExpression(CreateExpressionClause createExpression) {
         this.createExpression = createExpression;
     }

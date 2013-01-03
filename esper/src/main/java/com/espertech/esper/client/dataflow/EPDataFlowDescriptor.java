@@ -21,20 +21,38 @@ public class EPDataFlowDescriptor {
     private final EPStatementState statementState;
     private final String statementName;
 
+    /**
+     * Ctor.
+     * @param dataFlowName data flow name
+     * @param statementState statement state
+     * @param statementName statement name
+     */
     public EPDataFlowDescriptor(String dataFlowName, EPStatementState statementState, String statementName) {
         this.dataFlowName = dataFlowName;
         this.statementState = statementState;
         this.statementName = statementName;
     }
 
+    /**
+     * Returns the data flow name.
+     * @return name
+     */
     public String getDataFlowName() {
         return dataFlowName;
     }
 
+    /**
+     * Returns the statement state.
+     * @return statement state
+     */
     public EPStatementState getStatementState() {
         return statementState;
     }
 
+    /**
+     * Returns the statement name.
+     * @return statement name.
+     */
     public String getStatementName() {
         return statementName;
     }

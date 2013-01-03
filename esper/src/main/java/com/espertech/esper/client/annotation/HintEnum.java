@@ -168,6 +168,7 @@ public enum HintEnum
      * Validate a hint annotation ensuring it contains only recognized hints.
      * @param annotation to validate
      * @throws AnnotationException if an invalid text was found
+     * @return validated hint enums and their parameter list
      */
     public static Map<HintEnum, List<String>> validateGetListed(Annotation annotation) throws AnnotationException
     {
@@ -299,6 +300,11 @@ public enum HintEnum
         }
     }
 
+    /**
+     * Returns hint value.
+     * @param annotation to look for
+     * @return hint assigned first value provided
+     */
     public String getHintAssignedValue(Hint annotation) {
         try {
             Map<HintEnum, List<String>> hintValues = validateGetListed(annotation);
@@ -312,6 +318,11 @@ public enum HintEnum
         }
     }
 
+    /**
+     * Returns all values assigned for a given hint, if any
+     * @param annotations to be interogated
+     * @return hint assigned values or null if none found
+     */
     public List<String> getHintAssignedValues(Annotation[] annotations) {
         List<String> allHints = null;
         try {
@@ -379,6 +390,11 @@ public enum HintEnum
         return null;
     }
 
+    /**
+     * Split a line of comma-separated values allowing parenthesis.
+     * @param line to split
+     * @return parameters
+     */
     public static String[] splitCommaUnlessInParen(String line) {
         int nestingLevelParen = 0;
 

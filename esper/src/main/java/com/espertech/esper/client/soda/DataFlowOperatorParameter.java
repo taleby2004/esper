@@ -74,12 +74,21 @@ public class DataFlowOperatorParameter implements Serializable {
         this.parameterValue = parameterValue;
     }
 
+    /**
+     * Render parameter.
+     * @param writer to write to
+     */
     public void toEpl(StringWriter writer) {
         writer.write(parameterName);
         writer.write(": ");
         renderValue(writer, parameterValue);
     }
 
+    /**
+     * Render prameter.
+     * @param writer to render to
+     * @param parameterValue value
+     */
     public static void renderValue(StringWriter writer, Object parameterValue) {
         if (parameterValue instanceof EPStatementObjectModel) {
             writer.write("(");

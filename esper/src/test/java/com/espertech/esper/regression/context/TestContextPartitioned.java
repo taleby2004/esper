@@ -407,7 +407,7 @@ public class TestContextPartitioned extends TestCase {
         stmtPrev.stop();
 
         String[] fieldsPrior = new String[] {"theString", "col1"};
-        EPStatement stmtPrior = epService.getEPAdministrator().createEPL("@Name('A') context SegmentedByString " +
+        EPStatement stmtPrior = epService.getEPAdministrator().createEPL("@Name('B') context SegmentedByString " +
                 "select theString, (select prior(0, id) from SupportBean_S0.win:keepall()) as col1 from SupportBean");
         stmtPrior.addListener(listener);
 

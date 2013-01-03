@@ -13,7 +13,10 @@ package com.espertech.esper.epl.spec;
 
 import com.espertech.esper.collection.Pair;
 
-public class CreateExpressionDesc {
+import java.io.Serializable;
+
+public class CreateExpressionDesc implements Serializable {
+    private static final long serialVersionUID = 7784429868833410090L;
     private final ExpressionDeclItem expression;
     private final ExpressionScriptProvided script;
 

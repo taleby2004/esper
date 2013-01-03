@@ -104,10 +104,18 @@ public class InsertIntoClause implements Serializable
         this.columnNames = columnNames;
     }
 
+    /**
+     * Returns the stream selector for the insert into.
+     * @return stream selector
+     */
     public StreamSelector getStreamSelector() {
         return streamSelector;
     }
 
+    /**
+     * Sets the stream selector for the insert into.
+     * @param streamSelector stream selector
+     */
     public void setStreamSelector(StreamSelector streamSelector) {
         this.streamSelector = streamSelector;
     }

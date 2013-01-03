@@ -52,6 +52,10 @@ public class EPDataFlowCancellationException extends EPException {
         this.dataFlowName = dataFlowName;
     }
 
+    /**
+     * Returns the data flow name.
+     * @return name
+     */
     public String getDataFlowName() {
         return dataFlowName;
     }

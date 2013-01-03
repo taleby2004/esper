@@ -269,7 +269,7 @@ public class SelectClause implements Serializable
      * @param writer to output to
      * @param formatter for newline-whitespace formatting
      * @param isTopLevel to indicate if this select-clause is inside other clauses.
-     * @param andDelete
+     * @param andDelete indicator whether select and delete
      */
     public void toEPL(StringWriter writer, EPStatementFormatter formatter, boolean isTopLevel, boolean andDelete)
     {

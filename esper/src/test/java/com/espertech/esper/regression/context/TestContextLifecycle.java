@@ -126,7 +126,7 @@ public class TestContextLifecycle extends TestCase {
         // create same context
         epService.getEPAdministrator().createEPL(epl);
         epService.getEPAdministrator().createEPL("@Name('C') context NineToFive select * from SupportBean");
-        epService.getEPAdministrator().createEPL("@Name('C') context NineToFive select * from SupportBean");
+        epService.getEPAdministrator().createEPL("@Name('D') context NineToFive select * from SupportBean");
         epService.getEPAdministrator().destroyAllStatements();
         assertEquals(0, ctxMgmtService.getContextCount());
         assertEquals(0, schedulingService.getScheduleHandleCount());

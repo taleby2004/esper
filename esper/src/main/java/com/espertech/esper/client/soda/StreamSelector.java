@@ -34,6 +34,10 @@ public enum StreamSelector
         this.epl = epl;
     }
 
+    /**
+     * Returns syntactic text
+     * @return epl text
+     */
     public String getEpl() {
         return epl;
     }

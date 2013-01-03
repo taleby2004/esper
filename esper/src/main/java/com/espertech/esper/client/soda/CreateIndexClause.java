@@ -48,6 +48,7 @@ public class CreateIndexClause implements Serializable
      * @param windowName is the name of the named window
      * @param properties properties to index
      * @param indexName name of index
+     * @param unique for unique index
      * @return create variable clause
      */
     public static CreateIndexClause create(boolean unique, String indexName, String windowName, String... properties)
@@ -95,6 +96,7 @@ public class CreateIndexClause implements Serializable
      * @param windowName is the name of the window to create
      * @param indexName index name
      * @param properties properties to index
+     * @param unique for unique index
      */
     public CreateIndexClause(String indexName, String windowName, String[] properties, boolean unique)
     {
@@ -185,10 +187,18 @@ public class CreateIndexClause implements Serializable
         this.columns = columns;
     }
 
+    /**
+     * Returns unique indicator.
+     * @return unique indicator
+     */
     public boolean isUnique() {
         return unique;
     }
 
+    /**
+     * Sets unique indicator.
+     * @param unique unique indicator
+     */
     public void setUnique(boolean unique) {
         this.unique = unique;
     }

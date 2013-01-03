@@ -139,10 +139,18 @@ public class CreateVariableClause implements Serializable
         this.constant = constant;
     }
 
+    /**
+     * Returns indictor whether array or not array.
+     * @return array indicator
+     */
     public boolean isArray() {
         return array;
     }
 
+    /**
+     * Sets indictor whether array or not array.
+     * @param array array indicator
+     */
     public void setArray(boolean array) {
         this.array = array;
     }

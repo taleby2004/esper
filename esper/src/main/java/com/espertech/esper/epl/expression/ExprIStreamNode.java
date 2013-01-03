@@ -17,6 +17,8 @@ import java.util.Map;
  */
 public class ExprIStreamNode extends ExprNodeBase implements ExprEvaluator
 {
+    private static final long serialVersionUID = -6911351346095189882L;
+
     /**
      * Ctor.
      */

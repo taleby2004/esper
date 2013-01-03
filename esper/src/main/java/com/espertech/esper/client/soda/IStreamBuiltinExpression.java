@@ -15,6 +15,8 @@ import java.io.StringWriter;
  */
 public class IStreamBuiltinExpression extends ExpressionBase
 {
+    private static final long serialVersionUID = 2143750940825366959L;
+
     /**
      * Ctor.
      */

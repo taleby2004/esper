@@ -28,6 +28,7 @@ public class VirtualDataWindowEventStartIndex extends VirtualDataWindowEvent {
      * @param namedWindowName named window name
      * @param indexName index name
      * @param fields index fields
+     * @param unique for unique indexes
      */
     public VirtualDataWindowEventStartIndex(String namedWindowName, String indexName, List<VDWCreateIndexField> fields, boolean unique) {
         this.namedWindowName = namedWindowName;
@@ -60,6 +61,10 @@ public class VirtualDataWindowEventStartIndex extends VirtualDataWindowEvent {
         return namedWindowName;
     }
 
+    /**
+     * Returns indictor for unique index
+     * @return unique index indicator
+     */
     public boolean isUnique() {
         return unique;
     }

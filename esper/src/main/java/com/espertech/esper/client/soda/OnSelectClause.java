@@ -99,10 +99,18 @@ public class OnSelectClause extends OnClause
         this.optionalAsName = optionalAsName;
     }
 
+    /**
+     * Returns indicator whether select-and-delete or just select
+     * @return indicator
+     */
     public boolean isDeleteAndSelect() {
         return deleteAndSelect;
     }
 
+    /**
+     * Sets indicator whether select-and-delete or just select
+     * @param deleteAndSelect indicator
+     */
     public void setDeleteAndSelect(boolean deleteAndSelect) {
         this.deleteAndSelect = deleteAndSelect;
     }

@@ -18,8 +18,17 @@ import java.util.Map;
  */
 public interface EPDataFlowRuntime {
 
+    /**
+     * Returns a descriptor for the given data flow, or null if the data flow has not been declared.
+     * @param dataFlowName data flow name
+     * @return data flow descriptor
+     */
     public EPDataFlowDescriptor getDataFlow(String dataFlowName);
 
+    /**
+     * Returns the names of all declared data flows.
+     * @return data flow names
+     */
     public String[] getDataFlows();
 
     /**
@@ -39,14 +48,69 @@ public interface EPDataFlowRuntime {
      */
     public EPDataFlowInstance instantiate(String dataFlowName, EPDataFlowInstantiationOptions options) throws EPDataFlowInstantiationException;
 
+    /**
+     * Save an existing data flow configuration (data flow name and its options) for later retrieval.
+     * @param dataflowConfigName configuration name to save, must be unique
+     * @param dataFlowName data flow name
+     * @param options options object
+     * @throws EPDataFlowAlreadyExistsException if the configuration name is already used
+     * @throws EPDataFlowNotFoundException if the data flow by this name does not exist
+     */
     public void saveConfiguration(String dataflowConfigName, String dataFlowName, EPDataFlowInstantiationOptions options) throws EPDataFlowAlreadyExistsException, EPDataFlowNotFoundException;
+
+    /**
+     * Returns the names of a saved data flow configurations.
+     * @return data flow configuration names
+     */
     public String[] getSavedConfigurations();
+
+    /**
+     * Returns a saved dataflow configuration or null if it is not found.
+     * @param configurationName name to find
+     * @return data flow configuration
+     */
     public EPDataFlowSavedConfiguration getSavedConfiguration(String configurationName);
+
+    /**
+     * Instantiate a data flow from a saved configuration.
+     * @param configurationName configuration name
+     * @return instance
+     * @throws EPDataFlowInstantiationException if the configuration name could not be found
+     */
     public EPDataFlowInstance instantiateSavedConfiguration(String configurationName) throws EPDataFlowInstantiationException;
+
+    /**
+     * Remove a previously saved data flow configuration.
+     * @param configurationName to remove
+     * @return indicator whether found and removed
+     */
     public boolean removeSavedConfiguration(String configurationName);
 
+    /**
+     * Save an existing instance with the runtime, for later retrieval.
+     * @param instanceName name to use to save, must be unique among currently saved instances
+     * @param instance saved
+     * @throws EPDataFlowAlreadyExistsException if an instance by this name already exists
+     */
     public void saveInstance(String instanceName, EPDataFlowInstance instance) throws EPDataFlowAlreadyExistsException;
+
+    /**
+     * Returns the instance names of a saved data flow instances.
+     * @return data flow instance names
+     */
     public String[] getSavedInstances();
+
+    /**
+     * Returns a specific saved data flow instance, or null if it has not been found
+     * @param instanceName to look for
+     * @return instance
+     */
     public EPDataFlowInstance getSavedInstance(String instanceName);
+
+    /**
+     * Remove an instance previously saved.
+     * @param instanceName to be removed
+     * @return indicator whether found or not
+     */
     public boolean removeSavedInstance(String instanceName);
 }

@@ -47,7 +47,7 @@ public class TestAPIConfigAndInstance extends TestCase {
             fail();
         }
         catch(EPDataFlowInstantiationException ex) {
-            assertEquals("Dataflow savedConfiguration 'MyFirstFlow' could not be found", ex.getMessage());
+            assertEquals("Dataflow saved configuration 'MyFirstFlow' could not be found", ex.getMessage());
         }
         try {
             dataFlowRuntime.saveConfiguration("MyFirstFlow", "MyDataflow", null);
