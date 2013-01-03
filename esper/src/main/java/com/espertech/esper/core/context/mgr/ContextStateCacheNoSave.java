@@ -34,4 +34,8 @@ public class ContextStateCacheNoSave implements ContextStateCache {
     public TreeMap<ContextStatePathKey, ContextStatePathValue> getContextPaths(String contextName) {
         return null; // no state required
     }
+
+    public void removeContext(String contextName) {
+        // no action required
+    }
 }

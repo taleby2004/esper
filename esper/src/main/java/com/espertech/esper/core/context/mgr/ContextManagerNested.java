@@ -167,6 +167,7 @@ public class ContextManagerNested implements ContextManager, ContextControllerLi
     public void safeDestroy() {
         if (rootContext != null) {
             recursiveDeactivateStop(rootContext);
+            nestedContextFactories[0].getStateCache().removeContext(contextName);
             rootContext = null;
             statements.clear();
             subcontexts.clear();

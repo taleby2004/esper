@@ -40,4 +40,6 @@ public interface ContextControllerFactory {
     public void populateFilterAddendums(IdentityHashMap<FilterSpecCompiled, List<FilterValueSetParam>> filterAddendum, ContextControllerStatementDesc statement, Object key, int contextId);
 
     public FilterSpecLookupable getFilterLookupable(EventType eventType);
+
+    public ContextStateCache getStateCache();
 }

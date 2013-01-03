@@ -121,6 +121,7 @@ public class ContextManagerImpl implements ContextManager, ContextControllerLife
         if (rootContext != null) {
             // deactivate
             rootContext.deactivate();
+            factory.getStateCache().removeContext(contextName);
 
             for (Map.Entry<Integer, ContextControllerTreeAgentInstanceList> entryCP : agentInstances.entrySet()) {
                 StatementAgentInstanceUtil.stopAgentInstances(entryCP.getValue().getAgentInstances(), null, servicesContext, true);
