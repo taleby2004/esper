@@ -11,6 +11,9 @@
 
 package com.espertech.esper.epl.virtualdw;
 
+import java.util.Set;
+
 public interface VirtualDWViewFactory {
+    public Set<String> getUniqueKeys();
     public void destroyNamedWindow();
 }

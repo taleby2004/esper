@@ -18,7 +18,11 @@ import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanRange;
 import com.espertech.esper.support.bean.SupportBean_ST0;
+import com.espertech.esper.support.bean.SupportSimpleBeanOne;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.support.epl.SupportQueryPlanIndexHook;
+import com.espertech.esper.support.util.IndexAssertionEventSend;
+import com.espertech.esper.support.util.IndexBackingTableInfo;
 import com.espertech.esper.support.virtualdw.SupportVirtualDW;
 import com.espertech.esper.support.virtualdw.SupportVirtualDWExceptionFactory;
 import com.espertech.esper.support.virtualdw.SupportVirtualDWFactory;
@@ -26,12 +30,9 @@ import com.espertech.esper.support.virtualdw.SupportVirtualDWInvalidFactory;
 import junit.framework.TestCase;
 
 import javax.naming.NamingException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-public class TestVirtualDataWindow extends TestCase {
+public class TestVirtualDataWindow extends TestCase implements IndexBackingTableInfo {
 
     private EPServiceProvider epService;
     private SupportUpdateListener listener;
@@ -41,6 +42,7 @@ public class TestVirtualDataWindow extends TestCase {
         listener = new SupportUpdateListener();
 
         Configuration configuration = SupportConfigFactory.getConfiguration();
+        configuration.getEngineDefaults().getLogging().setEnableQueryPlan(true);
         configuration.addPlugInVirtualDataWindow("test", "vdw", SupportVirtualDWFactory.class.getName());
         configuration.addPlugInVirtualDataWindow("invalid", "invalid", TestCase.class.getName());
         configuration.addPlugInVirtualDataWindow("test", "testnoindex", SupportVirtualDWInvalidFactory.class.getName());
@@ -55,6 +57,7 @@ public class TestVirtualDataWindow extends TestCase {
     public void tearDown()
     {
         listener = null;
+        SupportVirtualDWFactory.setUniqueKeys(null);
     }
 
     public void testInsertConsume() {
@@ -380,6 +383,67 @@ public class TestVirtualDataWindow extends TestCase {
         epService.getEPAdministrator().getStatement("create-nw").start();
         assertEquals(1, SupportVirtualDWFactory.getWindows().size());
         assertEquals(1, SupportVirtualDWFactory.getInitializations().size());
+    }
+
+    public void testIndexChoicesJoinUniqueVirtualDW() {
+        epService.getEPAdministrator().getConfiguration().addEventType("SSB1", SupportSimpleBeanOne.class);
+
+        // test no where clause with unique on multiple props, exact specification of where-clause
+        IndexAssertionEventSend assertSendEvents = new IndexAssertionEventSend() {
+            public void run() {
+                String[] fields = "vdw.theString,vdw.intPrimitive,ssb1.i1".split(",");
+                epService.getEPRuntime().sendEvent(new SupportSimpleBeanOne("S1", 1, 102, 103));
+                EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"S1", 101, 1});
+            }
+        };
+
+        CaseEnum[] testCases = CaseEnum.values();
+        for (CaseEnum caseEnum: testCases) {
+            runAssertionVirtualDW(caseEnum, "theString", "where vdw.theString = ssb1.s1", true, assertSendEvents);
+            runAssertionVirtualDW(caseEnum, "i1", "where vdw.theString = ssb1.s1", false, assertSendEvents);
+            runAssertionVirtualDW(caseEnum, "intPrimitive", "where vdw.theString = ssb1.s1", false, assertSendEvents);
+            runAssertionVirtualDW(caseEnum, "longPrimitive", "where vdw.longPrimitive = ssb1.l1", true, assertSendEvents);
+            runAssertionVirtualDW(caseEnum, "longPrimitive,theString", "where vdw.theString = ssb1.s1 and vdw.longPrimitive = ssb1.l1", true, assertSendEvents);
+        }
+    }
+
+    private void runAssertionVirtualDW(CaseEnum caseEnum, String uniqueFields, String whereClause, boolean unique, IndexAssertionEventSend assertion) {
+        SupportVirtualDWFactory.setUniqueKeys(new HashSet<String>(Arrays.asList(uniqueFields.split(","))));
+        epService.getEPAdministrator().createEPL("create window MyVDW.test:vdw() as SupportBean");
+        SupportVirtualDW window = (SupportVirtualDW) getFromContext("/virtualdw/MyVDW");
+        SupportBean supportBean = new SupportBean("S1", 101);
+        supportBean.setDoublePrimitive(102);
+        supportBean.setLongPrimitive(103);
+        window.setData(Collections.singleton(supportBean));
+
+        String eplUnique = INDEX_CALLBACK_HOOK +
+                "select * from ";
+
+        if (caseEnum == CaseEnum.UNIDIRECTIONAL) {
+            eplUnique += "SSB1 as ssb1 unidirectional ";
+        }
+        else {
+            eplUnique += "SSB1.std:lastevent() as ssb1 ";
+        }
+        eplUnique += ", MyVDW as vdw ";
+        eplUnique += whereClause;
+
+        EPStatement stmtUnique = epService.getEPAdministrator().createEPL(eplUnique);
+        stmtUnique.addListener(listener);
+
+        // assert query plan
+        SupportQueryPlanIndexHook.assertJoinOneStreamAndReset(unique);
+
+        // run assertion
+        assertion.run();
+
+        epService.getEPAdministrator().destroyAllStatements();
+    }
+
+    private static enum CaseEnum
+    {
+        UNIDIRECTIONAL,
+        MULTIDIRECTIONAL,
     }
 
     private void tryInvalid(String epl, String message) {

@@ -11,6 +11,8 @@
 
 package com.espertech.esper.client.hook;
 
+import java.util.Set;
+
 /**
  * Factory for {@link VirtualDataWindow}.
  * <p>
@@ -50,4 +52,12 @@ public interface VirtualDataWindowFactory {
      * </p>
      */
     public void destroyAllContextPartitions();
+
+    /**
+     * Return the names of properties that taken together (combined, composed, not individually) are the unique keys of a row,
+     * return null if there are no unique keys that can be identified.
+     * @return set of unique key property names
+     */
+    public Set<String> getUniqueKeyPropertyNames();
+
 }

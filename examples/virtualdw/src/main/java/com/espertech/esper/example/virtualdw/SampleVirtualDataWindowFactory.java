@@ -5,6 +5,8 @@ import com.espertech.esper.client.hook.VirtualDataWindowContext;
 import com.espertech.esper.client.hook.VirtualDataWindowFactory;
 import com.espertech.esper.client.hook.VirtualDataWindowFactoryContext;
 
+import java.util.Set;
+
 public class SampleVirtualDataWindowFactory implements VirtualDataWindowFactory {
 
     public void initialize(VirtualDataWindowFactoryContext factoryContext) {
@@ -16,5 +18,10 @@ public class SampleVirtualDataWindowFactory implements VirtualDataWindowFactory 
 
     public void destroyAllContextPartitions() {
         // cleanup can be performed here
+    }
+
+    public Set<String> getUniqueKeyPropertyNames() {
+        // lets assume there is no unique key property names
+        return null;
     }
 }

@@ -18,12 +18,14 @@ import com.espertech.esper.client.hook.VirtualDataWindowFactoryContext;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class SupportVirtualDWFactory implements VirtualDataWindowFactory {
 
     private static List<VirtualDataWindowFactoryContext> initializations = new ArrayList<VirtualDataWindowFactoryContext>();
     private static List<SupportVirtualDW> windows = new ArrayList<SupportVirtualDW>();
     private static boolean destroyed;
+    private static Set<String> uniqueKeys;
 
     public SupportVirtualDWFactory() {
     }
@@ -38,6 +40,18 @@ public class SupportVirtualDWFactory implements VirtualDataWindowFactory {
 
     public static void setDestroyed(boolean destroyed) {
         SupportVirtualDWFactory.destroyed = destroyed;
+    }
+
+    public static Set<String> getUniqueKeys() {
+        return uniqueKeys;
+    }
+
+    public Set<String> getUniqueKeyPropertyNames() {
+        return uniqueKeys;
+    }
+
+    public static void setUniqueKeys(Set<String> uniqueKeys) {
+        SupportVirtualDWFactory.uniqueKeys = uniqueKeys;
     }
 
     public static List<VirtualDataWindowFactoryContext> getInitializations() {

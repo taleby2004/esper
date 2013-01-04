@@ -16,6 +16,7 @@ import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprNodeUtility;
 import com.espertech.esper.epl.spec.ViewSpec;
+import com.espertech.esper.epl.virtualdw.VirtualDWViewFactory;
 import com.espertech.esper.view.ext.IStreamSortRankRandomAccess;
 import com.espertech.esper.view.std.GroupByViewFactoryMarker;
 import com.espertech.esper.view.window.IStreamRandomAccess;
@@ -50,11 +51,13 @@ public class ViewServiceHelper
             }
             return null;
         }
-        else {
-            if (viewFactory.get(0) instanceof DataWindowViewFactoryUniqueCandidate) {
-                DataWindowViewFactoryUniqueCandidate uniqueFactory = (DataWindowViewFactoryUniqueCandidate) viewFactory.get(0);
-                return uniqueFactory.getUniquenessCandidatePropertyNames();
-            }
+        else if (viewFactory.get(0) instanceof DataWindowViewFactoryUniqueCandidate) {
+            DataWindowViewFactoryUniqueCandidate uniqueFactory = (DataWindowViewFactoryUniqueCandidate) viewFactory.get(0);
+            return uniqueFactory.getUniquenessCandidatePropertyNames();
+        }
+        else if (viewFactory.get(0) instanceof VirtualDWViewFactory) {
+            VirtualDWViewFactory vdw = (VirtualDWViewFactory) viewFactory.get(0);
+            return vdw.getUniqueKeys();
         }
         return null;
     }

@@ -14,6 +14,7 @@ Major API or EPL changes
   - Support for marking an index as a unique index
   - Many optimizations around query planning, execution-time reduced memory use and performance
   - Dependency updates for esperio-springjms adapter and J2EE terminal example
+  - Minor change to virtual data window API to allow a virtual data window to indicate unique key property names
 
 Bug fixes
   - Fixed Issue ESPER-703 Stateless statement with output rate limiting only outputs same event multiple times under inbound threading

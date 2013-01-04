@@ -16,6 +16,8 @@ import com.espertech.esper.client.hook.VirtualDataWindowContext;
 import com.espertech.esper.client.hook.VirtualDataWindowFactory;
 import com.espertech.esper.client.hook.VirtualDataWindowFactoryContext;
 
+import java.util.Set;
+
 public class SupportVirtualDWExceptionFactory implements VirtualDataWindowFactory {
 
     public void initialize(VirtualDataWindowFactoryContext factoryContext) {
@@ -27,5 +29,9 @@ public class SupportVirtualDWExceptionFactory implements VirtualDataWindowFactor
     }
 
     public void destroyAllContextPartitions() {
+    }
+
+    public Set<String> getUniqueKeyPropertyNames() {
+        return null;
     }
 }

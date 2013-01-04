@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Set;
 
 public class VirtualDWViewFactoryImpl implements ViewFactory, DataWindowViewFactory, VirtualDWViewFactory {
     private static Log log = LogFactory.getLog(VirtualDWViewFactoryImpl.class);
@@ -50,7 +51,10 @@ public class VirtualDWViewFactoryImpl implements ViewFactory, DataWindowViewFact
         this.customConfiguration = customConfiguration;
         this.namedWindowName = namedWindowName;
         virtualDataWindowFactory = (VirtualDataWindowFactory) JavaClassHelper.instantiate(VirtualDataWindowFactory.class, first.getName());
+    }
 
+    public Set<String> getUniqueKeys() {
+        return virtualDataWindowFactory.getUniqueKeyPropertyNames();
     }
 
     public void setViewParameters(ViewFactoryContext viewFactoryContext, List<ExprNode> viewParameters) throws ViewParameterException {
