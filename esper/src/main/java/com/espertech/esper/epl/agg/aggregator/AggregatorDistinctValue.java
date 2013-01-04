@@ -22,7 +22,6 @@ public class AggregatorDistinctValue implements AggregationMethod
     /**
      * Ctor.
      * @param inner is the aggregator function computing aggregation values
-     * @param childType is the return type of the inner expression to aggregate, if any
      */
     public AggregatorDistinctValue(AggregationMethod inner)
     {
