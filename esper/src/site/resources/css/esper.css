@@ -36,7 +36,7 @@ pre {font-size: 1.2em; font-weight: bold; color:#000099;}
 .content { margin: 0px auto; width: 900px; }
 
 /* Top part */
-#top { padding-top: 0px; background: #F6F6F6; height: 71px;}
+#top { padding-top: 0px; background: #FCFCFC; height: 71px;}
 	#top h1 { font: bold 1.8em Arial, Sans-Serif; padding: 8px 0 4px 0; margin: 0; letter-spacing: 1px; color: #FFF }
 	#top h2 { font: 1.4em Arial, Sans-Serif; letter-spacing: 0px; color: #868686; margin:0; padding: 0 }
 	#top #icons { float: right; margin:20px 0; padding:0 }
@@ -44,7 +44,7 @@ pre {font-size: 1.2em; font-weight: bold; color:#000099;}
 	
 /* DMenu dropdown
 #000099
-#F6F6F6
+#FCFCFC
 	border-color: #ccc #888 #555 #bbb;
 */
 /**************** menu coding *****************/
@@ -112,30 +112,30 @@ pre {font-size: 1.2em; font-weight: bold; color:#000099;}
 		
 
 /* Second part was height: 190px; overflow: hidden; */
-#prec { 	height: 44px; margin:0; padding: 0px; background: #F6F6F6; border-bottom: 1px solid #DCDCDC; margin-bottom: 10px }
-#precHOME { 	height: 140px; margin:0; padding: 0px; background: #F6F6F6; border-bottom: 1px solid #DCDCDC; margin-bottom: 0px }
+#prec { 	height: 44px; margin:0; padding: 0px; background: #FCFCFC; border-bottom: 1px solid #DCDCDC; margin-bottom: 10px }
+#precHOME { 	height: 140px; margin:0; padding: 0px; background: #FCFCFC; border-bottom: 1px solid #DCDCDC; margin-bottom: 0px }
 	#wrap { margin: 0 auto; width: 900px; }
 		#wrap #pic { margin: 10px; float: left; height: 100px; width: 900px; overflow: hidden;
 		border-width: 1px 0px 0px 0px;
 		border-style: solid;
 		border-color: #ccc #888 #555 #bbb;
 		}
-			#wrap #pic #slogan { float: right; padding: 5px 140px 0px 30px; text-align: left; color: #000099; font: 1.4em Arial, Sans-Serif;}
-			#wrap #pic #slogan h1 { font: bold 1.5em Arial, Sans-Serif; color: #000099; letter-spacing: 1px; margin:0 }
-			#wrap #pic #slogan h2 { font:  1.5em Arial, Sans-Serif; color: #000099; letter-spacing: 0px; margin:0; padding: 0px 0}
-			#wrap #pic #slogan a { color: #A00; text-decoration: none; font: bold 2.0em}
+			#wrap #pic #slogan { float: right; padding: 5px 140px 0px 30px; text-align: left; color: #000000; font: 1.4em Arial, Sans-Serif;}
+			#wrap #pic #slogan h1 { font: bold 1.5em Arial, Sans-Serif; color: #000000; letter-spacing: 1px; margin:0 }
+			#wrap #pic #slogan h2 { font:  1.5em Arial, Sans-Serif; color: #000000; letter-spacing: 0px; margin:0; padding: 0px 0}
+			#wrap #pic #slogan a { color: #000099; text-decoration: none; font: bold 2.0em}
 			#wrap #pic #slogan a:hover { color: #A00; text-decoration: underline;}
 			
 		#wrap #menu { padding: 0; margin:0; background: inherit; }
-		#wrap #menu a { padding-left: 25px; font:  0.9em Arial, Sans-Serif; text-decoration: none; background: #F6F6F6 url(/images/lm-li.gif) no-repeat left;  }
+		#wrap #menu a { padding-left: 25px; font:  0.9em Arial, Sans-Serif; text-decoration: none; background: #FCFCFC url(/images/lm-li.gif) no-repeat left;  }
 		#wrap #menu ul { padding: 0px 0 }
-		#wrap #menu li { line-height: 26px; background: #F6F6F6 url(/images/li-line.gif) no-repeat bottom left; list-style: none }
+		#wrap #menu li { line-height: 26px; background: #FCFCFC url(/images/li-line.gif) no-repeat bottom left; list-style: none }
 		
 		#wrap #menu2 {background: inherit;}
 		/* float: right; width: 200; padding-right: 450px; margin-top: 27px; */
-		#wrap #menu2 a { padding-left: 25px; font:  0.9em Arial, Sans-Serif; text-decoration: none; background: #F6F6F6 url(/images/lm-li.gif) no-repeat left;  }
+		#wrap #menu2 a { padding-left: 25px; font:  0.9em Arial, Sans-Serif; text-decoration: none; background: #FCFCFC url(/images/lm-li.gif) no-repeat left;  }
 		#wrap #menu2 ul { padding: 0px 0 }
-		#wrap #menu2 li { line-height: 26px; background: #F6F6F6 url(/images/li-line.gif) no-repeat bottom left; list-style: none }
+		#wrap #menu2 li { line-height: 26px; background: #FCFCFC url(/images/li-line.gif) no-repeat bottom left; list-style: none }
 
 /*  Advertising #FFF url(/images/download.jpg) no-repeat left; min-height: 80px;*/
 #ad { background: #FFF; padding-left: 0px; margin-bottom: 15px;}
@@ -146,16 +146,16 @@ pre {font-size: 1.2em; font-weight: bold; color:#000099;}
 #main { }
 	#right_side {
 	width: 212px;
-	background: #F6F6F6;
+	background: #FCFCFC;
 	padding: 5px 10px 5px 10px;
 	margin-bottom: 10px;
 }
 		#right_side ul { padding: 3px 0 8px 0 } 
-		#right_side li { line-height: 18px; color: #000099; background: #F6F6F6 url(/images/cat-li.gif) no-repeat left; list-style: none; padding-left: 20px; }
-		#right_side a { background: #F6F6F6; text-decoration:  none }
+		#right_side li { line-height: 18px; color: #000099; background: #FCFCFC url(/images/cat-li.gif) no-repeat left; list-style: none; padding-left: 20px; }
+		#right_side a { background: #FCFCFC; text-decoration:  none }
 		#right_side a:hover { text-decoration: underline; }
 		#right_side h3 { color: #404040; font:  bold 1.2em Arial, Sans-Serif; }
-		#right_side p { background: #F6F6F6; color: #000099; padding: 3px 0px 8px 0px; }
+		#right_side p { background: #FCFCFC; color: #000099; padding: 3px 0px 8px 0px; }
 	
 	#left_side {
 	float: right;

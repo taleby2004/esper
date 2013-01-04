@@ -409,7 +409,7 @@ google.setOnLoadCallback(OnLoad, true);
 			Where <b>Complex Event Processing meets Open Source</b>: <a href="http://www.espertech.com/products/">Esper & NEsper</a></b><br/>
 			High-availability and Enterprise Readiness: <a href="http://www.espertech.com/products/esperha.php">EsperHA</a>, <a href="http://www.espertech.com/products/esperee.php">Enterprise Edition</a> and <a href="http://www.espertech.com/support/">support services</a>.
 			Embed mainstream CEP in your products and deployments: Learn about our <a href="http://www.espertech.com/partners/embedded.php">licensing options</a>.<br/>
-			<small><a href="http://www.espertech.com/products/" style="color: #A00">Product info</a> | <a href="http://www.espertech.com/partners/partners.php" style="color: #A00">Customers</a> | <a href="http://www.espertech.com/company/contact.php" style="color: #A00">Contact us</a></small>
+			<small><a href="http://www.espertech.com/products/" style="color: #000099">Product info</a> | <a href="http://www.espertech.com/partners/partners.php" style="color: #000099">Customers</a> | <a href="http://www.espertech.com/company/contact.php" style="color: #000099">Contact us</a></small>
 		</div>
 	</div>
 #end
@@ -436,7 +436,7 @@ google.setOnLoadCallback(OnLoad, true);
     	
 	<div id="footer">
 		<div class="right">
-			&copy; 2006-2007, Esper contributors &amp; EsperTech Inc. - <small>Design: <a href="http://www.free-css-templates.com">David Herreman</a></small>
+			&copy; 2006-2013, Esper contributors &amp; EsperTech Inc. - <small>Design: <a href="http://www.free-css-templates.com">David Herreman</a></small>
 		</div>
 	</div>
 </div><!-- content -->
