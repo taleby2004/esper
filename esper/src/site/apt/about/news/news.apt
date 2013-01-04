@@ -1,5 +1,34 @@
 News
 
+* January 4, 2013  -  Esper 4.8.0 - Update release
+  
+  * Support for "create expression" to declare an independent expression or script for use in other statements.
+  
+  * Support for an externally-timed batch window (win:ext_timed_batch).
+  
+  * Support for array variables.
+  
+  * Support for enumeration methods to operate on collections of scalar values (ESPER-717).
+  
+  * Support for on-select-delete: On-select can now also delete the selected rows.
+  
+  * Support for insert-into clause to use "irstream" keyword to produce the insert as well as the remove stream.
+  
+  * Support for a new "istream" function that returns true if the event is part of the insert stream and false if the event is part of the remove stream.
+  
+  * Support for marking an index as a unique index.
+  
+  * Many optimizations around query planning, execution-time reduced memory use and performance.
+  
+  * Dependency updates for esperio-springjms adapter and J2EE terminal example.
+  
+  * Minor change to virtual data window API to allow a virtual data window to indicate unique key property names.
+    
+  * Please see history or changelog.txt for additional information.
+
+  []
+
+
 * November 16, 2012  -  NEsper 4.6.1 for .NET
 	      
   * Feature equivalent to Esper version 4.6.1

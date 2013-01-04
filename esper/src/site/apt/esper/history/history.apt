@@ -12,6 +12,39 @@ Change History
 	[]
 
 
+Version 4.8.0
+
+	Released January 4, 2013
+	
+	Built and tested with JDK 6.0 Update 34, tested with JDK 7.0 Update 10
+
+* API changes
+
+  * None.
+    
+* Major changes
+
+  * Support for "create expression" to declare an independent expression or script for use in other statements.
+  
+  * Support for an externally-timed batch window (win:ext_timed_batch).
+  
+  * Support for array variables.
+  
+  * Support for enumeration methods to operate on collections of scalar values (ESPER-717).
+  
+  * Support for on-select-delete: On-select can now also delete the selected rows.
+  
+  * Support for insert-into clause to use "irstream" keyword to produce the insert as well as the remove stream.
+  
+  * Support for a new "istream" function that returns true if the event is part of the insert stream and false if the event is part of the remove stream.
+  
+  * Support for marking an index as a unique index.
+  
+  * Many bug fixes and other improvements; Please see history or changelog.txt for additional information.
+
+  []
+
+
 Version 4.7.0
 
 	Released October 8, 2012
