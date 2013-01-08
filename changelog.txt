@@ -33,7 +33,7 @@ Bug fixes
   - Fixed Issue ESPER-725 Object-array event type not enforcing single supertype
   - additional bug fixes
 
-Changes in version 4.8.0
+Changes in version 4.7.0
 ------------------------
 Major API or EPL changes
   - Many performance-related changes and also related to support of the new EsperHA release.
