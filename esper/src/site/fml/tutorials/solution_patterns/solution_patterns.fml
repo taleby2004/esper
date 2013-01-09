@@ -313,6 +313,63 @@ where sensor.sensorId = loc.sensorId</pre></div>
         </p>
       </answer>
     </faq>    
+    <faq id="design-5">
+      <question>Offline Analysis - Analyzing Historical Data</question>
+      <answer>
+        <p>
+          We have seen quite a few use cases around analyzing data offline. One example is to detect
+          fraud in health care by replaying recorded past claims and prescriptions. Or
+          detect fraud by replaying bank transactions at the end of a business day 
+          since they were not available real-time. Another is fleet tracking to determine when trucks are 
+          not on schedule considering up to 2 weeks of past data.
+        </p>
+        <p>
+          Esper EPL can detect complex events regardless of whether the data is offline and historical,
+          or whether the data is online and currently arriving (or a mix thereof). 
+          Trying to do this analysis using a relational database and SQL can be difficult 
+          when relationships become complex and may include the time dimension.
+          Since the engine is fast it is often feasible to replay large numbers of events.
+        </p>
+        <p>
+          Start by disabling the internal timer in the configuration passed when obtaining an engine instance:
+        </p>
+	<div class="source"><pre>Configuration config = new Configuration();
+config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);</pre></div>      
+        <p>
+          Set time to zero or to the oldest event's timestamp:
+        </p>
+	<div class="source"><pre>runtime.sendEvent(new CurrentTimeEvent(0));</pre></div>      
+        <p>
+          Next create a bunch of EPL statements.
+        </p>
+        <p>
+          From your event source, read events and send events into the engine advancing time (here entry is your event object):
+        </p>
+	<div class="source"><pre>CurrentTimeEvent timeEvent = new CurrentTimeEvent(entry.timestamp);
+cepRT.sendEvent(timeEvent);
+cepRT.sendEvent(entry);</pre></div>      
+        <p>
+          It is not necessary to advance time for every event that your application sends in. 
+          Instead and as an optimization you could decide on a time resolution and advance time according to that resolution (i.e. every 100 milliseconds).          
+        </p>
+        <p>
+          Replay events from multiple threads to gain the best performance, given your EPL statements are well laid out
+          using context partitions for example. It is not necessary to synchronize application events 
+          with timer control events (CurrentTimeEvent or time span event instances, see doc).
+          If you are concerned with a defined order of processing application and timer control events, consider using a CountDownLatch to trigger timer processing.
+          We would recommend reordering events that are not in time order before sending events into the engine.
+        </p>
+        <p>
+          Also, when your application is done replaying events, it could switch on the internal timer again
+          using an Esper class called TimerControlEvent and start sending online currently-arriving events.
+          See the API chapter in the doc for additional information.
+        </p>
+        <p>
+          All this works for EsperHA the same as for Esper. With EsperHA your application can snapshot state at any time
+          and continue from snapshot state.
+        </p>
+      </answer>
+    </faq>    
   </part>
 
   <part id="epl">
