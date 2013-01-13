@@ -542,7 +542,7 @@ min(value) as minValue, max(value) as maxValue from MyEvent.win:time(60 sec)</pr
 
         <p>
           The sample statements here compute average temperature and count for sensor events.
-	  A nested context is useful in that is can partition by keys and base on some control event arriving can stop counting and trigger output.
+	  A nested context is useful in that is can partition by keys and when a control events arrives can stop counting and trigger output.
 The control event that ends the counting and triggers output in below EPL is MyEndEvent.
         </p>
 	<div class="source"><pre>create context CtxPerKeysAndExternallyControlled
