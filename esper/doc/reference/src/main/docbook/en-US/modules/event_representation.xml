@@ -508,7 +508,7 @@ public class InnerType {
 				</para>
 		
 				<para>
-					<emphasis>Indexed</emphasis> event properties require either one of the following getter-methods. A method that takes an integer-type key value and returns the property value, such as the <literal>getSubordinate</literal> method, or a method that returns an array-type, or a class that implements <literal>Iterable</literal>. An example is the <literal>getSubordinates</literal> getter method, which returns an array of Employee but could also return an <literal>Iterable</literal>. In an EPL or event pattern statement, indexed properties are accessed via the <literal>property[index]</literal> syntax.
+					<emphasis>Indexed</emphasis> event properties require either one of the following getter-methods. A method that takes an integer-type key value and returns the property value, such as the <literal>getSubordinate</literal> method, or a method that returns an array-type, or a class that implements <literal>Iterable</literal>. An example is the <literal>getAllSubordinates</literal> getter method, which returns an array of Employee but could also return an <literal>Iterable</literal>. In an EPL or event pattern statement, indexed properties are accessed via the <literal>property[index]</literal> syntax.
 				</para>
 		
 				<para>
