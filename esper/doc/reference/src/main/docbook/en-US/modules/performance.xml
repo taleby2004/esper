@@ -891,7 +891,7 @@ select * from PersonEvent(department=VAR_DEPARTMENT)]]></programlisting>
 		<sect2 xml:id="perf-tips-23">
 				<title>Composite or Compound Keys</title>
 				<para>
-					If your uniqueness, grouping and sorting keys are composite keys or compound keys, this section may apply. A composite key is a key that consists of 2 or more properties or expressions.
+					If your uniqueness, grouping, sorting or partitioning keys are composite keys or compound keys, this section may apply. A composite key is a key that consists of 2 or more properties or expressions.
 				</para>
 				<para>
 					In the example below the <literal>firstName</literal> and <literal>lastName</literal> expressions are part of a composite key: 
