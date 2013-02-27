@@ -51,6 +51,26 @@ public class TestExpressionDef extends TestCase {
         listener = null;
     }
 
+    public void testWildcardAndPattern() {
+        String eplNonJoin =
+                "expression abc { x => intPrimitive } " +
+                "expression def { (x, y) => x.intPrimitive * y.intPrimitive }" +
+                "select abc(*) as c0, def(*, *) as c1 from SupportBean";
+        epService.getEPAdministrator().createEPL(eplNonJoin).addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 2));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "c0, c1".split(","), new Object[]{2, 4});
+        epService.getEPAdministrator().destroyAllStatements();
+
+        String eplPattern = "expression abc { x => intPrimitive * 2} " +
+                "select * from pattern [a=SupportBean -> b=SupportBean(intPrimitive = abc(a))]";
+        epService.getEPAdministrator().createEPL(eplPattern).addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 2));
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 4));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.theString, b.theString".split(","), new Object[]{"E1", "E2"});
+    }
+
     public void testSequenceAndNested() {
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean_S0", SupportBean_S0.class);
         epService.getEPAdministrator().createEPL("create window WindowOne.win:keepall() as (col1 string, col2 string)");
@@ -626,6 +646,9 @@ public class TestExpressionDef extends TestCase {
 
         epl = "expression abc {x=>intPrimitive} select * from SupportBean sb where abc(sb)";
         tryInvalid(epl, "Filter expression not returning a boolean value: 'abc(sb)' [expression abc {x=>intPrimitive} select * from SupportBean sb where abc(sb)]");
+
+        epl = "expression abc {x=>x.intPrimitive = 0} select * from SupportBean.std:lastevent() sb1, SupportBean.std:lastevent() sb2 where abc(*)";
+        tryInvalid(epl, "Error validating expression: Expression 'abc' only allows a wildcard parameter if there is a single stream available, please use a stream or tag name instead [expression abc {x=>x.intPrimitive = 0} select * from SupportBean.std:lastevent() sb1, SupportBean.std:lastevent() sb2 where abc(*)]");
     }
 
     private SupportBean getSupportBean(int intPrimitive, Integer intBoxed) {

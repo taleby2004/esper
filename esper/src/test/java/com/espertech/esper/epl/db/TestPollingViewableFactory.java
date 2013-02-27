@@ -11,24 +11,21 @@
 
 package com.espertech.esper.epl.db;
 
+import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.spec.DBStatementStreamSpec;
 import com.espertech.esper.epl.spec.ViewSpec;
-import com.espertech.esper.epl.db.DatabasePollingViewableFactory;
-import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.support.epl.SupportDatabaseService;
 import com.espertech.esper.support.event.SupportEventAdapterService;
 import com.espertech.esper.view.EventCollection;
-
-import java.util.LinkedList;
-import java.math.BigDecimal;
-
 import junit.framework.TestCase;
+
+import java.math.BigDecimal;
 
 public class TestPollingViewableFactory extends TestCase
 {
     public void testDBStatementViewFactory() throws Exception
     {
-        DBStatementStreamSpec spec = new DBStatementStreamSpec("s0", new LinkedList<ViewSpec>(),
+        DBStatementStreamSpec spec = new DBStatementStreamSpec("s0", ViewSpec.EMPTY_VIEWSPEC_ARRAY,
                 "mydb_part", "select * from mytesttable where mybigint=${idnum}", null);
 
         EventCollection eventCollection = DatabasePollingViewableFactory.createDBStatementView("id", 1, spec,

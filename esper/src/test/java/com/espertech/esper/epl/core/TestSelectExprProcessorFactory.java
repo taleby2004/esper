@@ -13,6 +13,7 @@ package com.espertech.esper.epl.core;
 
 import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.ConfigurationEngineDefaults;
+import com.espertech.esper.core.service.StatementEventTypeRefImpl;
 import com.espertech.esper.core.service.StatementResultService;
 import com.espertech.esper.core.service.StatementResultServiceImpl;
 import com.espertech.esper.core.thread.ThreadingServiceImpl;
@@ -25,23 +26,23 @@ import com.espertech.esper.epl.spec.SelectClauseStreamCompiledSpec;
 import com.espertech.esper.support.epl.SupportExprNodeFactory;
 import com.espertech.esper.support.epl.SupportStreamTypeSvc3Stream;
 import com.espertech.esper.support.event.SupportEventAdapterService;
+import com.espertech.esper.util.CollectionUtil;
 import junit.framework.TestCase;
 
-import java.util.*;
+import java.util.Collections;
 
 public class TestSelectExprProcessorFactory extends TestCase
 {
-    private List<SelectClauseStreamCompiledSpec> listOfStreamsSelected = new ArrayList<SelectClauseStreamCompiledSpec>();
     private StatementResultService statementResultService = new StatementResultServiceImpl("name", null, null, new ThreadingServiceImpl(new ConfigurationEngineDefaults.Threading()));
-    private SelectExprEventTypeRegistry selectExprEventTypeRegistry = new SelectExprEventTypeRegistry(new HashSet<String>());
+    private SelectExprEventTypeRegistry selectExprEventTypeRegistry = new SelectExprEventTypeRegistry("abc", new StatementEventTypeRefImpl());
 
     public void testGetProcessorInvalid() throws Exception
     {
-        List<SelectClauseElementCompiled> selectionList = new LinkedList<SelectClauseElementCompiled>();
+        SelectClauseElementCompiled[] selectionList = new SelectClauseElementCompiled[2];
         ExprNode identNode = SupportExprNodeFactory.makeIdentNode("doubleBoxed", "s0");
         ExprNode mathNode = SupportExprNodeFactory.makeMathNode();
-        selectionList.add(new SelectClauseExprCompiledSpec(identNode, "result", "result"));
-        selectionList.add(new SelectClauseExprCompiledSpec(mathNode, "result", "result"));
+        selectionList[0] = new SelectClauseExprCompiledSpec(identNode, "result", "result");
+        selectionList[1] = new SelectClauseExprCompiledSpec(mathNode, "result", "result");
 
         try
         {
@@ -57,8 +58,7 @@ public class TestSelectExprProcessorFactory extends TestCase
 
     public void testGetProcessorWildcard() throws Exception
     {
-        List<SelectClauseElementCompiled> selectionList = new LinkedList<SelectClauseElementCompiled>();
-        selectionList.add(new SelectClauseElementWildcard());
+        SelectClauseElementCompiled[] selectionList = new SelectClauseElementCompiled[] {new SelectClauseElementWildcard()};
         SelectExprProcessor processor = SelectExprProcessorFactory.getProcessor(Collections.<Integer>emptyList(), selectionList, false, null, null,
                 new SupportStreamTypeSvc3Stream(), SupportEventAdapterService.getService(), statementResultService, null, selectExprEventTypeRegistry, null, null, null, null, null, null, null, null, null, new Configuration(), null);
         assertTrue(processor instanceof SelectExprResultProcessor);
@@ -66,9 +66,9 @@ public class TestSelectExprProcessorFactory extends TestCase
 
     public void testGetProcessorValid() throws Exception
     {
-        List<SelectClauseElementCompiled> selectionList = new LinkedList<SelectClauseElementCompiled>();
+        SelectClauseElementCompiled[] selectionList = new SelectClauseElementCompiled[1];
         ExprNode identNode = SupportExprNodeFactory.makeIdentNode("doubleBoxed", "s0");
-        selectionList.add(new SelectClauseExprCompiledSpec(identNode, "result", null));
+        selectionList[0] = new SelectClauseExprCompiledSpec(identNode, "result", null);
         SelectExprProcessor processor = SelectExprProcessorFactory.getProcessor(Collections.<Integer>emptyList(), selectionList, false, null, null,
                 new SupportStreamTypeSvc3Stream(), SupportEventAdapterService.getService(), statementResultService, null, selectExprEventTypeRegistry, null, null, null, null, null, null, null, null, null, new Configuration(), null);
         assertTrue(processor != null);
@@ -77,16 +77,16 @@ public class TestSelectExprProcessorFactory extends TestCase
     public void testVerifyNameUniqueness() throws Exception
     {
         // try valid case
-        List<SelectClauseElementCompiled> elements = new LinkedList<SelectClauseElementCompiled>();
-        elements.add(new SelectClauseExprCompiledSpec(null, "xx", null));
-        elements.add(new SelectClauseExprCompiledSpec(null, "yy", null));
-        elements.add(new SelectClauseStreamCompiledSpec("win", null));
-        elements.add(new SelectClauseStreamCompiledSpec("s2", "abc"));
+        SelectClauseElementCompiled[] elements = new SelectClauseElementCompiled[4];
+        elements[0] = new SelectClauseExprCompiledSpec(null, "xx", null);
+        elements[1] = new SelectClauseExprCompiledSpec(null, "yy", null);
+        elements[2] = new SelectClauseStreamCompiledSpec("win", null);
+        elements[3] = new SelectClauseStreamCompiledSpec("s2", "abc");
 
         SelectExprProcessorFactory.verifyNameUniqueness(elements);
 
         // try invalid case
-        elements.add(new SelectClauseExprCompiledSpec(null, "yy", null));
+        elements = (SelectClauseElementCompiled[]) CollectionUtil.arrayExpandAddSingle(elements, new SelectClauseExprCompiledSpec(null, "yy", null));
         try
         {
             SelectExprProcessorFactory.verifyNameUniqueness(elements);
@@ -98,9 +98,9 @@ public class TestSelectExprProcessorFactory extends TestCase
         }
 
         // try invalid case
-        elements.clear();
-        elements.add(new SelectClauseExprCompiledSpec(null, "abc", null));
-        elements.add(new SelectClauseStreamCompiledSpec("s0", "abc"));
+        elements = new SelectClauseElementCompiled[2];
+        elements[0] = new SelectClauseExprCompiledSpec(null, "abc", null);
+        elements[1] = new SelectClauseStreamCompiledSpec("s0", "abc");
         try
         {
             SelectExprProcessorFactory.verifyNameUniqueness(elements);

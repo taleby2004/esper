@@ -12,6 +12,7 @@
 package com.espertech.esper.epl.enummethod.eval;
 
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.util.ExpressionReturnType;
 import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.enummethod.dot.*;
 import com.espertech.esper.epl.expression.ExprDotNodeUtility;
@@ -31,11 +32,11 @@ public class ExprDotEvalMinByMaxBy extends ExprDotEvalEnumMethodBase {
 
         boolean max = this.getEnumMethodEnum() == EnumMethodEnum.MAXBY;
         if (inputEventType == null) {
-            super.setTypeInfo(ExprDotEvalTypeInfo.scalarOrUnderlying(collectionComponentType));
+            super.setTypeInfo(ExpressionReturnType.singleValue(collectionComponentType));
             return new EnumEvalMinMaxByScalarLambda(first.getBodyEvaluator(), first.getStreamCountIncoming(), max,
                     (ObjectArrayEventType) first.getGoesToTypes()[0]);
         }
-        super.setTypeInfo(ExprDotEvalTypeInfo.event(inputEventType));
+        super.setTypeInfo(ExpressionReturnType.singleEvent(inputEventType));
         return new EnumEvalMinMaxByEvents(first.getBodyEvaluator(), first.getStreamCountIncoming(), max);
     }
 }

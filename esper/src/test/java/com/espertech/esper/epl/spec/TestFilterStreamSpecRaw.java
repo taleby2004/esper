@@ -24,7 +24,10 @@ import junit.framework.TestCase;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.tree.Tree;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
 public class TestFilterStreamSpecRaw extends TestCase
 {
@@ -33,7 +36,7 @@ public class TestFilterStreamSpecRaw extends TestCase
         FilterStreamSpecRaw raw = makeSpec("select * from " + SupportBean.class.getName());
         FilterSpecCompiled spec = compile(raw);
         assertEquals(SupportBean.class, spec.getFilterForEventType().getUnderlyingType());
-        assertEquals(0, spec.getParameters().size());
+        assertEquals(0, spec.getParameters().length);
     }
 
     public void testMultipleExpr() throws Exception
@@ -42,10 +45,10 @@ public class TestFilterStreamSpecRaw extends TestCase
                 "(intPrimitive-1>2 and intBoxed-5>3)");
         FilterSpecCompiled spec = compile(raw);
         assertEquals(SupportBean.class, spec.getFilterForEventType().getUnderlyingType());
-        assertEquals(1, spec.getParameters().size());
+        assertEquals(1, spec.getParameters().length);
         // expecting unoptimized expressions to condense to a single boolean expression, more efficient this way
 
-        FilterSpecParamExprNode exprNode = (FilterSpecParamExprNode) spec.getParameters().getFirst();
+        FilterSpecParamExprNode exprNode = (FilterSpecParamExprNode) spec.getParameters()[0];
         assertEquals(FilterSpecCompiler.PROPERTY_NAME_BOOLEAN_EXPRESSION, exprNode.getLookupable().getExpression());
         assertEquals(FilterOperator.BOOLEAN_EXPRESSION, exprNode.getFilterOperator());
         assertTrue(exprNode.getExprNode() instanceof ExprAndNode);
@@ -77,17 +80,17 @@ public class TestFilterStreamSpecRaw extends TestCase
     {
         FilterStreamSpecRaw raw = makeSpec("select * from " + SupportBean.class.getName() + "(intPrimitive=5)");
         FilterSpecCompiled spec = compile(raw);
-        assertEquals(1, spec.getParameters().size());
-        assertEquals("intPrimitive", spec.getParameters().getFirst().getLookupable().getExpression());
-        assertEquals(FilterOperator.EQUAL, spec.getParameters().getFirst().getFilterOperator());
-        assertEquals(5, getConstant(spec.getParameters().getFirst()));
+        assertEquals(1, spec.getParameters().length);
+        assertEquals("intPrimitive", spec.getParameters()[0].getLookupable().getExpression());
+        assertEquals(FilterOperator.EQUAL, spec.getParameters()[0].getFilterOperator());
+        assertEquals(5, getConstant(spec.getParameters()[0]));
     }
 
     public void testEqualsAndLess() throws Exception
     {
         FilterStreamSpecRaw raw = makeSpec("select * from " + SupportBean.class.getName() + "(theString='a' and intPrimitive<9)");
         FilterSpecCompiled spec = compile(raw);
-        assertEquals(2, spec.getParameters().size());
+        assertEquals(2, spec.getParameters().length);
         Map<String, FilterSpecParam> parameters = mapParameters(spec.getParameters());
 
         assertEquals(FilterOperator.EQUAL, parameters.get("theString").getFilterOperator());
@@ -97,7 +100,7 @@ public class TestFilterStreamSpecRaw extends TestCase
         assertEquals(9, getConstant(parameters.get("intPrimitive")));
     }
 
-    private Map<String, FilterSpecParam> mapParameters(ArrayDeque<FilterSpecParam> parameters)
+    private Map<String, FilterSpecParam> mapParameters(FilterSpecParam[] parameters)
     {
         Map<String, FilterSpecParam> map = new HashMap<String, FilterSpecParam>();
         for (FilterSpecParam param : parameters)
@@ -112,7 +115,7 @@ public class TestFilterStreamSpecRaw extends TestCase
         FilterStreamSpecRaw raw = makeSpec("select * from " + SupportBean.class.getName() +
                 "(doubleBoxed>1.11, doublePrimitive>=9.11 and intPrimitive<=9, theString || 'a' = 'sa')");
         FilterSpecCompiled spec = compile(raw);
-        assertEquals(4, spec.getParameters().size());
+        assertEquals(4, spec.getParameters().length);
         Map<String, FilterSpecParam> parameters = mapParameters(spec.getParameters());
 
         assertEquals(FilterOperator.GREATER, parameters.get("doubleBoxed").getFilterOperator());
@@ -133,7 +136,7 @@ public class TestFilterStreamSpecRaw extends TestCase
         FilterStreamSpecRaw raw = makeSpec("select * from " + SupportBean.class.getName() +
                 "((doubleBoxed=1 and doublePrimitive=2) and (intPrimitive=3 and (theString like '%_a' and theString = 'a')))");
         FilterSpecCompiled spec = compile(raw);
-        assertEquals(5, spec.getParameters().size());
+        assertEquals(5, spec.getParameters().length);
         Map<String, FilterSpecParam> parameters = mapParameters(spec.getParameters());
 
         assertEquals(FilterOperator.EQUAL, parameters.get("doubleBoxed").getFilterOperator());
@@ -156,11 +159,11 @@ public class TestFilterStreamSpecRaw extends TestCase
     {
         FilterStreamSpecRaw raw = makeSpec("select * from " + SupportBean.class.getName() + "(doubleBoxed in (1, 2, 3))");
         FilterSpecCompiled spec = compile(raw);
-        assertEquals(1, spec.getParameters().size());
+        assertEquals(1, spec.getParameters().length);
 
-        assertEquals("doubleBoxed", spec.getParameters().getFirst().getLookupable().getExpression());
-        assertEquals(FilterOperator.IN_LIST_OF_VALUES, spec.getParameters().getFirst().getFilterOperator());
-        FilterSpecParamIn inParam = (FilterSpecParamIn) spec.getParameters().getFirst();
+        assertEquals("doubleBoxed", spec.getParameters()[0].getLookupable().getExpression());
+        assertEquals(FilterOperator.IN_LIST_OF_VALUES, spec.getParameters()[0].getFilterOperator());
+        FilterSpecParamIn inParam = (FilterSpecParamIn) spec.getParameters()[0];
         assertEquals(3, inParam.getListOfValues().size());
         assertEquals(1.0, getConstant(inParam.getListOfValues().get(0)));
         assertEquals(2.0, getConstant(inParam.getListOfValues().get(1)));
@@ -171,11 +174,11 @@ public class TestFilterStreamSpecRaw extends TestCase
     {
         FilterStreamSpecRaw raw = makeSpec("select * from " + SupportBean.class.getName() + "(theString not in (\"a\"))");
         FilterSpecCompiled spec = compile(raw);
-        assertEquals(1, spec.getParameters().size());
+        assertEquals(1, spec.getParameters().length);
 
-        assertEquals("theString", spec.getParameters().getFirst().getLookupable().getExpression());
-        assertEquals(FilterOperator.NOT_IN_LIST_OF_VALUES, spec.getParameters().getFirst().getFilterOperator());
-        FilterSpecParamIn inParam = (FilterSpecParamIn) spec.getParameters().getFirst();
+        assertEquals("theString", spec.getParameters()[0].getLookupable().getExpression());
+        assertEquals(FilterOperator.NOT_IN_LIST_OF_VALUES, spec.getParameters()[0].getFilterOperator());
+        FilterSpecParamIn inParam = (FilterSpecParamIn) spec.getParameters()[0];
         assertEquals(1, inParam.getListOfValues().size());
         assertEquals("a", getConstant(inParam.getListOfValues().get(0)));
     }
@@ -185,7 +188,7 @@ public class TestFilterStreamSpecRaw extends TestCase
         FilterStreamSpecRaw raw = makeSpec("select * from " + SupportBean.class.getName() +
                 "(intBoxed in [1:5] and doubleBoxed in (2:6) and floatBoxed in (3:7] and byteBoxed in [0:1))");
         FilterSpecCompiled spec = compile(raw);
-        assertEquals(4, spec.getParameters().size());
+        assertEquals(4, spec.getParameters().length);
         Map<String, FilterSpecParam> parameters = mapParameters(spec.getParameters());
 
         assertEquals(FilterOperator.RANGE_CLOSED, parameters.get("intBoxed").getFilterOperator());
@@ -214,7 +217,7 @@ public class TestFilterStreamSpecRaw extends TestCase
         FilterStreamSpecRaw raw = makeSpec("select * from " + SupportBean.class.getName() +
                 "(intBoxed not in [1:5] and doubleBoxed not in (2:6) and floatBoxed not in (3:7] and byteBoxed not in [0:1))");
         FilterSpecCompiled spec = compile(raw);
-        assertEquals(4, spec.getParameters().size());
+        assertEquals(4, spec.getParameters().length);
         Map<String, FilterSpecParam> parameters = mapParameters(spec.getParameters());
 
         assertEquals(FilterOperator.NOT_RANGE_CLOSED, parameters.get("intBoxed").getFilterOperator());

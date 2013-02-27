@@ -16,13 +16,62 @@ import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.event.map.MapEventBean;
 import junit.framework.TestCase;
 
-import java.util.Set;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Arrays;
+import java.util.*;
 
 public class TestCollectionUtil extends TestCase
 {
+    public void testArrayExpandSingle() {
+        runAssertionExpandSingle("a", "", "a");
+        runAssertionExpandSingle("a,b", "a", "b");
+        runAssertionExpandSingle("a,b,c", "a,b", "c");
+        runAssertionExpandSingle("a,b,c,d", "a,b,c", "d");
+    }
+
+    public void testArrayExpandCollectionAndArray() {
+        runAssertionExpandColl("", "", "");
+        runAssertionExpandColl("a,b", "a", "b");
+        runAssertionExpandColl("a,b", "", "a,b");
+        runAssertionExpandColl("b", "", "b");
+        runAssertionExpandColl("a,b,c", "a,b", "c");
+        runAssertionExpandColl("a,b,c", "", "a,b,c");
+        runAssertionExpandColl("a,b,c", "a", "b,c");
+        runAssertionExpandColl("a,b,c,d", "a,b,c", "d");
+    }
+
+    public void testArrayShrink() {
+        runAssertionShrink("a,c", "a,b,c", 1);
+        runAssertionShrink("b,c", "a,b,c", 0);
+        runAssertionShrink("a,b", "a,b,c", 2);
+        runAssertionShrink("a", "a,b", 1);
+        runAssertionShrink("b", "a,b", 0);
+        runAssertionShrink("", "a", 0);
+    }
+
+    private void runAssertionShrink(String expected, String existing, int index) {
+        String[] expectedArr = expected.length() == 0 ? new String[0] : expected.split(",");
+        String[] existingArr = existing.length() == 0 ? new String[0] : existing.split(",");
+        String[] resultAddColl = (String[]) CollectionUtil.arrayShrinkRemoveSingle(existingArr, index);
+        EPAssertionUtil.assertEqualsExactOrder(expectedArr, resultAddColl);
+    }
+
+    private void runAssertionExpandColl(String expected, String existing, String coll) {
+        String[] expectedArr = expected.length() == 0 ? new String[0] : expected.split(",");
+        String[] existingArr = existing.length() == 0 ? new String[0] : existing.split(",");
+        Collection<String> addCollection = Arrays.asList(coll.length() == 0 ? new String[0] : coll.split(","));
+        String[] resultAddColl = (String[]) CollectionUtil.arrayExpandAddElements(existingArr, addCollection);
+        EPAssertionUtil.assertEqualsExactOrder(expectedArr, resultAddColl);
+
+        String[] resultAddArr = (String[]) CollectionUtil.arrayExpandAddElements(existingArr, addCollection.toArray());
+        EPAssertionUtil.assertEqualsExactOrder(expectedArr, resultAddArr);
+    }
+
+    private void runAssertionExpandSingle(String expected, String existing, String single) {
+        String[] expectedArr = expected.length() == 0 ? new String[0] : expected.split(",");
+        String[] existingArr = existing.length() == 0 ? new String[0] : existing.split(",");
+        String[] result = (String[]) CollectionUtil.arrayExpandAddSingle(existingArr, single);
+        EPAssertionUtil.assertEqualsExactOrder(expectedArr, result);
+    }
+
     public void testAddArraySetSemantics() {
 
         EventBean[] e = new EventBean[10];

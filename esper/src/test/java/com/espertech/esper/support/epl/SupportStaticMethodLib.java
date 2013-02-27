@@ -11,6 +11,8 @@
 
 package com.espertech.esper.support.epl;
 
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.hook.EPLMethodInvocationContext;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanNumeric;
 import com.espertech.esper.support.bean.SupportBean_S0;
@@ -27,13 +29,14 @@ import java.util.Map;
 public class SupportStaticMethodLib 
 {
     private static List<Object[]> invocations = new ArrayList<Object[]>();
+    private static List<EPLMethodInvocationContext> methodInvocationContexts = new ArrayList<EPLMethodInvocationContext>();
 
     public static List<Object[]> getInvocations() {
         return invocations;
     }
 
-    public static void setInvocations(List<Object[]> invocations) {
-        SupportStaticMethodLib.invocations = invocations;
+    public static List<EPLMethodInvocationContext> getMethodInvocationContexts() {
+        return methodInvocationContexts;
     }
 
     public static boolean compareEvents(SupportMarketDataBean beanOne, SupportBean beanTwo)
@@ -243,6 +246,35 @@ public class SupportStaticMethodLib
         return values;
     }
 
+    public static Map fetchMapEventBeanMetadata()
+    {
+        Map<String, Class> values = new HashMap<String, Class>();
+        values.put("mapstring", String.class);
+        values.put("mapint", Integer.class);
+        return values;
+    }
+
+    public static Map fetchMapEventBean(EventBean eventBean, String propOne, String propTwo)
+    {
+        String theString = (String) eventBean.get(propOne);
+        int id = (Integer) eventBean.get(propTwo);
+
+        if (id < 0)
+        {
+            return null;
+        }
+
+        Map<String, Object> values = new HashMap<String, Object>();
+        if (id == 0)
+        {
+            return values;
+        }
+
+        values.put("mapstring", "|" + theString + "|");
+        values.put("mapint", id + 1);
+        return values;
+    }
+
     public static Map fetchIdDelimitedMetadata()
     {
         Map<String, Class> values = new HashMap<String, Class>();
@@ -279,6 +311,12 @@ public class SupportStaticMethodLib
 	{
 		return object;
 	}
+
+    public static Object staticMethodWithContext(Object object, EPLMethodInvocationContext context)
+    {
+        methodInvocationContexts.add(context);
+        return object;
+    }
 	
     public static int arrayLength(Object object)
 	{
@@ -435,6 +473,12 @@ public class SupportStaticMethodLib
     public static boolean volumeGreaterZero(SupportMarketDataBean bean)
     {
         return bean.getVolume() > 0;
+    }
+
+    public static boolean volumeGreaterZeroEventBean(EventBean bean)
+    {
+        long volume = (Long) bean.get("volume");
+        return volume > 0;
     }
 
     public static BigInteger myBigIntFunc(BigInteger val)

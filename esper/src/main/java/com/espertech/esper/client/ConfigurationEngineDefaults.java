@@ -824,6 +824,7 @@ public class ConfigurationEngineDefaults implements Serializable
         private Configuration.PropertyResolutionStyle classPropertyResolutionStyle;
         private ConfigurationEventTypeLegacy.AccessorStyle defaultAccessorStyle;
         private Configuration.EventRepresentation defaultEventRepresentation;
+        private int anonymousCacheSize = 5;
 
         /**
          * Ctor.
@@ -887,6 +888,22 @@ public class ConfigurationEngineDefaults implements Serializable
          */
         public Configuration.EventRepresentation getDefaultEventRepresentation() {
             return defaultEventRepresentation;
+        }
+
+        /**
+         * Returns the cache size for anonymous event types.
+         * @return cache size
+         */
+        public int getAnonymousCacheSize() {
+            return anonymousCacheSize;
+        }
+
+        /**
+         * Sets the cache size for anonymous event types.
+         * @param anonymousCacheSize cache size
+         */
+        public void setAnonymousCacheSize(int anonymousCacheSize) {
+            this.anonymousCacheSize = anonymousCacheSize;
         }
     }
 

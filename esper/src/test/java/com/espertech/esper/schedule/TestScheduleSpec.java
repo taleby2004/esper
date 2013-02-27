@@ -35,7 +35,7 @@ public class TestScheduleSpec extends TestCase
 
         // Test all units are wildcards
         unitValues = (new ScheduleSpec()).getUnitValues();
-        new ScheduleSpec(unitValues);
+        new ScheduleSpec(unitValues, null);
 
         // Test invalid value in month
         SortedSet<Integer> values = new TreeSet<Integer>();
@@ -48,7 +48,7 @@ public class TestScheduleSpec extends TestCase
         values.add(1);
         values.add(5);
         unitValues.put(ScheduleUnit.MONTHS, values);
-        new ScheduleSpec(unitValues);
+        new ScheduleSpec(unitValues, null);
     }
 
     public void testCompress()
@@ -65,7 +65,7 @@ public class TestScheduleSpec extends TestCase
         unitValues.put(ScheduleUnit.MONTHS, monthValues);
 
         // Construct spec, test that month was replaced with wildcards
-        ScheduleSpec spec = new ScheduleSpec(unitValues);
+        ScheduleSpec spec = new ScheduleSpec(unitValues, null);
         assertTrue(spec.getUnitValues().get(ScheduleUnit.MONTHS) == null);
     }
 
@@ -73,7 +73,7 @@ public class TestScheduleSpec extends TestCase
     {
         try
         {
-            new ScheduleSpec(unitValues);
+            new ScheduleSpec(unitValues, null);
             assertFalse(true);
         }
         catch (IllegalArgumentException ex)

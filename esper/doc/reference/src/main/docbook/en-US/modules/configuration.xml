@@ -970,7 +970,7 @@ config.addImport("com.mycompany.mypackage.MyLib");   // class import]]></program
 			</para>
 			
 			<para>
-				A variable is declared by specifying a variable name, the variable type and an optional initialization value. The initialization value can be of the same or compatible type as the variable type, or can also be a String value that, when parsed, is compatible to the type declared for the variable.
+				A variable is declared by specifying a variable name, the variable type, an optional initialization value and an optional boolean-type flag indicating whether the variable is a constant (false by default). The initialization value can be of the same or compatible type as the variable type, or can also be a String value that, when parsed, is compatible to the type declared for the variable. Declare each variable a constant to achieve the best performance.
 			</para>
 
 			<para>
@@ -978,7 +978,8 @@ config.addImport("com.mycompany.mypackage.MyLib");   // class import]]></program
 			</para>
 
 		<programlisting><![CDATA[<variable name="var_threshold" type="long" initialization-value="100"/>
-<variable name="var_key" type="string"/>]]></programlisting>
+<variable name="var_key" type="string"/>
+<variable name="test" type="int" constant="true"/>]]></programlisting>
 
 			<para>
 				Please find the list of valid values for the <literal>type</literal> attribute in <xref linkend="configuration-type-names"/>.
@@ -1599,6 +1600,22 @@ config.getEngineDefaults().getEventMeta().setClassPropertyResolutionStyle(
     Configuration.PropertyResolutionStyle.CASE_INSENSITIVE);
 config.getEngineDefaults().getEventMeta().setDefaultAccessorStyle(
     ConfigurationEventTypeLegacy.AccessorStyle.PUBLIC);]]></programlisting>
+			</sect3>
+
+			<sect3 xml:id="config-engine-eventmeta-anonymouscache" revision="1">
+				<title>Cache Size for Anonymous Event Types</title>
+
+				<para>
+					By default the engine maintains a cache of the last 5 recently allocated anonymous event types. Anonymous event types are unnamed output event types associated to statements.
+					The <literal>anonymous-cache</literal> element under the <literal>event-meta</literal> element in the XML configuration contols the cache size.
+					The cache size can be set to zero to disable the cache.
+				</para>
+				
+				<para>
+					The next code snippet shows how to control this setting via the API:
+				</para>
+				<programlisting><![CDATA[Configuration config = new Configuration();
+config.getEngineDefaults().getEventMeta().setAnonymousCacheSize(5);]]></programlisting>
 			</sect3>
 		</sect2>
 

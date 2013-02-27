@@ -11,20 +11,21 @@
 
 package com.espertech.esper.core.context.mgr;
 
-import com.espertech.esper.client.EventBean;
-
+import java.io.Serializable;
 import java.util.Map;
 
-public class ContextControllerInitTermState {
+/**
+ * State of the overlapping and non-overlapping context.
+ * Serializable for the purpose of SPI testing.
+ */
+public class ContextControllerInitTermState implements Serializable {
 
     private final long startTime;
     private final Map<String, Object> patternData;
-    private final EventBean filterEvent;
 
-    public ContextControllerInitTermState(long startTime, Map<String, Object> patternData, EventBean filterEvent) {
+    public ContextControllerInitTermState(long startTime, Map<String, Object> patternData) {
         this.startTime = startTime;
         this.patternData = patternData;
-        this.filterEvent = filterEvent;
     }
 
     public long getStartTime() {
@@ -33,9 +34,5 @@ public class ContextControllerInitTermState {
 
     public Map<String, Object> getPatternData() {
         return patternData;
-    }
-
-    public EventBean getFilterEvent() {
-        return filterEvent;
     }
 }

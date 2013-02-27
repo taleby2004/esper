@@ -18,6 +18,20 @@ public class ContextPartitionIdentifierHash extends ContextPartitionIdentifier {
     private int hash;
 
     /**
+     * Ctor.
+     */
+    public ContextPartitionIdentifierHash() {
+    }
+
+    /**
+     * Ctor.
+     * @param hash code
+     */
+    public ContextPartitionIdentifierHash(int hash) {
+        this.hash = hash;
+    }
+
+    /**
      * Returns the hash code.
      * @return hash code
      */
@@ -31,5 +45,18 @@ public class ContextPartitionIdentifierHash extends ContextPartitionIdentifier {
      */
     public void setHash(int hash) {
         this.hash = hash;
+    }
+
+    public boolean compareTo(ContextPartitionIdentifier other) {
+        if (!(other instanceof ContextPartitionIdentifierHash)) {
+            return false;
+        }
+        return hash == ((ContextPartitionIdentifierHash) other).hash;
+    }
+
+    public String toString() {
+        return "ContextPartitionIdentifierHash{" +
+                "hash=" + hash +
+                '}';
     }
 }

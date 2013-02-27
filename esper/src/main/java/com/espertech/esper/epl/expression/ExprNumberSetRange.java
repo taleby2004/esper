@@ -32,9 +32,9 @@ public class ExprNumberSetRange extends ExprNodeBase implements ExprEvaluator
 
     public String toExpressionString()
     {
-        return this.getChildNodes().get(0).toExpressionString() +
+        return this.getChildNodes()[0].toExpressionString() +
                 ":" +
-                this.getChildNodes().get(1).toExpressionString();
+                this.getChildNodes()[1].toExpressionString();
     }
 
     @Override
@@ -44,7 +44,7 @@ public class ExprNumberSetRange extends ExprNodeBase implements ExprEvaluator
 
     public boolean isConstantResult()
     {
-        return this.getChildNodes().get(0).isConstantResult() && this.getChildNodes().get(1).isConstantResult();
+        return this.getChildNodes()[0].isConstantResult() && this.getChildNodes()[1].isConstantResult();
     }
 
     public boolean equalsNode(ExprNode node)

@@ -12,6 +12,7 @@
 package com.espertech.esper.regression.view;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.hook.EPLMethodInvocationContext;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.*;
@@ -274,7 +275,17 @@ public class TestStaticFunctions extends TestCase
 		String className = SupportStaticMethodLib.class.getName();
 		statementText = "select " + className + ".staticMethod(2)" + stream;
 		assertEquals(2, createStatementAndGetProperty(true, className + ".staticMethod(2)")[0]);
-	}
+
+        // try context passed
+        SupportStaticMethodLib.getMethodInvocationContexts().clear();
+        statementText = "@Name('S0') select " + className + ".staticMethodWithContext(2)" + stream;
+        assertEquals(2, createStatementAndGetProperty(true, className + ".staticMethodWithContext(2)")[0]);
+        EPLMethodInvocationContext first = SupportStaticMethodLib.getMethodInvocationContexts().get(0);
+        assertEquals("S0", first.getStatementName());
+        assertEquals(epService.getURI(), first.getEngineURI());
+        assertEquals(-1, first.getContextPartitionId());
+        assertEquals("staticMethodWithContext", first.getFunctionName());
+    }
 
 	public void testComplexParameters()
 	{

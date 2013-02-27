@@ -12,12 +12,20 @@
 package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.context.ContextPartitionSelector;
 import com.espertech.esper.client.deploy.DeploymentOptions;
 import com.espertech.esper.client.deploy.EPDeploymentAdmin;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
+import com.espertech.esper.client.soda.EPStatementObjectModel;
+import com.espertech.esper.regression.context.SupportHashCodeFuncGranularCRC32;
+import com.espertech.esper.regression.context.SupportSelectorByHashCode;
+import com.espertech.esper.regression.context.SupportSelectorCategory;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.support.epl.SupportQueryPlanIndexHook;
+import com.espertech.esper.support.util.IndexBackingTableInfo;
 import com.espertech.esper.util.EventRepresentationEnum;
 import junit.framework.TestCase;
 
@@ -26,24 +34,191 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class TestNamedWindowExecuteQuery extends TestCase
+public class TestNamedWindowExecuteQuery extends TestCase implements IndexBackingTableInfo
 {
-    private EPServiceProvider epService;
-    private String[] fields = new String[] {"theString", "intPrimitive"};
+    private final static String[] FIELDS = new String[] {"theString", "intPrimitive"};
 
-    // test expressions + current timestamp
+    private EPServiceProvider epService;
+    private SupportUpdateListener listener;
+
     public void setUp()
     {
+        listener = new SupportUpdateListener();
+
         Configuration config = SupportConfigFactory.getConfiguration();
+        config.getEngineDefaults().getLogging().setEnableQueryPlan(true);
         config.addEventType("SupportBean", SupportBean.class.getName());
         config.addEventType("SupportBean_A", SupportBean_A.class.getName());
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
 
-        String namedWin = "create window MyWindow.win:keepall() as select * from SupportBean";
+        String namedWin = "@Name('TheWindow') create window MyWindow.win:keepall() as select * from SupportBean";
         epService.getEPAdministrator().createEPL(namedWin);
         String insert = "insert into MyWindow select * from SupportBean";
         epService.getEPAdministrator().createEPL(insert);
+    }
+
+    public void tearDown() {
+        listener = null;
+    }
+
+    public void testFAFUpdate() {
+        // test update-all
+        for (int i = 0; i < 2; i++) {
+            epService.getEPRuntime().sendEvent(new SupportBean("E" + i, i));
+        }
+        EPOnDemandQueryResult result = epService.getEPRuntime().executeQuery("update MyWindow set theString = 'ABC'");
+        EPAssertionUtil.assertPropsPerRow(epService.getEPAdministrator().getStatement("TheWindow").iterator(), FIELDS, new Object[][] {{"ABC", 0}, {"ABC", 1}});
+        EPAssertionUtil.assertPropsPerRow(result.getArray(), FIELDS, new Object[][] {{"ABC", 0}, {"ABC", 1}});
+
+        // test update with where-clause
+        epService.getEPRuntime().executeQuery("delete from MyWindow");
+        for (int i = 0; i < 3; i++) {
+            epService.getEPRuntime().sendEvent(new SupportBean("E" + i, i));
+        }
+        result = epService.getEPRuntime().executeQuery("update MyWindow set theString = 'X', intPrimitive=-1 where theString = 'E1'");
+        EPAssertionUtil.assertPropsPerRow(result.getArray(), FIELDS, new Object[][] {{"X", -1}});
+        EPAssertionUtil.assertPropsPerRow(epService.getEPAdministrator().getStatement("TheWindow").iterator(), FIELDS, new Object[][] {{"E0", 0}, {"E2", 2}, {"X", -1}});
+
+        // test update with SODA
+        String epl = "update MyWindow set intPrimitive = intPrimitive + 10 where theString = \"E2\"";
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(epl);
+        assertEquals(epl, model.toEPL());
+        result = epService.getEPRuntime().executeQuery(model);
+        EPAssertionUtil.assertPropsPerRow(result.getArray(), FIELDS, new Object[][] {{"E2", 12}});
+        EPAssertionUtil.assertPropsPerRow(epService.getEPAdministrator().getStatement("TheWindow").iterator(), FIELDS, new Object[][] {{"E0", 0}, {"X", -1}, {"E2", 12}});
+
+        // test update with initial value
+        result = epService.getEPRuntime().executeQuery("update MyWindow set intPrimitive=5, theString = 'x', theString = initial.theString || 'y', intPrimitive=initial.intPrimitive+100 where theString = 'E0'");
+        EPAssertionUtil.assertPropsPerRow(result.getArray(), FIELDS, new Object[][] {{"E0y", 100}});
+        EPAssertionUtil.assertPropsPerRow(epService.getEPAdministrator().getStatement("TheWindow").iterator(), FIELDS, new Object[][] {{"X", -1}, {"E2", 12}, {"E0y", 100}});
+        epService.getEPRuntime().executeQuery("delete from MyWindow");
+
+        // test with index
+        epService.getEPAdministrator().createEPL("create unique index Idx1 on MyWindow (theString)");
+        for (int i = 0; i < 5; i++) {
+            epService.getEPRuntime().sendEvent(new SupportBean("E" + i, i));
+        }
+        runQueryAssertCountNonNegative(INDEX_CALLBACK_HOOK + "update MyWindow set intPrimitive=-1 where theString = 'E1' and intPrimitive = 0", 5, "Idx1", BACKING_SINGLE_UNIQUE);
+        runQueryAssertCountNonNegative(INDEX_CALLBACK_HOOK + "update MyWindow set intPrimitive=-1 where theString = 'E1' and intPrimitive = 1", 4, "Idx1", BACKING_SINGLE_UNIQUE);
+        runQueryAssertCountNonNegative(INDEX_CALLBACK_HOOK + "update MyWindow set intPrimitive=-1 where theString = 'E2'", 3, "Idx1", BACKING_SINGLE_UNIQUE);
+        runQueryAssertCountNonNegative(INDEX_CALLBACK_HOOK + "update MyWindow set intPrimitive=-1 where intPrimitive = 4", 2, null, null);
+
+        // test with alias
+        runQueryAssertCountNonNegative(INDEX_CALLBACK_HOOK + "update MyWindow as w1 set intPrimitive=-1 where w1.theString = 'E3'", 1, "Idx1", BACKING_SINGLE_UNIQUE);
+
+        // test consumption
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select irstream * from MyWindow");
+        stmt.addListener(listener);
+        epService.getEPRuntime().executeQuery("update MyWindow set intPrimitive=1000 where theString = 'E0'");
+        EPAssertionUtil.assertProps(listener.assertPairGetIRAndReset(), FIELDS, new Object[] {"E0", 1000}, new Object[] {"E0", 0});
+    }
+
+    public void testFAFDelete() {
+        // test delete-all
+        for (int i = 0; i < 10; i++) {
+            epService.getEPRuntime().sendEvent(new SupportBean("E" + i, i));
+        }
+        assertEquals(10L, getMyWindowCount());
+        EPOnDemandQueryResult result = epService.getEPRuntime().executeQuery("delete from MyWindow");
+        assertEquals(0L, getMyWindowCount());
+        assertEquals(epService.getEPAdministrator().getConfiguration().getEventType("MyWindow"), result.getEventType());
+        assertEquals(10, result.getArray().length);
+        assertEquals("E0", result.getArray()[0].get("theString"));
+
+        // test SODA + where-clause
+        for (int i = 0; i < 10; i++) {
+            epService.getEPRuntime().sendEvent(new SupportBean("E" + i, i));
+        }
+        assertEquals(10L, getMyWindowCount());
+        String eplWithWhere = "delete from MyWindow where theString = \"E1\"";
+        EPStatementObjectModel modelWithWhere = epService.getEPAdministrator().compileEPL(eplWithWhere);
+        assertEquals(eplWithWhere, modelWithWhere.toEPL());
+        result = epService.getEPRuntime().executeQuery(modelWithWhere);
+        assertEquals(9L, getMyWindowCount());
+        assertEquals(epService.getEPAdministrator().getConfiguration().getEventType("MyWindow"), result.getEventType());
+        EPAssertionUtil.assertPropsPerRow(result.getArray(), "theString".split(","), new Object[][] {{"E1"}});
+
+        // test SODA delete-all
+        String eplDelete = "delete from MyWindow";
+        EPStatementObjectModel modelDeleteOnly = epService.getEPAdministrator().compileEPL(eplDelete);
+        assertEquals(eplDelete, modelDeleteOnly.toEPL());
+        epService.getEPRuntime().executeQuery(modelDeleteOnly);
+        assertEquals(0L, getMyWindowCount());
+
+        // test with index
+        epService.getEPAdministrator().createEPL("create unique index Idx1 on MyWindow (theString)");
+        for (int i = 0; i < 5; i++) {
+            epService.getEPRuntime().sendEvent(new SupportBean("E" + i, i));
+        }
+        runQueryAssertCount(INDEX_CALLBACK_HOOK + "delete from MyWindow where theString = 'E1' and intPrimitive = 0", 5, "Idx1", BACKING_SINGLE_UNIQUE);
+        runQueryAssertCount(INDEX_CALLBACK_HOOK + "delete from MyWindow where theString = 'E1' and intPrimitive = 1", 4, "Idx1", BACKING_SINGLE_UNIQUE);
+        runQueryAssertCount(INDEX_CALLBACK_HOOK + "delete from MyWindow where theString = 'E2'", 3, "Idx1", BACKING_SINGLE_UNIQUE);
+        runQueryAssertCount(INDEX_CALLBACK_HOOK + "delete from MyWindow where intPrimitive = 4", 2, null, null);
+
+        // test with alias
+        runQueryAssertCount(INDEX_CALLBACK_HOOK + "delete from MyWindow as w1 where w1.theString = 'E3'", 1, "Idx1", BACKING_SINGLE_UNIQUE);
+
+        // test consumption
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select rstream * from MyWindow");
+        stmt.addListener(listener);
+        epService.getEPRuntime().executeQuery("delete from MyWindow");
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), FIELDS, new Object[] {"E0", 0});
+    }
+
+    public void testFAFDeleteContextPartitioned() {
+
+        // test hash-segmented context
+        String eplCtx = "create context MyCtx coalesce consistent_hash_crc32(theString) from SupportBean granularity 4 preallocate";
+        epService.getEPAdministrator().createEPL(eplCtx);
+
+        epService.getEPAdministrator().createEPL("context MyCtx create window CtxWindow.win:keepall() as SupportBean");
+        epService.getEPAdministrator().createEPL("context MyCtx insert into CtxWindow select * from SupportBean");
+
+        SupportHashCodeFuncGranularCRC32 codeFunc = new SupportHashCodeFuncGranularCRC32(4);
+        int[] codes = new int[5];
+        for (int i = 0; i < 5; i++) {
+            epService.getEPRuntime().sendEvent(new SupportBean("E" + i, i));
+            codes[i] = codeFunc.codeFor("E" + i);
+        }
+        EPAssertionUtil.assertEqualsExactOrder(new int[] {3, 1, 3, 1, 2}, codes);   // just to make sure CRC32 didn't change
+
+        // assert counts individually per context partition
+        assertCtxWindowCountPerCode(new long[] {0, 2, 1, 2});
+
+        // delete per context partition (E0 ended up in '3')
+        epService.getEPRuntime().executeQuery("delete from CtxWindow where theString = 'E0'", new ContextPartitionSelector[] {new SupportSelectorByHashCode(1)});
+        assertCtxWindowCountPerCode(new long[] {0, 2, 1, 2});
+
+        EPOnDemandQueryResult result = epService.getEPRuntime().executeQuery("delete from CtxWindow where theString = 'E0'", new ContextPartitionSelector[] {new SupportSelectorByHashCode(3)});
+        assertCtxWindowCountPerCode(new long[] {0, 2, 1, 1});
+        EPAssertionUtil.assertPropsPerRow(result.getArray(), "theString".split(","), new Object[][] {{"E0"}});
+
+        // delete per context partition (E1 ended up in '1')
+        epService.getEPRuntime().executeQuery("delete from CtxWindow where theString = 'E1'", new ContextPartitionSelector[] {new SupportSelectorByHashCode(0)});
+        assertCtxWindowCountPerCode(new long[] {0, 2, 1, 1});
+
+        epService.getEPRuntime().executeQuery("delete from CtxWindow where theString = 'E1'", new ContextPartitionSelector[] {new SupportSelectorByHashCode(1)});
+        assertCtxWindowCountPerCode(new long[] {0, 1, 1, 1});
+        epService.getEPAdministrator().destroyAllStatements();
+
+        // test category-segmented context
+        String eplCtxCategory = "create context MyCtxCat group by intPrimitive < 0 as negative, group by intPrimitive > 0 as positive from SupportBean";
+        epService.getEPAdministrator().createEPL(eplCtxCategory);
+        epService.getEPAdministrator().createEPL("context MyCtxCat create window CtxWindowCat.win:keepall() as SupportBean");
+        epService.getEPAdministrator().createEPL("context MyCtxCat insert into CtxWindowCat select * from SupportBean");
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", -2));
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 1));
+        epService.getEPRuntime().sendEvent(new SupportBean("E3", -3));
+        epService.getEPRuntime().sendEvent(new SupportBean("E4", 2));
+        assertEquals(2L, getCtxWindowCatCount("positive"));
+        assertEquals(2L, getCtxWindowCatCount("negative"));
+
+        result = epService.getEPRuntime().executeQuery("context MyCtxCat delete from CtxWindowCat where context.label = 'negative'");
+        assertEquals(2L, getCtxWindowCatCount("positive"));
+        assertEquals(0L, getCtxWindowCatCount("negative"));
+        EPAssertionUtil.assertPropsPerRow(result.getArray(), "theString".split(","), new Object[][] {{"E1"}, {"E3"}});
     }
 
     public void test3StreamInnerJoin() throws Exception {
@@ -104,13 +279,16 @@ public class TestNamedWindowExecuteQuery extends TestCase
                 ).getArray();
         EPAssertionUtil.assertPropsPerRow(queryResults, fields, new Object[][]{{"Product1"}});
 
-        queryResults = epService.getEPRuntime().executeQuery("" +
-                "select WinProduct.productId " +
+        String eplQuery = "select WinProduct.productId " +
                 " from WinProduct" +
                 " inner join WinCategory on WinProduct.categoryId=WinCategory.categoryId" +
                 " inner join WinProductOwnerDetails on WinProduct.productId=WinProductOwnerDetails.productId" +
-                " having WinCategory.owner=WinProductOwnerDetails.owner"
-                ).getArray();
+                " having WinCategory.owner=WinProductOwnerDetails.owner";
+        queryResults = epService.getEPRuntime().executeQuery(eplQuery).getArray();
+        EPAssertionUtil.assertPropsPerRow(queryResults, fields, new Object[][]{{"Product1"}});
+
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(eplQuery);
+        queryResults = epService.getEPRuntime().executeQuery(model).getArray();
         EPAssertionUtil.assertPropsPerRow(queryResults, fields, new Object[][]{{"Product1"}});
 
         epService.destroy();
@@ -205,23 +383,23 @@ public class TestNamedWindowExecuteQuery extends TestCase
         for (EventBean row : result.getArray()) {
             // System.out.println("name=" + row.get("name"));
         }
-        EPAssertionUtil.assertPropsPerRow(result.iterator(), fields, null);
-        EPAssertionUtil.assertPropsPerRow(prepared.execute().iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRow(result.iterator(), FIELDS, null);
+        EPAssertionUtil.assertPropsPerRow(prepared.execute().iterator(), FIELDS, null);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         result = epService.getEPRuntime().executeQuery(query);
-        EPAssertionUtil.assertPropsPerRow(result.iterator(), fields, new Object[][]{{"E1", 1}});
-        EPAssertionUtil.assertPropsPerRow(prepared.execute().iterator(), fields, new Object[][]{{"E1", 1}});
+        EPAssertionUtil.assertPropsPerRow(result.iterator(), FIELDS, new Object[][]{{"E1", 1}});
+        EPAssertionUtil.assertPropsPerRow(prepared.execute().iterator(), FIELDS, new Object[][]{{"E1", 1}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
         result = epService.getEPRuntime().executeQuery(query);
-        EPAssertionUtil.assertPropsPerRow(result.iterator(), fields, new Object[][]{{"E1", 1}, {"E2", 2}});
-        EPAssertionUtil.assertPropsPerRow(prepared.execute().iterator(), fields, new Object[][]{{"E1", 1}, {"E2", 2}});
+        EPAssertionUtil.assertPropsPerRow(result.iterator(), FIELDS, new Object[][]{{"E1", 1}, {"E2", 2}});
+        EPAssertionUtil.assertPropsPerRow(prepared.execute().iterator(), FIELDS, new Object[][]{{"E1", 1}, {"E2", 2}});
     }
 
     public void testExecuteCount() throws Exception
     {
-        fields = new String[] {"cnt"};
+        String[] fields = new String[] {"cnt"};
         String query = "select count(*) as cnt from MyWindow";
         EPOnDemandPreparedQuery prepared = epService.getEPRuntime().prepareQuery(query);
 
@@ -241,6 +419,14 @@ public class TestNamedWindowExecuteQuery extends TestCase
         result = epService.getEPRuntime().executeQuery(query);
         EPAssertionUtil.assertPropsPerRow(result.iterator(), fields, new Object[][]{{2L}});
         EPAssertionUtil.assertPropsPerRow(prepared.execute().iterator(), fields, new Object[][]{{2L}});
+
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(query);
+        result = epService.getEPRuntime().executeQuery(model);
+        EPAssertionUtil.assertPropsPerRow(result.iterator(), fields, new Object[][]{{2L}});
+        EPAssertionUtil.assertPropsPerRow(prepared.execute().iterator(), fields, new Object[][]{{2L}});
+
+        EPOnDemandPreparedQuery preparedFromModel = epService.getEPRuntime().prepareQuery(model);
+        EPAssertionUtil.assertPropsPerRow(preparedFromModel.execute().iterator(), fields, new Object[][]{{2L}});
     }
 
     public void testExecuteFilter() throws Exception
@@ -387,9 +573,42 @@ public class TestNamedWindowExecuteQuery extends TestCase
     private void runAssertionFilter(String query)
     {
         EPOnDemandQueryResult result = epService.getEPRuntime().executeQuery(query);
-        EPAssertionUtil.assertPropsPerRow(result.iterator(), fields, new Object[][]{{"E3", 5}});
+        EPAssertionUtil.assertPropsPerRow(result.iterator(), FIELDS, new Object[][]{{"E3", 5}});
 
         EPOnDemandPreparedQuery prepared = epService.getEPRuntime().prepareQuery(query);
-        EPAssertionUtil.assertPropsPerRow(prepared.execute().iterator(), fields, new Object[][]{{"E3", 5}});
+        EPAssertionUtil.assertPropsPerRow(prepared.execute().iterator(), FIELDS, new Object[][]{{"E3", 5}});
+    }
+
+    private void runQueryAssertCount(String epl, int count, String indexName, String backingClass) {
+        epService.getEPRuntime().executeQuery(epl);
+        assertEquals(count, getMyWindowCount());
+        SupportQueryPlanIndexHook.assertFAFAndReset(indexName, backingClass);
+    }
+
+    private void runQueryAssertCountNonNegative(String epl, int count, String indexName, String backingClass) {
+        epService.getEPRuntime().executeQuery(epl);
+        long actual = (Long) epService.getEPRuntime().executeQuery("select count(*) as c0 from MyWindow where intPrimitive >= 0").getArray()[0].get("c0");
+        assertEquals(count, actual);
+        SupportQueryPlanIndexHook.assertFAFAndReset(indexName, backingClass);
+    }
+
+    private long getMyWindowCount() {
+        return (Long) epService.getEPRuntime().executeQuery("select count(*) as c0 from MyWindow").getArray()[0].get("c0");
+    }
+
+    private void assertCtxWindowCountPerCode(long[] expectedCountPerCode) {
+        for (int i = 0; i < expectedCountPerCode.length; i++) {
+            assertEquals("for code " + i, expectedCountPerCode[i], getCtxWindowCount(i));
+        }
+    }
+
+    private long getCtxWindowCount(int hashCode) {
+        EPOnDemandQueryResult result = epService.getEPRuntime().executeQuery("select count(*) as c0 from CtxWindow", new ContextPartitionSelector[] {new SupportSelectorByHashCode(hashCode)});
+        return (Long) result.getArray()[0].get("c0");
+    }
+
+    private long getCtxWindowCatCount(String categoryName) {
+        EPOnDemandQueryResult result = epService.getEPRuntime().executeQuery("select count(*) as c0 from CtxWindowCat", new ContextPartitionSelector[] {new SupportSelectorCategory(categoryName)});
+        return (Long) result.getArray()[0].get("c0");
     }
 }

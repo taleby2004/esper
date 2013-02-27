@@ -16,16 +16,13 @@ import com.espertech.esper.support.epl.SupportOuterJoinDescFactory;
 import com.espertech.esper.type.OuterJoinType;
 import junit.framework.TestCase;
 
-import java.util.List;
-import java.util.LinkedList;
-
 public class TestOuterJoinAnalyzer extends TestCase
 {
     public void testAnalyze() throws Exception
     {
-        List<OuterJoinDesc> descList = new LinkedList<OuterJoinDesc>();
-        descList.add(SupportOuterJoinDescFactory.makeDesc("intPrimitive", "s0", "intBoxed", "s1", OuterJoinType.LEFT));
-        descList.add(SupportOuterJoinDescFactory.makeDesc("simpleProperty", "s2", "theString", "s1", OuterJoinType.LEFT));
+        OuterJoinDesc[] descList = new OuterJoinDesc[2];
+        descList[0] = SupportOuterJoinDescFactory.makeDesc("intPrimitive", "s0", "intBoxed", "s1", OuterJoinType.LEFT);
+        descList[1] = SupportOuterJoinDescFactory.makeDesc("simpleProperty", "s2", "theString", "s1", OuterJoinType.LEFT);
         // simpleProperty in s2
 
         QueryGraph graph = new QueryGraph(3);

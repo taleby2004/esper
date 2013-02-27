@@ -209,24 +209,17 @@ public final class SchedulingServiceImpl implements SchedulingServiceSPI
         return null;
     }
 
-    @Override
-    public synchronized Map<String, Long> getStatementSchedules() {
-        if (timeHandleMap.isEmpty()) {
-            return Collections.emptyMap();
-        }
-        Map<String, Long> result = new HashMap<String, Long>();
+    public void visitSchedules(ScheduleVisitor visitor) {
+        ScheduleVisit visit = new ScheduleVisit();
         for (Map.Entry<Long, SortedMap<ScheduleSlot, ScheduleHandle>> entry : timeHandleMap.entrySet()) {
-            if (entry.getValue().isEmpty()) {
-                continue;
-            }
+            visit.setTimestamp(entry.getKey());
+
             for (Map.Entry<ScheduleSlot, ScheduleHandle> inner : entry.getValue().entrySet()) {
-                if (result.containsKey(inner.getValue().getStatementId())) {
-                    continue;
-                }
-                result.put(inner.getValue().getStatementId(), entry.getKey());
+                visit.setStatementId(inner.getValue().getStatementId());
+                visit.setAgentInstanceId(inner.getValue().getAgentInstanceId());
+                visitor.visit(visit);
             }
         }
-        return result;
     }
 
     private static final Log log = LogFactory.getLog(SchedulingServiceImpl.class);

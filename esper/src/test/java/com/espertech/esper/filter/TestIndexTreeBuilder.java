@@ -11,13 +11,13 @@
 
 package com.espertech.esper.filter;
 
-import junit.framework.TestCase;
-import com.espertech.esper.support.bean.SupportBean;
-import com.espertech.esper.support.filter.SupportFilterSpecBuilder;
-import com.espertech.esper.support.filter.SupportFilterHandle;
-import com.espertech.esper.support.event.SupportEventBeanFactory;
-import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.support.bean.SupportBean;
+import com.espertech.esper.support.event.SupportEventBeanFactory;
+import com.espertech.esper.support.filter.SupportFilterHandle;
+import com.espertech.esper.support.filter.SupportFilterSpecBuilder;
+import junit.framework.TestCase;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -188,7 +188,7 @@ public class TestIndexTreeBuilder extends TestCase
         matches.clear();
 
         // Remove filter
-        builder.remove(eventType, testFilterCallback[0], pathAddedTo, top);
+        builder.remove(eventType, testFilterCallback[0], new EventTypeIndexBuilderIndexLookupableIterator(pathAddedTo.toArray()), top);
 
         // Match should not be found
         top.matchEvent(eventBean, matches);
@@ -226,35 +226,35 @@ public class TestIndexTreeBuilder extends TestCase
         matches.clear();
 
         // Remove some of the nodes
-        builder.remove(eventType, testFilterCallback[2], pathAddedToTwo, top);
+        builder.remove(eventType, testFilterCallback[2], new EventTypeIndexBuilderIndexLookupableIterator(pathAddedToTwo.toArray()), top);
 
         top.matchEvent(eventBean, matches);
         assertTrue(matches.size() == 4);
         matches.clear();
 
         // Remove some of the nodes
-        builder.remove(eventType, testFilterCallback[4], pathAddedToFour, top);
+        builder.remove(eventType, testFilterCallback[4], new EventTypeIndexBuilderIndexLookupableIterator(pathAddedToFour.toArray()), top);
 
         top.matchEvent(eventBean, matches);
         assertTrue(matches.size() == 3);
         matches.clear();
 
         // Remove some of the nodes
-        builder.remove(eventType, testFilterCallback[5], pathAddedToFive, top);
+        builder.remove(eventType, testFilterCallback[5], new EventTypeIndexBuilderIndexLookupableIterator(pathAddedToFive.toArray()), top);
 
         top.matchEvent(eventBean, matches);
         assertTrue(matches.size() == 2);
         matches.clear();
 
         // Remove some of the nodes
-        builder.remove(eventType, testFilterCallback[1], pathAddedToOne, top);
+        builder.remove(eventType, testFilterCallback[1], new EventTypeIndexBuilderIndexLookupableIterator(pathAddedToOne.toArray()), top);
 
         top.matchEvent(eventBean, matches);
         assertTrue(matches.size() == 1);
         matches.clear();
 
         // Remove some of the nodes
-        builder.remove(eventType, testFilterCallback[3], pathAddedToThree, top);
+        builder.remove(eventType, testFilterCallback[3], new EventTypeIndexBuilderIndexLookupableIterator(pathAddedToThree.toArray()), top);
 
         top.matchEvent(eventBean, matches);
         assertTrue(matches.size() == 0);

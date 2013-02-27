@@ -16,6 +16,7 @@ import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.client.time.CurrentTimeEvent;
+import com.espertech.esper.client.util.DateTime;
 import com.espertech.esper.regression.support.*;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanConstants;
@@ -23,10 +24,7 @@ import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.util.SerializableObjectCopier;
 import junit.framework.TestCase;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.List;
+import java.util.*;
 
 public class TestTimerAtObserver extends TestCase implements SupportBeanConstants
 {
@@ -289,45 +287,46 @@ public class TestTimerAtObserver extends TestCase implements SupportBeanConstant
         runAssertion(epService, listener);
     }
 
-    public void testExpressionWithProperty()
+    public void testPropertyAndSODAAndTimezone()
     {
-        String expression = "select * from pattern [a=SupportBean -> every timer:at(2*a.intPrimitive,*,*,*,*)]";
-
+        SupportUpdateListener listener = new SupportUpdateListener();
         Configuration config = SupportConfigFactory.getConfiguration();
         config.addEventType("SupportBean", SupportBean.class.getName());
         EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
 
-        Calendar cal = GregorianCalendar.getInstance();
-        cal.set(Calendar.MILLISECOND, 0);
-        cal.set(2008, 7, 3, 6, 0, 0);      // start on a Sunday at 6am, August 3 2008
-        sendTimer(cal.getTimeInMillis(), epService);
-
+        sendTimeEvent("2008-08-3T6:00:00.000", epService);
+        String expression = "select * from pattern [a=SupportBean -> every timer:at(2*a.intPrimitive,*,*,*,*)]";
         EPStatement statement = epService.getEPAdministrator().createEPL(expression);
-
-        SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 20));
-        
-        cal.set(2008, 7, 3, 6, 39, 59);
-        sendTimer(cal.getTimeInMillis(), epService);
-        assertFalse(listener.isInvoked());
 
-        cal.set(2008, 7, 3, 6, 40, 00);
-        sendTimer(cal.getTimeInMillis(), epService);
-        assertTrue(listener.isInvoked());
-    }
+        sendTimeEvent("2008-08-3T6:39:59.000", epService);
+        assertFalse(listener.getAndClearIsInvoked());
 
-    public void testCrontabParameters()
-    {
-        String expression = "select * from pattern [every timer:at(*/VFREQ, VMIN:VMAX, 1 last, *, [8, 2:VMAX, */VREQ])]";
-        Configuration config = SupportConfigFactory.getConfiguration();
-        EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(config);
-        epService.initialize();
+        sendTimeEvent("2008-08-3T6:40:00.000", epService);
+        assertTrue(listener.getAndClearIsInvoked());
+        statement.destroy();
 
-        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(expression);
-        assertEquals(expression, model.toEPL());
+        // test SODA
+        String epl = "select * from pattern [every timer:at(*/VFREQ, VMIN:VMAX, 1 last, *, [8, 2:VMAX, */VREQ])]";
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(epl);
+        assertEquals(epl, model.toEPL());
+
+        // test timezone
+        if (TimeZone.getDefault().getRawOffset() == -5 * 60 * 60 * 1000)  {    // asserting only in EST timezone, see schedule util tests
+            sendTimeEvent("2008-08-4T6:50:00.000", epService);
+            epService.getEPAdministrator().createEPL("select * from pattern [timer:at(0, 5, 4, 8, *, 0, 'PST')]").addListener(listener);
+
+            sendTimeEvent("2008-08-4T7:59:59.999", epService);
+            assertFalse(listener.getAndClearIsInvoked());
+
+            sendTimeEvent("2008-08-4T8:00:00.000", epService);
+            assertTrue(listener.getAndClearIsInvoked());
+        }
+        epService.getEPAdministrator().createEPL("select * from pattern [timer:at(0, 5, 4, 8, *, 0, 'xxx')]").addListener(listener);
+        epService.getEPAdministrator().createEPL("select * from pattern [timer:at(0, 5, 4, 8, *, 0, *)]").addListener(listener);
     }
 
     private void runAssertion(EPServiceProvider epService, SupportUpdateListener listener)
@@ -360,6 +359,14 @@ public class TestTimerAtObserver extends TestCase implements SupportBeanConstant
         cal.set(2008, 7, 8, 8, 0, 0); //"Fri Aug 08 08:00:00 EDT 2008"
         expectedResult[4] = cal.getTime().toString();
         EPAssertionUtil.assertEqualsExactOrder(expectedResult, invocations.toArray());
+    }
+
+    private void sendTimeEvent(String time, EPServiceProvider epService) {
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(DateTime.parseDefaultMSec(time)));
+    }
+
+    private void sendTimeEventWZone(String timeWZone, EPServiceProvider epService) {
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(DateTime.parseDefaultMSecWZone(timeWZone)));
     }
 
     private void sendTimer(long timeInMSec, EPServiceProvider epService)

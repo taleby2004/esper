@@ -72,16 +72,8 @@ public class OnMergeMatchedUpdateAction implements OnMergeMatchedAction
 
     @Override
     public void toEPL(StringWriter writer) {
-        writer.write("then update set ");
-        String delimiter = "";
-        for (AssignmentPair pair : assignments)
-        {
-            writer.write(delimiter);
-            writer.write(pair.getName());
-            writer.write(" = ");
-            pair.getValue().toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
-            delimiter = ", ";
-        }
+        writer.write("then update ");
+        UpdateClause.renderEPLAssignments(writer, assignments);
         if (whereClause != null) {
             writer.write(" where ");
             whereClause.toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);

@@ -175,7 +175,7 @@ public class SupportViewSpecFactory
     private static List<ViewFactory> makeFactories(EventType parentEventType, List<ViewSpec> viewSpecs) throws Exception
     {
         ViewServiceImpl svc = new ViewServiceImpl();
-        ViewFactoryChain viewFactories = svc.createFactories(1, parentEventType, viewSpecs, new StreamSpecOptions(), SupportStatementContextFactory.makeContext());
+        ViewFactoryChain viewFactories = svc.createFactories(1, parentEventType, ViewSpec.toArray(viewSpecs), new StreamSpecOptions(), SupportStatementContextFactory.makeContext());
         return viewFactories.getViewFactoryChain();
     }
 }

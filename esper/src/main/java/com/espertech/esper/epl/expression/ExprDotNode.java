@@ -9,6 +9,7 @@
 package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.util.ExpressionReturnType;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.core.EngineImportService;
 import com.espertech.esper.epl.core.PropertyResolutionDescriptor;
@@ -67,18 +68,18 @@ public class ExprDotNode extends ExprNodeBase implements ExprNodeInnerNodeProvid
         //   Such as "window(*).doIt(...)" or "(select * from Window).doIt()" or "prevwindow(sb).doIt(...)", in which case the expression to act on is a child expression
         //
         StreamTypeService streamTypeService = validationContext.getStreamTypeService();
-        if (!this.getChildNodes().isEmpty()) {
+        if (this.getChildNodes().length != 0) {
             // the root expression is the first child node
-            ExprNode rootNode = this.getChildNodes().get(0);
+            ExprNode rootNode = this.getChildNodes()[0];
             ExprEvaluator rootNodeEvaluator = rootNode.getExprEvaluator();
 
             // the root expression may also provide a lambda-function input (Iterator<EventBean>)
             // Determine collection-type and evaluator if any for root node
-            Pair<ExprEvaluatorEnumeration, ExprDotEvalTypeInfo> enumSrc = getEnumerationSource(rootNode, validationContext.getStreamTypeService(), validationContext.getEventAdapterService(), validationContext.getStatementId(), hasEnumerationMethod);
+            Pair<ExprEvaluatorEnumeration, ExpressionReturnType> enumSrc = getEnumerationSource(rootNode, validationContext.getStreamTypeService(), validationContext.getEventAdapterService(), validationContext.getStatementId(), hasEnumerationMethod);
 
-            ExprDotEvalTypeInfo typeInfo;
+            ExpressionReturnType typeInfo;
             if (enumSrc.getSecond() == null) {
-                typeInfo = ExprDotEvalTypeInfo.scalarOrUnderlying(rootNodeEvaluator.getType());    // not a collection type, treat as scalar
+                typeInfo = ExpressionReturnType.singleValue(rootNodeEvaluator.getType());    // not a collection type, treat as scalar
             }
             else {
                 typeInfo = enumSrc.getSecond();
@@ -157,7 +158,7 @@ public class ExprDotNode extends ExprNodeBase implements ExprNodeInnerNodeProvid
                 ExprValidationException methodEx = null;
                 ExprDotEval[] underlyingMethodChain = null;
                 try {
-                    ExprDotEvalTypeInfo typeInfo = ExprDotEvalTypeInfo.scalarOrUnderlying(type);
+                    ExpressionReturnType typeInfo = ExpressionReturnType.singleValue(type);
                     underlyingMethodChain = ExprDotNodeUtility.getChainEvaluators(typeInfo, remainderChain, validationContext, false, new ExprDotNodeFilterAnalyzerInputStream(prefixedStreamNumber)).getChainWithUnpack();
                 }
                 catch (ExprValidationException ex) {
@@ -168,7 +169,7 @@ public class ExprDotNode extends ExprNodeBase implements ExprNodeInnerNodeProvid
                 ExprDotEval[] eventTypeMethodChain = null;
                 ExprValidationException enumDatetimeEx = null;
                 try {
-                    ExprDotEvalTypeInfo typeInfo = ExprDotEvalTypeInfo.event(eventType);
+                    ExpressionReturnType typeInfo = ExpressionReturnType.singleEvent(eventType);
                     ExprDotNodeRealizedChain chain = ExprDotNodeUtility.getChainEvaluators(typeInfo, remainderChain, validationContext, false, new ExprDotNodeFilterAnalyzerInputStream(prefixedStreamNumber));
                     eventTypeMethodChain = chain.getChainWithUnpack();
                     exprDotNodeFilterAnalyzerDesc = chain.getFilterAnalyzerDesc();
@@ -214,16 +215,16 @@ public class ExprDotNode extends ExprNodeBase implements ExprNodeInnerNodeProvid
             String propertyName = propertyInfoPair.getFirst().getPropertyName();
             int streamId = propertyInfoPair.getFirst().getStreamNum();
             EventType streamType = streamTypeService.getEventTypes()[streamId];
-            ExprDotEvalTypeInfo typeInfo;
+            ExpressionReturnType typeInfo;
             ExprEvaluatorEnumeration enumerationEval = null;
-            ExprDotEvalTypeInfo inputType;
+            ExpressionReturnType inputType;
             ExprEvaluator rootNodeEvaluator = null;
             EventPropertyGetter getter;
 
             if (firstItem.getParameters().isEmpty()) {
                 getter = streamType.getGetter(propertyInfoPair.getFirst().getPropertyName());
 
-                Pair<ExprEvaluatorEnumeration, ExprDotEvalTypeInfo> propertyEval = getPropertyEnumerationSource(propertyInfoPair.getFirst().getPropertyName(), streamId, streamType, hasEnumerationMethod);
+                Pair<ExprEvaluatorEnumeration, ExpressionReturnType> propertyEval = getPropertyEnumerationSource(propertyInfoPair.getFirst().getPropertyName(), streamId, streamType, hasEnumerationMethod);
                 typeInfo = propertyEval.getSecond();
                 enumerationEval = propertyEval.getFirst();
                 inputType = propertyEval.getSecond();
@@ -236,7 +237,7 @@ public class ExprDotNode extends ExprNodeBase implements ExprNodeInnerNodeProvid
                     throw new ExprValidationException("Property '" + firstItem.getName() + "' may not be accessed passing 2 or more parameters");
                 }
                 ExprEvaluator paramEval = firstItem.getParameters().get(0).getExprEvaluator();
-                typeInfo = ExprDotEvalTypeInfo.scalarOrUnderlying(desc.getPropertyComponentType());
+                typeInfo = ExpressionReturnType.singleValue(desc.getPropertyComponentType());
                 inputType = typeInfo;
                 getter = null;
                 if (desc.isMapped()) {
@@ -278,12 +279,12 @@ public class ExprDotNode extends ExprNodeBase implements ExprNodeInnerNodeProvid
                     throw ex;
                 }
 
-                ExprDotEvalTypeInfo fragmentTypeInfo;
+                ExpressionReturnType fragmentTypeInfo;
                 if (fragment.isIndexed()) {
-                    fragmentTypeInfo = ExprDotEvalTypeInfo.eventColl(fragment.getFragmentType());
+                    fragmentTypeInfo = ExpressionReturnType.collectionOfEvents(fragment.getFragmentType());
                 }
                 else {
-                    fragmentTypeInfo = ExprDotEvalTypeInfo.event(fragment.getFragmentType());
+                    fragmentTypeInfo = ExpressionReturnType.singleEvent(fragment.getFragmentType());
                 }
 
                 evals = ExprDotNodeUtility.getChainEvaluators(fragmentTypeInfo, modifiedChain, validationContext, isDuckTyping, filterAnalyzerInputProp);
@@ -298,23 +299,49 @@ public class ExprDotNode extends ExprNodeBase implements ExprNodeInnerNodeProvid
         // If variable then resolve as such
         VariableReader variableReader = validationContext.getVariableService().getReader(firstItem.getName());
         if (variableReader != null) {
-            ExprDotEvalTypeInfo typeInfo;
+            ExpressionReturnType typeInfo;
             ExprDotStaticMethodWrap wrap;
             if (variableReader.getType().isArray()) {
-                typeInfo = ExprDotEvalTypeInfo.componentColl(variableReader.getType().getComponentType());
+                typeInfo = ExpressionReturnType.collectionOfSingleValue(variableReader.getType().getComponentType());
                 wrap = new ExprDotStaticMethodWrapArrayScalar(variableReader.getVariableName(), variableReader.getType().getComponentType());
             }
             else if (variableReader.getEventType() != null) {
-                typeInfo = ExprDotEvalTypeInfo.event(variableReader.getEventType());
+                typeInfo = ExpressionReturnType.singleEvent(variableReader.getEventType());
                 wrap = null;
             }
             else {
-                typeInfo = ExprDotEvalTypeInfo.scalarOrUnderlying(variableReader.getType());
+                typeInfo = ExpressionReturnType.singleValue(variableReader.getType());
                 wrap = null;
             }
 
             ExprDotNodeRealizedChain evals = ExprDotNodeUtility.getChainEvaluators(typeInfo, modifiedChain, validationContext, false, new ExprDotNodeFilterAnalyzerInputStatic());
             exprEvaluator = new ExprDotEvalVariable(variableReader, wrap, evals.getChainWithUnpack());
+            return;
+        }
+
+        // try resolve as enumeration class with value
+        Object enumconstant = JavaClassHelper.resolveIdentAsEnumConst(firstItem.getName(), validationContext.getMethodResolutionService(), null);
+        if (enumconstant != null) {
+
+            // try resolve method
+            final ExprChainedSpec methodSpec = modifiedChain.get(0);
+            final String enumvalue = firstItem.getName();
+            ExprNodeUtilResolveExceptionHandler handler = new ExprNodeUtilResolveExceptionHandler() {
+                public ExprValidationException handle(Exception ex) {
+                    return new ExprValidationException("Failed to resolve method '" + methodSpec.getName() + "' on enumeration value '" + enumvalue + "': " + ex.getMessage());
+                }
+            };
+            EventType wildcardType = validationContext.getStreamTypeService().getEventTypes().length != 1 ? null : validationContext.getStreamTypeService().getEventTypes()[0];
+            ExprNodeUtilMethodDesc methodDesc = ExprNodeUtility.resolveMethodAllowWildcardAndStream(enumconstant.getClass().getName(), enumconstant.getClass(), methodSpec.getName(), methodSpec.getParameters(), validationContext.getMethodResolutionService(), validationContext.getEventAdapterService(), validationContext.getStatementId(), wildcardType != null, wildcardType, handler, methodSpec.getName());
+
+            // method resolved, hook up
+            modifiedChain.remove(0);    // we identified this piece
+            ExprDotStaticMethodWrap optionalLambdaWrap = ExprDotStaticMethodWrapFactory.make(methodDesc.getReflectionMethod(), validationContext.getEventAdapterService(), modifiedChain);
+            ExpressionReturnType typeInfo = optionalLambdaWrap != null ? optionalLambdaWrap.getTypeInfo() : ExpressionReturnType.singleValue(methodDesc.getFastMethod().getReturnType());
+
+            ExprDotNodeRealizedChain evals = ExprDotNodeUtility.getChainEvaluators(typeInfo, modifiedChain, validationContext, false, new ExprDotNodeFilterAnalyzerInputStatic());
+            exprEvaluator = new ExprDotEvalStaticMethod(validationContext.getStatementName(), firstItem.getName(), methodDesc.getFastMethod(),
+                    methodDesc.getChildEvals(), false, optionalLambdaWrap, evals.getChainWithUnpack(), false, enumconstant);
             return;
         }
 
@@ -326,17 +353,18 @@ public class ExprDotNode extends ExprNodeBase implements ExprNodeInnerNodeProvid
         if (validationContext.getStreamTypeService().getEventTypes().length > 0) {
             streamZeroType = validationContext.getStreamTypeService().getEventTypes()[0];
         }
-        ExprNodeUtilSingleRowMethodDesc singleRowMethod = ExprNodeUtility.resolveSingleRowPluginFunc(firstItem.getName(), secondItem.getName(), secondItem.getParameters(), validationContext.getMethodResolutionService(), allowWildcard, streamZeroType, firstItem.getName() + "." + secondItem.getName(), false);
 
-        boolean isConstantParameters = singleRowMethod.isAllConstants() && isUDFCache;
+        ExprNodeUtilMethodDesc method = ExprNodeUtility.resolveMethodAllowWildcardAndStream(firstItem.getName(), null, secondItem.getName(), secondItem.getParameters(), validationContext.getMethodResolutionService(), validationContext.getEventAdapterService(), validationContext.getStatementId(), allowWildcard, streamZeroType, new ExprNodeUtilResolveExceptionHandlerDefault(firstItem.getName() + "." + secondItem.getName(), false), secondItem.getName());
+
+        boolean isConstantParameters = method.isAllConstants() && isUDFCache;
         isReturnsConstantResult = isConstantParameters && modifiedChain.isEmpty();
 
         // this may return a pair of null if there is no lambda or the result cannot be wrapped for lambda-function use
-        ExprDotStaticMethodWrap optionalLambdaWrap = ExprDotStaticMethodWrapFactory.make(singleRowMethod.getReflectionMethod(), validationContext.getEventAdapterService(), modifiedChain);
-        ExprDotEvalTypeInfo typeInfo = optionalLambdaWrap != null ? optionalLambdaWrap.getTypeInfo() : ExprDotEvalTypeInfo.scalarOrUnderlying(singleRowMethod.getReflectionMethod().getReturnType());
+        ExprDotStaticMethodWrap optionalLambdaWrap = ExprDotStaticMethodWrapFactory.make(method.getReflectionMethod(), validationContext.getEventAdapterService(), modifiedChain);
+        ExpressionReturnType typeInfo = optionalLambdaWrap != null ? optionalLambdaWrap.getTypeInfo() : ExpressionReturnType.singleValue(method.getReflectionMethod().getReturnType());
 
         ExprDotNodeRealizedChain evals = ExprDotNodeUtility.getChainEvaluators(typeInfo, modifiedChain, validationContext, false, new ExprDotNodeFilterAnalyzerInputStatic());
-        exprEvaluator = new ExprDotEvalStaticMethod(validationContext.getStatementName(), firstItem.getName(), singleRowMethod.getFastMethod(), singleRowMethod.getChildEvals(), isConstantParameters, optionalLambdaWrap, evals.getChainWithUnpack(), false);
+        exprEvaluator = new ExprDotEvalStaticMethod(validationContext.getStatementName(), firstItem.getName(), method.getFastMethod(), method.getChildEvals(), isConstantParameters, optionalLambdaWrap, evals.getChainWithUnpack(), false, null);
     }
 
     public ExprDotNodeFilterAnalyzerDesc getExprDotNodeFilterAnalyzerDesc() {
@@ -423,12 +451,12 @@ public class ExprDotNode extends ExprNodeBase implements ExprNodeInnerNodeProvid
     public String toExpressionString()
     {
         StringBuilder buffer = new StringBuilder();
-        if (!this.getChildNodes().isEmpty()) {
+        if (this.getChildNodes().length != 0) {
             buffer.append('(');
-            buffer.append(this.getChildNodes().get(0).toExpressionString());
+            buffer.append(this.getChildNodes()[0].toExpressionString());
             buffer.append(")");
         }
-        ExprNodeUtility.toExpressionString(chainSpec, buffer, !this.getChildNodes().isEmpty(), null);
+        ExprNodeUtility.toExpressionString(chainSpec, buffer, this.getChildNodes().length != 0, null);
         return buffer.toString();
     }
 
@@ -460,22 +488,22 @@ public class ExprDotNode extends ExprNodeBase implements ExprNodeInnerNodeProvid
         return ExprNodeUtility.collectChainParameters(chainSpec);
     }
 
-    public static Pair<ExprEvaluatorEnumeration, ExprDotEvalTypeInfo> getEnumerationSource(ExprNode inputExpression, StreamTypeService streamTypeService, EventAdapterService eventAdapterService, String statementId, boolean hasEnumerationMethod) throws ExprValidationException {
+    public static Pair<ExprEvaluatorEnumeration, ExpressionReturnType> getEnumerationSource(ExprNode inputExpression, StreamTypeService streamTypeService, EventAdapterService eventAdapterService, String statementId, boolean hasEnumerationMethod) throws ExprValidationException {
         ExprEvaluator rootNodeEvaluator = inputExpression.getExprEvaluator();
         ExprEvaluatorEnumeration rootLambdaEvaluator = null;
-        ExprDotEvalTypeInfo info = null;
+        ExpressionReturnType info = null;
 
         if (rootNodeEvaluator instanceof ExprEvaluatorEnumeration) {
             rootLambdaEvaluator = (ExprEvaluatorEnumeration) rootNodeEvaluator;
 
             if (rootLambdaEvaluator.getEventTypeCollection(eventAdapterService) != null) {
-                info = ExprDotEvalTypeInfo.eventColl(rootLambdaEvaluator.getEventTypeCollection(eventAdapterService));
+                info = ExpressionReturnType.collectionOfEvents(rootLambdaEvaluator.getEventTypeCollection(eventAdapterService));
             }
             else if (rootLambdaEvaluator.getEventTypeSingle(eventAdapterService, statementId) != null) {
-                info = ExprDotEvalTypeInfo.event(rootLambdaEvaluator.getEventTypeSingle(eventAdapterService, statementId));
+                info = ExpressionReturnType.singleEvent(rootLambdaEvaluator.getEventTypeSingle(eventAdapterService, statementId));
             }
             else if (rootLambdaEvaluator.getComponentTypeCollection() != null) {
-                info = ExprDotEvalTypeInfo.componentColl(rootLambdaEvaluator.getComponentTypeCollection());
+                info = ExpressionReturnType.collectionOfSingleValue(rootLambdaEvaluator.getComponentTypeCollection());
             }
             else {
                 rootLambdaEvaluator = null; // not a lambda evaluator
@@ -487,25 +515,25 @@ public class ExprDotNode extends ExprNodeBase implements ExprNodeInnerNodeProvid
             EventType streamType = streamTypeService.getEventTypes()[streamId];
             return getPropertyEnumerationSource(identNode.getResolvedPropertyName(), streamId, streamType, hasEnumerationMethod);
         }
-        return new Pair<ExprEvaluatorEnumeration, ExprDotEvalTypeInfo>(rootLambdaEvaluator, info);
+        return new Pair<ExprEvaluatorEnumeration, ExpressionReturnType>(rootLambdaEvaluator, info);
     }
 
-    public static Pair<ExprEvaluatorEnumeration, ExprDotEvalTypeInfo> getPropertyEnumerationSource(String propertyName, int streamId, EventType streamType, boolean hasEnumerationMethod) {
+    public static Pair<ExprEvaluatorEnumeration, ExpressionReturnType> getPropertyEnumerationSource(String propertyName, int streamId, EventType streamType, boolean hasEnumerationMethod) {
 
         EventPropertyGetter getter = streamType.getGetter(propertyName);
         FragmentEventType fragmentEventType = streamType.getFragmentType(propertyName);
         Class propertyType = streamType.getPropertyType(propertyName);
-        ExprDotEvalTypeInfo typeInfo = ExprDotEvalTypeInfo.scalarOrUnderlying(propertyType);  // assume scalar for now
+        ExpressionReturnType typeInfo = ExpressionReturnType.singleValue(propertyType);  // assume scalar for now
 
         // no enumeration methods, no need to expose as an enumeration
         if (!hasEnumerationMethod) {
-            return new Pair<ExprEvaluatorEnumeration, ExprDotEvalTypeInfo>(null, typeInfo);
+            return new Pair<ExprEvaluatorEnumeration, ExpressionReturnType>(null, typeInfo);
         }
 
         ExprEvaluatorEnumeration enumEvaluator = null;
         if (getter != null && fragmentEventType != null && fragmentEventType.isIndexed()) {
             enumEvaluator = new PropertyExprEvaluatorEventCollection(propertyName, streamId, fragmentEventType.getFragmentType(), getter);
-            typeInfo = ExprDotEvalTypeInfo.eventColl(fragmentEventType.getFragmentType());
+            typeInfo = ExpressionReturnType.collectionOfEvents(fragmentEventType.getFragmentType());
         }
         else {
             EventPropertyDescriptor desc = EventTypeUtility.getNestablePropertyDescriptor(streamType, propertyName);
@@ -522,10 +550,10 @@ public class ExprDotNode extends ExprNodeBase implements ExprNodeInnerNodeProvid
                 else {
                     throw new IllegalStateException("Property indicated indexed-type but failed to find proper collection adapter for use with enumeration methods");
                 }
-                typeInfo = ExprDotEvalTypeInfo.componentColl(desc.getPropertyComponentType());
+                typeInfo = ExpressionReturnType.collectionOfSingleValue(desc.getPropertyComponentType());
             }
         }
-        return new Pair<ExprEvaluatorEnumeration, ExprDotEvalTypeInfo>(enumEvaluator, typeInfo);
+        return new Pair<ExprEvaluatorEnumeration, ExpressionReturnType>(enumEvaluator, typeInfo);
     }
 
     private ExprValidationException handleNotFound(String name) {

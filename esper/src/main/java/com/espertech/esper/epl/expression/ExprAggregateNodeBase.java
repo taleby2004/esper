@@ -11,7 +11,6 @@ package com.espertech.esper.epl.expression;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.epl.agg.service.AggregationMethodFactory;
 import com.espertech.esper.epl.agg.service.AggregationResultFuture;
-import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.util.JavaClassHelper;
 
@@ -57,13 +56,12 @@ public abstract class ExprAggregateNodeBase extends ExprNodeBase implements Expr
 
     /**
      * Gives the aggregation node a chance to validate the sub-expression types.
-     * @param streamTypeService is the types per stream
-     * @param methodResolutionService used for resolving method and function names
-     * @param exprEvaluatorContext context for expression evaluation
+     *
+     * @param validationContext validation information
      * @return aggregation function factory to use
      * @throws com.espertech.esper.epl.expression.ExprValidationException when expression validation failed
      */
-    protected abstract AggregationMethodFactory validateAggregationChild(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ExprEvaluatorContext exprEvaluatorContext)
+    protected abstract AggregationMethodFactory validateAggregationChild(ExprValidationContext validationContext)
         throws ExprValidationException;
 
     /**
@@ -92,7 +90,7 @@ public abstract class ExprAggregateNodeBase extends ExprNodeBase implements Expr
 
     public void validate(ExprValidationContext validationContext) throws ExprValidationException
     {
-        aggregationMethodFactory = validateAggregationChild(validationContext.getStreamTypeService(), validationContext.getMethodResolutionService(), validationContext.getExprEvaluatorContext());
+        aggregationMethodFactory = validateAggregationChild(validationContext);
     }
 
     public Class getType()
@@ -170,15 +168,15 @@ public abstract class ExprAggregateNodeBase extends ExprNodeBase implements Expr
     protected final Class validateNumericChildAllowFilter(StreamTypeService streamTypeService, boolean hasFilter)
         throws ExprValidationException
     {
-        if (this.getChildNodes().size() == 0 || this.getChildNodes().size() > 2)
+        if (this.getChildNodes().length == 0 || this.getChildNodes().length > 2)
         {
             throw new ExprValidationException(getAggregationFunctionName() + " node must have at least 1 or maximum 2 child nodes");
         }
 
         // validate child expression (filter expression is actually always the first expression)
-        ExprNode child = this.getChildNodes().get(0);
+        ExprNode child = this.getChildNodes()[0];
         if (hasFilter) {
-            validateFilter(getChildNodes().get(1).getExprEvaluator());
+            validateFilter(getChildNodes()[1].getExprEvaluator());
         }
 
         Class childType = child.getExprEvaluator().getType();
@@ -207,9 +205,9 @@ public abstract class ExprAggregateNodeBase extends ExprNodeBase implements Expr
             buffer.append("distinct ");
         }
 
-        if (!this.getChildNodes().isEmpty())
+        if (this.getChildNodes().length > 0)
         {
-            buffer.append(this.getChildNodes().get(0).toExpressionString());
+            buffer.append(this.getChildNodes()[0].toExpressionString());
         }
         else
         {

@@ -97,7 +97,7 @@ public class TestContextPartitioned extends TestCase {
         // test iterator targeted
         SupportSelectorPartitioned selector = new SupportSelectorPartitioned(Collections.singletonList(new Object[]{"E2"}));
         EPAssertionUtil.assertPropsPerRow(stmt.iterator(selector), stmt.safeIterator(selector), fields, new Object[][]{{"E2", 41}});
-        assertFalse(stmt.iterator(new SupportSelectorPartitioned(null)).hasNext());
+        assertFalse(stmt.iterator(new SupportSelectorPartitioned((List)null)).hasNext());
         assertFalse(stmt.iterator(new SupportSelectorPartitioned(Collections.singletonList(new Object[]{"EX"}))).hasNext());
         assertFalse(stmt.iterator(new SupportSelectorPartitioned(Collections.<Object[]>emptyList())).hasNext());
 

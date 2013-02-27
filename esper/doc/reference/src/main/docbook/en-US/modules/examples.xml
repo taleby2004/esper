@@ -82,6 +82,14 @@
 						</entry>
 					</row>
 					<row>
+						<entry><xref linkend="examples-cycledetect"/></entry>
+						<entry>
+							<para>
+								This example showcases the aggregation multi-function extension API for use with a cycle-detection problem detecting cycles in transactions between accounts.
+							</para>
+						</entry>
+					</row>
+					<row>
 						<entry><xref linkend="examples-ohlcpluginview"/></entry>
 						<entry>
 							<para>
@@ -952,6 +960,20 @@ select Part.zone from pattern [
 		
 		<para>
 		   See the <literal>virtualdw</literal> folder for example code, compile and run scripts.
+		</para>
+
+    </sect1>
+
+    <sect1 xml:id="examples-cycledetect">
+        <title>Sample Cycle Detection</title>
+
+		<para>
+			The example is also discussed in the section on extension APIs specifically the aggregation multi-function development.
+			The example uses the <literal>jgrapht</literal> library for a cycle-detection problem detecting cycles in transactions between accounts.
+		</para>
+		
+		<para>
+		   See the <literal></literal> folder for example code, compile and run scripts.
 		</para>
 
     </sect1>

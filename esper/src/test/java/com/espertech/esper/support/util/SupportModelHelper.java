@@ -17,10 +17,11 @@ import com.espertech.esper.client.soda.EPStatementObjectModel;
 import junit.framework.Assert;
 
 public class SupportModelHelper {
-    public static void compileCreate(EPServiceProvider epService, String epl) {
+    public static EPStatement compileCreate(EPServiceProvider epService, String epl) {
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(epl);
         Assert.assertEquals(epl, model.toEPL());
         EPStatement stmt = epService.getEPAdministrator().create(model);
         Assert.assertEquals(epl, stmt.getText());
+        return stmt;
     }
 }

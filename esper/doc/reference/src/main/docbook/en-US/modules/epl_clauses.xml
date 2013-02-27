@@ -438,6 +438,54 @@ epService.getEPAdministrator().createEPL("select * from OrderEvent(
 
 		</sect2>
 
+        <sect2 xml:id="epl-syntax-javaconst">
+           <title>Using Constants and Enum Types</title>
+			<indexterm><primary>constants</primary></indexterm>
+			<indexterm><primary>enum types</primary></indexterm>
+			<para>
+				This chapter is about Java language constants and enum types and their use in EPL expressions. 
+			</para>
+			<para>
+				Java language constants are public static final fields in Java that may participate in expressions of all kinds, as this example shows:
+			</para>
+			<programlisting><![CDATA[select * from MyEvent where property = MyConstantClass.FIELD_VALUE]]></programlisting>
+	
+			<para>
+				Event properties that are enumeration values can be compared by their enum type value:
+			</para>
+			<programlisting><![CDATA[select * from MyEvent where enumProp = EnumClass.ENUM_VALUE_1]]></programlisting>
+	
+			<para>
+				Event properties can also be passed to enum type functions or compared to an enum type method result:
+			</para>
+			<programlisting><![CDATA[select * from MyEvent where somevalue = EnumClass.ENUM_VALUE_1.getSomeValue()
+  or EnumClass.ENUM_VALUE_2.analyze(someothervalue)]]></programlisting>
+
+			<para>
+				Enum types have a <literal>valueOf</literal> method that returns the enum type value:
+			</para>
+			<programlisting><![CDATA[select * from MyEvent where enumProp = EnumClass.valueOf('ENUM_VALUE_1')]]></programlisting>
+	
+			<para>
+				If your application does not import, through configuration, the package that contains the enumeration class, then it must also specify the package name of the class. Enum types that are inner classes must be qualified with <literal>$</literal> following Java conventions.
+			</para>
+			<para>
+				For example, the Color enum type as an inner class to <literal>MyEvent</literal> in package <literal>org.myorg</literal> can be referenced as shown:
+			</para>
+			<programlisting><![CDATA[select * from MyEvent(enumProp=org.myorg.MyEvent$Color.GREEN).std:firstevent()]]></programlisting>
+	
+			<para>
+				Instance methods may also be invoked on event instances by specifying a stream name, as shown below:
+			</para>
+			<programlisting><![CDATA[select myevent.computeSomething() as result from MyEvent as myevent]]></programlisting>
+
+			<para>
+				Chaining instance methods is supported as this example shows:
+			</para>
+			<programlisting><![CDATA[select myevent.getComputerFor('books', 'movies').calculate() as result 
+from MyEvent as myevent]]></programlisting>
+		</sect2>
+
 		<sect2 xml:id="epl-syntax-annotation">
 			<title>Annotation</title>
 			<indexterm><primary>annotation</primary></indexterm>
@@ -459,7 +507,7 @@ epService.getEPAdministrator().createEPL("select * from OrderEvent(
 			<synopsis>@<emphasis>annotation_name</emphasis> (<emphasis>attribute_name</emphasis> = <emphasis>attribute_value</emphasis>, [name=value, ...])</synopsis>
 			
 			<para>
-				The <emphasis>attribute_name</emphasis> is an identifier that must match the attributes defined by the annotation class. An <emphasis>attribute_value</emphasis> is a constant of any of the primitive types or string, an array, an enumeration value or another (nested) annotation. Null values are not allowed as annotation attribute values. Enumeration values are supported in EPL statements and not support in statements created via the <literal>createPattern</literal> method.
+				The <emphasis>attribute_name</emphasis> is an identifier that must match the attributes defined by the annotation class. An <emphasis>attribute_value</emphasis> is a constant of any of the primitive types or string, an array, an enum type value or another (nested) annotation. Null values are not allowed as annotation attribute values. Enumeration values are supported in EPL statements and not support in statements created via the <literal>createPattern</literal> method.
 			</para>
 			
 			<para>
@@ -773,7 +821,7 @@ select ipaddress, count(*) from SecurityFilter.win:time(60 sec) group by ipaddre
 			</para>
 			
 			<para>
-				Please note the following limitation: Parameters to a declared expression can only be a stream name. For limitations as to the type of expression that can be used in the expression body please see below.
+				Parameters to a declared expression can be a stream name, pattern tag name or wildcard (<literal>*</literal>). Use wildcard to pass the event itself to the expression. In a join or subquery, or more generally in an expression where multiple streams or pattern tags are available, the EPL must specify the stream name or pattern tag name and cannot use wildcard.
 			</para>
 		
 			<para>
@@ -816,6 +864,12 @@ select midPrice(md) from MarketDataEvent as md]]></programlisting>
 select midPrice(md) from MarketDataEvent as md]]></programlisting>
 
 			<para>
+				The next example EPL specifies wildcard instead:
+			</para>
+			<programlisting><![CDATA[expression midPrice { x => (buy + sell) / 2 } 
+select midPrice(*) from MarketDataEvent]]></programlisting>
+
+			<para>
 				A further example that demonstrates two parameters is listed next. The example joins two streams and uses the price value from MarketDataEvent and the sentiment value of NewsEvent to compute a weighted sentiment:
 			</para>
 			<programlisting><![CDATA[expression weightedSentiment { (x, y) => x.price * y.sentiment } 
@@ -841,7 +895,7 @@ from MarketDataEvent mdstream]]></programlisting>
 			<orderedlist spacing="compact">
 				<listitem>
 					<para>
-						Parameters to a declared expression can currently only be a stream name.
+						Parameters to a declared expression can only be a stream name, pattern tag name or wildcard (<literal>*</literal>).
 					</para>
 				</listitem>
 			</orderedlist>
@@ -4919,6 +4973,47 @@ set field_a = 1,
 
 		</sect2>
 
+		<sect2 xml:id="named_update_faf" revision="1">
+			<title>Updating Named Windows Using Fire-And-Forget Queries</title>
+			
+			<indexterm><primary>update</primary></indexterm>
+			<indexterm><primary>named window</primary><secondary>updating</secondary></indexterm>
+			<indexterm><primary>EPL</primary><secondary>named window</secondary><tertiary>updating</tertiary></indexterm>
+
+			<para>
+				Your application can update named window rows using on-demand (fire-and-forget, non-continuous) queries as described in <xref linkend="api-runtime-ondemand"/>.
+			</para>
+
+			<para>
+				The syntax for the <literal>update</literal> clause is as follows: 
+			</para>
+			<synopsis>update <emphasis>window_name</emphasis> [as <emphasis>stream_name</emphasis>]
+set <emphasis>property_name</emphasis> = <emphasis>expression</emphasis> [, <emphasis>property_name</emphasis> = <emphasis>expression</emphasis> [,...]]
+[where <emphasis>criteria_expression</emphasis>]</synopsis>
+				
+			<para>
+				The <emphasis>window_name</emphasis> is the name of the named window to delete events from. The <literal>as</literal> keyword is also available to assign a name to the named window.
+			</para>
+				
+			<para>
+				The comma-separated list of property names and expressions set the value of one or more properties. For fire-and-forget queries the following restriction applies: Subqueries, aggregation functions and the <literal>prev</literal> or <literal>prior</literal> function may not be used in expressions.
+			</para>
+
+			<para>
+				The optional <literal>where</literal> clause contains a <emphasis>criteria_expression</emphasis> that identifies events to be updated.
+			</para>
+
+			<para>				
+				The example code snippet updates those rows of the named window that have a negative value for volume:
+			</para>
+			<programlisting><![CDATA[String query = "update AllOrdersNamedWindow set volume = 0 where volumne = 0";
+epService.getEPRuntime().executeQuery(query);]]></programlisting>
+
+			<para>
+			  To instruct the engine to use the initial property value before update, prefix the event property name with the literal <literal>initial</literal>. 
+			</para>
+		</sect2>
+
 		<sect2 xml:id="named_delete" revision="1">
 			<title>Deleting From Named Windows: the <literal>On Delete</literal> clause</title>
 			
@@ -5014,6 +5109,38 @@ where ord.id = win.id or flush.id = win.id]]></programlisting>
 				</para>
 
 			</sect3>
+		</sect2>
+
+		<sect2 xml:id="named_delete_faf" revision="1">
+			<title>Deleting From Named Windows Using Fire-And-Forget Queries</title>
+			
+			<indexterm><primary>delete</primary></indexterm>
+			<indexterm><primary>named window</primary><secondary>deleting from</secondary></indexterm>
+			<indexterm><primary>EPL</primary><secondary>named window</secondary><tertiary>deleting from</tertiary></indexterm>
+
+			<para>
+				Your application can delete rows from a named window using on-demand (fire-and-forget, non-continuous) queries as described in <xref linkend="api-runtime-ondemand"/>.
+			</para>
+
+			<para>
+				The syntax for the <literal>delete</literal> clause is as follows: 
+			</para>
+			<synopsis>delete from <emphasis>window_name</emphasis> [as <emphasis>stream_name</emphasis>]
+[where <emphasis>criteria_expression</emphasis>]</synopsis>
+				
+			<para>
+				The <emphasis>window_name</emphasis> is the name of the named window to delete events from. The <literal>as</literal> keyword is also available to assign a name to the named window.
+			</para>
+				
+			<para>
+				The optional <literal>where</literal> clause contains a <emphasis>criteria_expression</emphasis> that identifies events to be removed from the named window.
+			</para>
+
+			<para>				
+				The example code snippet deletes from a named window all rows that have a negative value for volume:
+			</para>
+			<programlisting><![CDATA[String query = "delete from AllOrdersNamedWindow where volume <= 0";
+epService.getEPRuntime().executeQuery(query);]]></programlisting>
 		</sect2>
 
 		<sect2 xml:id="named_upsert" revision="1">
@@ -6003,13 +6130,19 @@ on PageHitEvent(ip='0.0.0.0') pagehit set varPageHitZero = pagehit]]></programli
 on PageHitEvent(ip='0.0.0.0') pagehit set varPageHitZero.userId = pagehit.userId]]></programlisting>
 
 			<para>
+				When using class or event-type variables, in order for the engine to assign property values,  the underlying event type must allow writing property values. If using JavaBean event classes the class must have setter methods and a default constructor.
+			</para>			
+
+			<para>
 			  Similarly statements may use properties of class or event-type variables as this example shows:
 			</para>		
 			<programlisting><![CDATA[select * from FirewallEvent(userId=varPageHitZero.userId)]]></programlisting>
 
 			<para>
-				When using class or event-type variables, in order for the engine to assign property values,  the underlying event type must allow writing property values. If using JavaBean event classes the class must have setter methods and a default constructor.
-			</para>			
+			  Instances method can also be invoked:
+			</para>		
+			<programlisting><![CDATA[create variable com.example.StateChecker stateChecker]]></programlisting>
+			<programlisting><![CDATA[select * from TestEvent as e where stateChecker.checkState(e)]]></programlisting>
 		</sect2>
 
 	</sect1>		

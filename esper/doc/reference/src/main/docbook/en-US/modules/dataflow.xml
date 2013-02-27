@@ -1313,6 +1313,10 @@ instance.run();]]></programlisting>
 EPDataFlowInstanceCaptive captiveStart = instance.startCaptive();
 Emitter emitter = captiveStart.getEmitters().get("myemitter");
 emitter.submit(new Object[] {"this is some text"});]]></programlisting>  
+
+			<para>
+			  When emitting DOM XML events please emit the root element obtained from <literal>document.getDocumentElement()</literal>.
+			</para>
 		</sect2>
 
 		<sect2 xml:id="dataflow-api-punctuation">

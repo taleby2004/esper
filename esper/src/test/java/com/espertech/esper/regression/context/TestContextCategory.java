@@ -74,7 +74,7 @@ public class TestContextCategory extends TestCase {
         // test iterator targeted for a given filtered category
         MySelectorFilteredCategory filtered = new MySelectorFilteredCategory("grp1");
         EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(filtered), stmt.safeIterator(filtered), fields, new Object[][]{{0, "grp1", "E3", -108}});
-        assertFalse(stmt.iterator(new SupportSelectorCategory(null)).hasNext());
+        assertFalse(stmt.iterator(new SupportSelectorCategory((Set<String>)null)).hasNext());
         assertFalse(stmt.iterator(new SupportSelectorCategory(Collections.<String>emptySet())).hasNext());
 
         // test always-false filter - compare context partition info

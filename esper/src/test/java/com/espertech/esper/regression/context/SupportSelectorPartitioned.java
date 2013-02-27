@@ -13,6 +13,7 @@ package com.espertech.esper.regression.context;
 
 import com.espertech.esper.client.context.ContextPartitionSelectorSegmented;
 
+import java.util.Collections;
 import java.util.List;
 
 public class SupportSelectorPartitioned implements ContextPartitionSelectorSegmented {
@@ -20,6 +21,14 @@ public class SupportSelectorPartitioned implements ContextPartitionSelectorSegme
 
     public SupportSelectorPartitioned(List<Object[]> keys) {
         this.keys = keys;
+    }
+
+    public SupportSelectorPartitioned(Object[] keys) {
+        this.keys = Collections.singletonList(keys);
+    }
+
+    public SupportSelectorPartitioned(Object singleKey) {
+        this.keys = Collections.singletonList(new Object[] {singleKey});
     }
 
     public List<Object[]> getPartitionKeys() {

@@ -41,19 +41,19 @@ public class ExprTypeofNode extends ExprNodeBase
 
     public void validate(ExprValidationContext validationContext) throws ExprValidationException
     {
-        if (this.getChildNodes().size() != 1)
+        if (this.getChildNodes().length != 1)
         {
             throw new ExprValidationException("Typeof node must have 1 child expression node supplying the expression to test");
         }
 
-        if (this.getChildNodes().get(0) instanceof ExprStreamUnderlyingNode) {
-            ExprStreamUnderlyingNode stream = (ExprStreamUnderlyingNode) getChildNodes().get(0);
+        if (this.getChildNodes()[0] instanceof ExprStreamUnderlyingNode) {
+            ExprStreamUnderlyingNode stream = (ExprStreamUnderlyingNode) getChildNodes()[0];
             evaluator = new StreamEventTypeEval(stream.getStreamId());
             return;
         }
 
-        if (this.getChildNodes().get(0) instanceof ExprIdentNode) {
-            ExprIdentNode ident = (ExprIdentNode) getChildNodes().get(0);
+        if (this.getChildNodes()[0] instanceof ExprIdentNode) {
+            ExprIdentNode ident = (ExprIdentNode) getChildNodes()[0];
             int streamNum = validationContext.getStreamTypeService().getStreamNumForStreamName(ident.getFullUnresolvedName());
             if (streamNum != -1) {
                 evaluator = new StreamEventTypeEval(streamNum);
@@ -67,7 +67,7 @@ public class ExprTypeofNode extends ExprNodeBase
             }
         }
 
-        evaluator = new InnerEvaluator(this.getChildNodes().get(0).getExprEvaluator());
+        evaluator = new InnerEvaluator(this.getChildNodes()[0].getExprEvaluator());
     }
 
     public boolean isConstantResult()
@@ -99,7 +99,7 @@ public class ExprTypeofNode extends ExprNodeBase
     {
         StringBuilder buffer = new StringBuilder();
         buffer.append("typeof(");
-        buffer.append(this.getChildNodes().get(0).toExpressionString());
+        buffer.append(this.getChildNodes()[0].toExpressionString());
         buffer.append(')');
         return buffer.toString();
     }

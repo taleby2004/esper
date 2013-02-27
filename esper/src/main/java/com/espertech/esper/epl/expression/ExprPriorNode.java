@@ -51,15 +51,15 @@ public class ExprPriorNode extends ExprNodeBase implements ExprEvaluator
 
     public void validate(ExprValidationContext validationContext) throws ExprValidationException
     {
-        if (this.getChildNodes().size() != 2)
+        if (this.getChildNodes().length != 2)
         {
             throw new ExprValidationException("Prior node must have 2 child nodes");
         }
-        if (!(this.getChildNodes().get(0).isConstantResult()))
+        if (!(this.getChildNodes()[0].isConstantResult()))
         {
             throw new ExprValidationException("Prior function requires an integer index parameter");
         }
-        ExprNode constantNode = this.getChildNodes().get(0);
+        ExprNode constantNode = this.getChildNodes()[0];
         if (constantNode.getExprEvaluator().getType() != Integer.class)
         {
             throw new ExprValidationException("Prior function requires an integer index parameter");
@@ -67,17 +67,17 @@ public class ExprPriorNode extends ExprNodeBase implements ExprEvaluator
 
         Object value = constantNode.getExprEvaluator().evaluate(null, false, validationContext.getExprEvaluatorContext());
         constantIndexNumber = ((Number) value).intValue();
-        innerEvaluator = this.getChildNodes().get(1).getExprEvaluator();
+        innerEvaluator = this.getChildNodes()[1].getExprEvaluator();
 
         // Determine stream number
         // Determine stream number
-        if (this.getChildNodes().get(1) instanceof ExprIdentNode) {
-            ExprIdentNode identNode = (ExprIdentNode) this.getChildNodes().get(1);
+        if (this.getChildNodes()[1] instanceof ExprIdentNode) {
+            ExprIdentNode identNode = (ExprIdentNode) this.getChildNodes()[1];
             streamNumber = identNode.getStreamId();
             resultType = innerEvaluator.getType();
         }
-        else if (this.getChildNodes().get(1) instanceof ExprStreamUnderlyingNode) {
-            ExprStreamUnderlyingNode streamNode = (ExprStreamUnderlyingNode) this.getChildNodes().get(1);
+        else if (this.getChildNodes()[1] instanceof ExprStreamUnderlyingNode) {
+            ExprStreamUnderlyingNode streamNode = (ExprStreamUnderlyingNode) this.getChildNodes()[1];
             streamNumber = streamNode.getStreamId();
             resultType = innerEvaluator.getType();
         }
@@ -112,9 +112,9 @@ public class ExprPriorNode extends ExprNodeBase implements ExprEvaluator
     {
         StringBuilder buffer = new StringBuilder();
         buffer.append("prior(");
-        buffer.append(this.getChildNodes().get(0).toExpressionString());
+        buffer.append(this.getChildNodes()[0].toExpressionString());
         buffer.append(',');
-        buffer.append(this.getChildNodes().get(1).toExpressionString());
+        buffer.append(this.getChildNodes()[1].toExpressionString());
         buffer.append(')');
         return buffer.toString();
     }

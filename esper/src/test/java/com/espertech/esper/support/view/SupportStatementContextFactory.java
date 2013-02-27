@@ -94,21 +94,19 @@ public class SupportStatementContextFactory
                 null,
                 null,
                 null,
-                null);
+                null,
+                new StatementEventTypeRefImpl());
 
         return new StatementContext(stmtEngineServices,
-                "stmtId",
                 null,
-                "stmtName",
-                "exprHere",
                 stub,
                 new ScheduleBucket(1),
-                null,
+                new EPStatementHandle("id1", "name1", "epl1", "epl1", false, null, 0, false),
                 new ViewResolutionServiceImpl(new PluggableObjectRegistryImpl(new PluggableObjectCollection[] {ViewEnumHelper.getBuiltinViews()}), null, null),
                 new PatternObjectResolutionServiceImpl(null),
                 null,
                 null,
-                new MethodResolutionServiceImpl(new EngineImportServiceImpl(true, true, true), null),
+                new MethodResolutionServiceImpl(new EngineImportServiceImpl(true, true, true, false), null),
                 null,
                 null,
                 new StatementResultServiceImpl("name", null, null, new ThreadingServiceImpl(new ConfigurationEngineDefaults.Threading())), // statement result svc

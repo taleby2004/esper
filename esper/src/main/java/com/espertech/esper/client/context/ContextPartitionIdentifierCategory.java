@@ -18,6 +18,20 @@ public class ContextPartitionIdentifierCategory extends ContextPartitionIdentifi
     private String label;
 
     /**
+     * Ctor.
+     */
+    public ContextPartitionIdentifierCategory() {
+    }
+
+    /**
+     * Ctor.
+     * @param label of category
+     */
+    public ContextPartitionIdentifierCategory(String label) {
+        this.label = label;
+    }
+
+    /**
      * Returns the category label.
      * @return label
      */
@@ -31,5 +45,18 @@ public class ContextPartitionIdentifierCategory extends ContextPartitionIdentifi
      */
     public void setLabel(String label) {
         this.label = label;
+    }
+
+    public boolean compareTo(ContextPartitionIdentifier other) {
+        if (!(other instanceof ContextPartitionIdentifierCategory)) {
+            return false;
+        }
+        return label.equals(((ContextPartitionIdentifierCategory) other).label);
+    }
+
+    public String toString() {
+        return "ContextPartitionIdentifierCategory{" +
+                "label='" + label + '\'' +
+                '}';
     }
 }

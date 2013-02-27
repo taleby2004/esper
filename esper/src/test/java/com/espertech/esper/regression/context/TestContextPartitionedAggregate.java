@@ -84,7 +84,7 @@ public class TestContextPartitionedAggregate extends TestCase {
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(10, "s1"));
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 10));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G1", 10, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G1", 10, ""});
     }
 
     public void testGroupByEventPerGroupStream() {

@@ -11,10 +11,10 @@
 
 package com.espertech.esper.epl.expression;
 
-import com.espertech.esper.support.epl.SupportExprNodeUtil;
-import junit.framework.TestCase;
 import com.espertech.esper.support.epl.SupportExprNode;
+import com.espertech.esper.support.epl.SupportExprNodeUtil;
 import com.espertech.esper.type.RelationalOpEnum;
+import junit.framework.TestCase;
 
 public class TestExprRelationalOpNode extends TestCase
 {
@@ -39,8 +39,7 @@ public class TestExprRelationalOpNode extends TestCase
         opNode.addChildNode(new SupportExprNode(String.class));
         opNode.validate(ExprValidationContextFactory.makeEmpty());
 
-        opNode.getChildNodes().clear();
-        opNode.addChildNode(new SupportExprNode(String.class));
+        opNode.setChildNodes(new SupportExprNode(String.class));
 
         // Test too few nodes under this node
         try
@@ -66,8 +65,7 @@ public class TestExprRelationalOpNode extends TestCase
         }
 
         // Test type cannot be compared
-        opNode.getChildNodes().clear();
-        opNode.addChildNode(new SupportExprNode(Boolean.class));
+        opNode.setChildNodes(new SupportExprNode(Boolean.class));
         opNode.addChildNode(new SupportExprNode(Boolean.class));
 
         try

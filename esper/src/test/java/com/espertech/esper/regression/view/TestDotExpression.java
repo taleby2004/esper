@@ -38,6 +38,26 @@ public class TestDotExpression extends TestCase
         listener = null;
     }
 
+    public void testDotExpressionEnumValue() {
+        epService.getEPAdministrator().getConfiguration().addImport(SupportEnumTwo.class);
+        epService.getEPAdministrator().getConfiguration().addEventType(SupportBean.class);
+
+        String[] fields = "c0,c1,c2,c3".split(",");
+        epService.getEPAdministrator().createEPL("select " +
+                "intPrimitive = SupportEnumTwo.ENUM_VALUE_1.getAssociatedValue() as c0," +
+                "SupportEnumTwo.ENUM_VALUE_2.checkAssociatedValue(intPrimitive) as c1, " +
+                "SupportEnumTwo.ENUM_VALUE_3.getNested().getValue() as c2," +
+                "SupportEnumTwo.ENUM_VALUE_2.checkEventBeanPropInt(sb, 'intPrimitive') as c3, " +
+                "SupportEnumTwo.ENUM_VALUE_2.checkEventBeanPropInt(*, 'intPrimitive') as c4 " +
+                "from SupportBean as sb").addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 100));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {true, false, 300, false});
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 200));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false, true, 300, true});
+    }
+
     public void testMapIndexPropertyRooted() {
         epService.getEPAdministrator().getConfiguration().addEventType(MyTypeErasure.class);
         EPStatement stmt = epService.getEPAdministrator().createEPL("select " +
@@ -46,8 +66,10 @@ public class TestDotExpression extends TestCase
                 "innerTypes('key1').ids[1] as c2,\n" +
                 "innerTypes(key).getIds(subkey) as c3,\n" +
                 "innerTypesArray[1].ids[1] as c4,\n" +
-                "innerTypesArray(subkey).getIds(subkey) as c5\n" +
-                "from MyTypeErasure");
+                "innerTypesArray(subkey).getIds(subkey) as c5,\n" +
+                "innerTypesArray(subkey).getIds(s0, 'xyz') as c6,\n" +
+                "innerTypesArray(subkey).getIds(*, 'xyz') as c7\n" +
+                "from MyTypeErasure as s0");
         stmt.addListener(listener);
         assertEquals(InnerType.class, stmt.getEventType().getPropertyType("c0"));
         assertEquals(InnerType.class, stmt.getEventType().getPropertyType("c1"));
@@ -56,7 +78,7 @@ public class TestDotExpression extends TestCase
         
         MyTypeErasure event = new MyTypeErasure("key1", 2, Collections.singletonMap("key1", new InnerType(new int[] {20, 30, 40})), new InnerType[] {new InnerType(new int[] {2, 3}), new InnerType(new int[] {4, 5}), new InnerType(new int[] {6, 7, 8})});
         epService.getEPRuntime().sendEvent(event);
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "c0,c1,c2,c3,c4,c5".split(","), new Object[] {event.getInnerTypes().get("key1"), event.getInnerTypes().get("key1"), 30, 40, 5, 8});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "c0,c1,c2,c3,c4,c5,c6,c7".split(","), new Object[] {event.getInnerTypes().get("key1"), event.getInnerTypes().get("key1"), 30, 40, 5, 8, 999999, 999999});
     }
 
     public void testInvalid() {
@@ -64,9 +86,9 @@ public class TestDotExpression extends TestCase
         epService.getEPAdministrator().getConfiguration().addEventType("SupportChainTop", SupportChainTop.class);
 
         tryInvalid("select (abc).noSuchMethod() from SupportBean abc",
-                "Error starting statement: Could not find enumeration method, date-time method or instance method named 'noSuchMethod' in class 'com.espertech.esper.support.bean.SupportBean' taking no parameters [select (abc).noSuchMethod() from SupportBean abc]");
+                "Error starting statement: Failed to resolve method 'noSuchMethod': Could not find enumeration method, date-time method or instance method named 'noSuchMethod' in class 'com.espertech.esper.support.bean.SupportBean' taking no parameters [select (abc).noSuchMethod() from SupportBean abc]");
         tryInvalid("select (abc).getChildOne(\"abc\", 10).noSuchMethod() from SupportChainTop abc",
-                "Error starting statement: Could not find enumeration method, date-time method or instance method named 'noSuchMethod' in class 'com.espertech.esper.support.bean.SupportChainChildOne' taking no parameters [select (abc).getChildOne(\"abc\", 10).noSuchMethod() from SupportChainTop abc]");
+                "Error starting statement: Failed to resolve method 'noSuchMethod': Could not find enumeration method, date-time method or instance method named 'noSuchMethod' in class 'com.espertech.esper.support.bean.SupportChainChildOne' taking no parameters [select (abc).getChildOne(\"abc\", 10).noSuchMethod() from SupportChainTop abc]");
     }
 
     public void testNestedPropertyInstanceExpr() {
@@ -307,6 +329,10 @@ public class TestDotExpression extends TestCase
 
         public int getIds(int subkey) {
             return ids[subkey];
+        }
+
+        public int getIds(EventBean event, String name) {
+            return 999999;
         }
     }
 }

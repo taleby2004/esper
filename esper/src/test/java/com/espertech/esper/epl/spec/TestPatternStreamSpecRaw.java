@@ -94,8 +94,8 @@ public class TestPatternStreamSpecRaw extends TestCase
         // node 0
         EvalFilterFactoryNode filterNode = filters.get(0);
         assertEquals(SupportBean.class, filterNode.getFilterSpec().getFilterForEventType().getUnderlyingType());
-        assertEquals(1, filterNode.getFilterSpec().getParameters().size());
-        FilterSpecParamExprNode exprParam = (FilterSpecParamExprNode) filterNode.getFilterSpec().getParameters().getFirst();
+        assertEquals(1, filterNode.getFilterSpec().getParameters().length);
+        FilterSpecParamExprNode exprParam = (FilterSpecParamExprNode) filterNode.getFilterSpec().getParameters()[0];
     }
 
     public void testPatternInSetOfVal() throws Exception
@@ -117,14 +117,14 @@ public class TestPatternStreamSpecRaw extends TestCase
         // node 0
         EvalFilterFactoryNode filterNode = filters.get(0);
         assertEquals(SupportBean.class, filterNode.getFilterSpec().getFilterForEventType().getUnderlyingType());
-        assertEquals(0, filterNode.getFilterSpec().getParameters().size());
+        assertEquals(0, filterNode.getFilterSpec().getParameters().length);
 
         // node 1
         filterNode = filters.get(1);
         assertEquals(SupportBean.class, filterNode.getFilterSpec().getFilterForEventType().getUnderlyingType());
-        assertEquals(1, filterNode.getFilterSpec().getParameters().size());
+        assertEquals(1, filterNode.getFilterSpec().getParameters().length);
 
-        FilterSpecParamIn inlist = (FilterSpecParamIn) filterNode.getFilterSpec().getParameters().getFirst();
+        FilterSpecParamIn inlist = (FilterSpecParamIn) filterNode.getFilterSpec().getParameters()[0];
         assertEquals(FilterOperator.IN_LIST_OF_VALUES, inlist.getFilterOperator());
         assertEquals(2, inlist.getListOfValues().size());
 
@@ -157,14 +157,14 @@ public class TestPatternStreamSpecRaw extends TestCase
         // node 0
         EvalFilterFactoryNode filterNode = filters.get(0);
         assertEquals(SupportBean.class, filterNode.getFilterSpec().getFilterForEventType().getUnderlyingType());
-        assertEquals(0, filterNode.getFilterSpec().getParameters().size());
+        assertEquals(0, filterNode.getFilterSpec().getParameters().length);
 
         // node 1
         filterNode = filters.get(1);
         assertEquals(SupportBean.class, filterNode.getFilterSpec().getFilterForEventType().getUnderlyingType());
-        assertEquals(1, filterNode.getFilterSpec().getParameters().size());
+        assertEquals(1, filterNode.getFilterSpec().getParameters().length);
 
-        FilterSpecParamRange range = (FilterSpecParamRange) filterNode.getFilterSpec().getParameters().getFirst();
+        FilterSpecParamRange range = (FilterSpecParamRange) filterNode.getFilterSpec().getParameters()[0];
         assertEquals(FilterOperator.RANGE_CLOSED, range.getFilterOperator());
 
         // min-value
@@ -192,9 +192,9 @@ public class TestPatternStreamSpecRaw extends TestCase
         // node 0
         EvalFilterFactoryNode filterNode = filters.get(0);
         assertEquals(SupportBean.class, filterNode.getFilterSpec().getFilterForEventType().getUnderlyingType());
-        assertEquals(1, filterNode.getFilterSpec().getParameters().size());
+        assertEquals(1, filterNode.getFilterSpec().getParameters().length);
 
-        FilterSpecParamConstant constant = (FilterSpecParamConstant) filterNode.getFilterSpec().getParameters().getFirst();
+        FilterSpecParamConstant constant = (FilterSpecParamConstant) filterNode.getFilterSpec().getParameters()[0];
         assertEquals(FilterOperator.EQUAL, constant.getFilterOperator());
         assertEquals("intPrimitive", constant.getLookupable().getExpression());
         assertEquals(5, constant.getFilterConstant());
@@ -202,9 +202,9 @@ public class TestPatternStreamSpecRaw extends TestCase
         // node 1
         filterNode = filters.get(1);
         assertEquals(SupportBean.class, filterNode.getFilterSpec().getFilterForEventType().getUnderlyingType());
-        assertEquals(1, filterNode.getFilterSpec().getParameters().size());
+        assertEquals(1, filterNode.getFilterSpec().getParameters().length);
 
-        FilterSpecParamEventProp eventprop = (FilterSpecParamEventProp) filterNode.getFilterSpec().getParameters().getFirst();
+        FilterSpecParamEventProp eventprop = (FilterSpecParamEventProp) filterNode.getFilterSpec().getParameters()[0];
         assertEquals(FilterOperator.EQUAL, constant.getFilterOperator());
         assertEquals("intPrimitive", constant.getLookupable().getExpression());
         assertEquals("s", eventprop.getResultEventAsName());
@@ -213,8 +213,7 @@ public class TestPatternStreamSpecRaw extends TestCase
 
     private PatternStreamSpecCompiled compile(PatternStreamSpecRaw raw) throws Exception
     {
-        PatternStreamSpecCompiled compiled = (PatternStreamSpecCompiled) raw.compile(SupportStatementContextFactory.makeContext(), new HashSet<String>(), false, Collections.<Integer>emptyList());
-        return compiled;
+        return raw.compile(SupportStatementContextFactory.makeContext(), new HashSet<String>(), false, Collections.<Integer>emptyList());
     }
 
     private static PatternStreamSpecRaw makeSpec(String expression) throws Exception

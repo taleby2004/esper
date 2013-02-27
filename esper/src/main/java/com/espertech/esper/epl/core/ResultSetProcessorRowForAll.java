@@ -140,9 +140,6 @@ public class ResultSetProcessorRowForAll implements ResultSetProcessor
 
     private EventBean[] getSelectListEvents(boolean isNewData, boolean isSynthesize)
     {
-        // Since we are dealing with strictly aggregation nodes, there are no events required for evaluating
-        EventBean theEvent = selectExprProcessor.process(CollectionUtil.EVENT_PER_STREAM_EMPTY, isNewData, isSynthesize, exprEvaluatorContext);
-
         if (prototype.getOptionalHavingNode() != null)
         {
             Boolean result = (Boolean) prototype.getOptionalHavingNode().evaluate(null, isNewData, exprEvaluatorContext);
@@ -151,6 +148,9 @@ public class ResultSetProcessorRowForAll implements ResultSetProcessor
                 return null;
             }
         }
+
+        // Since we are dealing with strictly aggregation nodes, there are no events required for evaluating
+        EventBean theEvent = selectExprProcessor.process(CollectionUtil.EVENT_PER_STREAM_EMPTY, isNewData, isSynthesize, exprEvaluatorContext);
 
         // The result is always a single row
         return new EventBean[] {theEvent};
@@ -158,9 +158,6 @@ public class ResultSetProcessorRowForAll implements ResultSetProcessor
 
     private EventBean getSelectListEvent(boolean isNewData, boolean isSynthesize)
     {
-        // Since we are dealing with strictly aggregation nodes, there are no events required for evaluating
-        EventBean theEvent = selectExprProcessor.process(CollectionUtil.EVENT_PER_STREAM_EMPTY, isNewData, isSynthesize, exprEvaluatorContext);
-
         if (prototype.getOptionalHavingNode() != null)
         {
             Boolean result = (Boolean) prototype.getOptionalHavingNode().evaluate(null, isNewData, exprEvaluatorContext);
@@ -169,6 +166,9 @@ public class ResultSetProcessorRowForAll implements ResultSetProcessor
                 return null;
             }
         }
+
+        // Since we are dealing with strictly aggregation nodes, there are no events required for evaluating
+        EventBean theEvent = selectExprProcessor.process(CollectionUtil.EVENT_PER_STREAM_EMPTY, isNewData, isSynthesize, exprEvaluatorContext);
 
         // The result is always a single row
         return theEvent;
@@ -509,9 +509,6 @@ public class ResultSetProcessorRowForAll implements ResultSetProcessor
 
     private void getSelectListEvent(boolean isNewData, boolean isSynthesize, List<EventBean> resultEvents)
     {
-        // Since we are dealing with strictly aggregation nodes, there are no events required for evaluating
-        EventBean theEvent = selectExprProcessor.process(CollectionUtil.EVENT_PER_STREAM_EMPTY, isNewData, isSynthesize, exprEvaluatorContext);
-
         if (prototype.getOptionalHavingNode() != null)
         {
             Boolean result = (Boolean) prototype.getOptionalHavingNode().evaluate(null, isNewData, exprEvaluatorContext);
@@ -520,6 +517,9 @@ public class ResultSetProcessorRowForAll implements ResultSetProcessor
                 return;
             }
         }
+
+        // Since we are dealing with strictly aggregation nodes, there are no events required for evaluating
+        EventBean theEvent = selectExprProcessor.process(CollectionUtil.EVENT_PER_STREAM_EMPTY, isNewData, isSynthesize, exprEvaluatorContext);
 
         resultEvents.add(theEvent);
     }

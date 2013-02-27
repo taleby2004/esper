@@ -16,7 +16,7 @@ import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.enummethod.dot.ExprDotEvalEnumMethodBase;
 import com.espertech.esper.epl.enummethod.dot.ExprDotEvalParam;
 import com.espertech.esper.epl.enummethod.dot.ExprDotEvalParamLambda;
-import com.espertech.esper.epl.enummethod.dot.ExprDotEvalTypeInfo;
+import com.espertech.esper.client.util.ExpressionReturnType;
 import com.espertech.esper.epl.expression.ExprDotNodeUtility;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.arr.ObjectArrayEventType;
@@ -30,7 +30,7 @@ public class ExprDotEvalCountOf extends ExprDotEvalEnumMethodBase {
     }
 
     public EnumEval getEnumEval(EventAdapterService eventAdapterService, StreamTypeService streamTypeService, String statementId, String enumMethodUsedName, List<ExprDotEvalParam> bodiesAndParameters, EventType inputEventType, Class collectionComponentType, int numStreamsIncoming) {
-        super.setTypeInfo(ExprDotEvalTypeInfo.scalarOrUnderlying(Integer.class));
+        super.setTypeInfo(ExpressionReturnType.singleValue(Integer.class));
         if (bodiesAndParameters.isEmpty()) {
             return new EnumEvalCountOf(numStreamsIncoming);
         }

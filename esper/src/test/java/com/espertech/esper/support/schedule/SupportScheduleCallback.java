@@ -11,11 +11,11 @@
 
 package com.espertech.esper.support.schedule;
 
+import com.espertech.esper.core.service.ExtensionServicesContext;
+import com.espertech.esper.schedule.ScheduleHandle;
+import com.espertech.esper.schedule.ScheduleHandleCallback;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.espertech.esper.schedule.ScheduleHandleCallback;
-import com.espertech.esper.schedule.ScheduleHandle;
-import com.espertech.esper.core.service.ExtensionServicesContext;
 
 public class SupportScheduleCallback implements ScheduleHandle, ScheduleHandleCallback 
 {
@@ -41,9 +41,12 @@ public class SupportScheduleCallback implements ScheduleHandle, ScheduleHandleCa
         SupportScheduleCallback.orderAllCallbacks = orderAllCallbacks;
     }
 
-    public String getStatementId()
-    {
+    public String getStatementId() {
         return null;
+    }
+
+    public int getAgentInstanceId() {
+        return 0;
     }
 
     private static final Log log = LogFactory.getLog(SupportScheduleCallback.class);

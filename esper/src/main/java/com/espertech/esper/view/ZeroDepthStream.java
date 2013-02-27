@@ -12,19 +12,15 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.ArrayEventIterator;
 import com.espertech.esper.collection.SingleEventIterator;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * Event stream implementation that does not keep any window by itself of the events coming into the stream.
  */
 public final class ZeroDepthStream implements EventStream
 {
-    private final LinkedList<View> children = new LinkedList<View>();
+    private View[] children = ViewSupport.EMPTY_VIEW_ARRAY;
     private final EventType eventType;
     private EventBean lastInsertedEvent;
     private EventBean[] lastInsertedEvents;
@@ -77,34 +73,36 @@ public final class ZeroDepthStream implements EventStream
 
     public final View addView(View view)
     {
-        children.add(view);
+        children = ViewSupport.addView(children, view);
         view.setParent(this);
         return view;
     }
 
-    public final List<View> getViews()
+    public final View[] getViews()
     {
         return children;
     }
 
     public final boolean removeView(View view)
     {
-        boolean isRemoved = children.remove(view);
+        int index = ViewSupport.findViewIndex(children, view);
+        if (index == -1) {
+            return false;
+        }
+        children = ViewSupport.removeView(children, index);
         view.setParent(null);
-        return isRemoved;
+        return true;
     }
 
     public final boolean hasViews()
     {
-        return (!children.isEmpty());
+        return children.length > 0;
     }
 
     public void removeAllViews()
     {
-        children.clear();
+        children = ViewSupport.EMPTY_VIEW_ARRAY;
     }
-
-    private static final Log log = LogFactory.getLog(ZeroDepthStream.class);
 }
 
 

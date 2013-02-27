@@ -11,13 +11,11 @@ package com.espertech.esper.epl.expression;
 import com.espertech.esper.client.ConfigurationPlugInSingleRowFunction;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.util.ExpressionReturnType;
 import com.espertech.esper.epl.core.EngineImportSingleRowDesc;
-import com.espertech.esper.epl.enummethod.dot.ExprDotEvalTypeInfo;
 import com.espertech.esper.epl.enummethod.dot.ExprDotStaticMethodWrap;
 import com.espertech.esper.epl.enummethod.dot.ExprDotStaticMethodWrapFactory;
 import com.espertech.esper.filter.FilterSpecLookupable;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +27,6 @@ import java.util.Map;
 public class ExprPlugInSingleRowNode extends ExprNodeBase implements ExprNodeInnerNodeProvider, ExprFilterOptimizableNode
 {
     private static final long serialVersionUID = 2485214890449563098L;
-    private static final Log log = LogFactory.getLog(ExprPlugInSingleRowNode.class);
 
     private final String functionName;
     private final Class clazz;
@@ -71,13 +68,15 @@ public class ExprPlugInSingleRowNode extends ExprNodeBase implements ExprNodeInn
         return functionName;
     }
 
-    public Class getClazz()
-    {
-        return clazz;
-    }
-
     public boolean getFilterLookupEligible() {
-        return config.getFilterOptimizable() == ConfigurationPlugInSingleRowFunction.FilterOptimizable.ENABLED && chainSpec.size() == 1 && !isReturnsConstantResult;
+        // We disallow context properties in a filter-optimizable expression if they are passed in since
+        // the evaluation is context-free and shared.
+        ExprNodeContextPropertiesVisitor visitor = new ExprNodeContextPropertiesVisitor();
+        ExprNodeUtility.acceptChain(visitor, chainSpec);
+        return !visitor.isFound() &&
+                config.getFilterOptimizable() == ConfigurationPlugInSingleRowFunction.FilterOptimizable.ENABLED &&
+                chainSpec.size() == 1 &&
+                !isReturnsConstantResult;
     }
 
     public FilterSpecLookupable getFilterLookupable() {
@@ -126,7 +125,7 @@ public class ExprPlugInSingleRowNode extends ExprNodeBase implements ExprNodeInn
         if (validationContext.getStreamTypeService().getEventTypes().length > 0) {
             streamZeroType = validationContext.getStreamTypeService().getEventTypes()[0];
         }
-        final ExprNodeUtilSingleRowMethodDesc staticMethodDesc = ExprNodeUtility.resolveSingleRowPluginFunc(clazz.getName(), firstItem.getName(), firstItem.getParameters(), validationContext.getMethodResolutionService(), allowWildcard, streamZeroType, firstItem.getName(), true);
+        final ExprNodeUtilMethodDesc staticMethodDesc = ExprNodeUtility.resolveMethodAllowWildcardAndStream(clazz.getName(), null, firstItem.getName(), firstItem.getParameters(), validationContext.getMethodResolutionService(), validationContext.getEventAdapterService(), validationContext.getStatementId(), allowWildcard, streamZeroType, new ExprNodeUtilResolveExceptionHandlerDefault(firstItem.getName(), true), functionName);
 
         boolean allowValueCache = true;
         if (config.getValueCache() == ConfigurationPlugInSingleRowFunction.ValueCache.DISABLED) {
@@ -146,10 +145,10 @@ public class ExprPlugInSingleRowNode extends ExprNodeBase implements ExprNodeInn
 
         // this may return a pair of null if there is no lambda or the result cannot be wrapped for lambda-function use
         ExprDotStaticMethodWrap optionalLambdaWrap = ExprDotStaticMethodWrapFactory.make(staticMethodDesc.getReflectionMethod(), validationContext.getEventAdapterService(), chainList);
-        ExprDotEvalTypeInfo typeInfo = optionalLambdaWrap != null ? optionalLambdaWrap.getTypeInfo() : ExprDotEvalTypeInfo.scalarOrUnderlying(staticMethodDesc.getReflectionMethod().getReturnType());
+        ExpressionReturnType typeInfo = optionalLambdaWrap != null ? optionalLambdaWrap.getTypeInfo() : ExpressionReturnType.singleValue(staticMethodDesc.getReflectionMethod().getReturnType());
 
         ExprDotEval[] eval = ExprDotNodeUtility.getChainEvaluators(typeInfo, chainList, validationContext, false, new ExprDotNodeFilterAnalyzerInputStatic()).getChainWithUnpack();
-        evaluator = new ExprDotEvalStaticMethod(validationContext.getStatementName(), clazz.getName(), staticMethodDesc.getFastMethod(), staticMethodDesc.getChildEvals(), allowValueCache && staticMethodDesc.isAllConstants(), optionalLambdaWrap, eval, config.isRethrowExceptions());
+        evaluator = new ExprDotEvalStaticMethod(validationContext.getStatementName(), clazz.getName(), staticMethodDesc.getFastMethod(), staticMethodDesc.getChildEvals(), allowValueCache && staticMethodDesc.isAllConstants(), optionalLambdaWrap, eval, config.isRethrowExceptions(), null);
 
         // If caching the result, evaluate now and return the result.
         if (isReturnsConstantResult) {

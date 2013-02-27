@@ -891,7 +891,7 @@ sender.sendEvent(myEvent);]]></programlisting>
 		</sect2>
 
 	    <sect2 xml:id="api-runtime-ondemand">		
-			<title>On-Demand Snapshot Query Execution</title>
+			<title>On-Demand Fire-And-Forget Query Execution</title>
 
 			<para>
 				As your application may not require streaming results and may not know each query in advance, the on-demand query facility provides for ad-hoc execution of an EPL expression.
@@ -908,10 +908,6 @@ sender.sendEvent(myEvent);]]></programlisting>
 			
 			<para>
 			  When named windows are used with contexts and context partitions, the APIs to identify, filter and select context partitions for on-demand queries can be found in <xref linkend="api-contextpartitionselection"/>.
-			</para>
-
-			<para>
-				Esper also provides the facility to explicitly index named windows to speed up queries. Please consult <xref linkend="named_explicit_index"/> for more information.
 			</para>
 			
 			<para>
@@ -2854,6 +2850,63 @@ epService.getEPRuntime().executeQuery(
 			</sect2>
      </sect1>
      
+    <sect1 xml:id="api-contextpartitionadmin">
+        <title>Context Partition Administration</title>        
+		<indexterm><primary>context partition</primary></indexterm>
+
+        <para>
+			This chapter briefly discusses the API to manage context partitions. Contexts are discussed in <xref linkend="context"/>.
+        </para>
+        
+        <para>
+			The section is only relevant when you declare a context. It applies to all different types of hash, partitioned, category, overlapping or other temporal contexts.
+        </para>
+
+		<para>
+			The administrative API for context partitions is <literal>EPContextPartitionAdmin</literal>. Use the <literal>getContextPartitionAdmin</literal> method of the <literal>EPAdministrator</literal> interface 
+			to obtain said service.
+		</para>
+		
+		<para>
+			The context partition admin API allows an application to:
+		</para>
+
+		<itemizedlist spacing="compact">
+			<listitem>
+				<para>
+					Start, stop and destroy individual context partitions.
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					Interrogate the state and identifiers for existing context partitions.
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					Determine statements associated to a context and context nesting level.
+				</para>
+			</listitem>
+		</itemizedlist>
+		
+		<para>
+			Stopping individual context partitions is useful to drop state, free memory and suspend a given context partition without stopping or destroying any associated statements.
+			For example, assume a keyed segmented context per user id. To suspend and free the memory for a given user id your application can stop the user id's context partition. 
+			The engine does not allocate a context partition for this user id again, until your application destroys or starts the context partition.
+		</para>
+
+		<para>
+			Destroying individual context partitions is useful to drop state, free memory and deregister the given context partition without stopping or destroying any associated statements.
+			For example, assume a keyed segmented context per user id. To deregister and free the memory for a given user id your application can destroy the user id's context partition.
+			The engine can allocate a fresh context partition for this user id when events for this user id arrive.
+		</para>
+
+		<para>
+			Please see the JavaDoc documentation for more information.
+		</para>
+		
+     </sect1>
+
     <sect1 xml:id="api-testing">
         <title>Test and Assertion Support</title>        
 		<indexterm><primary>testing</primary></indexterm>

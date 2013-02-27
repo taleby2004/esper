@@ -61,11 +61,13 @@ public class EventAdapterServiceImpl implements EventAdapterService
     private LinkedHashSet<String> javaPackageNames;
     private final Map<URI, PlugInEventRepresentation> plugInRepresentations;
     private final EventTypeIdGenerator eventTypeIdGenerator;
+    private final EventAdapterServiceAnonymousTypeCache anonymousTypeCache;
 
     /**
      * Ctor.
      */
-    public EventAdapterServiceImpl(EventTypeIdGenerator eventTypeIdGenerator)
+    public EventAdapterServiceImpl(EventTypeIdGenerator eventTypeIdGenerator,
+                                   int anonymousTypeCacheSize)
     {
         this.eventTypeIdGenerator = eventTypeIdGenerator;
 
@@ -78,6 +80,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
         typesPerJavaBean = new ConcurrentHashMap<Class, BeanEventType>();
         beanEventAdapter = new BeanEventAdapter(typesPerJavaBean, this, eventTypeIdGenerator);
         plugInRepresentations = new HashMap<URI, PlugInEventRepresentation>();
+        anonymousTypeCache = new EventAdapterServiceAnonymousTypeCache(anonymousTypeCacheSize);
     }
 
     public Map<String, EventType> getDeclaredEventTypes() {
@@ -786,14 +789,16 @@ public class EventAdapterServiceImpl implements EventAdapterService
     {
         String assignedTypeName = EventAdapterService.ANONYMOUS_TYPE_NAME_PREFIX + typeName;
         EventTypeMetadata metadata = EventTypeMetadata.createAnonymous(assignedTypeName);
-        return new MapEventType(metadata, assignedTypeName, eventTypeIdGenerator.getTypeId(assignedTypeName), this, propertyTypes, null, null, null);
+        MapEventType mapEventType = new MapEventType(metadata, assignedTypeName, eventTypeIdGenerator.getTypeId(assignedTypeName), this, propertyTypes, null, null, null);
+        return anonymousTypeCache.addReturnExistingAnonymousType(mapEventType);
     }
 
     public final EventType createAnonymousObjectArrayType(String typeName, Map<String, Object> propertyTypes) throws EventAdapterException
     {
         String assignedTypeName = EventAdapterService.ANONYMOUS_TYPE_NAME_PREFIX + typeName;
         EventTypeMetadata metadata = EventTypeMetadata.createAnonymous(assignedTypeName);
-        return new ObjectArrayEventType(metadata, assignedTypeName, eventTypeIdGenerator.getTypeId(assignedTypeName), this, propertyTypes, null, null, null);
+        ObjectArrayEventType oaEventType = new ObjectArrayEventType(metadata, assignedTypeName, eventTypeIdGenerator.getTypeId(assignedTypeName), this, propertyTypes, null, null, null);
+        return anonymousTypeCache.addReturnExistingAnonymousType(oaEventType);
     }
 
     public EventType createSemiAnonymousMapType(String typeName, Map<String, Pair<EventType, String>> taggedEventTypes, Map<String, Pair<EventType, String>> arrayEventTypes, boolean isUsedByChildViews)
@@ -829,7 +834,8 @@ public class EventAdapterServiceImpl implements EventAdapterService
             propertyTypes = propertiesSuperset;
         }
 
-    	return new WrapperEventType(metadata, assignedTypeName, eventTypeIdGenerator.getTypeId(assignedTypeName), underlyingEventType, propertyTypes, this);
+        WrapperEventType wrapperEventType = new WrapperEventType(metadata, assignedTypeName, eventTypeIdGenerator.getTypeId(assignedTypeName), underlyingEventType, propertyTypes, this);
+        return anonymousTypeCache.addReturnExistingAnonymousType(wrapperEventType);
     }
 
 	public final EventBean adapterForTypedWrapper(EventBean theEvent, Map<String, Object> properties, EventType eventType)
@@ -857,8 +863,9 @@ public class EventAdapterServiceImpl implements EventAdapterService
     }
 
     public EventType createAnonymousBeanType(String eventTypeName, Class clazz) {
-        return new BeanEventType(EventTypeMetadata.createBeanType(eventTypeName, clazz, false, false, false, EventTypeMetadata.TypeClass.ANONYMOUS),
+        BeanEventType beanEventType = new BeanEventType(EventTypeMetadata.createBeanType(eventTypeName, clazz, false, false, false, EventTypeMetadata.TypeClass.ANONYMOUS),
                 -1, clazz, this, beanEventAdapter.getClassToLegacyConfigs(clazz.getName()));
+        return anonymousTypeCache.addReturnExistingAnonymousType(beanEventType);
     }
 
     private Pair<EventType[], Set<EventType>> getSuperTypesDepthFirst(Set<String> superTypesSet, boolean expectMapType)

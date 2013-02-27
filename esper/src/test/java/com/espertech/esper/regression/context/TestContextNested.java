@@ -51,6 +51,36 @@ public class TestContextNested extends TestCase {
         spi = (EPServiceProviderSPI) epService;
     }
 
+    public void testNestedContextWithFilterUDF() {
+        epService.getEPAdministrator().getConfiguration().addPlugInSingleRowFunction(
+                "customEnabled", TestContextNested.class.getName(), "customMatch", ConfigurationPlugInSingleRowFunction.FilterOptimizable.ENABLED);
+        epService.getEPAdministrator().getConfiguration().addPlugInSingleRowFunction(
+                "customDisabled", TestContextNested.class.getName(), "customMatch", ConfigurationPlugInSingleRowFunction.FilterOptimizable.DISABLED);
+        epService.getEPAdministrator().createEPL("create context NestedContext " +
+                "context ACtx initiated by SupportBean_S0 as s0 terminated after 24 hours, " +
+                "context BCtx initiated by SupportBean_S1 as s1 terminated after 1 hour");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("context NestedContext select * " +
+                "from SupportBean(" +
+                "customEnabled(theString, context.ACtx.s0.p00, intPrimitive, context.BCtx.s1.id)" +
+                " and " +
+                "customDisabled(theString, context.ACtx.s0.p00, intPrimitive, context.BCtx.s1.id))");
+        SupportUpdateListener listener = new SupportUpdateListener();
+        stmt.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "S0"));
+        epService.getEPRuntime().sendEvent(new SupportBean_S1(2, "S1"));
+        epService.getEPRuntime().sendEvent(new SupportBean("X", -1));
+        assertTrue(listener.isInvoked());
+    }
+
+    public static boolean customMatch(String theString, String p00, int intPrimitive, int s1id) {
+        assertEquals("X", theString);
+        assertEquals("S0", p00);
+        assertEquals(-1, intPrimitive);
+        assertEquals(2, s1id);
+        return true;
+    }
+
     public void testIterateTargetedCP() {
         epService.getEPAdministrator().createEPL("create context NestedContext " +
                 "context ACtx initiated by SupportBean_S0 as s0 terminated by SupportBean_S1(id=s0.id), " +
@@ -76,12 +106,12 @@ public class TestContextNested extends TestCase {
         // test iterator targeted
         ContextPartitionSelector firstOne = new SupportSelectorFilteredInitTerm("S0_2");
         ContextPartitionSelector secondOne = new SupportSelectorCategory(Collections.singleton("grp3"));
-        MySelectorTargetedNested nestedSelector = new MySelectorTargetedNested(Collections.singletonList(new ContextPartitionSelector[] {firstOne, secondOne}));
+        SupportSelectorNested nestedSelector = new SupportSelectorNested(Collections.singletonList(new ContextPartitionSelector[] {firstOne, secondOne}));
         EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(nestedSelector), stmt.safeIterator(nestedSelector), fields, new Object[][]{{"S0_2", "grp3", "E1", 2}});
 
         ContextPartitionSelector firstTwo = new SupportSelectorFilteredInitTerm("S0_1");
         ContextPartitionSelector secondTwo = new SupportSelectorCategory(Collections.singleton("grp1"));
-        MySelectorTargetedNested nestedSelectorTwo = new MySelectorTargetedNested(Arrays.asList(new ContextPartitionSelector[] {firstOne, secondOne}, new ContextPartitionSelector[] {firstTwo, secondTwo}));
+        SupportSelectorNested nestedSelectorTwo = new SupportSelectorNested(Arrays.asList(new ContextPartitionSelector[] {firstOne, secondOne}, new ContextPartitionSelector[] {firstTwo, secondTwo}));
         EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(nestedSelectorTwo), stmt.safeIterator(nestedSelectorTwo), fields, new Object[][]{{"S0_2", "grp3", "E1", 2}, {"S0_1", "grp1", "E2", -1}});
 
         // test iterator filtered : not supported for nested
@@ -129,7 +159,7 @@ public class TestContextNested extends TestCase {
                 new SupportSelectorCategory(Collections.singleton("l1")),
                 new SupportSelectorCategory(Collections.singleton("b2"))
         };
-        MySelectorTargetedNested nestedSelectorSelect = new MySelectorTargetedNested(Collections.singletonList(selectors));
+        SupportSelectorNested nestedSelectorSelect = new SupportSelectorNested(Collections.singletonList(selectors));
         EPAssertionUtil.assertPropsPerRowAnyOrder(stmtSelect.iterator(nestedSelectorSelect), stmtSelect.safeIterator(nestedSelectorSelect), fieldsSelect, new Object[][]{{"i3", "l1", "b2", 1L}});
     }
 
@@ -1097,6 +1127,28 @@ public class TestContextNested extends TestCase {
         assertFalse(listener.isInvoked());
     }
 
+    public void testPartitionWithMultiPropsAndTerm() {
+        epService.getEPAdministrator().createEPL("create context NestedContext " +
+                "context PartitionedByKeys partition by theString, intPrimitive from SupportBean, " +
+                "context InitiateAndTerm start SupportBean as e1 " +
+                "end SupportBean_S0(id=e1.intPrimitive and p00=e1.theString)");
+
+        SupportUpdateListener listenerOne = new SupportUpdateListener();
+        String[] fields = "c0,c1,c2".split(",");
+        EPStatementSPI statementOne = (EPStatementSPI) epService.getEPAdministrator().createEPL("context NestedContext " +
+                "select theString as c0, intPrimitive as c1, count(longPrimitive) as c2 from SupportBean \n" +
+                "output last when terminated");
+        statementOne.addListener(listenerOne);
+
+        epService.getEPRuntime().sendEvent(makeEvent("E1", 0, 10));
+        epService.getEPRuntime().sendEvent(makeEvent("E1", 0, 10));
+        epService.getEPRuntime().sendEvent(makeEvent("E2", 1, 1));
+        assertFalse(listenerOne.isInvoked());
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(0, "E1"));
+        EPAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), fields, new Object[]{"E1", 0, 2L});
+    }
+
     private Object makeEvent(String theString, int intPrimitive, long longPrimitive) {
         SupportBean bean = new SupportBean(theString, intPrimitive);
         bean.setLongPrimitive(longPrimitive);
@@ -1141,18 +1193,6 @@ public class TestContextNested extends TestCase {
             paths.add(extract);
 
             return paths != null && Arrays.equals(pathMatch, extract);
-        }
-    }
-
-    public static class MySelectorTargetedNested implements ContextPartitionSelectorNested {
-        private List<ContextPartitionSelector[]> selectors;
-
-        public MySelectorTargetedNested(List<ContextPartitionSelector[]> selectors) {
-            this.selectors = selectors;
-        }
-
-        public List<ContextPartitionSelector[]> getSelectors() {
-            return selectors;
         }
     }
 

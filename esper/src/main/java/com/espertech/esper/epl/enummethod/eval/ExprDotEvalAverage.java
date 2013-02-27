@@ -16,7 +16,7 @@ import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.enummethod.dot.ExprDotEvalEnumMethodBase;
 import com.espertech.esper.epl.enummethod.dot.ExprDotEvalParam;
 import com.espertech.esper.epl.enummethod.dot.ExprDotEvalParamLambda;
-import com.espertech.esper.epl.enummethod.dot.ExprDotEvalTypeInfo;
+import com.espertech.esper.client.util.ExpressionReturnType;
 import com.espertech.esper.epl.expression.ExprDotNodeUtility;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.arr.ObjectArrayEventType;
@@ -35,10 +35,10 @@ public class ExprDotEvalAverage extends ExprDotEvalEnumMethodBase {
 
         if (bodiesAndParameters.isEmpty()) {
             if (collectionComponentType == BigDecimal.class || collectionComponentType == BigInteger.class) {
-                super.setTypeInfo(ExprDotEvalTypeInfo.scalarOrUnderlying(BigDecimal.class));
+                super.setTypeInfo(ExpressionReturnType.singleValue(BigDecimal.class));
                 return new EnumEvalAverageBigDecimalScalar(numStreamsIncoming);
             }
-            super.setTypeInfo(ExprDotEvalTypeInfo.scalarOrUnderlying(Double.class));
+            super.setTypeInfo(ExpressionReturnType.singleValue(Double.class));
             return new EnumEvalAverageScalar(numStreamsIncoming);
         }
 
@@ -46,14 +46,14 @@ public class ExprDotEvalAverage extends ExprDotEvalEnumMethodBase {
         Class returnType = first.getBodyEvaluator().getType();
 
         if (returnType == BigDecimal.class || returnType == BigInteger.class) {
-            super.setTypeInfo(ExprDotEvalTypeInfo.scalarOrUnderlying(BigDecimal.class));
+            super.setTypeInfo(ExpressionReturnType.singleValue(BigDecimal.class));
             if (inputEventType == null) {
                 return new EnumEvalAverageBigDecimalScalarLambda(first.getBodyEvaluator(), first.getStreamCountIncoming(),
                         (ObjectArrayEventType) first.getGoesToTypes()[0]);
             }
             return new EnumEvalAverageBigDecimalEvents(first.getBodyEvaluator(), first.getStreamCountIncoming());
         }
-        super.setTypeInfo(ExprDotEvalTypeInfo.scalarOrUnderlying(Double.class));
+        super.setTypeInfo(ExpressionReturnType.singleValue(Double.class));
         if (inputEventType == null) {
             return new EnumEvalAverageScalarLambda(first.getBodyEvaluator(), first.getStreamCountIncoming(),
                     (ObjectArrayEventType) first.getGoesToTypes()[0]);

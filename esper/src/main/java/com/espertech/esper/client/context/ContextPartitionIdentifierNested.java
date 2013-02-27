@@ -11,11 +11,27 @@
 
 package com.espertech.esper.client.context;
 
+import java.util.Arrays;
+
 /**
  * Context partition identifier for nested contexts.
  */
 public class ContextPartitionIdentifierNested extends ContextPartitionIdentifier {
     private ContextPartitionIdentifier[] identifiers;
+
+    /**
+     * Ctor.
+     */
+    public ContextPartitionIdentifierNested() {
+    }
+
+    /**
+     * Ctor.
+     * @param identifiers nested identifiers, count should match nesting level of context
+     */
+    public ContextPartitionIdentifierNested(ContextPartitionIdentifier[] identifiers) {
+        this.identifiers = identifiers;
+    }
 
     /**
      * Returns nested partition identifiers.
@@ -31,5 +47,27 @@ public class ContextPartitionIdentifierNested extends ContextPartitionIdentifier
      */
     public void setIdentifiers(ContextPartitionIdentifier[] identifiers) {
         this.identifiers = identifiers;
+    }
+
+    public boolean compareTo(ContextPartitionIdentifier other) {
+        if (!(other instanceof ContextPartitionIdentifierNested)) {
+            return false;
+        }
+        ContextPartitionIdentifierNested nestedOther = (ContextPartitionIdentifierNested) other;
+        if (nestedOther.getIdentifiers().length != identifiers.length) {
+            return false;
+        }
+        for (int i = 0; i < identifiers.length; i++) {
+            if (!identifiers[i].compareTo(nestedOther.getIdentifiers()[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public String toString() {
+        return "ContextPartitionIdentifierNested{" +
+                "identifiers=" + (identifiers == null ? null : Arrays.asList(identifiers)) +
+                '}';
     }
 }

@@ -14,9 +14,11 @@ package com.espertech.esper.regression.view;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
+import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.epl.SupportStaticMethodLib;
+import com.espertech.esper.support.util.SupportModelHelper;
 import junit.framework.TestCase;
 
 import java.util.*;
@@ -40,6 +42,24 @@ public class TestFilterExpressions extends TestCase
 
     protected void tearDown() throws Exception {
         listener = null;
+    }
+
+    public void testFilterInstanceMethodWWildcard() {
+        epService.getEPAdministrator().getConfiguration().addEventType(TestEvent.class);
+
+        runAssertionFilterInstanceMethod("select * from TestEvent(s0.myInstanceMethodAlwaysTrue()) as s0", new boolean[]{true, true, true});
+        runAssertionFilterInstanceMethod("select * from TestEvent(s0.myInstanceMethodEventBean(s0, 'x', 1)) as s0", new boolean[]{false, true, false});
+        runAssertionFilterInstanceMethod("select * from TestEvent(s0.myInstanceMethodEventBean(*, 'x', 1)) as s0", new boolean[]{false, true, false});
+    }
+
+    private void runAssertionFilterInstanceMethod(String epl, boolean[] expected) {
+        EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
+        stmt.addListener(listener);
+        for (int i = 0; i < 3; i++) {
+            epService.getEPRuntime().sendEvent(new TestEvent(i));
+            assertEquals(expected[i], listener.getAndClearIsInvoked());
+        }
+        stmt.destroy();
     }
 
     public void testShortCircuitEvalAndOverspecified() {
@@ -219,22 +239,14 @@ public class TestFilterExpressions extends TestCase
         assertFalse(listener.isInvoked());
     }
 
-    public void testNotEqualsNotIn()
+    public void testNotEqualsConsolidate()
     {
         tryNotEqualsConsolidate("intPrimitive not in (1, 2)");
-    }
-
-    public void testNotEqualsComma()
-    {
         tryNotEqualsConsolidate("intPrimitive != 1, intPrimitive != 2");
-    }
-
-    public void testNotEqualsAnd()
-    {
         tryNotEqualsConsolidate("intPrimitive != 1 and intPrimitive != 2");
     }
 
-    public void tryNotEqualsConsolidate(String filter)
+    private void tryNotEqualsConsolidate(String filter)
     {
         String text = "select * from " + SupportBean.class.getName() + "(" + filter + ")";
         EPStatement stmt = epService.getEPAdministrator().createEPL(text);
@@ -255,6 +267,7 @@ public class TestFilterExpressions extends TestCase
             listener.reset();
         }
 
+        stmt.destroy();
     }
 
     public void testEqualsSemanticFilter()
@@ -428,6 +441,12 @@ public class TestFilterExpressions extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 0));
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, null, null, null});
+
+        // test SODA
+        String epl = "select intBoxed is null, intBoxed is not null, intBoxed = 1, intBoxed != 1 from SupportBean";
+        EPStatement stmt = SupportModelHelper.compileCreate(epService, epl);
+        EPAssertionUtil.assertEqualsExactOrder(new String[]{"intBoxed is null", "intBoxed is not null",
+                "intBoxed = 1", "intBoxed != 1"}, stmt.getEventType().getPropertyNames());
     }
 
     private void assertListeners(SupportUpdateListener[] listeners, boolean[] invoked) {
@@ -911,6 +930,16 @@ public class TestFilterExpressions extends TestCase
         assertTrue(listenerTwo.getAndClearIsInvoked());
         sendBeanIntDoubleString(25, 50d, "x");
         assertFalse(listenerTwo.getAndClearIsInvoked());
+        epService.getEPAdministrator().destroyAllStatements();
+
+        // test priority of equals and boolean
+        epService.getEPAdministrator().getConfiguration().addImport(SupportStaticMethodLib.class);
+        epService.getEPAdministrator().createEPL("select * from SupportBean(intPrimitive = 1 or intPrimitive = 2)");
+        epService.getEPAdministrator().createEPL("select * from SupportBean(intPrimitive = 3, SupportStaticMethodLib.alwaysTrue({}))");
+
+        SupportStaticMethodLib.getInvocations().clear();
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        assertTrue(SupportStaticMethodLib.getInvocations().isEmpty());
     }
 
     public void testFilterWithEqualsSameCompare()
@@ -1205,6 +1234,15 @@ public class TestFilterExpressions extends TestCase
 
         public int getX() {
             return x;
+        }
+
+        public boolean myInstanceMethodAlwaysTrue() {
+            return true;
+        }
+
+        public boolean myInstanceMethodEventBean(EventBean event, String propertyName, int expected) {
+            Object value = event.get(propertyName);
+            return value.equals(expected);
         }
     }
 }

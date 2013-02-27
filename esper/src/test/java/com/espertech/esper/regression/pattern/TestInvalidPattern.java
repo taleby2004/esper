@@ -68,6 +68,9 @@ public class TestInvalidPattern extends TestCase
         exceptionText = getStatementExceptionPattern("timer:at(2,3,4,4,4)");
         assertEquals("Invalid parameter for pattern observer: Error computing crontab schedule specification: Invalid combination between days of week and days of month fields for timer:at [timer:at(2,3,4,4,4)]", exceptionText);
 
+        exceptionText = getStatementExceptionPattern("timer:at(*,*,*,*,*,0,-1)");
+        assertEquals("Invalid parameter for pattern observer: Error computing crontab schedule specification: Invalid timezone parameter '-1' for timer:at, expected a string-type value [timer:at(*,*,*,*,*,0,-1)]", exceptionText);
+
         exceptionText = getStatementExceptionPattern(EVENT_ALLTYPES + " -> timer:within()");
         assertEquals("Failed to resolve pattern observer: Pattern guard function 'within' cannot be used as a pattern observer [com.espertech.esper.support.bean.SupportBean -> timer:within()]", exceptionText);
 

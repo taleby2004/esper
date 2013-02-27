@@ -93,7 +93,7 @@ startEPLExpressionRule
 	;
 
 eplExpressionRule
-	:	(contextExpr? (selectExpr | createWindowExpr | createIndexExpr | createVariableExpr | createSchemaExpr[true] | onExpr | updateExpr | createDataflow) forExpr?)
+	:	(contextExpr? (selectExpr | createWindowExpr | createIndexExpr | createVariableExpr | createSchemaExpr[true] | onExpr | updateExpr | createDataflow | fafDelete | fafUpdate) forExpr?)
 	|	createContextExpr | createExpr
 	;
 	
@@ -138,7 +138,11 @@ mergeInsert
 	;
 	
 updateExpr
-	:	^(u=UPDATE_EXPR CLASS_IDENT IDENT? onSetAssignment+ whereClause[false]? { leaveNode($u); })
+	:	^(u=UPDATE_EXPR updateDetails { leaveNode($u); })
+	;
+
+updateDetails
+	:	^(u=UPDATE CLASS_IDENT IDENT? onSetAssignment+ whereClause[false]?)
 	;
 
 onDeleteExpr
@@ -223,7 +227,15 @@ createSelectionListElement
 createVariableExpr
 	:	^(i=CREATE_VARIABLE_EXPR CLASS_IDENT IDENT IDENT? LBRACK? valueExpr? { leaveNode($i); } )
 	;
+
+fafDelete
+	:	^(d=DELETE IDENT IDENT? whereClause[true]? { leaveNode($d); })
+	;
 			
+fafUpdate
+	:	^(u=UPDATE updateDetails { leaveNode($u); })
+	;
+
 //----------------------------------------------------------------------------
 // Dataflow Declaration
 //----------------------------------------------------------------------------

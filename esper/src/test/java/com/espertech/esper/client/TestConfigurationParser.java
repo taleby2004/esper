@@ -72,6 +72,7 @@ public class TestConfigurationParser extends TestCase
         assertEquals(Configuration.PropertyResolutionStyle.CASE_SENSITIVE, config.getEngineDefaults().getEventMeta().getClassPropertyResolutionStyle());
         assertEquals(ConfigurationEventTypeLegacy.AccessorStyle.JAVABEAN, config.getEngineDefaults().getEventMeta().getDefaultAccessorStyle());
         assertEquals(Configuration.EventRepresentation.MAP, config.getEngineDefaults().getEventMeta().getDefaultEventRepresentation());
+        assertEquals(5, config.getEngineDefaults().getEventMeta().getAnonymousCacheSize());
 
         assertTrue(config.getEngineDefaults().getViewResources().isShareViews());
         assertFalse(config.getEngineDefaults().getViewResources().isAllowMultipleExpiryPolicies());
@@ -321,6 +322,14 @@ public class TestConfigurationParser extends TestCase
         assertEquals("func2a", pluginAgg.getName());
         assertEquals("com.mycompany.MyMatrixAggregationMethod1Factory", pluginAgg.getFactoryClassName());
 
+        // assert plug-in aggregation multi-function loaded
+        assertEquals(1, config.getPlugInAggregationMultiFunctions().size());
+        ConfigurationPlugInAggregationMultiFunction pluginMultiAgg = config.getPlugInAggregationMultiFunctions().get(0);
+        EPAssertionUtil.assertEqualsExactOrder(new String[] {"func1", "func2"}, pluginMultiAgg.getFunctionNames());
+        assertEquals("com.mycompany.MyAggregationMultiFunctionFactory", pluginMultiAgg.getMultiFunctionFactoryClassName());
+        assertEquals(1, pluginMultiAgg.getAdditionalConfiguredProperties().size());
+        assertEquals("value1", pluginMultiAgg.getAdditionalConfiguredProperties().get("prop1"));
+
         // assert plug-in singlerow function loaded
         assertEquals(2, config.getPlugInSingleRowFunctions().size());
         ConfigurationPlugInSingleRowFunction pluginSingleRow = config.getPlugInSingleRowFunctions().get(0);
@@ -389,6 +398,7 @@ public class TestConfigurationParser extends TestCase
         assertEquals(Configuration.PropertyResolutionStyle.DISTINCT_CASE_INSENSITIVE, config.getEngineDefaults().getEventMeta().getClassPropertyResolutionStyle());
         assertEquals(ConfigurationEventTypeLegacy.AccessorStyle.PUBLIC, config.getEngineDefaults().getEventMeta().getDefaultAccessorStyle());
         assertEquals(Configuration.EventRepresentation.MAP, config.getEngineDefaults().getEventMeta().getDefaultEventRepresentation());
+        assertEquals(100, config.getEngineDefaults().getEventMeta().getAnonymousCacheSize());
         assertTrue(config.getEngineDefaults().getLogging().isEnableExecutionDebug());
         assertFalse(config.getEngineDefaults().getLogging().isEnableTimerDebug());
         assertTrue(config.getEngineDefaults().getLogging().isEnableQueryPlan());

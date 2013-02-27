@@ -15,12 +15,11 @@ import com.espertech.esper.client.*;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.util.JavaClassHelper;
 import junit.framework.Assert;
+import org.w3c.dom.NodeList;
 
 import java.io.StringWriter;
-import java.util.*;
 import java.lang.reflect.Array;
-
-import org.w3c.dom.NodeList;
+import java.util.*;
 
 public class EventTypeAssertionUtil
 {
@@ -467,6 +466,20 @@ public class EventTypeAssertionUtil
         else
         {
             writer.append(result.toString());
+        }
+    }
+
+    public static void assertEventTypeProperties(Object[][] expectedArr, EventType eventType, EventTypeAssertionEnum... assertions) {
+        for (int propNum = 0; propNum < expectedArr.length; propNum++) {
+            String message = "Failed assertion for property " + propNum;
+            EventPropertyDescriptor prop = eventType.getPropertyDescriptors()[propNum];
+
+            for (int i = 0; i < assertions.length; i++) {
+                EventTypeAssertionEnum assertion = assertions[i];
+                Object expected = expectedArr[propNum][i];
+                Object value = assertion.getExtractor().extract(prop, eventType);
+                Assert.assertEquals(message + " at assertion " + assertion, expected, value);
+            }
         }
     }
 }

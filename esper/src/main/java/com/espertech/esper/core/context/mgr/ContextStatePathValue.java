@@ -11,13 +11,17 @@
 
 package com.espertech.esper.core.context.mgr;
 
+import com.espertech.esper.client.context.EPContextPartitionState;
+
 public class ContextStatePathValue {
     private final Integer optionalContextPartitionId;
     private final byte[] blob;
+    private EPContextPartitionState state;
 
-    public ContextStatePathValue(Integer optionalContextPartitionId, byte[] blob) {
+    public ContextStatePathValue(Integer optionalContextPartitionId, byte[] blob, EPContextPartitionState state) {
         this.optionalContextPartitionId = optionalContextPartitionId;
         this.blob = blob;
+        this.state = state;
     }
 
     public Integer getOptionalContextPartitionId() {
@@ -28,9 +32,18 @@ public class ContextStatePathValue {
         return blob;
     }
 
+    public EPContextPartitionState getState() {
+        return state;
+    }
+
+    public void setState(EPContextPartitionState state) {
+        this.state = state;
+    }
+
     public String toString() {
         return "ContextStatePathValue{" +
                 "optionalContextPartitionId=" + optionalContextPartitionId +
+                ", state=" + state +
                 ", blob=" + blob +
                 '}';
     }

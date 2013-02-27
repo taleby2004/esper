@@ -16,6 +16,7 @@ import com.espertech.esper.client.context.ContextPartitionSelector;
 import com.espertech.esper.client.context.ContextPartitionSelectorAll;
 import com.espertech.esper.client.context.ContextPartitionSelectorCategory;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.bean.SupportBean_S1;
@@ -231,6 +232,17 @@ public class TestContextSelectionAndFireAndForget extends TestCase {
         EPOnDemandPreparedQuery preparedQuery = epService.getEPRuntime().prepareQuery(epl);
         EPOnDemandQueryResult resultPrepared = preparedQuery.execute(selectors);
         EPAssertionUtil.assertPropsPerRowAnyOrder(resultPrepared.getArray(), fields.split(","), expected);
+
+        // test SODA prepare and execute
+        EPStatementObjectModel modelForPrepare = epService.getEPAdministrator().compileEPL(epl);
+        EPOnDemandPreparedQuery preparedQueryModel = epService.getEPRuntime().prepareQuery(modelForPrepare);
+        EPOnDemandQueryResult resultPreparedModel = preparedQueryModel.execute(selectors);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(resultPreparedModel.getArray(), fields.split(","), expected);
+
+        // test model query
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(epl);
+        result = epService.getEPRuntime().executeQuery(model, selectors);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(result.getArray(), fields.split(","), expected);
     }
 
     private void tryInvalidRuntimeQuery(ContextPartitionSelector[] selectors, String epl, String expected) {

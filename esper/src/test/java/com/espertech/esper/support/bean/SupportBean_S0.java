@@ -118,4 +118,38 @@ public class SupportBean_S0 implements Serializable
     {
         this.p03 = p03;
     }
+
+    public String toString() {
+        return "SupportBean_S0{" +
+                "id=" + id +
+                ", p00='" + p00 + '\'' +
+                ", p01='" + p01 + '\'' +
+                ", p02='" + p02 + '\'' +
+                ", p03='" + p03 + '\'' +
+                '}';
+    }
+
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        SupportBean_S0 that = (SupportBean_S0) o;
+
+        if (id != that.id) return false;
+        if (p00 != null ? !p00.equals(that.p00) : that.p00 != null) return false;
+        if (p01 != null ? !p01.equals(that.p01) : that.p01 != null) return false;
+        if (p02 != null ? !p02.equals(that.p02) : that.p02 != null) return false;
+        if (p03 != null ? !p03.equals(that.p03) : that.p03 != null) return false;
+
+        return true;
+    }
+
+    public int hashCode() {
+        int result = id;
+        result = 31 * result + (p00 != null ? p00.hashCode() : 0);
+        result = 31 * result + (p01 != null ? p01.hashCode() : 0);
+        result = 31 * result + (p02 != null ? p02.hashCode() : 0);
+        result = 31 * result + (p03 != null ? p03.hashCode() : 0);
+        return result;
+    }
 }

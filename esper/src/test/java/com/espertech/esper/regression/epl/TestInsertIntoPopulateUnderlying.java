@@ -346,6 +346,16 @@ public class TestInsertIntoPopulateUnderlying extends TestCase
         vals.put("floatBoxed", 0f);
         epService.getEPRuntime().sendEvent(vals, "MyMap");
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "longBoxed,doubleBoxed".split(","), new Object[]{4L, 0d});
+        epService.getEPAdministrator().destroyAllStatements();
+
+        // test new-to-map conversion
+        epService.getEPAdministrator().getConfiguration().addEventType(MyEventWithMapFieldSetter.class);
+        EPStatement stmt = epService.getEPAdministrator().createEPL("insert into MyEventWithMapFieldSetter(id, themap) " +
+                "select 'test' as id, new {somefield = theString} as themap from SupportBean");
+        stmt.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        EPAssertionUtil.assertPropsMap((Map) listener.assertOneGetNew().get("themap"), "somefield".split(","), "E1");
     }
 
     public void testBeanWildcard()
@@ -798,5 +808,26 @@ public class TestInsertIntoPopulateUnderlying extends TestCase
         assertEquals(intBoxed, theEvent.getIntBoxed());
         assertEquals(boolPrimitive, theEvent.isBoolPrimitive());
         assertEquals(intPrimitive, theEvent.getIntPrimitive());
+    }
+
+    public static class MyEventWithMapFieldSetter {
+        private String id;
+        private Map themap;
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public Map getThemap() {
+            return themap;
+        }
+
+        public void setThemap(Map themap) {
+            this.themap = themap;
+        }
     }
 }

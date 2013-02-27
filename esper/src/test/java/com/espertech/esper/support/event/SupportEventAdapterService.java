@@ -21,12 +21,12 @@ public class SupportEventAdapterService
 
     static
     {
-        eventAdapterService = new EventAdapterServiceImpl(new EventTypeIdGeneratorImpl());
+        eventAdapterService = new EventAdapterServiceImpl(new EventTypeIdGeneratorImpl(), 5);
     }
 
     public static void reset()
     {
-        eventAdapterService = new EventAdapterServiceImpl(new EventTypeIdGeneratorImpl());
+        eventAdapterService = new EventAdapterServiceImpl(new EventTypeIdGeneratorImpl(), 5);
     }
     public static EventAdapterService getService()
     {

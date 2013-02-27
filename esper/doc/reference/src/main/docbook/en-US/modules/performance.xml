@@ -63,38 +63,6 @@ testing on small configuration.</programlisting>
 			</para>
 		</sect2>
 	
-		<sect2 xml:id="perf-tips-2">
-			<title>Compare Esper to other solutions</title>
-			<para>
-				If you compare Esper performance to the performance of another solution, you need to ensure that your statements have
-				truly equivalent semantics. The is because between different vendors the event processing language can be seem fairly similar 
-				whoever may, for all similarities, produce different results.
-			</para>
-
-			<para>
-				For example some vendor solution mandates the use of "bounded streams". The next statement shows one vendor's event processing syntax:
-			</para>
-
-<programlisting><![CDATA[// Other (name omitted) vendor solution statement:
-select * from (select * from Market where ticker = 'GOOG') retain 1 event
-// The above is NOT an Esper statement]]></programlisting>
-			<para>
-				The semantically equivalent statement in Esper is:
-			</para>
-		
-<programlisting><![CDATA[// Esper statement with the same semantics:
-select * from MarketData(ticker='$').std:lastevent()
-// ... or ...
-select * from MarketData(ticker='$').win:length(1)]]></programlisting>
-
-			<para>
-				As an example, a NOT semantically equivalent statement in Esper is:
-			</para>
-		
-<programlisting><![CDATA[// Esper statement that DOES ***NOT*** HAVE the same semantics 
-// No length window was used
-select * from MarketData(ticker='$')]]></programlisting>
-		</sect2>
 
 		<sect2 xml:id="perf-tips-3">
 			<title>Input and Output Bottlenecks</title>
@@ -691,7 +659,7 @@ from WithdrawalWindow(accountNumber=’123’) as w]]></programlisting>
 			
 			<para>
 			  The <literal>prev</literal>, <literal>prevwindow</literal> and <literal>prevtail</literal> functions access a data window directly. The engine does not need to maintain a separate data structure and grouping is based on the use of the <literal>std:groupwin</literal> grouped data window. 
-			  Compare this to the use of data window aggregation functions <literal>first</literal>, <literal>window</literal> and <literal>last</literal> which group according to the <literal>group by</literal> clause. If your statement utilizes both together consider reformulating to use <literal>prev</literal> instead.
+			  Compare this to the use of event aggregation functions such as <literal>first</literal>, <literal>window</literal> and <literal>last</literal> which group according to the <literal>group by</literal> clause. If your statement utilizes both together consider reformulating to use <literal>prev</literal> instead.
 			</para>
 			
 		</sect2>
@@ -1100,10 +1068,10 @@ select * from PersonEvent(department=VAR_DEPARTMENT)]]></programlisting>
                         1.7.0)
                         and its dependencies as in the sample below (with Esper 2.1) :
                         <programlisting><![CDATA[# classpath on Unix/Linux (on one single line)
-etc:build:lib/esper-4.8.0.jar:lib/commons-logging-1.1.1.jar:lib/cglib-nodep-2.2.jar
+etc:build:lib/esper-4.9.0.jar:lib/commons-logging-1.1.1.jar:lib/cglib-nodep-2.2.jar
    :lib/antlr-runtime-3.2.jar:lib/log4j-1.2.16.jar
 @rem  classpath on Windows (on one single line)
-etc;build;lib\esper-4.8.0.jar;lib\commons-logging-1.1.1.jar;lib\cglib-nodep-2.2.jar
+etc;build;lib\esper-4.9.0.jar;lib\commons-logging-1.1.1.jar;lib\cglib-nodep-2.2.jar
    ;lib\antlr-runtime-3.2.jar;lib\log4j-1.2.16.jar]]></programlisting>
                         Note that <literal>./etc</literal> and <literal>./build</literal> have to be in the classpath.
                         At that stage you should also start to set min and max JVM heap. A good start is 1GB as in

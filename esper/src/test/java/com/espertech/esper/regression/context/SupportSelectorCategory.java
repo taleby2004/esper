@@ -13,6 +13,7 @@ package com.espertech.esper.regression.context;
 
 import com.espertech.esper.client.context.ContextPartitionSelectorCategory;
 
+import java.util.Collections;
 import java.util.Set;
 
 public class SupportSelectorCategory implements ContextPartitionSelectorCategory {
@@ -20,6 +21,15 @@ public class SupportSelectorCategory implements ContextPartitionSelectorCategory
 
     public SupportSelectorCategory(Set<String> labels) {
         this.labels = labels;
+    }
+
+    public SupportSelectorCategory(String label) {
+        if (label == null) {
+            labels = Collections.emptySet();
+        }
+        else {
+            labels = Collections.singleton(label);
+        }
     }
 
     public Set<String> getLabels() {

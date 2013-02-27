@@ -750,7 +750,7 @@ from LocationReport]]></programlisting>
 			</listitem>
 			<listitem>
 				<para>
-					Any of the data window aggregation functions (<literal>window</literal>, <literal>first</literal>, <literal>last</literal>).
+					Any of the event aggregation functions (<literal>window</literal>, <literal>first</literal>, <literal>last</literal>, <literal>sorted</literal>, <literal>maxby</literal>, <literal>minby</literal>, <literal>maxbyever</literal>, <literal>minbyever</literal>).
 				</para>
 			</listitem>
 			<listitem>
@@ -760,7 +760,7 @@ from LocationReport]]></programlisting>
 			</listitem>
 			<listitem>
 				<para>
-					A plug-in single-row function or user-defined function.
+					A plug-in single-row function, a user-defined function or an enum type.
 				</para>
 			</listitem>
 			<listitem>
@@ -927,16 +927,20 @@ from LocationReport]]></programlisting>
 		</sect2>
 
 		<sect2 xml:id="enumeration-ds-accessagg">
-			<title>Data Window Aggregation</title>
+			<title>Event Aggregation Function</title>
 			
 			<para>
-				Data window aggregation functions return events present in a stream's current data window. They are aggregation functions and as such sensitive to the presence of <literal>group by</literal>. See <xref linkend="epl-function-aggregation-dwtrack"/>.
+				Event aggregation functions return an event or multiple events. They are aggregation functions and as such sensitive to the presence of <literal>group by</literal>. See <xref linkend="epl-function-aggregation-event"/>.
 			</para>
 			
 			<para>
-				When using data window aggregation functions as input to a built-in enumeration method you can specify the <literal>*</literal> wildcard to provide a collection of events as input. Or you can specify a property name in the data window aggregation function to provide a collection of scala values as input. Use any of the <literal>window</literal>, <literal>first</literal> or <literal>last</literal> functions.
+				You can use <literal>window</literal>, <literal>first</literal> or <literal>last</literal> event aggregation functions as input to an enumeration method. Specify the <literal>*</literal> wildcard as the parameter to the event aggregation function to provide a collection of events as input. Or specify a property name as the parameter to event aggregation function to provide a collection of scalar values as input. 
 			</para>
 			
+			<para>
+				You can use the <literal>sorted</literal>, <literal>maxby</literal>, <literal>minby</literal>, <literal>maxbyever</literal> or <literal>minbyever</literal> event aggregation functions as input to an enumeration method. Specify one or more criteria expressions that provide the sort order as parameters to the event aggregation function. 
+			</para>
+
 			<para>
 				In this example query the <literal>window(*)</literal> aggregation function returns the last 10 seconds of item location reports for the same asset id as the incoming event. Among that last 10 seconds of events for the same asset id, the 
 				enumeration method returns those item location reports where the distance to center is less then 20, for each arriving Item event.
@@ -953,6 +957,12 @@ from Item(type='P').win:time(10) group by assetId]]></programlisting>
 			</para>
 			<programlisting><![CDATA[select window(assetId).orderBy() as orderedAssetIds
 from Item.win:time(10) group by assetId]]></programlisting>
+
+			<para>
+				The following example outputs the 5 highest prices per symbol among the last 10 seconds of stock ticks:
+			</para>
+			<programlisting><![CDATA[select sorted(price desc).take(5) as highest5PricesPerSymbol
+from StockTick.win:time(10) group by symbol]]></programlisting>
 
 		</sect2>
 
@@ -987,7 +997,7 @@ from Item.win:time(10) as items]]></programlisting>
 		</sect2>
                 
 		<sect2 xml:id="enumeration-ds-udf">
-			<title>Single-Row Function or UDF</title>
+			<title>Single-Row Function, User-Defined Function and Enum Types</title>
 			
 			<para>
 				Your single-row or user-defined function can return either an array or any collection that implements either the <literal>Collection</literal> or <literal>Iterable</literal> interface. For arrays, the array component type and for collections, the collection or iterable generic type should be the class providing event properties.
@@ -1036,6 +1046,33 @@ from Item as item]]></programlisting>
 			</para>
 			<programlisting><![CDATA[select getZoneNames().where(z => z != "Z1")
 from pattern[every timer:interval(30)]]]></programlisting>			
+
+			<para>
+				An enum type can also be a useful source for enumerable values.
+			</para>
+
+			<para>
+				The following sample Java declares an enum type <literal>EnumOfZones</literal>:
+			</para>
+			<programlisting><![CDATA[public enum EnumOfZones {
+  ZONES_OUTSIDE(new String[] {"z1", "z2"}),
+  ZONES_INSIDE(new String[] {"z3", "z4"})
+
+  private final String[] zones;
+
+  private EnumOfZones(String[] zones) {
+	  this.zones = zones;
+  }
+
+  public String[] getZones() {
+    return zones;
+  }
+}]]></programlisting>
+
+			<para>
+				A sample statement that utilizes the enum type is shown next:
+			</para>
+			<programlisting><![CDATA[select EnumOfZones.ZONES_OUTSIDE.getZones().anyOf(v => v = zone) from Item]]></programlisting>			
 		</sect2>
 
 		<sect2 xml:id="enumeration-ds-lambda">

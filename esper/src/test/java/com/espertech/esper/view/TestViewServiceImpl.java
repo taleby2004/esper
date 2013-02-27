@@ -51,32 +51,32 @@ public class TestViewServiceImpl extends TestCase
     public void testCheckChainReuse()
     {
         // Child views of first and second level must be the same
-        assertEquals(2, streamOne.getViews().size());
-        View child1_1 = streamOne.getViews().get(0);
-        View child2_1 = streamOne.getViews().get(0);
+        assertEquals(2, streamOne.getViews().length);
+        View child1_1 = streamOne.getViews()[0];
+        View child2_1 = streamOne.getViews()[0];
         assertTrue(child1_1 == child2_1);
 
-        assertEquals(2, child1_1.getViews().size());
-        View child1_1_1 = child1_1.getViews().get(0);
-        View child2_1_1 = child2_1.getViews().get(0);
+        assertEquals(2, child1_1.getViews().length);
+        View child1_1_1 = child1_1.getViews()[0];
+        View child2_1_1 = child2_1.getViews()[0];
         assertTrue(child1_1_1 == child2_1_1);
 
-        assertEquals(2, child1_1_1.getViews().size());
-        assertEquals(2, child2_1_1.getViews().size());
-        assertTrue(child2_1_1.getViews().get(0) != child2_1_1.getViews().get(1));
+        assertEquals(2, child1_1_1.getViews().length);
+        assertEquals(2, child2_1_1.getViews().length);
+        assertTrue(child2_1_1.getViews()[0] != child2_1_1.getViews()[1]);
 
         // Create one more view chain
-        View child3_1 = streamOne.getViews().get(0);
+        View child3_1 = streamOne.getViews()[0];
         assertTrue(child3_1 == child1_1);
-        assertEquals(2, child3_1.getViews().size());
-        View child3_1_1 = child3_1.getViews().get(1);
+        assertEquals(2, child3_1.getViews().length);
+        View child3_1_1 = child3_1.getViews()[1];
         assertTrue(child3_1_1 != child2_1_1);
     }
 
     public void testRemove()
     {
-        assertEquals(2, streamOne.getViews().size());
-        assertEquals(1, streamTwo.getViews().size());
+        assertEquals(2, streamOne.getViews().length);
+        assertEquals(1, streamTwo.getViews().length);
 
         viewService.remove(streamOne, viewOne);
         viewService.remove(streamOne, viewTwo);
@@ -85,8 +85,8 @@ public class TestViewServiceImpl extends TestCase
 
         viewService.remove(streamTwo, viewFive);
 
-        assertEquals(0, streamOne.getViews().size());
-        assertEquals(0, streamTwo.getViews().size());
+        assertEquals(0, streamOne.getViews().length);
+        assertEquals(0, streamTwo.getViews().length);
     }
 
     public void testRemoveInvalid()

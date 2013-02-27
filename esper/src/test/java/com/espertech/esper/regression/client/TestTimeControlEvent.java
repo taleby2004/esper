@@ -12,7 +12,6 @@
 package com.espertech.esper.regression.client;
 
 import com.espertech.esper.client.*;
-import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.client.scopetest.ScopeTestHelper;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.time.CurrentTimeEvent;

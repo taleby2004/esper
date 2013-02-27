@@ -729,7 +729,9 @@ eplExpression
 	|	createExpressionExpr
 	|	onExpr
 	|	updateExpr
-	|	createDataflow) forExpr?
+	|	createDataflow
+	|	fafDelete
+	|	fafUpdate) forExpr?
 	;
 	
 contextExpr
@@ -762,10 +764,15 @@ onStreamExpr
 	;
 
 updateExpr
-	:	UPDATE ISTREAM classIdentifier (AS i=IDENT | i=IDENT)?
+	:	UPDATE ISTREAM updateDetails
+		-> ^(UPDATE_EXPR updateDetails)
+	;
+	
+updateDetails
+	:	classIdentifier (AS i=IDENT | i=IDENT)?
 		SET onSetAssignment (COMMA onSetAssignment)* 
 		(WHERE whereClause)?		
-		-> ^(UPDATE_EXPR classIdentifier $i? onSetAssignment+ whereClause?)
+		-> ^(UPDATE classIdentifier $i? onSetAssignment+ whereClause?)
 	;
 
 onMergeExpr
@@ -952,11 +959,21 @@ createSchemaDef
 		-> ^(CREATE_SCHEMA_DEF $name variantList? createColumnList? createSchemaQual*)
 	;
 
+fafDelete
+	:	DELETE FROM name=IDENT (AS i=IDENT | i=IDENT)? (WHERE whereClause)?
+		-> ^(DELETE $name $i? whereClause?)
+	;
+
+fafUpdate
+	:	UPDATE updateDetails
+		-> ^(UPDATE updateDetails)
+	;
+
 createDataflow
 	:	CREATE DATAFLOW name=IDENT AS? gopList
 		-> ^(CREATE_DATAFLOW $name gopList)
 	;
-
+	
 gopList
 	:	gop gop*
 	;

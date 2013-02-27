@@ -14,7 +14,9 @@
 		</para>
 
 		<para>
-		  For information on input and output adapters that connect to an event transport and perform event transformation for incoming and outgoing on-the-wire event data, for use with streaming data, please see the EsperIO reference documentation. Consider using the Plug-in Loader API for creating a new adapter that starts or stops as part of the CEP engine initialization and destroy lifecycle, see <xref linkend="api-plugin"/>.
+		  For information on input and output adapters that connect to an event transport and perform event transformation for incoming and outgoing on-the-wire event data, for use with streaming data, please see the EsperIO reference documentation. The data flow instances as described in <xref linkend="dataflow"/> are an easy way to plug in operators that perform input and output. 
+		  Data flows allow providing parameters and managing individual flows independent of engine lifecycle.
+		  Also consider using the Plug-in Loader API for creating a new adapter that starts or stops as part of the CEP engine initialization and destroy lifecycle, see <xref linkend="api-plugin"/>.
 		</para>
 		
 		<para>
@@ -22,12 +24,20 @@
 		</para>
 		
 		<para>
-		  To join data that resides in a non-relational store the engine offers a two means: FIrst, the virtual data window, as described below, for transparently integrating the external store as a named window. The second mechanism is a special join syntax based on static method invocation, see <xref linkend="joining_method"/>.
+		  To join data that resides in a non-relational store the engine offers a two means: First, the virtual data window, as described below, for transparently integrating the external store as a named window. The second mechanism is a special join syntax based on static method invocation, see <xref linkend="joining_method"/>.
 		</para>
 		
-		<para>
-		  For all extension code and similar to listeners and subscribers, to send events into the engine from extension code the <literal>route</literal> method should be used (and not <literal>sendEvent</literal>) to avoid the possibility of stack overflow due to event-callback looping and ensure correct processing of the current and routed event .
-		</para>
+		<note>
+			<para>
+			  For all extension code and similar to listeners and subscribers, to send events into the engine from extension code the <literal>route</literal> method should be used (and not <literal>sendEvent</literal>) to avoid the possibility of stack overflow due to event-callback looping and ensure correct processing of the current and routed event .
+			</para>
+		</note>
+		
+		<note>
+			<para>
+			  For all extension code it is not safe to administrate the engine within the extension code. For example, it is not safe to implement a data window view that creates a new statement or destroys an existing statement.
+			</para>
+		</note>
     </sect1>
     
     <sect1 xml:id="extension-virtualdw" revision="1">
@@ -563,6 +573,61 @@ AgentInstanceContext agentInstanceContext;  // Other EPL statement information i
 </esper-configuration>]]></programlisting>
 		</sect2>
 
+		<sect2 xml:id="custom-single-eventsparam" revision="1">
+			<title>Single-Row Functions Taking Events as Parameters</title>
+
+			<para>
+			  Esper allows parameters to a single-row function to be events. In this case, declare the method parameter type to either take <literal>EventBean</literal>, <literal>Collection&lt;EventBean&gt;</literal>
+			  or the underlying class as a parameter.			  
+			</para>
+			
+			<para>
+			  Sample method footprints are:
+			</para>
+			<programlisting><![CDATA[public static double doCompute(EventBean eventBean) {...}
+public static boolean doCheck(MyEvent myEvent, String text) {...}
+public static String doSearch(Collection<EventBean> events) {...}]]></programlisting>
+
+			<para>
+			  To pass the event, specify the stream alias, or wildcard <literal>(*)</literal> or the tag name when used in a pattern.
+			</para>
+			
+			<para>
+			  The EPL below shows example uses:
+			</para>
+			<programlisting><![CDATA[select * from MyEvent(doCompute(me) = 100) as me]]></programlisting>
+			<programlisting><![CDATA[select * from MyEvent where doCompute(*) = 100]]></programlisting>
+			<programlisting><![CDATA[select * from pattern[a=MyEvent -> MyEvent(doCheck(a, 'sometext'))]]]></programlisting>
+			<programlisting><![CDATA[select * from MyEvent.win:time(1 min) having doCompute(last(*))]]]></programlisting>
+			<programlisting><![CDATA[select * from MyEvent.win:time(1 min) having doSearch(window(*))]]]></programlisting>
+			
+			<para>
+			  Declare the method parameter as <literal>Collection&lt;EventBean&gt;</literal> if the method expects 
+			  an expression result that returns multiple events.
+			</para>
+
+			<para>
+			  Declare the method parameter as <literal>EventBean</literal> if the method expects 
+			  an expression result that returns a single event.
+			</para>
+		</sect2>
+
+		<sect2 xml:id="custom-single-receivectx" revision="1">
+			<title>Receiving a Context Object</title>
+
+			<para>
+			  Esper can pass an object containing contextual information such as statement name, function name, engine URI and context partition id to your
+			  method. The container for this information is <literal>EPLMethodInvocationContext</literal> in package <literal>com.espertech.esper.client.hook</literal>.
+			  Please declare your method to take <literal>EPLMethodInvocationContext</literal> as the last parameter. The engine then passes the information along.
+			</para>
+			
+			<para> 
+			  A sample method footprint and EPL are shown below:
+			</para>					
+			<programlisting><![CDATA[public static double computeSomething(double number, EPLMethodInvocationContext context) {...}]]></programlisting>
+			<programlisting><![CDATA[select computeSomething(10) from MyEvent]]></programlisting>
+		</sect2>
+
 		<sect2 xml:id="custom-single-rethrowex" revision="1">
 			<title>Exception Handling</title>
 
@@ -899,170 +964,247 @@ public EventType getEventType() {
         
 		<indexterm><primary>plug-in</primary><secondary>custom aggregation function</secondary></indexterm>
 		<indexterm><primary>aggregation functions</primary><secondary>custom plug-in</secondary></indexterm>
+		
+		<para>
+		  Aggregation functions are stateful functions that aggregate events, event property values or expression results. Examples for built-in aggregation functions are <literal>count(*)</literal>, <literal>sum(price * volume)</literal>, <literal>window(*)</literal> or <literal>maxby(volume)</literal>.
+		</para>
+		
         <para>
-			Aggregation functions aggregate event property values or expression results obtained from one or more streams. Examples for built-in aggregation functions are <literal>count(*)</literal>, <literal>sum(price * volume)</literal> or <literal>avg(distinct volume)</literal>.
+		  Esper allows two different ways for your application to provide aggregation functions. We use the name <emphasis>aggregation single-function</emphasis> and <emphasis>aggregation multi-function</emphasis> for the two independent extension APIs for aggregation functions.			
         </para>
+
+		<para>
+			The aggregation single-function API is simple to use however it imposes certain restrictions on how expressions that contain aggregation functions share state and are evaluated.
+		</para>
+
+		<para>
+			The aggregation multi-function API is more powerful and provides control over how expressions that contain aggregation functions share state and are evaluated.
+		</para>
         
         <para>
-			The optional keyword <literal>distinct</literal> ensures that only distinct (unique) values are aggregated and duplicate values are ignored by the aggregation function. Custom plug-in aggregation functions do not need to implement the logic to handle <literal>distinct</literal> values. This is because when the engine encounters the <literal>distinct</literal> keyword, it eliminates any non-distinct values before passing the value for aggregation to the custom aggregation function.
+		  The next table compares the two aggregation function extension API's:
         </para>
+        
+        <table frame="topbot">
+			<title>Aggregation Function Extension API's</title>
+			<tgroup cols="4">
+				<colspec colwidth="1*"/>
+				<colspec colwidth="1.5*"/>
+				<colspec colwidth="1.5*"/>
+				<thead>
+					<row>
+						<entry></entry>
+						<entry>Single-Function</entry>
+						<entry>Multi-Function</entry>
+					</row>
+				</thead>
+				<tbody>
+					<row>
+						<entry>Return Value</entry>
+						<entry>Can only return a single value or object. Cannot return an <literal>EventBean</literal> event, collection of <literal>EventBean</literal> events or collection or array of values for use with enumeration methods, for example.</entry>
+						<entry>Can return an <literal>EventBean</literal> event, a collection of <literal>EventBean</literal> events or a collection or array of objects for use with enumeration methods or to access event properties.</entry>
+					</row>
+					<row>
+						<entry>Complexity of API</entry>
+						<entry>Simple (consists of 2 interfaces).</entry>
+						<entry>More complex (consists of 6 interfaces).</entry>
+					</row>
+					<row>
+						<entry>State Sharing</entry>
+						<entry>State and parameter evaluation shared if multiple aggregation functions of the same name in the same statement (and context partition) take the exact same parameter expressions.</entry>
+						<entry>State and parameter evaluation sharable when multiple aggregation functions of a related name (related thru configuration) for the same statement (and context partition) exist, according to a sharing-key provided by your API implementation.</entry>
+					</row>
+					<row>
+						<entry>Function Name</entry>
+						<entry>Each aggregation function expression receives its own factory object.</entry>
+						<entry>Multiple related aggregation function expressions share a single factory object.</entry>
+					</row>
+					<row>
+						<entry>Distinct Keyword</entry>
+						<entry>Handled by the engine transparently.</entry>
+						<entry>Indicated to the API implementation only.</entry>
+					</row>
+				</tbody>
+			</tgroup>
+		</table> 
+		
+		<para>
+		  The following sections discuss developing an aggregation single-function first, followed by the subject of developing an aggregation multi-function.
+		</para>
+		
+		<note>
+			<para>
+			  The aggregation multi-function API is a powerful and lower-level API to extend the engine. Any classes that are not part of the <literal>client</literal>, <literal>plugin</literal> or <literal>agg.access</literal> package are subject to change between minor and major releases of the engine.
+			</para>
+		</note>
+        
+		<sect2 xml:id="custom-aggregation-single" revision="1">
+			<title>Aggregation Single-Function Development</title>
 
-        <para>
-			Custom aggregation functions can also be passed multiple parameters, as further discribed in <xref linkend="custom-aggregation-multiparam"/>. In the example below the aggregation function accepts a single parameter.
-        </para>
+			<para>
+				This section describes the <emphasis>aggregation single-function</emphasis> extension API for providing aggregation functions.
+			</para>
 
-        <para>
-			The following steps are required to develop and use a custom aggregation function with Esper. 
-        </para>
+			<para>
+				The following steps are required to develop and use a custom aggregation single-function with Esper. 
+			</para>
+				
+			<orderedlist spacing="compact">
+				<listitem>
+					<para>
+						Implement an aggregation function factory by implementing the interface <literal>com.espertech.esper.client.hook.AggregationFunctionFactory</literal>.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						Implement an aggregation function by implementing the interface <literal>com.espertech.esper.epl.agg.aggregator.AggregationMethod</literal>.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						Register the aggregation single-function factory class with the engine by supplying a function name, via the engine configuration file or the runtime and static configuration API.
+					</para>
+				</listitem>
+			</orderedlist>
+	
+			<para>
+				The optional keyword <literal>distinct</literal> ensures that only distinct (unique) values are aggregated and duplicate values are ignored by the aggregation function. Custom plug-in aggregation single-functions do not need to implement the logic to handle <literal>distinct</literal> values. This is because when the engine encounters the <literal>distinct</literal> keyword, it eliminates any non-distinct values before passing the value for aggregation to the custom aggregation single-function.
+			</para>
+
+			<para>
+				Custom aggregation functions can also be passed multiple parameters, as further described in <xref linkend="custom-aggregation-single-multiparam"/>. In the example below the aggregation function accepts a single parameter.
+			</para>
+	
+			<para>
+				The code for the example aggregation function as shown in this chapter can be found in the runtime configuration example in the package <literal>com.espertech.esper.example.runtimeconfig</literal> by the name <literal>MyConcatAggregationFunction</literal>. The sample function simply concatenates string-type values.
+			</para>
+
+			<sect3 xml:id="custom-aggregation-single-factory" revision="1">
+				<title>Implementing an Aggregation Single-Function Factory</title>
 			
-		<orderedlist spacing="compact">
-			<listitem>
 				<para>
-					Implement an aggregation function factory by implementing the interface <literal>com.espertech.esper.client.hook.AggregationFunctionFactory</literal>.
+					An aggregation function factory class is responsible for the following functions:
 				</para>
-			</listitem>
-			<listitem>
+				<itemizedlist spacing="compact">
+					<listitem>
+						<para>
+							Implement a <literal>setFunctionName</literal> method that receives the function name assigned to this instance. 
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							Implement a <literal>validate</literal> method that validates the value type of the data points that the function must process.
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							Implement a <literal>getValueType</literal> method that returns the type of the aggregation value generated by the aggregation function instances. For example, the built-in <literal>count</literal> aggregation function returns <literal>Long.class</literal> as it generates <literal>long</literal> -typed values.
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							Implement a <literal>newAggregator</literal> method that instantiates and returns an aggregation function instance. 
+						</para>
+					</listitem>
+				</itemizedlist>
+
 				<para>
-					Implement an aggregation function by implementing the interface <literal>com.espertech.esper.epl.agg.AggregationMethod</literal>.
+					Aggregation function classes implement the interface <literal>com.espertech.esper.client.hook.AggregationFunctionFactory</literal>:
 				</para>
-			</listitem>
-			<listitem>
+				<programlisting><![CDATA[public class MyConcatAggregationFunctionFactory implements AggregationFunctionFactory { ...]]></programlisting>
+	
 				<para>
-					Register the aggregation function factory class with the engine by supplying a function name, via the engine configuration file or the runtime and static configuration API.
+					The engine generally constructs one instance of the aggregation function factory class for each time the function is listed in an EPL statement, however the engine may decide to reduce the number of aggregation class instances if it finds equivalent aggregations.
 				</para>
-			</listitem>
-		</orderedlist>
-
-        <para>
-			The code for the example aggregation function as shown in this chapter can be found in the runtime configuration example in the package <literal>com.espertech.esper.example.runtimeconfig</literal> by the name <literal>MyConcatAggregationFunction</literal>. The sample function simply concatenates string-type values.
-        </para>
-
-		<sect2 xml:id="custom-aggregation-factory" revision="1">
-			<title>Implementing an Aggregation Function Factory</title>
-			
-			<para>
-				An aggregation function factory class is responsible for the following functions:
-			</para>
-			<itemizedlist spacing="compact">
-				<listitem>
-					<para>
-						Implement a <literal>setFunctionName</literal> method that receives the function name assigned to this instance. 
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						Implement a <literal>validate</literal> method that validates the value type of the data points that the function must process.
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						Implement a <literal>getValueType</literal> method that returns the type of the aggregation value generated by the aggregation function instances. For example, the built-in <literal>count</literal> aggregation function returns <literal>Long.class</literal> as it generates <literal>long</literal> -typed values.
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						Implement a <literal>newAggregator</literal> method that instantiates and returns an aggregation function instance. 
-					</para>
-				</listitem>
-			</itemizedlist>
-
-			<para>
-				Aggregation function classes implement the interface <literal>com.espertech.esper.client.hook.AggregationFunctionFactory</literal>:
-			</para>
-			<programlisting><![CDATA[public class MyConcatAggregationFunctionFactory implements AggregationFunctionFactory { ...]]></programlisting>
-
-			<para>
-				The engine generally constructs one instance of the aggregation function factory class for each time the function is listed in a statement, however the engine may decide to reduce the number of aggregation class instances if it finds equivalent aggregations.
-			</para>
-
-			<para>
-				The aggregation function factory instance receives the aggregation function name via set <literal>setFunctionName</literal> method.
-			</para>
-			
-			<para>
-			  The sample concatenation function factory provides an empty <literal>setFunctionName</literal> method:
-			</para>
-			<programlisting><![CDATA[public void setFunctionName(String functionName) {
+	
+				<para>
+					The aggregation function factory instance receives the aggregation function name via set <literal>setFunctionName</literal> method.
+				</para>
+				
+				<para>
+				  The sample concatenation function factory provides an empty <literal>setFunctionName</literal> method:
+				</para>
+				<programlisting><![CDATA[public void setFunctionName(String functionName) {
   // no action taken
 }]]></programlisting>
 
-			<para>
-				An aggregation function factory must provide an implementation of the <literal>validate</literal> method that is passed a <literal>AggregationValidationContext</literal> validation context object. Within the validation context you find the result type of each of the parameters expressions to the aggregation function as well as information about constant values and data window use. Please see the API documentation for a comprehensive list of validation context information.
-			</para>
-				
-			<para>
-				Since the example concatenation function requires string types, it implements a type check:
-			</para>
-			<programlisting><![CDATA[public void validate(AggregationValidationContext validationContext) {
+				<para>
+					An aggregation function factory must provide an implementation of the <literal>validate</literal> method that is passed a <literal>AggregationValidationContext</literal> validation context object. Within the validation context you find the result type of each of the parameters expressions to the aggregation function as well as information about constant values and data window use. Please see the JavaDoc API documentation for a comprehensive list of validation context information.
+				</para>
+					
+				<para>
+					Since the example concatenation function requires string types, it implements a type check:
+				</para>
+				<programlisting><![CDATA[public void validate(AggregationValidationContext validationContext) {
   if ((validationContext.getParameterTypes().length != 1) ||
     (validationContext.getParameterTypes()[0] != String.class)) {
     throw new IllegalArgumentException("Concat aggregation requires a single parameter of type String");
   }
 }]]></programlisting>
 
-			<para>
-				In order for the engine to validate the type returned by the aggregation function against the types expected by enclosing expressions, the <literal>getValueType</literal> must return the result type of any values produced by the aggregation function:
-			</para>
-			<programlisting><![CDATA[public Class getValueType() {
+				<para>
+					In order for the engine to validate the type returned by the aggregation function against the types expected by enclosing expressions, the <literal>getValueType</literal> must return the result type of any values produced by the aggregation function:
+				</para>
+				<programlisting><![CDATA[public Class getValueType() {
   return String.class;
 }]]></programlisting>
 
-			<para>
-				 Finally the factory implementation must provide a <literal>newAggregator</literal> method that returns instances of <literal>com.espertech.esper.epl.agg.AggregationMethod</literal>. The engine invokes this method for each new aggregation state to be allocated.
-			</para>
-			<programlisting><![CDATA[public AggregationMethod newAggregator() {
+				<para>
+					 Finally the factory implementation must provide a <literal>newAggregator</literal> method that returns instances of <literal>AggregationMethod</literal>. The engine invokes this method for each new aggregation state to be allocated.
+				</para>
+				<programlisting><![CDATA[public AggregationMethod newAggregator() {
   return new MyConcatAggregationFunction();
 }]]></programlisting>
 
-		</sect2>
+			</sect3>
 
-		<sect2 xml:id="custom-aggregation-implementing" revision="1">
-			<title>Implementing an Aggregation Function</title>
+			<sect3 xml:id="custom-aggregation-single implementing" revision="1">
+				<title>Implementing an Aggregation Single-Function</title>
 			
-			<para>
-				An aggregation function class is responsible for the following functions:
-			</para>
-			<itemizedlist spacing="compact">
-				<listitem>
-					<para>
-						Implement a <literal>getValueType</literal> method that returns the type of the aggregation value generated by the function. For example, the built-in <literal>count</literal> aggregation function returns <literal>Long.class</literal> as it generates <literal>long</literal> -typed values.
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						Implement an <literal>enter</literal> method that the engine invokes to add a data point into the aggregation, when an event enters a data window
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						Implement a <literal>leave</literal> method that the engine invokes to remove a data point from the aggregation, when an event leaves a data window
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						Implement a <literal>getValue</literal> method that returns the current value of the aggregation. 
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						Implement a <literal>clear</literal> method that resets the current value. 
-					</para>
-				</listitem>
-			</itemizedlist>
-
-			<para>
-				Aggregation function classes implement the interface <literal>com.espertech.esper.epl.agg.AggregationMethod</literal>:
-			</para>
-			<programlisting><![CDATA[public class MyConcatAggregationFunction implements AggregationMethod { ...]]></programlisting>
-
-			<para>
-				The class that provides the aggregation and implements <literal>AggregationMethod</literal> does not have to be threadsafe.
-			</para>
-
-			<para>
-				The constructor initializes the aggregation function:
-			</para>
-			<programlisting><![CDATA[public class MyConcatAggregationFunction implements AggregationMethod {
+				<para>
+					An aggregation function class is responsible for the following functions:
+				</para>
+				<itemizedlist spacing="compact">
+					<listitem>
+						<para>
+							Implement a <literal>getValueType</literal> method that returns the type of the aggregation value generated by the function. For example, the built-in <literal>count</literal> aggregation function returns <literal>Long.class</literal> as it generates <literal>long</literal> -typed values.
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							Implement an <literal>enter</literal> method that the engine invokes to add a data point into the aggregation, when an event enters a data window
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							Implement a <literal>leave</literal> method that the engine invokes to remove a data point from the aggregation, when an event leaves a data window
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							Implement a <literal>getValue</literal> method that returns the current value of the aggregation. 
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							Implement a <literal>clear</literal> method that resets the current value. 
+						</para>
+					</listitem>
+				</itemizedlist>
+	
+				<para>
+					Aggregation function classes implement the interface <literal>AggregationMethod</literal>:
+				</para>
+				<programlisting><![CDATA[public class MyConcatAggregationFunction implements AggregationMethod { ...]]></programlisting>
+	
+				<para>
+					The class that provides the aggregation and implements <literal>AggregationMethod</literal> does not have to be threadsafe.
+				</para>
+	
+				<para>
+					The constructor initializes the aggregation function:
+				</para>
+				<programlisting><![CDATA[public class MyConcatAggregationFunction implements AggregationMethod {
   private final static char DELIMITER = ' ';
   private StringBuilder builder;
   private String delimiter;
@@ -1073,17 +1215,17 @@ public EventType getEventType() {
   }
   ...]]></programlisting>
 
-			<para>
-				In order for the engine to validate the type returned by the aggregation function against the types expected by enclosing expressions, the <literal>getValueType</literal> must return the result type of any values produced by the aggregation function:
-			</para>
-			<programlisting><![CDATA[public Class getValueType() {
+				<para>
+					In order for the engine to validate the type returned by the aggregation function against the types expected by enclosing expressions, the <literal>getValueType</literal> must return the result type of any values produced by the aggregation function:
+				</para>
+				<programlisting><![CDATA[public Class getValueType() {
   return String.class;
 }]]></programlisting>
 
-			<para>
-				The <literal>enter</literal> method adds a datapoint to the current aggregation value. The example <literal>enter</literal> method shown below adds a delimiter and the string value to a string buffer:
-			</para>
-			<programlisting><![CDATA[public void enter(Object value) {
+				<para>
+					The <literal>enter</literal> method adds a datapoint to the current aggregation value. The example <literal>enter</literal> method shown below adds a delimiter and the string value to a string buffer:
+				</para>
+				<programlisting><![CDATA[public void enter(Object value) {
   if (value != null) {
     builder.append(delimiter);
     builder.append(value.toString());
@@ -1091,67 +1233,66 @@ public EventType getEventType() {
   }
 }]]></programlisting>
 
-			<para>
-				Conversly, the <literal>leave</literal> method removes a datapoint from the current aggregation value. The example <literal>leave</literal> method removes from the string buffer:
-			</para>
-			<programlisting><![CDATA[public void leave(Object value) {
+				<para>
+					Conversly, the <literal>leave</literal> method removes a datapoint from the current aggregation value. The example <literal>leave</literal> method removes from the string buffer:
+				</para>
+				<programlisting><![CDATA[public void leave(Object value) {
   if (value != null) {
     builder.delete(0, value.toString().length() + 1);
   }
 }]]></programlisting>
 
-			<para>
-				Finally, the engine obtains the current aggregation value by means of the <literal>getValue</literal> method:
-			</para>
-			<programlisting><![CDATA[public Object getValue() {
+				<para>
+					Finally, the engine obtains the current aggregation value by means of the <literal>getValue</literal> method:
+				</para>
+				<programlisting><![CDATA[public Object getValue() {
   return builder.toString();
 }]]></programlisting>
 
-			<para>
-				For on-demand queries the aggregation function must support resetting its value to empty or start values. Implement the <literal>clear</literal> function to reset the value as shown below:
-			</para>
-			<programlisting><![CDATA[public void clear() {
+				<para>
+					For on-demand queries the aggregation function must support resetting its value to empty or start values. Implement the <literal>clear</literal> function to reset the value as shown below:
+				</para>
+				<programlisting><![CDATA[public void clear() {
   builder = new StringBuilder();
   delimiter = "";
-}]]></programlisting>			
-			
-		</sect2>
+}]]></programlisting>
+			</sect3>
 
-		<sect2 xml:id="custom-aggregation-config" revision="1">
-			<title>Configuring the Aggregation Function Name</title>
+			<sect3 xml:id="custom-aggregation-single-config" revision="1">
+				<title>Configuring the Aggregation Single-Function Name</title>
 			
-			<para>
-				The aggregation function class name as well as the function name for the new aggregation function must be added to the engine configuration via the configuration API or using the XML configuration file. The configuration shown below is XML however the same options are available through the configuration API:
-			</para>
-		
-			<programlisting><![CDATA[<esper-configuration
+				<para>
+					The aggregation function class name as well as the function name for the new aggregation function must be added to the engine configuration via the configuration API or using the XML configuration file. The configuration shown below is XML however the same options are available through the configuration API:
+				</para>
+			
+				<programlisting><![CDATA[<esper-configuration
   <plugin-aggregation-function name="concat" 
     factory-class="com.espertech.esper.example.runtimeconfig.MyConcatAggregationFunctionFactory" />
 </esper-configuration>]]></programlisting>
 
-			<para>
-				The new aggregation function is now ready to use in a statement:
-			</para>		
-			<programlisting><![CDATA[select concat(symbol) from StockTick.win:length(3)]]></programlisting>
+				<para>
+					The new aggregation function is now ready to use in a statement:
+				</para>		
+				<programlisting><![CDATA[select concat(symbol) from StockTick.win:length(3)]]></programlisting>
+	
+			</sect3>
 
-		</sect2>
-
-		<sect2 xml:id="custom-aggregation-multiparam" revision="1">
-			<title>Accepting Multiple Parameters</title>
+			<sect3 xml:id="custom-aggregation-single-multiparam" revision="1">
+				<title>Aggregation Single-Function: Accepting Multiple Parameters</title>
+				
+				<para>
+					Your plug-in aggregation function may accept multiple parameters, simply by casting the Object parameter of the <literal>enter</literal> and <literal>leave</literal> method to <literal>Object[]</literal>.
+				</para>
 			
-			<para>
-				Your plug-in aggregation function may accept multiple parameters, simply by casting the Object parameter of the <literal>enter</literal> and <literal>leave</literal> method to <literal>Object[]</literal>.
-			</para>
-		
-			<para>
-				For instance, assume an aggregation function <literal>rangeCount</literal> that counts all values that fall into a range of values. The EPL that calls this function and provides a lower and upper bounds of 1 and 10 is:
-			</para>
-			<programlisting><![CDATA[select rangeCount(1, 10, myValue) from MyEvent]]></programlisting>
+				<para>
+					For instance, assume an aggregation function <literal>rangeCount</literal> that counts all values that fall into a range of values. The EPL that calls this function and provides a lower and upper bounds of 1 and 10 is:
+				</para>
+				<programlisting><![CDATA[select rangeCount(1, 10, myValue) from MyEvent]]></programlisting>
 
-			<para>
-				The <literal>enter</literal> method of the plug-in aggregation function may look as follows:
-			</para>
-			<programlisting><![CDATA[public void enter(Object value)  {
+				<para>
+					The <literal>enter</literal> method of the plug-in aggregation function may look as follows:
+				</para>
+				<programlisting><![CDATA[public void enter(Object value)  {
   Object[] params = (Object[]) value;
   int lower = (Integer) params[0];
   int upper = (Integer) params[1];
@@ -1161,25 +1302,440 @@ public EventType getEventType() {
   }
 }]]></programlisting>
 
-			<para>
-				Your plug-in aggregation function may want to validate parameter types or may want to know which parameters are constant-value expressions. Constant-value expressions are evaluated only once by the engine and could
-				therefore be cached by your aggregation function for performance reasons. The engine provides constant-value information as part of the <literal>AggregationValidationContext</literal> passed to the <literal>validate</literal> method.
-			</para>
+				<para>
+					Your plug-in aggregation function may want to validate parameter types or may want to know which parameters are constant-value expressions. Constant-value expressions are evaluated only once by the engine and could
+					therefore be cached by your aggregation function for performance reasons. The engine provides constant-value information as part of the <literal>AggregationValidationContext</literal> passed to the <literal>validate</literal> method.
+				</para>
+			</sect3>
+
+			<sect3 xml:id="custom-aggregation-single-dotmethod" revision="1">
+				<title>Aggregation Single-Function: Dot-Operator Use</title>
+				<para>
+					When the custom aggregation function returns an object as a return value, the EPL can use parenthesis and the dot-operator to invoke methods on the return value.
+				</para>
+				<para>
+					The following example assumes that the <literal>myAggregation</literal> custom aggregation function returns an object that has <literal>getValueOne</literal> and <literal>getValueTwo</literal> methods:
+				</para>
+				<programlisting><![CDATA[select (myAggregation(myValue)).getValueOne(),  (myAggregation(myValue)).getValueTwo() from MyEvent]]></programlisting>
+				<para>
+					Since the above EPL aggregates the same value, the engine internally uses a single aggregation to represent the current value of <literal>myAggregation</literal> (and not two instances of the aggregation, even though <literal>myAggregation</literal> is listed twice).
+				</para>
+			</sect3>
 		</sect2>
 
-		<sect2 xml:id="custom-aggregation-dotmethod" revision="1">
-			<title>Dot-Operator Use</title>
+	    <!--
+		    BEGIN Aggregation Multi-function
+		  -->
+		<sect2 xml:id="custom-aggregation-multi" revision="1">
+			<title>Aggregation Multi-Function Development</title>
+			
 			<para>
-				When the custom aggregation function returns an object as a return value, the EPL can use parenthesis and the dot-operator to invoke methods on the return value.
+				This section introduces the aggregation multi-function API. Please refer to the JavaDoc for more complete class and method-level documentation.
 			</para>
+
 			<para>
-				The following example assumes that the <literal>myAggregation</literal> custom aggregation function returns an object that has <literal>getValueOne</literal> and <literal>getValueTwo</literal> methods:
+				Among the Esper examples we provide an example use of the aggregation multi-function API in the example by name Cycle-Detect. 
+				Cycle-Detect takes incoming transaction events that have from-account and to-account fields.
+				The example detects a cycle in the transactions between accounts in order to detect a possible transaction fraud. 
+				Please note that the graph and cycle detection logic of the example is not part of Esper:
+				The example utilizes the <literal>jgrapht</literal> library.
 			</para>
-			<programlisting><![CDATA[select (myAggregation(myValue)).getValueOne(),  (myAggregation(myValue)).getValueTwo() from MyEvent]]></programlisting>
+
 			<para>
-				Since the above EPL aggregates the same value, the engine internally uses a single aggregation to represent the current value of <literal>myAggregation</literal> (and not two instances of the aggregation, even though <literal>myAggregation</literal> is listed twice).
+				In the Cycle-Detect example, the vertices of a graph are the account numbers. For example the account numbers <literal>Acct-1</literal>, <literal>Acct-2</literal> and <literal>Acct-3</literal>.
+				In the graph the edges are transaction events that identify a from-account and a to-account. An example edge is <literal>{from:Acct-1, to:Acct-2}</literal>.
+				An example cycle is therefore in the three transactions <literal>{from:Acct-1, to:Acct-2}</literal>, <literal>{from:Acct-2, to:Acct-3}</literal> and <literal>{from:Acct-3, to:Acct-1}</literal>.
 			</para>
-		</sect2>
+
+			<para>
+				The code for the example aggregation multi-function as shown in this chapter can be found in the Cycle-Detect example in the package <literal>com.espertech.esper.example.cycledetect</literal>.
+				The example provides two aggregation functions named <literal>cycledetected</literal> and <literal>cycleoutput</literal>:
+			</para>
+			
+			<orderedlist>
+				<listitem>
+					<para>
+					  The <literal>cycledetected</literal> function returns a boolean value whether a graph cycle is found or not.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+					  The <literal>cycleoutput</literal> function outputs the vertices (account numbers) that are part of the graph cycle.
+					</para>
+				</listitem>
+			</orderedlist>
+
+			<para>
+			  In the Cycle-Detect example, the following statement utilizes the two functions <literal>cycledetected</literal> and <literal>cycleoutput</literal> that
+			  share the same graph state to detect a cycle among the last 1000 events:
+			</para>
+			<programlisting><![CDATA[@Name('CycleDetector') select cycleoutput() as cyclevertices
+from TransactionEvent.win:length(1000)
+having cycledetected(fromAcct, toAcct)]]></programlisting>
+
+			<para>
+			  If instead the goal is to run graph cycle detection every 1 second (and not upon arrival of a new event), this sample EPL statement uses a pattern to trigger cycle detection:
+			</para>
+			<programlisting><![CDATA[@Name('CycleDetector')
+select (select cycleoutput(fromAcct, toAcct) from TransactionEvent.win:length(1000)) as cyclevertices
+from pattern [every timer:interval(1)]]]></programlisting>
+
+			<para>
+				The following steps are required to develop and use a custom aggregation multi-function with Esper. 
+			</para>
+				
+			<orderedlist spacing="compact">
+				<listitem>
+					<para>
+						Implement an aggregation multi-function factory by implementing the interface <literal>com.espertech.esper.plugin.PlugInAggregationMultiFunctionFactory</literal>.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						Implement one or more handlers for aggregation functions by implementing the interface <literal>com.espertech.esper.plugin.PlugInAggregationMultiFunctionHandler</literal>.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						Implement an aggregation state key by implementing the interface <literal>com.espertech.esper.epl.agg.access.AggregationStateKey</literal>.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						Implement an aggregation state factory by implementing the interface <literal>com.espertech.esper.plugin.PlugInAggregationMultiFunctionStateFactory</literal>.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						Implement an aggregation state holder by implementing the interface <literal>com.espertech.esper.epl.agg.access.AggregationState</literal>.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						Implement a state accessor by implementing the interface <literal>com.espertech.esper.epl.agg.access.AggregationAccessor</literal>.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						Register the aggregation multi-function factory class with the engine by supplying one or more function names, via the engine configuration file or the runtime and static configuration API.
+					</para>
+				</listitem>
+			</orderedlist>
+	
+			<sect3 xml:id="custom-aggregation-multi-factory" revision="1">
+				<title>Implementing an Aggregation Multi-Function Factory</title>
+			
+				<para>
+					An aggregation multi-function factory class is responsible for the following functions:
+				</para>
+				<itemizedlist spacing="compact">
+					<listitem>
+						<para>
+							Implement the <literal>addAggregationFunction</literal> method that receives an invocation for each aggregation function declared in the statement that matches any of the function names provided at configuration time. 
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							Implement the <literal>validateGetHandler</literal> method that receives an invocation for each aggregation function to be validated in the statement that matches any of the function names provided at configuration time.
+						</para>
+					</listitem>
+				</itemizedlist>
+
+				<para>
+					Aggregation multi-function factory classes implement the interface <literal>com.espertech.esper.plugin.PlugInAggregationMultiFunctionFactory</literal>:
+				</para>
+				<programlisting><![CDATA[public class CycleDetectorAggregationFactory implements PlugInAggregationMultiFunctionFactory { ...]]></programlisting>
+	
+				<para>
+					The engine constructs a single instance of the aggregation multi-function factory class that is shared for all aggregation function expressions in a statement that have one of the function names provided in the configuration object.
+				</para>
+	
+				<para>
+					The engine invokes the <literal>addAggregationFunction</literal> method at the time it parses an EPL statement or compiles a statement object model (SODA API).
+					The method receives a declaration-time context object that provides the function name as well as additional information.
+				</para>
+				
+				<para>
+				  The sample Cycle-Detect factory class provides an empty <literal>addAggregationFunction</literal> method:
+				</para>
+				<programlisting><![CDATA[public void addAggregationFunction(PlugInAggregationMultiFunctionDeclarationContext declarationContext) {
+  // no action taken
+}]]></programlisting>
+
+				<para>
+					The engine invokes the <literal>validateGetHandler</literal> method at the time of expression validation. It passes 
+					a <literal>PlugInAggregationMultiFunctionValidationContext</literal> validation context object that contains actual parameters expressions. 
+					Please see the JavaDoc API documentation for a comprehensive list of validation context information.
+				</para>
+					
+				<para>
+					The <literal>validateGetHandler</literal> method must return a handler object the implements the <literal>PlugInAggregationMultiFunctionHandler</literal> interface.
+					Return a handler object for each aggregation function expression according to the aggregation function name and its parameters that are provided in the validation 
+					context.
+				</para>
+
+				<para>
+					The example <literal>cycledetect</literal> function takes two parameters that provide the cycle edge (from-account and to-account):
+				</para>
+				<programlisting><![CDATA[public PlugInAggregationMultiFunctionHandler validateGetHandler(PlugInAggregationMultiFunctionValidationContext validationContext) {
+  if (validationContext.getParameterExpressions().length == 2) {
+    fromExpression = validationContext.getParameterExpressions()[0].getExprEvaluator();
+    toExpression = validationContext.getParameterExpressions()[1].getExprEvaluator();
+  }
+  return new CycleDetectorAggregationHandler(this, validationContext);
+}]]></programlisting>
+			</sect3>
+
+			<sect3 xml:id="custom-aggregation-multi-handlr" revision="1">
+				<title>Implementing an Aggregation Multi-Function Handler</title>
+			
+				<para>
+					An aggregation multi-function handler class must implement the <literal>PlugInAggregationMultiFunctionHandler</literal> interface and is responsible for the following functions:
+				</para>
+				
+				<itemizedlist spacing="compact">
+					<listitem>
+						<para>
+							Implement the <literal>getAccessor</literal> method that returns a reader object for the aggregation state.
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							Implement the <literal>getReturnType</literal> method that returns information about the type of return values provided by the accessor reader object.
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							Implement the <literal>getAggregationStateUniqueKey</literal> method that provides a key object used by the engine to determine which aggregation functions share state. 
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							Implement the <literal>getStateFactory</literal> method that returns a state factory object that the engine invokes, when required, to instantiate aggregation state holders.
+						</para>
+					</listitem>
+				</itemizedlist>
+
+				<para>
+					Typically your API returns a handler instance for each aggregation function in an EPL statement expression.
+				</para>
+
+				<para>
+					In the Cycle-Detect example, the class <literal>CycleDetectorAggregationHandler</literal> is the handler for all aggregation functions.
+				</para>
+				<programlisting><![CDATA[public class CycleDetectorAggregationHandler implements PlugInAggregationMultiFunctionHandler { ...]]></programlisting>
+	
+				<para>
+				  The <literal>getAccessor</literal> methods return a reader object according to whether the aggregation function name is <literal>cycledetected</literal> or <literal>cycleoutput</literal>:
+				</para>
+				<programlisting><![CDATA[public AggregationAccessor getAccessor() {
+  if (validationContext.getFunctionName().toLowerCase().equals(CycleDetectorConstant.CYCLEOUTPUT_NAME)) {
+    return new CycleDetectorAggregationAccessorOutput();
+  }
+  return new CycleDetectorAggregationAccessorDetect();
+}]]></programlisting>
+
+				<para>
+				  The <literal>getReturnType</literal> method provided by the handler instructs the engine about the return type of each aggregation accessor.
+				  The class <literal>com.espertech.esper.client.util.ExpressionReturnType</literal> holds return type information.
+				</para>
+
+				<para>
+					In the Cycle-Detect example the <literal>cycledetected</literal> function returns a single boolean value. The <literal>cycleoutput</literal> returns a collection of vertices:
+				</para>			
+				<programlisting><![CDATA[public ExpressionReturnType getReturnType() {
+  if (validationContext.getFunctionName().toLowerCase().equals(CycleDetectorConstant.CYCLEOUTPUT_NAME)) {
+    return ExpressionReturnType.collectionOfSingleValue(factory.getFromExpression().getType());
+  }
+  return ExpressionReturnType.singleValue(Boolean.class) ;
+}]]></programlisting>
+					
+				<para>
+					The engine invokes the <literal>getAggregationStateUniqueKey</literal> method to determine whether multiple aggregation function expressions
+					in the same statement can share the same aggregation state or should receive different aggregation state instances.
+				</para>
+				
+				<para>
+					The <literal>getAggregationStateUniqueKey</literal> method must return an instance of <literal>AggregationStateKey</literal>.
+					The engine uses equals-semantics (the <literal>hashCode</literal> and <literal>equals</literal> methods) to determine whether multiple aggregation function share the state object.
+					If the key object returned for each aggregation function by the handler is an equal key object then the engine shares aggregation 
+					state between such aggregation functions for the same statement and context partition.
+				</para>
+
+				<para>
+				  In the Cycle-Detect example the state is shared, which it achieves by simply returning the same key instance:
+				</para>
+				<programlisting><![CDATA[private static final AggregationStateKey CYCLE_KEY = new AggregationStateKey() {};
+
+public AggregationStateKey getAggregationStateUniqueKey() {
+  return CYCLE_KEY;   // Share the same aggregation state instance
+}]]></programlisting>
+
+				<para>
+				  The engine invokes the <literal>getStateFactory</literal> method to obtain an instance of <literal>PlugInAggregationMultiFunctionStateFactory</literal>. The 
+				  state factory is responsible to instantiating separate aggregation state instances. If you statement does not have a <literal>group by</literal> clause,
+				  the engine obtains a single aggregation state from the state factory. If your statement has a <literal>group by</literal> clause, the engine obtains
+				  an aggregation state instance for each group when it encounters a new group. 
+				</para>
+				
+				<para>
+				  In the Cycle-Detect example the method passes the expression evaluators providing the from-account and to-account expressions to the state factory:
+				</para>
+				<programlisting><![CDATA[public PlugInAggregationMultiFunctionStateFactory getStateFactory() {
+  return new CycleDetectorAggregationStateFactory(factory.getFromExpression(), factory.getToExpression());
+}]]></programlisting>
+			</sect3>
+
+			<sect3 xml:id="custom-aggregation-multi-statefactory" revision="1">
+				<title>Implementing an Aggregation Multi-Function State Factory</title>
+			
+				<para>
+					An aggregation multi-function state factory class must implement the <literal>PlugInAggregationMultiFunctionStateFactory</literal> interface and is responsible for the following functions:
+				</para>
+				
+				<itemizedlist spacing="compact">
+					<listitem>
+						<para>
+							Implement the <literal>makeAggregationState</literal> method that returns an aggregation state holder.
+						</para>
+					</listitem>
+				</itemizedlist>
+
+				<para>
+					The engine invokes the <literal>makeAggregationState</literal> method to obtain a new aggregation state instance before applying aggregation state. 
+					If using <literal>group by</literal> in your statement, the engine invokes the <literal>makeAggregationState</literal> method to obtain a state holder for each group.
+				</para>
+
+				<para>
+					In the Cycle-Detect example, the class <literal>CycleDetectorAggregationStateFactory</literal> is the state factory for all aggregation functions:
+				</para>
+				<programlisting><![CDATA[public class CycleDetectorAggregationStateFactory implements PlugInAggregationMultiFunctionStateFactory {
+  private final ExprEvaluator fromEvaluator;
+  private final ExprEvaluator toEvaluator;
+
+  public CycleDetectorAggregationStateFactory(ExprEvaluator fromEvaluator, ExprEvaluator toEvaluator) {
+    this.fromEvaluator = fromEvaluator;
+    this.toEvaluator = toEvaluator;
+  }
+
+  public AggregationState makeAggregationState(PlugInAggregationMultiFunctionStateContext stateContext) {
+    return new CycleDetectorAggregationState(this);
+  }
+
+  public ExprEvaluator getFromEvaluator() {
+    return fromEvaluator;
+  }
+
+  public ExprEvaluator getToEvaluator() {
+    return toEvaluator;
+  }
+}]]></programlisting>	
+			</sect3>
+
+			<sect3 xml:id="custom-aggregation-multi-state" revision="1">
+				<title>Implementing an Aggregation Multi-Function State</title>
+			
+				<para>
+					An aggregation multi-function state class must implement the <literal>AggregationState</literal> interface and is responsible for the following functions:
+				</para>
+				
+				<itemizedlist spacing="compact">
+					<listitem>
+						<para>
+							Implement the <literal>applyEnter</literal> method that enters events, event properties or computed values.
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							Optionally implement the <literal>applyLeave</literal> method that can remove events or computed values.
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							Implement the <literal>clear</literal> method to clear state. 
+						</para>
+					</listitem>
+				</itemizedlist>
+
+				<para>
+					In the Cycle-Detect example, the class <literal>CycleDetectorAggregationState</literal> is the state for all aggregation functions.
+					Please review the example for more information.
+				</para>
+			</sect3>
+
+			<sect3 xml:id="custom-aggregation-multi-accessor" revision="1">
+				<title>Implementing an Aggregation Multi-Function Accessor</title>
+			
+				<para>
+					An aggregation multi-function accessor class must implement the <literal>AggregationAccessor</literal> interface and is responsible for the following functions:
+				</para>
+				
+				<itemizedlist spacing="compact">
+					<listitem>
+						<para>
+							Implement the <literal>Object getValue(AggregationState state)</literal> method that returns a result object for the aggregation state.
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							Implement the <literal>Collection&lt;EventBean&gt; getEnumerableEvents(AggregationState state)</literal> method that returns a collection of events for enumeration,
+							if applicable (or null).
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							Implement the <literal>EventBean getEnumerableEvent(AggregationState state)</literal> method that returns an event, if applicable (or null).
+						</para>
+					</listitem>
+				</itemizedlist>
+
+				<para>
+					In the Cycle-Detect example, the class <literal>CycleDetectorAggregationAccessorDetect</literal> returns state for the <literal>cycledetected</literal> aggregation function
+					and the <literal>CycleDetectorAggregationAccessorOutput</literal> returns the state for the <literal>cycleoutput</literal> aggregation function.
+				</para>
+			</sect3>
+			
+			<sect3 xml:id="custom-aggregation-multi-config" revision="1">
+				<title>Configuring the Aggregation Multi-Function Name</title>
+			
+				<para> 
+				  An aggregation multi-function configuration can receive one or multiple function names. You must also set a factory class name.
+				</para>
+				
+				<para>
+				  The sample XML snippet below configures an aggregation multi-function that is associated with the function names <literal>func1</literal> and <literal>func2</literal>.
+				</para>
+			
+				<programlisting><![CDATA[<esper-configuration
+  <plugin-aggregation-multifunction 
+      function-names="cycledetected,cycleoutput"   // a comma-separated list of function name
+      factory-class="com.espertech.esper.example.cycledetect.CycleDetectorAggregationFactory"/>
+</esper-configuration>]]></programlisting>
+
+				<para>
+				  The next example uses the runtime configuration API to register the same:
+				</para>
+			
+				<programlisting><![CDATA[String[] functionNames = new String[] {"cycledetected", "cycleoutput"};
+ConfigurationPlugInAggregationMultiFunction config = new ConfigurationPlugInAggregationMultiFunction(functionNames, CycleDetectorAggregationFactory.class.getName());
+engine.getEPAdministrator().getConfiguration().addPlugInAggregationMultiFunction(config);]]></programlisting>
+			</sect3>
+
+			<sect3 xml:id="custom-aggregation-multi-threadsafety" revision="1">
+				<title>Aggregation Multi-Function Thread Safety</title>
+			
+				<para>
+					The engine shares an <literal>AggregationAccessor</literal> instance between threads. The accessor should be designed stateless and should not use any locking of any kind
+					in the <literal>AggregationAccessor</literal> implementation unless your implementation uses other state.
+					Since the engine passes an aggregation state instance to the accessor it is thread-safe as long as it relies only on the aggregation state passed to it.
+				</para>
+
+				<para>
+					The engine does not share an <literal>AggregationState</literal> instance between threads. There is no need to use locking of any kind 
+					in the <literal>AggregationState</literal> implementation unless your implementation uses other state.
+				</para>
+			</sect3>
+		</sect2>		
 	</sect1>
 
     <sect1 xml:id="custom-pattern-guard" revision="1">

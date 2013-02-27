@@ -118,7 +118,7 @@ public class TestEnumInvalid extends TestCase {
 
         // not a property
         epl = "select contained.firstof().dummy from SupportBean_ST0_Container";
-        tryInvalid(epl, "Error starting statement: Could not find enumeration method, date-time method or instance method named 'dummy' in class 'com.espertech.esper.support.bean.SupportBean_ST0' taking no parameters [select contained.firstof().dummy from SupportBean_ST0_Container]");
+        tryInvalid(epl, "Error starting statement: Failed to resolve method 'dummy': Could not find enumeration method, date-time method or instance method named 'dummy' in class 'com.espertech.esper.support.bean.SupportBean_ST0' taking no parameters [select contained.firstof().dummy from SupportBean_ST0_Container]");
     }
 
     private void tryInvalid(String epl, String message) {

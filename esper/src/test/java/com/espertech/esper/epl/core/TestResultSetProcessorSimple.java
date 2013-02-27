@@ -15,6 +15,7 @@ import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.collection.MultiKey;
 import com.espertech.esper.collection.UniformPair;
+import com.espertech.esper.core.service.StatementEventTypeRefImpl;
 import com.espertech.esper.epl.core.eval.SelectExprStreamDesc;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.epl.SupportSelectExprFactory;
@@ -36,7 +37,7 @@ public class TestResultSetProcessorSimple extends TestCase
 
     public void setUp() throws Exception
     {
-        SelectExprEventTypeRegistry selectExprEventTypeRegistry = new SelectExprEventTypeRegistry(new HashSet<String>());
+        SelectExprEventTypeRegistry selectExprEventTypeRegistry = new SelectExprEventTypeRegistry("abc", new StatementEventTypeRefImpl());
 
         SelectExprProcessorHelper factory = new SelectExprProcessorHelper(Collections.<Integer>emptyList(), SupportSelectExprFactory.makeNoAggregateSelectList(), Collections.<SelectExprStreamDesc>emptyList(), null, false, new SupportStreamTypeSvc1Stream(), SupportEventAdapterService.getService(), null, selectExprEventTypeRegistry, null, null, null, new Configuration());
         selectExprProcessor = factory.getEvaluator();

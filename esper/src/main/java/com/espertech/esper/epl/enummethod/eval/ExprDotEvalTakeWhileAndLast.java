@@ -12,6 +12,7 @@
 package com.espertech.esper.epl.enummethod.eval;
 
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.util.ExpressionReturnType;
 import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.enummethod.dot.*;
 import com.espertech.esper.epl.expression.ExprDotNodeUtility;
@@ -44,7 +45,7 @@ public class ExprDotEvalTakeWhileAndLast extends ExprDotEvalEnumMethodBase {
         ExprDotEvalParamLambda first = (ExprDotEvalParamLambda) bodiesAndParameters.get(0);
 
         if (inputEventType != null) {
-            super.setTypeInfo(ExprDotEvalTypeInfo.eventColl(inputEventType));
+            super.setTypeInfo(ExpressionReturnType.collectionOfEvents(inputEventType));
             if (first.getGoesToNames().size() == 1) {
                 if (this.getEnumMethodEnum() == EnumMethodEnum.TAKEWHILELAST) {
                     return new EnumEvalTakeWhileLastEvents(first.getBodyEvaluator(), first.getStreamCountIncoming());
@@ -58,7 +59,7 @@ public class ExprDotEvalTakeWhileAndLast extends ExprDotEvalEnumMethodBase {
             return new EnumEvalTakeWhileIndexEvents(first.getBodyEvaluator(), first.getStreamCountIncoming(), (ObjectArrayEventType) first.getGoesToTypes()[1]);
         }
 
-        super.setTypeInfo(ExprDotEvalTypeInfo.componentColl(collectionComponentType));
+        super.setTypeInfo(ExpressionReturnType.collectionOfSingleValue(collectionComponentType));
         if (first.getGoesToNames().size() == 1) {
             if (this.getEnumMethodEnum() == EnumMethodEnum.TAKEWHILELAST) {
                 return new EnumEvalTakeWhileLastScalar(first.getBodyEvaluator(), first.getStreamCountIncoming(), (ObjectArrayEventType) first.getGoesToTypes()[0]);

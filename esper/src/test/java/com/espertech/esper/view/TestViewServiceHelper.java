@@ -170,19 +170,19 @@ public class TestViewServiceHelper extends TestCase
         // Remove a non-leaf, expect no removals
         List<View> removedViews = ViewServiceHelper.removeChainLeafView(top, child_2_2);
         assertEquals(0, removedViews.size());
-        assertEquals(2, child_2.getViews().size());
+        assertEquals(2, child_2.getViews().length);
 
         // Remove the whole tree child-by-child
         removedViews = ViewServiceHelper.removeChainLeafView(top, child_2_2_2);
         assertEquals(1, removedViews.size());
         assertEquals(child_2_2_2, removedViews.get(0));
-        assertEquals(2, child_2.getViews().size());
+        assertEquals(2, child_2.getViews().length);
 
         removedViews = ViewServiceHelper.removeChainLeafView(top, child_2_2_1);
         assertEquals(2, removedViews.size());
         assertEquals(child_2_2_1, removedViews.get(0));
         assertEquals(child_2_2, removedViews.get(1));
-        assertEquals(1, child_2.getViews().size());
+        assertEquals(1, child_2.getViews().length);
 
         removedViews = ViewServiceHelper.removeChainLeafView(top, child_1);
         assertEquals(1, removedViews.size());
@@ -194,7 +194,7 @@ public class TestViewServiceHelper extends TestCase
         assertEquals(child_2_1, removedViews.get(1));
         assertEquals(child_2, removedViews.get(2));
 
-        assertEquals(0, child_2.getViews().size());
-        assertEquals(0, top.getViews().size());
+        assertEquals(0, child_2.getViews().length);
+        assertEquals(0, top.getViews().length);
     }
 }

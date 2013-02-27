@@ -192,9 +192,9 @@ public class EPDeploymentAdminImpl implements EPDeploymentAdminSPI
                 statementNames.add(new DeploymentInformationItem(stmt.getName(), stmt.getText()));
                 statements.add(stmt);
 
-                Set<String> types = statementEventTypeRef.getTypesForStatementName(stmt.getName());
+                String[] types = statementEventTypeRef.getTypesForStatementName(stmt.getName());
                 if (types != null) {
-                    eventTypesReferenced.addAll(types);
+                    eventTypesReferenced.addAll(Arrays.asList(types));
                 }
             }
             catch (EPException ex) {
@@ -332,7 +332,7 @@ public class EPDeploymentAdminImpl implements EPDeploymentAdminSPI
                 log.debug("Deployment id '" + info.getDeploymentId() + "' statement name '" + item + "' not found");
                 continue;
             }
-            referencedTypes.addAll(statementEventTypeRef.getTypesForStatementName(statement.getName()));
+            referencedTypes.addAll(Arrays.asList(statementEventTypeRef.getTypesForStatementName(statement.getName())));
             if (statement.isDestroyed()) {
                 continue;
             }

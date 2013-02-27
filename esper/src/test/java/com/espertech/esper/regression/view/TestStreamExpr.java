@@ -95,10 +95,17 @@ public class TestStreamExpr extends TestCase
 
     public void testStreamFunction()
     {
-        String textOne = "select * from " + SupportMarketDataBean.class.getName() + " as s0 where " +
-                SupportStaticMethodLib.class.getName() + ".volumeGreaterZero(s0)";
+        String prefix = "select * from " + SupportMarketDataBean.class.getName() + " as s0 where " +
+                SupportStaticMethodLib.class.getName();
+        runAssertionStreamFunction(prefix + ".volumeGreaterZero(s0)");
+        runAssertionStreamFunction(prefix + ".volumeGreaterZero(*)");
+        runAssertionStreamFunction(prefix + ".volumeGreaterZeroEventBean(s0)");
+        runAssertionStreamFunction(prefix + ".volumeGreaterZeroEventBean(*)");
+    }
 
-        EPStatement stmtOne = epService.getEPAdministrator().createEPL(textOne);
+    private void runAssertionStreamFunction(String epl) {
+
+        EPStatement stmtOne = epService.getEPAdministrator().createEPL(epl);
         SupportUpdateListener listenerOne = new SupportUpdateListener();
         stmtOne.addListener(listenerOne);
 
@@ -106,6 +113,8 @@ public class TestStreamExpr extends TestCase
         assertFalse(listenerOne.isInvoked());
         epService.getEPRuntime().sendEvent(new SupportMarketDataBean("ACME", 0, 100L, null));
         assertTrue(listenerOne.isInvoked());
+
+        stmtOne.destroy();
     }
 
     public void testInstanceMethodOuterJoin()
@@ -175,8 +184,8 @@ public class TestStreamExpr extends TestCase
                             SupportMarketDataBean.class.getName() + " as s0 ";
 
         EPStatement stmtOne = epService.getEPAdministrator().createEPL(textOne);
-        SupportUpdateListener listenerOne = new SupportUpdateListener();
-        stmtOne.addListener(listenerOne);
+        SupportUpdateListener listener = new SupportUpdateListener();
+        stmtOne.addListener(listener);
 
         EventType type = stmtOne.getEventType();
         assertEquals(2, type.getPropertyNames().length);
@@ -185,7 +194,18 @@ public class TestStreamExpr extends TestCase
 
         SupportMarketDataBean eventA = new SupportMarketDataBean("ACME", 4, 2L, null);
         epService.getEPRuntime().sendEvent(eventA);
-        EPAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), new String[]{"s0.getVolume()", "s0.getPriceTimesVolume(3)"}, new Object[]{2L, 4d * 2L * 3d});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), new String[]{"s0.getVolume()", "s0.getPriceTimesVolume(3)"}, new Object[]{2L, 4d * 2L * 3d});
+
+        // try instance method that accepts EventBean
+        epService.getEPAdministrator().getConfiguration().addEventType("MyTestEvent", MyTestEvent.class);
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select " +
+                "s0.getValueAsInt(s0, 'id') as c0," +
+                "s0.getValueAsInt(*, 'id') as c1" +
+                " from MyTestEvent as s0");
+        stmt.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new MyTestEvent(10));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "c0,c1".split(","), new Object[] {10, 10});
     }
 
     public void testJoinStreamSelectNoWildcard()
@@ -400,7 +420,7 @@ public class TestStreamExpr extends TestCase
         tryInvalid("select s0.getString(1,2,3) from " + SupportBean.class.getName() + " as s0", null);
 
         tryInvalid("select s0.abc() from " + SupportBean.class.getName() + " as s0",
-                   "Error starting statement: Failed to solve 'abc' to either an date-time or enumeration method, an event property or a method on the event underlying object: Could not find enumeration method, date-time method or instance method named 'abc' in class 'com.espertech.esper.support.bean.SupportBean' taking no parameters [select s0.abc() from com.espertech.esper.support.bean.SupportBean as s0]");
+                   "Error starting statement: Failed to solve 'abc' to either an date-time or enumeration method, an event property or a method on the event underlying object: Failed to resolve method 'abc': Could not find enumeration method, date-time method or instance method named 'abc' in class 'com.espertech.esper.support.bean.SupportBean' taking no parameters [select s0.abc() from com.espertech.esper.support.bean.SupportBean as s0]");
     }
 
     public static Object[] getObjectArray() {
@@ -428,5 +448,22 @@ public class TestStreamExpr extends TestCase
         SupportMarketDataBean bean = new SupportMarketDataBean(s, 0d, 0L, "");
         epService.getEPRuntime().sendEvent(bean);
         return bean;
+    }
+
+    private static class MyTestEvent {
+
+        private int id;
+
+        private MyTestEvent(int id) {
+            this.id = id;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public int getValueAsInt(EventBean event, String propertyName) {
+            return (Integer) event.get(propertyName);
+        }
     }
 }

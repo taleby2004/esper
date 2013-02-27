@@ -24,9 +24,6 @@ import com.espertech.esper.type.OuterJoinType;
 import com.espertech.esper.util.DependencyGraph;
 import junit.framework.TestCase;
 
-import java.util.LinkedList;
-import java.util.List;
-
 public class TestQueryPlanBuilder extends TestCase
 {
     private EventType[] typesPerStream;
@@ -45,12 +42,12 @@ public class TestQueryPlanBuilder extends TestCase
 
     public void testGetPlan() throws Exception
     {
-        List<OuterJoinDesc> descList = new LinkedList<OuterJoinDesc>();
-        OuterJoinDesc joinDesc = SupportOuterJoinDescFactory.makeDesc("intPrimitive", "s0", "intBoxed", "s1", OuterJoinType.LEFT);
-        descList.add(joinDesc);
+        OuterJoinDesc[] descList = new OuterJoinDesc[] {
+                SupportOuterJoinDescFactory.makeDesc("intPrimitive", "s0", "intBoxed", "s1", OuterJoinType.LEFT)
+        };
 
         QueryGraph queryGraph = new QueryGraph(2);
-        QueryPlan plan = QueryPlanBuilder.getPlan(typesPerStream, new LinkedList<OuterJoinDesc>(), queryGraph, null, new HistoricalViewableDesc(5), dependencyGraph, null, new StreamJoinAnalysisResult(2), true, null, null);
+        QueryPlan plan = QueryPlanBuilder.getPlan(typesPerStream, new OuterJoinDesc[0], queryGraph, null, new HistoricalViewableDesc(5), dependencyGraph, null, new StreamJoinAnalysisResult(2), true, null, null);
         assertPlan(plan);
 
         plan = QueryPlanBuilder.getPlan(typesPerStream, descList, queryGraph, null, new HistoricalViewableDesc(5), dependencyGraph, null, new StreamJoinAnalysisResult(2), true, null, null);
@@ -60,7 +57,7 @@ public class TestQueryPlanBuilder extends TestCase
         plan = QueryPlanBuilder.getPlan(typesPerStream, descList, queryGraph, null, new HistoricalViewableDesc(5), dependencyGraph, null, new StreamJoinAnalysisResult(2), true, null, null);
         assertPlan(plan);
 
-        plan = QueryPlanBuilder.getPlan(typesPerStream, new LinkedList<OuterJoinDesc>(), queryGraph, null, new HistoricalViewableDesc(5), dependencyGraph, null, new StreamJoinAnalysisResult(2), true, null, null);
+        plan = QueryPlanBuilder.getPlan(typesPerStream, new OuterJoinDesc[0], queryGraph, null, new HistoricalViewableDesc(5), dependencyGraph, null, new StreamJoinAnalysisResult(2), true, null, null);
         assertPlan(plan);
     }
 

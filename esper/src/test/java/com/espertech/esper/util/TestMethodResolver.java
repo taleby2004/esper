@@ -11,11 +11,10 @@
 
 package com.espertech.esper.util;
 
+import com.espertech.esper.epl.core.EngineNoSuchMethodException;
 import junit.framework.TestCase;
 
 import java.lang.reflect.Method;
-
-import com.espertech.esper.epl.core.EngineNoSuchMethodException;
 
 public class TestMethodResolver extends TestCase
 {		
@@ -25,58 +24,60 @@ public class TestMethodResolver extends TestCase
 		String methodName = "max";
 		Class[] args = new Class[] { int.class, int.class };
 		Method expected = Math.class.getMethod(methodName, args);
-		assertEquals(expected, MethodResolver.resolveMethod(declClass, methodName, args, false));
+		assertEquals(expected, MethodResolver.resolveMethod(declClass, methodName, args, false, null, null));
 		
 		args = new Class[] { long.class, long.class };
 		expected = Math.class.getMethod(methodName, args);
 		args = new Class[] { int.class, long.class };
-		assertEquals(expected, MethodResolver.resolveMethod(declClass, methodName, args, false));
+		assertEquals(expected, MethodResolver.resolveMethod(declClass, methodName, args, false, null, null));
 		
 		args = new Class[] { int.class, int.class };
 		expected = Math.class.getMethod(methodName, args);
 		args = new Class[] { Integer.class, Integer.class };
-		assertEquals(expected, MethodResolver.resolveMethod(declClass, methodName, args, false));
+		assertEquals(expected, MethodResolver.resolveMethod(declClass, methodName, args, false, null, null));
 		
 		args = new Class[] { long.class, long.class };
 		expected = Math.class.getMethod(methodName, args);
 		args = new Class[] { Integer.class, Long.class };
-		assertEquals(expected, MethodResolver.resolveMethod(declClass, methodName, args, false));
+		assertEquals(expected, MethodResolver.resolveMethod(declClass, methodName, args, false, null, null));
 		
 		args = new Class[] { float.class, float.class };
 		expected = Math.class.getMethod(methodName, args);
 		args = new Class[] { Integer.class, Float.class };
-		assertEquals(expected, MethodResolver.resolveMethod(declClass, methodName, args, false));
+		assertEquals(expected, MethodResolver.resolveMethod(declClass, methodName, args, false, null, null));
 		
         declClass = System.class;
 		methodName = "currentTimeMillis";
 		args = new Class[0];
 		expected = System.class.getMethod(methodName, args);
-		assertEquals(expected, MethodResolver.resolveMethod(declClass, methodName, args, false));
+		assertEquals(expected, MethodResolver.resolveMethod(declClass, methodName, args, false, null, null));
 	}
 	
     public void testResolveMethodStaticAndInstance() throws Exception
     {
+        boolean[] allowEventBeanType = new boolean[10];
         Class declClass = Math.class;
         String methodName = "max";
         Class[] args = new Class[] { int.class, int.class };
         Method expected = Math.class.getMethod(methodName, args);
-        assertEquals(expected, MethodResolver.resolveMethod(declClass, methodName, args, true));
+        assertEquals(expected, MethodResolver.resolveMethod(declClass, methodName, args, true, null, null));
 
         declClass = String.class;
         methodName = "trim";
         args = new Class[0];
         expected = String.class.getMethod(methodName, args);
-        assertEquals(expected, MethodResolver.resolveMethod(declClass, methodName, args, true));
+        assertEquals(expected, MethodResolver.resolveMethod(declClass, methodName, args, true, null, null));
     }
 
 	public void testResolveMethodNotFound() throws Exception
 	{
+        boolean[] allowEventBeanType = new boolean[10];
         Class declClass = String.class;
 		String methodName = "trim";
 		Class[] args = null;
 		try
 		{
-			MethodResolver.resolveMethod(declClass, methodName, args, false);
+			MethodResolver.resolveMethod(declClass, methodName, args, false, null, null);
 			fail();
 		}
 		catch(EngineNoSuchMethodException e)
@@ -89,7 +90,7 @@ public class TestMethodResolver extends TestCase
 		args = new Class[] { int.class, int.class };
 		try
 		{
-			MethodResolver.resolveMethod(declClass, methodName, args, false);
+			MethodResolver.resolveMethod(declClass, methodName, args, false, null, null);
 			fail();
 		}
 		catch(EngineNoSuchMethodException e)
@@ -101,7 +102,7 @@ public class TestMethodResolver extends TestCase
 		args = new Class[] { boolean.class, boolean.class };
 		try
 		{
-			MethodResolver.resolveMethod(declClass, methodName, args, false);
+			MethodResolver.resolveMethod(declClass, methodName, args, false, null, null);
 			fail();
 		}
 		catch(EngineNoSuchMethodException e)
@@ -113,7 +114,7 @@ public class TestMethodResolver extends TestCase
 		args = new Class[] { int.class, int.class, boolean.class };
 		try
 		{
-			MethodResolver.resolveMethod(declClass, methodName, args, false);
+			MethodResolver.resolveMethod(declClass, methodName, args, false, null, null);
 			fail();
 		}
 		catch(EngineNoSuchMethodException e)

@@ -13,6 +13,7 @@ package com.espertech.esper.regression.context;
 
 import com.espertech.esper.client.context.ContextPartitionSelectorById;
 
+import java.util.Collections;
 import java.util.Set;
 
 public class SupportSelectorById implements ContextPartitionSelectorById {
@@ -20,6 +21,10 @@ public class SupportSelectorById implements ContextPartitionSelectorById {
 
     public SupportSelectorById(Set<Integer> ids) {
         this.ids = ids;
+    }
+
+    public SupportSelectorById(int id) {
+        this.ids = Collections.singleton(id);
     }
 
     public Set<Integer> getContextPartitionIds() {

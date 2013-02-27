@@ -45,6 +45,28 @@ public class TestContextPartitionedNamedWindow extends TestCase {
         listenerNamedWindow = null;
     }
 
+    public void testAggregatedSubquery() {
+        epService.getEPAdministrator().createEPL("create context SegmentedByString partition by theString from SupportBean, p00 from SupportBean_S0");
+        epService.getEPAdministrator().createEPL("context SegmentedByString create window MyWindow.win:keepall() as SupportBean");
+        epService.getEPAdministrator().createEPL("@Name('insert') context SegmentedByString insert into MyWindow select * from SupportBean");
+
+        EPStatement stmt = epService.getEPAdministrator().createEPL("@Audit context SegmentedByString " +
+                "select *, (select max(intPrimitive) from MyWindow) as mymax from SupportBean_S0");
+        stmt.addListener(listenerSelect);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 10));
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 20));
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(0, "E2"));
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), "mymax".split(","), new Object[] {20});
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(0, "E1"));
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), "mymax".split(","), new Object[] {10});
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(0, "E3"));
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), "mymax".split(","), new Object[] {null});
+    }
+
     public void testNWFireAndForgetInvalid() {
         epService.getEPAdministrator().createEPL("create context SegmentedByString partition by theString from SupportBean");
 

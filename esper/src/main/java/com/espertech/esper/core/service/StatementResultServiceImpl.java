@@ -176,7 +176,7 @@ public class StatementResultServiceImpl implements StatementResultService
         this.statementListenerSet = statementListenerSet;
 
         isMakeNatural = statementListenerSet.getSubscriber() != null;
-        isMakeSynthetic = !(statementListenerSet.getListeners().isEmpty() && statementListenerSet.getStmtAwareListeners().isEmpty())
+        isMakeSynthetic = !(statementListenerSet.getListeners().length == 0 && statementListenerSet.getStmtAwareListeners().length == 0)
                 || isPattern || isInsertInto || isDistinct | isForClause;
 
         if (statementListenerSet.getSubscriber() == null)
@@ -367,7 +367,7 @@ public class StatementResultServiceImpl implements StatementResultService
         EventBean[] newEventArr = events != null ? events.getFirst() : null;
         EventBean[] oldEventArr = events != null ? events.getSecond() : null;
 
-        for (UpdateListener listener : statementListenerSet.listeners)
+        for (UpdateListener listener : statementListenerSet.getListeners())
         {
             try
             {
@@ -380,7 +380,7 @@ public class StatementResultServiceImpl implements StatementResultService
                 log.error(message, t);
             }
         }
-        if (!(statementListenerSet.stmtAwareListeners.isEmpty()))
+        if (statementListenerSet.getStmtAwareListeners().length > 0)
         {
             for (StatementAwareUpdateListener listener : statementListenerSet.getStmtAwareListeners())
             {

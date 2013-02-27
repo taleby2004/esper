@@ -11,13 +11,14 @@
 
 package com.espertech.esper.schedule;
 
+import com.espertech.esper.client.util.DateTime;
+import com.espertech.esper.type.ScheduleUnit;
 import junit.framework.TestCase;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.espertech.esper.type.ScheduleUnit;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class TestScheduleComputeHelper extends TestCase
 {
@@ -275,17 +276,31 @@ public class TestScheduleComputeHelper extends TestCase
         checkCorrect(spec, "2004-12-12 20:00:00", "2004-12-31 23:59:50");
         checkCorrect(spec, "2004-12-31 23:59:55", "2005-12-31 23:59:50");
 
-        // Feb 29 (2004 leap year), 01pm any minute and 02 seconds
+        // CST timezone 7:00:00am
         spec = new ScheduleSpec();
-        spec.addValue(ScheduleUnit.MONTHS, 2);
-        spec.addValue(ScheduleUnit.DAYS_OF_MONTH, 29);
-        spec.addValue(ScheduleUnit.HOURS, 1);
-        spec.addValue(ScheduleUnit.SECONDS, 2);
+        spec.addValue(ScheduleUnit.HOURS, 7);
+        spec.addValue(ScheduleUnit.MINUTES, 0);
+        spec.addValue(ScheduleUnit.SECONDS, 0);
+        spec.setOptionalTimeZone("CST");
 
-        checkCorrect(spec, "2004-02-18 00:00:00", "2004-02-29 01:00:02");
-        checkCorrect(spec, "2004-02-29 01:00:02", "2004-02-29 01:01:02");
-        checkCorrect(spec, "2004-02-29 01:59:02", "2008-02-29 01:00:02");
-        checkCorrect(spec, "2008-02-29 01:59:02", "2012-02-29 01:00:02");
+        checkCorrectWZone(spec, "2008-02-01T06:00:00.000GMT-10:00", "2008-02-02T03:00:00.000GMT-10:00");
+        checkCorrectWZone(spec, "2008-02-01T06:00:00.000GMT-9:00", "2008-02-02T04:00:00.000GMT-9:00");
+        checkCorrectWZone(spec, "2008-02-01T06:00:00.000GMT-8:00", "2008-02-02T05:00:00.000GMT-8:00");
+        checkCorrectWZone(spec, "2008-02-01T06:00:00.000GMT-7:00", "2008-02-02T06:00:00.000GMT-7:00");
+        checkCorrectWZone(spec, "2008-02-01T06:00:00.000GMT-6:00", "2008-02-01T07:00:00.000GMT-6:00");
+        checkCorrectWZone(spec, "2008-02-01T06:00:00.000GMT-5:00", "2008-02-01T08:00:00.000GMT-5:00");
+        checkCorrectWZone(spec, "2008-02-01T06:00:00.000GMT-4:00", "2008-02-01T09:00:00.000GMT-4:00");
+
+        // EST timezone 7am, any minute
+        spec = new ScheduleSpec();
+        spec.addValue(ScheduleUnit.HOURS, 7);
+        spec.addValue(ScheduleUnit.SECONDS, 0);
+        spec.setOptionalTimeZone("EST");
+
+        checkCorrectWZone(spec, "2008-02-01T06:00:00.000GMT-7:00", "2008-02-02T05:00:00.000GMT-7:00");
+        checkCorrectWZone(spec, "2008-02-01T06:00:00.000GMT-6:00", "2008-02-01T06:01:00.000GMT-6:00");
+        checkCorrectWZone(spec, "2008-02-01T06:00:00.000GMT-5:00", "2008-02-01T07:00:00.000GMT-5:00");
+        checkCorrectWZone(spec, "2008-02-01T06:00:00.000GMT-4:00", "2008-02-01T08:00:00.000GMT-4:00");
     }
 
     public void checkCorrect(ScheduleSpec spec, String now, String expected) throws Exception
@@ -305,6 +320,27 @@ public class TestScheduleComputeHelper extends TestCase
                       " long=" + expectedDate.getTime());
             log.debug(".checkCorrect   result=" + timeFormat.format(resultDate) +
                       " long=" + resultDate.getTime());
+            assertTrue(false);
+        }
+    }
+
+    public void checkCorrectWZone(ScheduleSpec spec, String nowWZone, String expectedWZone) throws Exception
+    {
+        long nowDate = DateTime.parseDefaultMSecWZone(nowWZone);
+        long expectedDate = DateTime.parseDefaultMSecWZone(expectedWZone);
+
+        long result = ScheduleComputeHelper.computeNextOccurance(spec, nowDate);
+        Date resultDate = new Date(result);
+
+        if (result != expectedDate)
+        {
+            log.debug(".checkCorrect Difference in result found, spec=" + spec);
+            log.debug(".checkCorrect      now=" + timeFormat.format(nowDate) +
+                    " long=" + nowDate);
+            log.debug(".checkCorrect expected=" + timeFormat.format(expectedDate) +
+                    " long=" + expectedDate);
+            log.debug(".checkCorrect   result=" + timeFormat.format(resultDate) +
+                    " long=" + resultDate.getTime());
             assertTrue(false);
         }
     }

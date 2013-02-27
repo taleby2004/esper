@@ -1048,18 +1048,21 @@ select symbol, sum(price) from StockTickEvent.std:groupwin(symbol).win:length(5)
 				</para>
 				<programlisting><![CDATA[select sum(price) from StockTickEvent.std:groupwin(symbol, feed).win:length(100)]]></programlisting>
 		
-				<para>
-					When using grouped-window with time windows, note that if the engine retains 5 minutes of events or retains 5 minutes of events per group, the result is the same from the perspective of retaining events as both policies retain, considering all groups, the same set of events.
-				</para>
-				<para>
-					For example:
-				</para>
-				<programlisting><![CDATA[// Use this:
+				<note>
+					<para>
+					  A note on grouped time windows: When using grouped-window with time windows, note that whether the engine retains 5 minutes of events or retains 5 minutes of events per group, the result is the same from the perspective of retaining events as both policies retain, considering all groups, the same set of events. Therefore please specify the time window alone (ungrouped).
+					</para>
+					<para>
+						For example:
+					</para>
+					<programlisting><![CDATA[// Use this:
 select sum(price) from StockTickEvent.win:time(1 minute)
-// is equivalent to:
-// select sum(price) from StockTickEvent.std:groupwin(symbol).win:time(1 minute)
-// Use the group-by clause for grouping aggregation by symbol.]]></programlisting>
 
+// is equivalent to (don't use this):
+// select sum(price) from StockTickEvent.std:groupwin(symbol).win:time(1 minute)
+
+// Use the group-by clause for grouping aggregation by symbol.]]></programlisting>
+				</note>
 
 				<para>
 					For advanced users: There is an optional view that can control how the <literal>std:groupwin</literal> grouped-window view gets evaluated and that view is the <literal>std:merge</literal> view. 

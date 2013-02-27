@@ -115,13 +115,13 @@ public class TestContextHashSegmented extends TestCase {
         EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), stmt.safeIterator(), fields, new Object[][]{{5, "E1", 6}, {15, "E2", 10}, {9, "E3", 201}});
 
         // test iterator targeted hash
-        MySelectorHash selector = new MySelectorHash(Collections.singleton(15));
+        SupportSelectorByHashCode selector = new SupportSelectorByHashCode(Collections.singleton(15));
         EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(selector), stmt.safeIterator(selector), fields, new Object[][]{{15, "E2", 10}});
-        selector = new MySelectorHash(new HashSet<Integer>(Arrays.asList(1, 9, 5)));
+        selector = new SupportSelectorByHashCode(new HashSet<Integer>(Arrays.asList(1, 9, 5)));
         EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(selector), stmt.safeIterator(selector), fields, new Object[][]{{5, "E1", 6}, {9, "E3", 201}});
-        assertFalse(stmt.iterator(new MySelectorHash(Collections.singleton(99))).hasNext());
-        assertFalse(stmt.iterator(new MySelectorHash(Collections.<Integer>emptySet())).hasNext());
-        assertFalse(stmt.iterator(new MySelectorHash(null)).hasNext());
+        assertFalse(stmt.iterator(new SupportSelectorByHashCode(Collections.singleton(99))).hasNext());
+        assertFalse(stmt.iterator(new SupportSelectorByHashCode(Collections.<Integer>emptySet())).hasNext());
+        assertFalse(stmt.iterator(new SupportSelectorByHashCode(null)).hasNext());
 
         // test iterator filtered
         MySelectorFilteredHash filtered = new MySelectorFilteredHash(Collections.singleton(15));
@@ -190,7 +190,6 @@ public class TestContextHashSegmented extends TestCase {
                 "granularity 4 " +
                 "preallocate";
         epService.getEPAdministrator().createEPL(eplCtx);
-        HashCodeFuncGranularCRC32 codeFunc = new HashCodeFuncGranularCRC32(4);
 
         String eplStmt = "context " + ctx + " " + "select context.name as c0, intPrimitive as c1 from SupportBean";
         EPStatementSPI statement = (EPStatementSPI) epService.getEPAdministrator().createEPL(eplStmt);
@@ -257,7 +256,7 @@ public class TestContextHashSegmented extends TestCase {
                 "granularity 4 " +
                 "preallocate";
         epService.getEPAdministrator().createEPL(eplCtx);
-        HashCodeFuncGranularCRC32 codeFunc = new HashCodeFuncGranularCRC32(4);
+        SupportHashCodeFuncGranularCRC32 codeFunc = new SupportHashCodeFuncGranularCRC32(4);
 
         String eplStmt = "context " + ctx + " " +
                 "select context.name as c0, intPrimitive as c1, id as c2 from SupportBean.win:keepall() as t1, SupportBean_S0.win:keepall() as t2 where t1.theString = t2.p00";
@@ -290,7 +289,7 @@ public class TestContextHashSegmented extends TestCase {
         // Comment-in to see CRC32 code.
         for (int i = 0; i < 10; i++) {
             String key = "E" + i;
-            long code = HashCodeFuncGranularCRC32.computeCRC32(key) % 4;
+            long code = SupportHashCodeFuncGranularCRC32.computeCRC32(key) % 4;
             int hashCode = Integer.valueOf(i).hashCode() % 4;
             //System.out.println(key + " code " + code + " hashCode " + hashCode);
         }
@@ -311,7 +310,7 @@ public class TestContextHashSegmented extends TestCase {
         assertEquals(4, filterSPI.getFilterCountApprox());
         AgentInstanceAssertionUtil.assertInstanceCounts(statement.getStatementContext(), 4, 0, 0, 0);
 
-        runAssertionHash(ctx, statement, new HashCodeFuncGranularCRC32(4));
+        runAssertionHash(ctx, statement, new SupportHashCodeFuncGranularCRC32(4));
         assertEquals(0, filterSPI.getFilterCountApprox());
 
         // test same with SODA
@@ -322,7 +321,7 @@ public class TestContextHashSegmented extends TestCase {
         
         statement = (EPStatementSPI) epService.getEPAdministrator().createEPL(eplStmt);
         statement.addListener(listener);
-        runAssertionHash(ctx, statement, new HashCodeFuncGranularCRC32(4));
+        runAssertionHash(ctx, statement, new SupportHashCodeFuncGranularCRC32(4));
 
         // test with Java-hashCode String hash
         epService.getEPAdministrator().createEPL("@Name('context') create context " + ctx + " " +
@@ -471,25 +470,6 @@ public class TestContextHashSegmented extends TestCase {
         public int codeFor(String key);
     }
 
-    public static class HashCodeFuncGranularCRC32 implements HashCodeFunc {
-        private int granularity;
-
-        public HashCodeFuncGranularCRC32(int granularity) {
-            this.granularity = granularity;
-        }
-
-        public int codeFor(String key) {
-            long codeMod = computeCRC32(key) % granularity;
-            return (int) codeMod;
-        }
-
-        public static long computeCRC32(String key) {
-            CRC32 crc = new CRC32();
-            crc.update(key.getBytes());
-            return crc.getValue();
-        }
-    }
-
     public static class HashCodeFuncGranularInternalHash implements HashCodeFunc {
         private int granularity;
 
@@ -499,19 +479,6 @@ public class TestContextHashSegmented extends TestCase {
 
         public int codeFor(String key) {
             return key.hashCode() % granularity;
-        }
-    }
-
-    public static class MySelectorHash implements ContextPartitionSelectorHash {
-
-        private final Set<Integer> hashes;
-
-        public MySelectorHash(Set<Integer> hashes) {
-            this.hashes = hashes;
-        }
-
-        public Set<Integer> getHashes() {
-            return hashes;
         }
     }
 

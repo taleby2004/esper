@@ -12,6 +12,7 @@
 package com.espertech.esper.core.service;
 
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.util.CollectionUtil;
 import junit.framework.TestCase;
 
 import java.util.HashSet;
@@ -63,7 +64,7 @@ public class TestStatementEventTypeRef extends TestCase
         HashSet<String> values = new HashSet<String>();
         values.add("e5");
         values.add("e6");
-        service.addReferences("s4", values);
+        service.addReferences("s4", CollectionUtil.toArray(values));
 
         assertTrue(service.isInUse("e5"));
         assertTrue(service.isInUse("e6"));
@@ -127,6 +128,6 @@ public class TestStatementEventTypeRef extends TestCase
     {
         HashSet<String> set = new HashSet<String>();
         set.add(typeName);
-        service.addReferences(stmtName, set);
+        service.addReferences(stmtName, CollectionUtil.toArray(set));
     }
 }

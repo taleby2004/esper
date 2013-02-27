@@ -11,6 +11,7 @@ package com.espertech.esper.core.service;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.context.ContextPartitionSelector;
 import com.espertech.esper.client.dataflow.EPDataFlowRuntime;
+import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.client.time.CurrentTimeSpanEvent;
 import com.espertech.esper.client.time.TimerControlEvent;
@@ -22,6 +23,9 @@ import com.espertech.esper.collection.ThreadWorkQueue;
 import com.espertech.esper.core.context.util.EPStatementAgentInstanceHandle;
 import com.espertech.esper.core.context.util.EPStatementAgentInstanceHandleComparator;
 import com.espertech.esper.core.start.EPPreparedExecuteMethod;
+import com.espertech.esper.core.start.EPPreparedExecuteMethodQuery;
+import com.espertech.esper.core.start.EPPreparedExecuteSingleStreamDelete;
+import com.espertech.esper.core.start.EPPreparedExecuteSingleStreamUpdate;
 import com.espertech.esper.core.thread.*;
 import com.espertech.esper.epl.annotation.AnnotationUtil;
 import com.espertech.esper.epl.declexpr.ExprDeclaredNode;
@@ -30,18 +34,13 @@ import com.espertech.esper.epl.expression.ExprNodeSubselectDeclaredDotVisitor;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.metric.MetricReportingPath;
 import com.espertech.esper.epl.script.AgentInstanceScriptContext;
-import com.espertech.esper.epl.spec.SelectClauseStreamSelectorEnum;
-import com.espertech.esper.epl.spec.StatementSpecCompiled;
-import com.espertech.esper.epl.spec.StatementSpecRaw;
+import com.espertech.esper.epl.spec.*;
 import com.espertech.esper.epl.spec.util.StatementSpecRawAnalyzer;
 import com.espertech.esper.epl.variable.VariableReader;
 import com.espertech.esper.event.util.EventRendererImpl;
 import com.espertech.esper.filter.FilterHandle;
 import com.espertech.esper.filter.FilterHandleCallback;
-import com.espertech.esper.schedule.ScheduleHandle;
-import com.espertech.esper.schedule.ScheduleHandleCallback;
-import com.espertech.esper.schedule.SchedulingServiceSPI;
-import com.espertech.esper.schedule.TimeProvider;
+import com.espertech.esper.schedule.*;
 import com.espertech.esper.timer.TimerCallback;
 import com.espertech.esper.util.ExecutionPathDebugLog;
 import com.espertech.esper.util.MetricUtil;
@@ -76,7 +75,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
     private ThreadWorkQueue threadWorkQueue;
     private ThreadLocal<ArrayBackedCollection<FilterHandle>> matchesArrayThreadLocal;
     private ThreadLocal<ArrayBackedCollection<ScheduleHandle>> scheduleArrayThreadLocal;
-    private ThreadLocal<Map<EPStatementAgentInstanceHandle, ArrayDeque<FilterHandleCallback>>> matchesPerStmtThreadLocal;
+    private ThreadLocal<Map<EPStatementAgentInstanceHandle, Object>> matchesPerStmtThreadLocal;
     private ThreadLocal<Map<EPStatementAgentInstanceHandle, Object>> schedulePerStmtThreadLocal;
 
     /**
@@ -935,7 +934,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
             return;
         }
 
-        Map<EPStatementAgentInstanceHandle, ArrayDeque<FilterHandleCallback>> stmtCallbacks = matchesPerStmtThreadLocal.get();
+        Map<EPStatementAgentInstanceHandle, Object> stmtCallbacks = matchesPerStmtThreadLocal.get();
         Object[] matchArray = matches.getArray();
         int entryCount = matches.size();
 
@@ -948,13 +947,20 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
             // Priority or preemptive settings also require special ordering.
             if (handle.isCanSelfJoin() || isPrioritized)
             {
-                ArrayDeque<FilterHandleCallback> callbacks = stmtCallbacks.get(handle);
-                if (callbacks == null)
-                {
-                    callbacks = new ArrayDeque<FilterHandleCallback>();
-                    stmtCallbacks.put(handle, callbacks);
+                Object callbacks = stmtCallbacks.get(handle);
+                if (callbacks == null) {
+                    stmtCallbacks.put(handle, handleCallback.getFilterCallback());
                 }
-                callbacks.add(handleCallback.getFilterCallback());
+                else if (callbacks instanceof ArrayDeque) {
+                    ArrayDeque<FilterHandleCallback> q = (ArrayDeque<FilterHandleCallback>) callbacks;
+                    q.add(handleCallback.getFilterCallback());
+                }
+                else {
+                    ArrayDeque<FilterHandleCallback> q = new ArrayDeque<FilterHandleCallback>(4);
+                    q.add((FilterHandleCallback) callbacks);
+                    q.add(handleCallback.getFilterCallback());
+                    stmtCallbacks.put(handle, q);
+                }
                 continue;
             }
 
@@ -989,10 +995,10 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
             return;
         }
 
-        for (Map.Entry<EPStatementAgentInstanceHandle, ArrayDeque<FilterHandleCallback>> entry : stmtCallbacks.entrySet())
+        for (Map.Entry<EPStatementAgentInstanceHandle, Object> entry : stmtCallbacks.entrySet())
         {
             EPStatementAgentInstanceHandle handle = entry.getKey();
-            ArrayDeque<FilterHandleCallback> callbackList = entry.getValue();
+            Object callbackList = entry.getValue();
 
             if ((MetricReportingPath.isMetricsEnabled) && (handle.getStatementHandle().getMetricsHandle().isEnabled()))
             {
@@ -1005,7 +1011,11 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
                 long cpuTimeAfter = MetricUtil.getCPUCurrentThread();
                 long deltaCPU = cpuTimeAfter - cpuTimeBefore;
                 long deltaWall = wallTimeAfter - wallTimeBefore;
-                services.getMetricsReportingService().accountTime(handle.getStatementHandle().getMetricsHandle(), deltaCPU, deltaWall, callbackList.size());
+                int size = 1;
+                if (callbackList instanceof Collection) {
+                    size = ((Collection) callbackList).size();
+                }
+                services.getMetricsReportingService().accountTime(handle.getStatementHandle().getMetricsHandle(), deltaCPU, deltaWall, size);
             }
             else
             {
@@ -1109,7 +1119,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
      * @param theEvent to process
      * @param version filter version
      */
-    public void processStatementFilterMultiple(EPStatementAgentInstanceHandle handle, ArrayDeque<FilterHandleCallback> callbackList, EventBean theEvent, long version)
+    public void processStatementFilterMultiple(EPStatementAgentInstanceHandle handle, Object callbackList, EventBean theEvent, long version)
     {
         handle.getStatementAgentInstanceLock().acquireWriteLock(services.getStatementLockFactory());
         try
@@ -1123,52 +1133,68 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
                     handle.getFilterFaultHandler().handleFilterFault(theEvent, version);
                 }
 
-                callbackList.clear();
                 ArrayDeque<FilterHandle> callbackListNew = getCallbackList(theEvent, handle.getStatementId());
-                for (FilterHandle callback : callbackListNew)
-                {
-                    EPStatementHandleCallback handleCallbackFilter = (EPStatementHandleCallback) callback;
-                    callbackList.add(handleCallbackFilter.getFilterCallback());
+                if (callbackListNew.isEmpty()) {
+                    callbackList = Collections.emptyList();
                 }
-            }
-
-            if (isSubselectPreeval)
-            {
-                // sub-selects always go first
-                for (FilterHandleCallback callback : callbackList)
-                {
-                    if (callback.isSubSelect())
-                    {
-                        callback.matchFound(theEvent, callbackList);
-                    }
+                else if (callbackListNew.size() == 1) {
+                    callbackList = ((EPStatementHandleCallback) callbackListNew.getFirst()).getFilterCallback();
                 }
-
-                for (FilterHandleCallback callback : callbackList)
-                {
-                    if (!callback.isSubSelect())
+                else {
+                    ArrayDeque<FilterHandleCallback> q = new ArrayDeque<FilterHandleCallback>(callbackListNew.size());
+                    callbackList = q;
+                    for (FilterHandle callback : callbackListNew)
                     {
-                        callback.matchFound(theEvent, callbackList);
+                        EPStatementHandleCallback handleCallbackFilter = (EPStatementHandleCallback) callback;
+                        q.add(handleCallbackFilter.getFilterCallback());
                     }
                 }
             }
-            else
-            {
-                // sub-selects always go last
-                for (FilterHandleCallback callback : callbackList)
-                {
-                    if (!callback.isSubSelect())
-                    {
-                        callback.matchFound(theEvent, callbackList);
-                    }
-                }
 
-                for (FilterHandleCallback callback : callbackList)
+            if (callbackList instanceof Collection) {
+                Collection<FilterHandleCallback> callbackColl = (Collection<FilterHandleCallback>) callbackList;
+                if (isSubselectPreeval)
                 {
-                    if (callback.isSubSelect())
+                    // sub-selects always go first
+                    for (FilterHandleCallback callback : callbackColl)
                     {
-                        callback.matchFound(theEvent, callbackList);
+                        if (callback.isSubSelect())
+                        {
+                            callback.matchFound(theEvent, callbackColl);
+                        }
+                    }
+
+                    for (FilterHandleCallback callback : callbackColl)
+                    {
+                        if (!callback.isSubSelect())
+                        {
+                            callback.matchFound(theEvent, callbackColl);
+                        }
                     }
                 }
+                else
+                {
+                    // sub-selects always go last
+                    for (FilterHandleCallback callback : callbackColl)
+                    {
+                        if (!callback.isSubSelect())
+                        {
+                            callback.matchFound(theEvent, callbackColl);
+                        }
+                    }
+
+                    for (FilterHandleCallback callback : callbackColl)
+                    {
+                        if (callback.isSubSelect())
+                        {
+                            callback.matchFound(theEvent, callbackColl);
+                        }
+                    }
+                }
+            }
+            else {
+                FilterHandleCallback single = (FilterHandleCallback) callbackList;
+                single.matchFound(theEvent, null);
             }
 
             // internal join processing, if applicable
@@ -1265,6 +1291,10 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
     public void initialize() {
         initThreadLocals();
         threadWorkQueue = new ThreadWorkQueue();
+    }
+
+    public void clearCaches() {
+        initThreadLocals();
     }
 
     public void setUnmatchedListener(UnmatchedListener listener)
@@ -1405,18 +1435,29 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         if (contextPartitionSelectors == null) {
             throw new IllegalArgumentException("No context partition selectors provided");
         }
-        return executeQueryInternal(epl, contextPartitionSelectors);
+        return executeQueryInternal(epl, null, contextPartitionSelectors);
     }
 
     public EPOnDemandQueryResult executeQuery(String epl) {
-        return executeQueryInternal(epl, null);
+        return executeQueryInternal(epl, null, null);
     }
 
-    private EPOnDemandQueryResult executeQueryInternal(String epl, ContextPartitionSelector[] contextPartitionSelectors)
+    public EPOnDemandQueryResult executeQuery(EPStatementObjectModel model) {
+        return executeQueryInternal(null, model, null);
+    }
+
+    public EPOnDemandQueryResult executeQuery(EPStatementObjectModel model, ContextPartitionSelector[] contextPartitionSelectors) {
+        if (contextPartitionSelectors == null) {
+            throw new IllegalArgumentException("No context partition selectors provided");
+        }
+        return executeQueryInternal(null, model, contextPartitionSelectors);
+    }
+
+    private EPOnDemandQueryResult executeQueryInternal(String epl, EPStatementObjectModel model, ContextPartitionSelector[] contextPartitionSelectors)
     {
         try
         {
-            EPPreparedExecuteMethod executeMethod = getExecuteMethod(epl);
+            EPPreparedExecuteMethod executeMethod = getExecuteMethod(epl, model);
             EPPreparedQueryResult result = executeMethod.execute(contextPartitionSelectors);
             return new EPQueryResultImpl(result);
         }
@@ -1434,9 +1475,19 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
 
     public EPOnDemandPreparedQuery prepareQuery(String epl)
     {
+        return prepareQueryInternal(epl, null);
+    }
+
+    public EPOnDemandPreparedQuery prepareQuery(EPStatementObjectModel model)
+    {
+        return prepareQueryInternal(null, model);
+    }
+
+    private EPOnDemandPreparedQuery prepareQueryInternal(String epl, EPStatementObjectModel model)
+    {
         try
         {
-            EPPreparedExecuteMethod startMethod = getExecuteMethod(epl);
+            EPPreparedExecuteMethod startMethod = getExecuteMethod(epl, model);
             return new EPPreparedQueryImpl(startMethod, epl);
         }
         catch (EPStatementException ex)
@@ -1451,14 +1502,21 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         }
     }
 
-    private EPPreparedExecuteMethod getExecuteMethod(String epl)
+    private EPPreparedExecuteMethod getExecuteMethod(String epl, EPStatementObjectModel model)
     {
         String stmtName = UuidGenerator.generate();
         String stmtId = UuidGenerator.generate();
 
         try
         {
-            StatementSpecRaw spec = EPAdministratorHelper.compileEPL(epl, epl, true, stmtName, services, SelectClauseStreamSelectorEnum.ISTREAM_ONLY);
+            StatementSpecRaw spec;
+            if (epl != null) {
+                spec = EPAdministratorHelper.compileEPL(epl, epl, true, stmtName, services, SelectClauseStreamSelectorEnum.ISTREAM_ONLY);
+            }
+            else {
+                spec = StatementSpecMapper.map(model, services.getEngineImportService(), services.getVariableService(), services.getConfigSnapshot(), services.getSchedulingService(), services.getEngineURI(), services.getPatternNodeFactory(), services.getNamedWindowService(), services.getContextManagementService(), services.getExprDeclaredService());
+                epl = model.toEPL();
+            }
             Annotation[] annotations = AnnotationUtil.compileAnnotations(spec.getAnnotations(), services.getEngineImportService(), epl);
             StatementContext statementContext =  services.getStatementContextFactory().makeContext(stmtId, stmtName, epl, services, null, true, annotations, null, true, spec);
 
@@ -1472,7 +1530,18 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
             }
 
             StatementSpecCompiled compiledSpec = StatementLifecycleSvcImpl.compile(spec, epl, statementContext, true, annotations, visitor.getSubselects(), Collections.<ExprDeclaredNode>emptyList(), services);
-            return new EPPreparedExecuteMethod(compiledSpec, services, statementContext);
+            if (compiledSpec.getFireAndForgetSpec() == null) {   // null indicates a select-statement, same as continuous query
+                return new EPPreparedExecuteMethodQuery(compiledSpec, services, statementContext);
+            }
+            else if (compiledSpec.getFireAndForgetSpec() instanceof FireAndForgetSpecDelete) {
+                return new EPPreparedExecuteSingleStreamDelete(compiledSpec, services, statementContext);
+            }
+            else if (compiledSpec.getFireAndForgetSpec() instanceof FireAndForgetSpecUpdate) {
+                return new EPPreparedExecuteSingleStreamUpdate(compiledSpec, services, statementContext);
+            }
+            else {
+                throw new IllegalStateException("Unrecognized FAF code " + compiledSpec.getFireAndForgetSpec());
+            }
         }
         catch (EPStatementException ex)
         {
@@ -1519,7 +1588,16 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
     }
 
     protected static Map<String, Long> getStatementNearestSchedulesInternal(SchedulingServiceSPI schedulingService, StatementLifecycleSvc statementLifecycleSvc) {
-        Map<String, Long> schedulePerStatementId = schedulingService.getStatementSchedules();
+        final Map<String, Long> schedulePerStatementId = new HashMap<String, Long>();
+        schedulingService.visitSchedules(new ScheduleVisitor() {
+            public void visit(ScheduleVisit visit) {
+                if (schedulePerStatementId.containsKey(visit.getStatementId())) {
+                    return;
+                }
+                schedulePerStatementId.put(visit.getStatementId(), visit.getTimestamp());
+            }
+        });
+
         Map<String, Long> result = new HashMap<String, Long>();
         for (Map.Entry<String, Long> schedule : schedulePerStatementId.entrySet()) {
             String stmtName = statementLifecycleSvc.getStatementNameById(schedule.getKey());
@@ -1573,17 +1651,17 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         };
 
         matchesPerStmtThreadLocal =
-                new ThreadLocal<Map<EPStatementAgentInstanceHandle, ArrayDeque<FilterHandleCallback>>>()
+                new ThreadLocal<Map<EPStatementAgentInstanceHandle, Object>>()
                 {
-                    protected synchronized Map<EPStatementAgentInstanceHandle, ArrayDeque<FilterHandleCallback>> initialValue()
+                    protected synchronized Map<EPStatementAgentInstanceHandle, Object> initialValue()
                     {
                         if (isPrioritized)
                         {
-                            return new TreeMap<EPStatementAgentInstanceHandle, ArrayDeque<FilterHandleCallback>>(EPStatementAgentInstanceHandleComparator.INSTANCE);
+                            return new TreeMap<EPStatementAgentInstanceHandle, Object>(EPStatementAgentInstanceHandleComparator.INSTANCE);
                         }
                         else
                         {
-                            return new HashMap<EPStatementAgentInstanceHandle, ArrayDeque<FilterHandleCallback>>(10000);
+                            return new HashMap<EPStatementAgentInstanceHandle, Object>();
                         }
                     }
                 };
@@ -1598,7 +1676,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
                 }
                 else
                 {
-                    return new HashMap<EPStatementAgentInstanceHandle, Object>(10000);
+                    return new HashMap<EPStatementAgentInstanceHandle, Object>();
                 }
             }
         };

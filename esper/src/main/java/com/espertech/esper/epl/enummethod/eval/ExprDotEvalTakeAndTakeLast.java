@@ -13,7 +13,7 @@ package com.espertech.esper.epl.enummethod.eval;
 
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.epl.core.StreamTypeService;
-import com.espertech.esper.epl.enummethod.dot.ExprDotEvalTypeInfo;
+import com.espertech.esper.client.util.ExpressionReturnType;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.enummethod.dot.ExprDotEvalEnumMethodBase;
 import com.espertech.esper.epl.enummethod.dot.ExprDotEvalParam;
@@ -32,10 +32,10 @@ public class ExprDotEvalTakeAndTakeLast extends ExprDotEvalEnumMethodBase {
         ExprEvaluator sizeEval = bodiesAndParameters.get(0).getBodyEvaluator();
         
         if (inputEventType != null) {
-            super.setTypeInfo(ExprDotEvalTypeInfo.eventColl(inputEventType));
+            super.setTypeInfo(ExpressionReturnType.collectionOfEvents(inputEventType));
         }
         else {
-            super.setTypeInfo(ExprDotEvalTypeInfo.componentColl(collectionComponentType));
+            super.setTypeInfo(ExpressionReturnType.collectionOfSingleValue(collectionComponentType));
         }
 
         if (getEnumMethodEnum() == EnumMethodEnum.TAKE) {

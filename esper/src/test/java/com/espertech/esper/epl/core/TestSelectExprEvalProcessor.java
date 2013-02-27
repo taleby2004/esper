@@ -18,6 +18,7 @@ import java.util.HashSet;
 import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.client.soda.StreamSelector;
+import com.espertech.esper.core.service.StatementEventTypeRefImpl;
 import com.espertech.esper.epl.core.eval.SelectExprStreamDesc;
 import com.espertech.esper.epl.spec.SelectClauseStreamSelectorEnum;
 import junit.framework.TestCase;
@@ -43,8 +44,8 @@ public class TestSelectExprEvalProcessor extends TestCase
         List<SelectClauseExprCompiledSpec> selectList = SupportSelectExprFactory.makeNoAggregateSelectList();
         EventAdapterService eventAdapterService = SupportEventAdapterService.getService();
         SupportValueAddEventService vaeService = new SupportValueAddEventService();
-        SelectExprEventTypeRegistry selectExprEventTypeRegistry = new SelectExprEventTypeRegistry(new HashSet<String>());
-        MethodResolutionService methodResolutionService = new MethodResolutionServiceImpl(new EngineImportServiceImpl(true, true, true), null);
+        SelectExprEventTypeRegistry selectExprEventTypeRegistry = new SelectExprEventTypeRegistry("abc", new StatementEventTypeRefImpl());
+        MethodResolutionService methodResolutionService = new MethodResolutionServiceImpl(new EngineImportServiceImpl(true, true, true, false), null);
 
         methodOne = new SelectExprProcessorHelper(Collections.<Integer>emptyList(), selectList, Collections.<SelectExprStreamDesc>emptyList(), null, false, new SupportStreamTypeSvc1Stream(), eventAdapterService, vaeService, selectExprEventTypeRegistry, methodResolutionService, null, null, new Configuration());
 

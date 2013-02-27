@@ -52,6 +52,40 @@ public class TestEnumDataSources extends TestCase {
         listener = null;
     }
 
+    public void testEnumObject() {
+        epService.getEPAdministrator().getConfiguration().addImport(SupportEnumTwo.class);
+        epService.getEPAdministrator().getConfiguration().addEventType(SupportEnumTwoEvent.class);
+
+        String[] fields = "c0,c1".split(",");
+        epService.getEPAdministrator().createEPL("select " +
+                "SupportEnumTwo.ENUM_VALUE_1.getMystrings().anyOf(v => v = id) as c0, " +
+                "value.getMystrings().anyOf(v => v = '2') as c1 " +
+                "from SupportEnumTwoEvent").addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportEnumTwoEvent("0", SupportEnumTwo.ENUM_VALUE_1));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {true, false});
+
+        epService.getEPRuntime().sendEvent(new SupportEnumTwoEvent("2", SupportEnumTwo.ENUM_VALUE_2));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false, true});
+    }
+
+    public void testSortedMaxMinBy() {
+        String[] fields = "c0,c1,c2,c3,c4".split(",");
+
+        String eplWindowAgg = "select " +
+                "sorted(theString).allOf(x => x.intPrimitive < 5) as c0," +
+                "maxby(theString).allOf(x => x.intPrimitive < 5) as c1," +
+                "minby(theString).allOf(x => x.intPrimitive < 5) as c2," +
+                "maxbyever(theString).allOf(x => x.intPrimitive < 5) as c3," +
+                "minbyever(theString).allOf(x => x.intPrimitive < 5) as c4" +
+                " from SupportBean.win:length(5)";
+        EPStatement stmtWindowAgg = epService.getEPAdministrator().createEPL(eplWindowAgg);
+        stmtWindowAgg.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{true, true, true, true, true});
+    }
+
     public void testJoin() {
         epService.getEPAdministrator().getConfiguration().addEventType(SelectorEvent.class);
         epService.getEPAdministrator().getConfiguration().addEventType(ContainerEvent.class);
@@ -543,6 +577,24 @@ public class TestEnumDataSources extends TestCase {
 
         public List<String> getMyNestedList() {
             return myNestedList;
+        }
+    }
+
+    public static class SupportEnumTwoEvent {
+        private final String id;
+        private final SupportEnumTwo value;
+
+        public SupportEnumTwoEvent(String id, SupportEnumTwo value) {
+            this.id = id;
+            this.value = value;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public SupportEnumTwo getValue() {
+            return value;
         }
     }
 }

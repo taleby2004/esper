@@ -1056,8 +1056,8 @@ public class TestVariables extends TestCase
         FilterSet set = filterSpi.take(Collections.singleton(stmt.getStatementId()));
         assertEquals(1, set.getFilters().size());
         FilterValueSet valueSet = set.getFilters().get(0).getFilterValueSet();
-        assertEquals(1, valueSet.getParameters().size());
-        FilterValueSetParam para = valueSet.getParameters().getFirst();
+        assertEquals(1, valueSet.getParameters().length);
+        FilterValueSetParam para = valueSet.getParameters()[0];
         assertTrue(para.getFilterOperator() != FilterOperator.BOOLEAN_EXPRESSION);
 
         stmt.destroy();

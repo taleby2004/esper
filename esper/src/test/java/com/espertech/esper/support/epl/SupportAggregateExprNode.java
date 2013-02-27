@@ -13,12 +13,7 @@ package com.espertech.esper.support.epl;
 
 import com.espertech.esper.epl.agg.aggregator.AggregationMethod;
 import com.espertech.esper.epl.agg.service.AggregationMethodFactory;
-import com.espertech.esper.epl.core.MethodResolutionService;
-import com.espertech.esper.epl.core.StreamTypeService;
-import com.espertech.esper.epl.expression.ExprAggregateNode;
-import com.espertech.esper.epl.expression.ExprAggregateNodeBase;
-import com.espertech.esper.epl.expression.ExprValidationException;
-import com.espertech.esper.epl.expression.ExprEvaluatorContext;
+import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.client.EventBean;
 
 public class SupportAggregateExprNode extends ExprAggregateNodeBase
@@ -55,7 +50,7 @@ public class SupportAggregateExprNode extends ExprAggregateNodeBase
         this.type = type;
     }
 
-    protected AggregationMethodFactory validateAggregationChild(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
+    protected AggregationMethodFactory validateAggregationChild(ExprValidationContext validationContext) throws ExprValidationException
     {
         // Keep a count for if and when this was validated
         validateCount++;

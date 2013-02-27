@@ -11,9 +11,9 @@
 
 package com.espertech.esper.epl.expression;
 
+import com.espertech.esper.support.epl.SupportExprNode;
 import com.espertech.esper.support.epl.SupportExprNodeUtil;
 import junit.framework.TestCase;
-import com.espertech.esper.support.epl.SupportExprNode;
 
 public class TestExprEqualsNode extends TestCase
 {
@@ -56,8 +56,7 @@ public class TestExprEqualsNode extends TestCase
         equalsNodes[2].validate(ExprValidationContextFactory.makeEmpty());
         equalsNodes[3].validate(ExprValidationContextFactory.makeEmpty());
 
-        equalsNodes[0].getChildNodes().clear();
-        equalsNodes[0].addChildNode(new SupportExprNode(String.class));
+        equalsNodes[0].setChildNodes(new SupportExprNode(String.class));
 
         // Test too few nodes under this node
         try

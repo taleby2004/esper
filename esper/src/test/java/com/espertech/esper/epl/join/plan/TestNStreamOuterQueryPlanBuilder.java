@@ -25,9 +25,9 @@ public class TestNStreamOuterQueryPlanBuilder extends TestCase
 {
     public void testGraphOuterJoins() throws Exception
     {
-        List<OuterJoinDesc> descList = new LinkedList<OuterJoinDesc>();
-        descList.add(SupportOuterJoinDescFactory.makeDesc("intPrimitive", "s0", "intBoxed", "s1", OuterJoinType.RIGHT));
-        descList.add(SupportOuterJoinDescFactory.makeDesc("simpleProperty", "s2", "theString", "s1", OuterJoinType.FULL));
+        OuterJoinDesc[] descList = new OuterJoinDesc[2];
+        descList[0] = SupportOuterJoinDescFactory.makeDesc("intPrimitive", "s0", "intBoxed", "s1", OuterJoinType.RIGHT);
+        descList[1] = SupportOuterJoinDescFactory.makeDesc("simpleProperty", "s2", "theString", "s1", OuterJoinType.FULL);
 
         OuterInnerDirectionalGraph graph = NStreamOuterQueryPlanBuilder.graphOuterJoins(3, descList);
 
@@ -35,9 +35,8 @@ public class TestNStreamOuterQueryPlanBuilder extends TestCase
         assertInners(new int[][] {null,  {0, 2},  {1}}, graph);
         assertOuters(new int[][] {{1}, {2}, {1}}, graph);
 
-        descList.clear();
-        descList.add(SupportOuterJoinDescFactory.makeDesc("intPrimitive", "s1", "intBoxed", "s0", OuterJoinType.LEFT));
-        descList.add(SupportOuterJoinDescFactory.makeDesc("simpleProperty", "s2", "theString", "s1", OuterJoinType.RIGHT));
+        descList[0] = SupportOuterJoinDescFactory.makeDesc("intPrimitive", "s1", "intBoxed", "s0", OuterJoinType.LEFT);
+        descList[1] = SupportOuterJoinDescFactory.makeDesc("simpleProperty", "s2", "theString", "s1", OuterJoinType.RIGHT);
 
         graph = NStreamOuterQueryPlanBuilder.graphOuterJoins(3, descList);
 
@@ -47,8 +46,7 @@ public class TestNStreamOuterQueryPlanBuilder extends TestCase
 
         try
         {
-            descList.clear();
-            NStreamOuterQueryPlanBuilder.graphOuterJoins(3, descList);
+            NStreamOuterQueryPlanBuilder.graphOuterJoins(3, new OuterJoinDesc[0]);
             fail();
         }
         catch (IllegalArgumentException ex)

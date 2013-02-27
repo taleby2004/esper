@@ -131,7 +131,7 @@ public class TestIndexTreeBuilderMultithreaded extends TestCase
         for (IndexTreePath treePath : pathsAddedTo)
         {
             FilterHandle callback = filterCallbacks.get(count++);
-            builder.remove(eventType, callback, treePath, topNode);
+            builder.remove(eventType, callback, new EventTypeIndexBuilderIndexLookupableIterator(treePath.toArray()), topNode);
         }
 
         // After the remove no matches are expected

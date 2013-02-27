@@ -489,7 +489,7 @@ select current_timestamp() from MyEvent]]></programlisting>
 			</para>
 
 			<para>
-				The <literal>prev</literal> function is not an aggregation function and therefore does not return results per group when used with <literal>group by</literal>. Please consider the <literal>last</literal>, <literal>lastever</literal> or <literal>nth</literal> aggregation functions instead as described in <xref linkend="epl-function-aggregation-dwtrack"/>. You must use an aggregation function instead of <literal>prev</literal> when querying a named window.
+				The <literal>prev</literal> function is not an aggregation function and therefore does not return results per group when used with <literal>group by</literal>. Please consider the <literal>last</literal>, <literal>lastever</literal> or <literal>first</literal> aggregation functions instead as described in <xref linkend="epl-function-aggregation-event"/>. You must use an aggregation function instead of <literal>prev</literal> when querying a named window.
 			</para>
 
 			<para>
@@ -617,7 +617,7 @@ from Trade.std:groupwin(symbol).ext:sort(1, price asc)</programlisting>
 			</para>
 
 			<para>
-				The <literal>prevtail</literal> function is not an aggregation function and therefore does not return results per group when used with <literal>group by</literal>. Please consider the <literal>first</literal>, <literal>firstever</literal> or <literal>window</literal> aggregation functions instead as described in <xref linkend="epl-function-aggregation-dwtrack"/>. You must use an aggregation function instead of <literal>prevtail</literal> when querying a named window.
+				The <literal>prevtail</literal> function is not an aggregation function and therefore does not return results per group when used with <literal>group by</literal>. Please consider the <literal>first</literal>, <literal>firstever</literal> or <literal>window</literal> aggregation functions instead as described in <xref linkend="epl-function-aggregation-event"/>. You must use an aggregation function instead of <literal>prevtail</literal> when querying a named window.
 			</para>
 
 			<para>
@@ -709,7 +709,7 @@ from Trade.std:groupwin(symbol).win:length(10)</programlisting>
 			</para>
 
 			<para>
-				The <literal>prevwindow</literal> function is not an aggregation function and therefore does not return results per group when used with <literal>group by</literal>. Please consider the <literal>window</literal> aggregation function instead as described in <xref linkend="epl-function-aggregation-dwtrack"/>. You must use an aggregation function instead of <literal>prevwindow</literal> when querying a named window.
+				The <literal>prevwindow</literal> function is not an aggregation function and therefore does not return results per group when used with <literal>group by</literal>. Please consider the <literal>window</literal> aggregation function instead as described in <xref linkend="epl-function-aggregation-event"/>. You must use an aggregation function instead of <literal>prevwindow</literal> when querying a named window.
 			</para>
 
 			<para>
@@ -923,12 +923,12 @@ from Trade.std:groupwin(symbol).win:length(10)</programlisting>
 	</sect1>		
 	
 	<sect1 xml:id="epl-function-aggregation">
-		<title>Aggregate Functions</title>
+		<title>Aggregation Functions</title>
 
 		<indexterm><primary>aggregation functions</primary><secondary>overview</secondary></indexterm>
 		
 		<para>
-			Aggregation functions return a single value from a collection of input values. The <literal>group by</literal> keywords are often used in conjunction with aggregation functions to group the result-set by one or more columns.
+			Aggregation functions are stateful and consider sets of events or value points. The <literal>group by</literal> clause is often used in conjunction with aggregation functions to group the result-set by one or more columns.
 		</para>
 
 		<para>
@@ -937,13 +937,14 @@ from Trade.std:groupwin(symbol).win:length(10)</programlisting>
 		
 		<para>
 			Aggregation values are always computed incrementally: Insert and remove streams result in aggregation value changes. The exceptions are on-demand queries and joins when using the <literal>unidirectional</literal> keyword. Aggregation functions are optimized to retain the minimal
-				information necessary to compute the aggregated result. 
+				information necessary to compute the aggregated result, and to share aggregation state between eligible other aggregation functions in the same statement so that same-kind aggregation state is
+				never held multiple times unless required.
 		</para>
 		
 		<para>
-			Aggregation functions can also be used with unbound streams when no data window is specified.
+			Most aggregation functions can also be used with unbound streams when no data window is specified. A few aggregation functions require a data window or named window as documented below.
 		</para>
-
+		
 		<sect2 xml:id="epl-function-aggregation-std">
 			<title>SQL-Standard Functions</title>
 
@@ -1023,6 +1024,9 @@ from Trade.std:groupwin(symbol).win:length(10)</programlisting>
 								<para>
 									Use <literal>fmax</literal> to provide a filter expression that limits the values considered for computing the maximum.
 								</para>
+								<para>
+								    Consider using <literal>maxby</literal> instead if return values must include additional properties.
+								</para>
 							</entry>
 						</row>
 						<row>
@@ -1043,6 +1047,9 @@ from Trade.std:groupwin(symbol).win:length(10)</programlisting>
 								</para>
 								<para>
 									fmin([all|distinct] <emphasis>expression</emphasis>, <emphasis>filter_expr</emphasis>)
+								</para>
+								<para>
+								    Consider using <literal>minby</literal> instead if return values must include additional properties.
 								</para>
 							</entry>
 							<entry>
@@ -1105,47 +1112,162 @@ from Trade.std:groupwin(symbol).win:length(10)</programlisting>
 			
 		</sect2>
 	
-		<sect2 xml:id="epl-function-aggregation-dwtrack">
-			<title>Data Window Aggregation Functions</title>
-
+		<sect2 xml:id="epl-function-aggregation-event">
+			<title>Event Aggregation Functions</title>
+		
 			<para>
-				The <literal>first</literal>, <literal>last</literal> and <literal>window</literal> aggregation functions return event properties of events present in a stream's data window or named window. They are useful when information about current data window or named window contents is required.
+				The event aggregation functions return one or more events or event properties. When used with <literal>group by</literal> the event aggregation functions 
+				return one or more events or event properties per group.
 			</para>
 			
 			<para>
-			   In connection with named windows, the <literal>first</literal>, <literal>last</literal> and <literal>window</literal> aggregation functions can also be used in <literal>on-select</literal>, 
-			   selects with named window in the <literal>from</literal> clause, subqueries against named windows and on-demand fire-and-forget queries.
+			  The <literal>sorted</literal> and the <literal>window</literal> event aggregation functions require that a data window or named window is declared for the applicable stream.
+			  They cannot be used on unbound streams.
 			</para>
+				
+			<para>
+				The below table summarizes the event aggregation functions available:
+			</para>
+		
+			<table frame="topbot" xml:id="event_aggregation_func_table" revision="2">
+				<title>Event Aggregation Functions</title>
+				<tgroup cols="2">
+					<colspec colwidth="1.0*"/>
+					<colspec colwidth="2.0*"/>
+					<thead>
+						<row>
+							<entry>Function</entry>
+							<entry>Result</entry>
+						</row>
+					</thead>
+					<tbody>
+						<row>
+							<entry>first(...)</entry>
+							<entry>
+								<para>
+									Returns the first event or an event property value of the first event.
+								</para>
+								<para>
+									<xref linkend="epl-function-aggregation-event-first"/>.
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>last(...)</entry>
+							<entry>
+								<para>
+									Returns the last event or an event property value of the last event.
+								</para>
+								<para>
+									<xref linkend="epl-function-aggregation-event-last"/>.
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>maxby(criteria)</entry>
+							<entry>
+								<para>
+									Returns the event with the highest sorted value according to criteria expressions.
+								</para>
+								<para>
+									<xref linkend="epl-function-aggregation-event-maxby"/>.
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>maxbyever(criteria)</entry>
+							<entry>
+								<para>
+									Returns the event with the highest sorted value, ever, according to criteria expressions.
+								</para>
+								<para>
+									<xref linkend="epl-function-aggregation-event-maxbyever"/>.
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>minby(criteria)</entry>
+							<entry>
+								<para>
+									Returns the event with the lowest sorted value according to criteria expressions.
+								</para>
+								<para>
+									<xref linkend="epl-function-aggregation-event-minby"/>.
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>minbyever(criteria)</entry>
+							<entry>
+								<para>
+									Returns the event with the lowest sorted value, ever, according to criteria expressions.
+								</para>
+								<para>
+									<xref linkend="epl-function-aggregation-event-minbyever"/>.
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>sorted(criteria)</entry>
+							<entry>
+								<para>
+									Returns events sorted according to criteria expressions.
+								</para>
+								<para>
+									<xref linkend="epl-function-aggregation-event-sorted"/>.
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>window(...)</entry>
+							<entry>
+								<para>
+									Returns all events or all event's property values.
+								</para>
+								<para>
+									<xref linkend="epl-function-aggregation-event-window"/>.
+								</para>
+							</entry>
+						</row>
+					</tbody>
+				  </tgroup>
+				</table>		
+	
+				<para>
+				   In connection with named windows, event aggregation functions can also be used in <literal>on-select</literal>, 
+				   selects with named window in the <literal>from</literal> clause, subqueries against named windows and on-demand fire-and-forget queries.
+				</para>
+				
+				<para>
+				   The event aggregation functions are often useful in connection with enumeration methods and they can provide input events for enumeration. Please see <xref linkend="enumerationreference"/> for more information. 
+				</para>
+	
+				<para>
+					When comparing the <literal>last</literal> aggregation function to the <literal>prev</literal> function, the differences are as follows. The <literal>prev</literal> function is not an aggregation function and thereby not sensitive to the presence of <literal>group by</literal>. The <literal>prev</literal> function accesses data window contents directly and respects the sort order of the data window. The <literal>last</literal> aggregation function returns results based on arrival order and tracks data window contents in a separate shared data structure.
+				</para>
+	
+				<para>
+					When comparing the <literal>first</literal> aggregation function to the <literal>prevtail</literal> function, the differences are as follows. The <literal>prevtail</literal> function is not an aggregation function and thereby not sensitive to the presence of <literal>group by</literal>. The <literal>prevtail</literal> function accesses data window contents directly and respects the sort order of the data window. The <literal>first</literal> aggregation function returns results based on arrival order and tracks data window contents in a separate shared data structure.
+				</para>
+	
+				<para>
+					When comparing the <literal>window</literal> aggregation function to the <literal>prevwindow</literal> function, the differences are as follows. The <literal>prevwindow</literal> function is not an aggregation function and thereby not sensitive to the presence of <literal>group by</literal>. The <literal>prevwindow</literal> function accesses data window contents directly and respects the sort order of the data window. The <literal>window</literal> aggregation function returns results based on arrival order and tracks data window contents in a separate shared data structure.
+				</para>
+	
+				<para>
+					When comparing the <literal>count</literal> aggregation function to the <literal>prevcount</literal> function, the differences are as follows. The <literal>prevcount</literal> function is not an aggregation function and thereby not sensitive to the presence of <literal>group by</literal>.
+				</para>
+	
+				<para>
+					When comparing the <literal>last</literal> aggregation function to the <literal>nth</literal> aggregation function, the differences  are as follows. The <literal>nth</literal> aggregation function does not consider out-of-order deletes (for example with on-delete and sorted windows) and does not revert to the prior expression value when the last event or nth-event was deleted from a data window. The <literal>last</literal> aggregation function tracks the data window and reflects out-of-order deletes.
+				</para>
+	
+				<para>
+					From an implementation perspective, the <literal>first</literal>, <literal>last</literal> and <literal>window</literal> aggregation functions share a common data structure for each stream. 
+					The <literal>sorted</literal>, <literal>minby</literal> and <literal>maxby</literal> aggregation functions share a common data structure for each stream. 
+				</para>
 			
-			<para>
-			   The data window aggregation functions are often useful in connection with enumeration methods and they can provide input events for enumeration. Please see <xref linkend="enumerationreference"/> for more information. 
-			</para>
-
-			<para>
-				When comparing the <literal>last</literal> aggregation function to the <literal>prev</literal> function, the differences are as follows. The <literal>prev</literal> function is not an aggregation function and thereby not sensitive to the presence of <literal>group by</literal>. The <literal>prev</literal> function accesses data window contents directly and respects the sort order of the data window. The <literal>last</literal> aggregation function returns results based on arrival order and tracks data window contents in a separate shared data structure.
-			</para>
-
-			<para>
-				When comparing the <literal>first</literal> aggregation function to the <literal>prevtail</literal> function, the differences are as follows. The <literal>prevtail</literal> function is not an aggregation function and thereby not sensitive to the presence of <literal>group by</literal>. The <literal>prevtail</literal> function accesses data window contents directly and respects the sort order of the data window. The <literal>first</literal> aggregation function returns results based on arrival order and tracks data window contents in a separate shared data structure.
-			</para>
-
-			<para>
-				When comparing the <literal>window</literal> aggregation function to the <literal>prevwindow</literal> function, the differences are as follows. The <literal>prevwindow</literal> function is not an aggregation function and thereby not sensitive to the presence of <literal>group by</literal>. The <literal>prevwindow</literal> function accesses data window contents directly and respects the sort order of the data window. The <literal>window</literal> aggregation function returns results based on arrival order and tracks data window contents in a separate shared data structure.
-			</para>
-
-			<para>
-				When comparing the <literal>count</literal> aggregation function to the <literal>prevcount</literal> function, the differences are as follows. The <literal>prevcount</literal> function is not an aggregation function and thereby not sensitive to the presence of <literal>group by</literal>.
-			</para>
-
-			<para>
-				When comparing the <literal>last</literal> aggregation function to the <literal>nth</literal> aggregation function, the differences  are as follows. The <literal>nth</literal> aggregation function does not consider out-of-order deletes (for example with on-delete and sorted windows) and does not revert to the prior expression value when the last event or nth-event was deleted from a data window. The <literal>last</literal> aggregation function tracks the data window and reflects out-of-order deletes.
-			</para>
-
-			<para>
-				From an implementation perspective, the <literal>first</literal>, <literal>last</literal> and <literal>window</literal> aggregation functions share a common data structure for each stream. 
-			</para>
-			
-			<sect3 xml:id="epl-function-aggregation-dwtrack-first">
+			<sect3 xml:id="epl-function-aggregation-event-first">
 				<title><literal>First</literal> Aggregation Function</title>
 		
 				<para>
@@ -1154,7 +1276,7 @@ from Trade.std:groupwin(symbol).win:length(10)</programlisting>
 				<synopsis><literal>first(</literal>*|<emphasis>stream</emphasis>.*|<emphasis>value_expression</emphasis> [, <emphasis>index_expression</emphasis>])</synopsis>
 
 				<para>
-					The <literal>first</literal> aggregation function returns properties of very first event in the data window. When used with <literal>group by</literal>, it returns properties of the first event in the data window for each group. When specifying an index expression, the function returns properties of the Nth-subsequent event to the first event, all according to order of arrival.
+					The <literal>first</literal> aggregation function returns properties of the very first event. When used with <literal>group by</literal>, it returns properties of the first event for each group. When specifying an index expression, the function returns properties of the Nth-subsequent event to the first event, all according to order of arrival.
 				</para>
 				
 				<para>
@@ -1179,7 +1301,7 @@ from Trade.std:groupwin(symbol).win:length(10)</programlisting>
 				</para>
 				
 				<para>
-					The function returns <literal>null</literal> if there are no events in the data window or when the index is larger then the number of events held in the data window. If used with <literal>group by</literal>, it returns <literal>null</literal> if there are no events in the data window for that group or when the index is larger then the number of events held in the data window for that group.
+					The function returns <literal>null</literal> if there are no events or when the index is larger than the number of events held. When used with <literal>group by</literal>, it returns <literal>null</literal> if there are no events for that group or when the index is larger than the number of events held for that group.
 				</para>
 
 				<para>
@@ -1198,7 +1320,7 @@ from Trade.std:groupwin(symbol).win:length(10)</programlisting>
 				<programlisting>select (select first(se.*) from SensorEvent.win:length(2) as se) from DoorEvent </programlisting>
 				
 				<para>
-					The following example shows the use of an index expression. The output value for <literal>f1</literal> is the temperature property value of the first event in the data window, the value for <literal>f2</literal> is the temperature property value of the second event in the data window:
+					The following example shows the use of an index expression. The output value for <literal>f1</literal> is the temperature property value of the first event, the value for <literal>f2</literal> is the temperature property value of the second event:
 				</para>
 				<programlisting>select first(temperature, 0) as f1, first(temperature, 1) as f2
 from SensorEvent.win:time(10 sec)</programlisting>
@@ -1208,7 +1330,7 @@ from SensorEvent.win:time(10 sec)</programlisting>
 				</para>
 			</sect3>
 
-			<sect3 xml:id="epl-function-aggregation-dwtrack-last">
+			<sect3 xml:id="epl-function-aggregation-event-last">
 				<title><literal>Last</literal> Aggregation Function</title>
 		
 				<para>
@@ -1217,7 +1339,7 @@ from SensorEvent.win:time(10 sec)</programlisting>
 				<synopsis><literal>last(</literal>*|<emphasis>stream</emphasis>.*|<emphasis>value_expression</emphasis> [, <emphasis>index_expression</emphasis>])</synopsis>
 
 				<para>
-					The <literal>last</literal> aggregation function returns properties of the very last event in the data window. When used with <literal>group by</literal>, it returns properties of the last event in the data window for each group. When specifying an index expression, the function returns properties of the Nth-prior event to the last event, all according to order of arrival.
+					The <literal>last</literal> aggregation function returns properties of the very last event. When used with <literal>group by</literal>, it returns properties of the last event for each group. When specifying an index expression, the function returns properties of the Nth-prior event to the last event, all according to order of arrival.
 				</para>
 
 				<para>
@@ -1231,7 +1353,7 @@ from SensorEvent.win:time(10 sec)</programlisting>
 				</para>
 				
 				<para>
-					The function returns <literal>null</literal> if there are no events in the data window or when the index is larger then the number of events held in the data window. If used with <literal>group by</literal>, it returns <literal>null</literal> if there are no events in the data window for that group or when the index is larger then the number of events held in the data window for that group.
+					The function returns <literal>null</literal> if there are no events or when the index is larger than the number of events held. When used with <literal>group by</literal>, it returns <literal>null</literal> if there are no events for that group or when the index is larger than the number of events held for that group.
 				</para>
 
 				<para>
@@ -1246,7 +1368,151 @@ from SensorEvent.win:time(10 sec)</programlisting>
 from SensorEvent.win:time(10 sec)</programlisting>
 			</sect3>
 
-			<sect3 xml:id="epl-function-aggregation-dwtrack-window">
+			<sect3 xml:id="epl-function-aggregation-event-maxby">
+				<title><literal>Maxby</literal> Aggregation Function</title>
+				<indexterm><primary>maximum-by</primary></indexterm>
+		
+				<para>
+					The synopsis for the <literal>maxby</literal> aggregation function is:
+				</para>
+				<synopsis><literal>maxby</literal>(<emphasis>sort_criteria_expression</emphasis> [asc/desc][, <emphasis>sort_criteria_expression</emphasis> [asc/desc]...])</synopsis>
+
+				<para>
+					The <literal>maxby</literal> aggregation function returns the greatest of all events, compared by using criteria expressions.
+					When used with <literal>group by</literal>, it returns the greatest of all events per group.
+				</para>
+								
+				<para>
+					This example statement returns the sensor id and the temperature of the sensor event that had the highest temperature among all sensor events:
+				</para>
+				<programlisting>select maxby(temperature).sensorId, maxby(temperature).temperature from SensorEvent</programlisting>
+				
+				<para>
+					The next EPL returns the sensor event that had the highest temperature and the sensor event that had the lowest temperature, per zone, among the last 10 seconds of sensor events:
+				</para>
+				<programlisting>select maxby(temperature), minby(temperature) from SensorEvent.win:time(10 sec) group by zone</programlisting>
+				
+				<para>
+					Your EPL may specify multiple criteria expressions. If the sort criteria expression is descending please append the <literal>desc</literal> keyword.
+				</para>
+
+				<para>
+					The following EPL returns the sensor event with the highest temperature and if there are multiple sensor events with the highest temperature the query
+					returns the sensor event that has the newest timestamp value:
+				</para>
+				<programlisting>select maxby(temperature asc, timestamp desc) from SensorEvent</programlisting>
+
+				<para>
+				  Event properties that are listed in criteria expressions must refer to the same event stream and cannot originate from different event streams.
+				</para>
+				
+				<para>
+				  If your query does not define a data window and does not refer to a named window, the semantics of <literal>maxby</literal> are the same as <literal>maxbyever</literal>.
+				</para>
+			</sect3>
+
+			<sect3 xml:id="epl-function-aggregation-event-maxbyever">
+				<title><literal>Maxbyever</literal> Aggregation Function</title>
+		
+				<para>
+					The synopsis for the <literal>maxbyever</literal> aggregation function is:
+				</para>
+				<synopsis><literal>maxbyever</literal>(<emphasis>sort_criteria_expression</emphasis> [asc/desc][, <emphasis>sort_criteria_expression</emphasis> [asc/desc]...])</synopsis>
+
+				<para>
+					The <literal>maxbyever</literal> aggregation function returns the greatest of all events that ever occurred, compared by using criteria expressions.
+					When used with <literal>group by</literal>, it returns the greatest of all events that ever occurred per group.
+				</para>
+								
+				<para>
+					Compared to the <literal>maxby</literal> aggregation function the <literal>maxbyever</literal> does not consider the data window or named window contents
+					and instead considers all arriving events.
+				</para>
+				
+				<para>
+					The next EPL computes the difference, per zone, between the maximum temperature considering all events and the maximum temperature considering
+					only the events in the last 10 seconds:
+				</para>
+				<programlisting>select maxby(temperature).temperature - maxbyever(temperature).temperature 
+from SensorEvent.win:time(10) group by zone</programlisting>
+			</sect3>
+
+			<sect3 xml:id="epl-function-aggregation-event-minby">
+				<title><literal>Minby</literal> Aggregation Function</title>
+				<indexterm><primary>minimum-by</primary></indexterm>
+		
+				<para>
+					The synopsis for the <literal>minby</literal> aggregation function is:
+				</para>
+				<synopsis><literal>minby</literal>(<emphasis>sort_criteria_expression</emphasis> [asc/desc][, <emphasis>sort_criteria_expression</emphasis> [asc/desc]...])</synopsis>
+
+				<para>
+					Similar to the <literal>maxby</literal> aggregation function, the <literal>minby</literal> aggregation function returns the lowest of all events, compared by using criteria expressions.
+					When used with <literal>group by</literal>, it returns the lowest of all events per group.
+				</para>
+								
+				<para>
+					Please review the section on <literal>maxby</literal> for more information.
+				</para>
+			</sect3>
+
+			<sect3 xml:id="epl-function-aggregation-event-minbyever">
+				<title><literal>Minbyever</literal> Aggregation Function</title>
+		
+				<para>
+					Similar to the <literal>maxbyever</literal> aggregation function, the <literal>minbyever</literal> aggregation function returns the lowest of all events that ever occurred, compared by using criteria expressions.
+					When used with <literal>group by</literal>, it returns the lowest of all events per group that ever occured.
+				</para>
+								
+				<para>
+					Please review the section on <literal>maxbyever</literal> for more information.
+				</para>
+			</sect3>
+
+			<sect3 xml:id="epl-function-aggregation-event-sorted">
+				<title><literal>Sorted</literal> Aggregation Function</title>
+				<indexterm><primary>ordered</primary></indexterm>
+				<indexterm><primary>sorted</primary></indexterm>
+
+				<para>
+					The synopsis for the <literal>sorted</literal> aggregation function is:
+				</para>
+				<synopsis><literal>sorted</literal>(<emphasis>sort_criteria_expression</emphasis> [asc/desc][, <emphasis>sort_criteria_expression</emphasis> [asc/desc]...])</synopsis>
+
+				<para>
+					The <literal>sorted</literal> aggregation function maintains a list of events sorted according to criteria expressions.
+					When used with <literal>group by</literal>, it maintains a list of events sorted according to criteria expressions per group.
+				</para>
+								
+				<para>
+					The sample EPL listed next returns events sorted according to temperature ascending for the same zone:
+				</para>
+				<programlisting>select sorted(temperature) from SensorEvent group by zone</programlisting>
+								
+				<para>
+					Your EPL may specify multiple criteria expressions. If the sort criteria expression is descending please append the <literal>desc</literal> keyword.
+				</para>
+
+				<para>
+					Enumeration methods can be useful in connection with <literal>sorted</literal> as the function provides the sorted events as input.
+				</para>
+				
+				<para>
+				    This EPL statement finds the sensor event that when sorted according to temperature is the first sensor event for a Friday timestamp among sensor events for the same zone:
+				</para>
+				<programlisting>select sorted(temperature).first(v => timestamp.getDayOfWeek()=6)
+from SensorEvent</programlisting>
+
+				<para>
+				  Event properties that are listed in criteria expressions must refer to the same event stream and cannot originate from different event streams.
+				</para>
+				
+				<para>
+				  The use of <literal>sorted</literal> requires that your EPL defines a data window for the stream or utilizes a named window.
+				</para>
+			</sect3>
+
+			<sect3 xml:id="epl-function-aggregation-event-window">
 				<title><literal>Window</literal> Aggregation Function</title>
 		
 				<para>
@@ -1255,7 +1521,7 @@ from SensorEvent.win:time(10 sec)</programlisting>
 				<synopsis><literal>window(</literal>*|<emphasis>stream</emphasis>.*|<emphasis>value_expression</emphasis>)</synopsis>
 
 				<para>
-					The <literal>window</literal> aggregation function returns properties of all events in the data window. When used with <literal>group by</literal>, it returns properties of all events in the data window for each group.
+					The <literal>window</literal> aggregation function returns properties of all events in the data window or named window. When used with <literal>group by</literal>, it returns properties of all events in the data window or named window for each group.
 				</para>
 
 				<para>
@@ -1263,7 +1529,7 @@ from SensorEvent.win:time(10 sec)</programlisting>
 				</para>
 
 				<para>
-					The function returns <literal>null</literal> if there are no events in the data window. If used with <literal>group by</literal>, it returns <literal>null</literal> if there are no events in the data window for that group.
+					The function returns <literal>null</literal> if there are no events. When used with <literal>group by</literal>, it returns <literal>null</literal> if there are no events for that group.
 				</para>
 
 				<para>
@@ -1306,10 +1572,10 @@ from SensorEvent.win:time(10 sec)</programlisting>
 							<entry>firstever(<emphasis>expression</emphasis> [, <emphasis>filter_expr</emphasis>])</entry>
 							<entry>
 								<para>
-									The <literal>firstever</literal> aggregation function returns the very first value ever. If used with <literal>group by</literal> it returns the first value ever for that group.
+									The <literal>firstever</literal> aggregation function returns the very first value ever. When used with <literal>group by</literal> it returns the first value ever for that group.
 								</para>				
 								<para>
-									If used with a data window, the result of the function does not change as data points leave a data window. Use the <literal>first</literal> or <literal>prevtail</literal> function to return values relative to a data window.
+									When used with a data window, the result of the function does not change as data points leave a data window. Use the <literal>first</literal> or <literal>prevtail</literal> function to return values relative to a data window.
 								</para>
 								<para>
 									The optional filter expression limits the values considered for retaining the first-ever value.
@@ -1324,7 +1590,7 @@ from SensorEvent.win:time(10 sec)</programlisting>
 							<entry>lastever(<emphasis>expression</emphasis> [, <emphasis>filter_expr</emphasis>])</entry>
 							<entry>
 								<para>
-									Returns the last value or last value per group, if used with <literal>group by</literal>.
+									Returns the last value or last value per group, when used with <literal>group by</literal>.
 								</para>
 								<para>
 									This sample statement outputs the total price, the first price and the last price per symbol for the last 30 seconds of events and every 5 seconds:
@@ -1334,7 +1600,7 @@ from StockTickEvent.win:time(30 sec)
 group by symbol
 output every 5 sec</programlisting>
 								<para>
-									If used with a data window, the result of the function does not change as data points leave a data window (for example when all data points leave the data window). Use the <literal>last</literal> or <literal>prev</literal> function to return values relative to a data window.
+									When used with a data window, the result of the function does not change as data points leave a data window (for example when all data points leave the data window). Use the <literal>last</literal> or <literal>prev</literal> function to return values relative to a data window.
 								</para>
 								<para>
 									The optional filter expression limits the values considered for retaining the last-ever value.
@@ -1476,6 +1742,11 @@ group by symbol</programlisting>
 		</para>
 		<programlisting><![CDATA[select discount(*) from OrderEvent]]></programlisting>
 
+		<para>
+			Alternatively use the stream alias or EPL pattern tag to pass an event:
+		</para>
+		<programlisting><![CDATA[select discount(oe) from OrderEvent as oe]]></programlisting>
+
 		 <para>
 			 User-defined functions can be also be invoked on instances of an event: Please see <xref linkend="epl-from-clause-stream-name"/> to invoke event instance methods on a named stream.
 		 </para>
@@ -1563,11 +1834,31 @@ from StockTick.win:time(30 sec)]]></programlisting>
 				 Boxing and unboxing of arrays is not supported in UDF as it is not supported in Java. For example, an array of <literal>Integer</literal> and an array of <literal>int</literal> are not compatible types.
 			 </para>
 
+			<para>
+			  When passing the event or underlying event to your method, either declare the parameter to take <literal>EventBean</literal> (i.e. <literal>myfunc(EventBean event)</literal>) 
+			  or as the underlying event type (i.e. <literal>myfunc(OrderEvent event)</literal>).
+			</para>
+
 			 <para>
 				 When using <literal>{}</literal> array syntax in EPL, the resulting type is always a boxed type: <literal>"{1, 2}"</literal> is an array of <literal>Integer</literal> (and not <literal>int</literal> since it may contain null values), <literal>"{1.0, 2d}"</literal> is an array of <literal>Double</literal> and <literal>"{'A', "B"}"</literal> is an array of <literal>String</literal>, while <literal>"{1, "B", 2.0}"</literal> is an array of <literal>Object</literal> (<literal>Object[]</literal>).
 			 </para>
 		</sect3>
 
+		<sect3 xml:id="epl-function-user-defined-receivectx" revision="1">
+			<title>Receiving a Context Object</title>
+
+			<para>
+			  Esper can pass an object containing contextual information such as statement name, function name, engine URI and context partition id to your
+			  method. The container for this information is <literal>EPLMethodInvocationContext</literal> in package <literal>com.espertech.esper.client.hook</literal>.
+			  Please declare your method to take <literal>EPLMethodInvocationContext</literal> as the last parameter. The engine then passes the information along.
+			</para>
+			
+			<para> 
+			  A sample method footprint and EPL are shown below:
+			</para>					
+			<programlisting><![CDATA[public static double computeSomething(double number, EPLMethodInvocationContext context) {...}]]></programlisting>
+			<programlisting><![CDATA[select MyLib.computeSomething(10) from MyEvent]]></programlisting>
+		</sect3>
 	</sect1>
 
 	<sect1 xml:id="functionreference-transpose">

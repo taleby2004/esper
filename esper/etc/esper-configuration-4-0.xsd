@@ -14,6 +14,7 @@
 					<xs:element ref="esper:plugin-view" minOccurs="0" maxOccurs="unbounded"/>
 					<xs:element ref="esper:plugin-virtualdw" minOccurs="0" maxOccurs="unbounded"/>
 					<xs:element ref="esper:plugin-aggregation-function" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element ref="esper:plugin-aggregation-multifunction" minOccurs="0" maxOccurs="unbounded"/>
 					<xs:element ref="esper:plugin-singlerow-function" minOccurs="0" maxOccurs="unbounded"/>
 					<xs:element ref="esper:plugin-pattern-guard" minOccurs="0" maxOccurs="unbounded"/>
 					<xs:element ref="esper:plugin-pattern-observer" minOccurs="0" maxOccurs="unbounded"/>
@@ -348,6 +349,17 @@
 			<xs:attribute name="factory-class" type="xs:string" use="optional"/>
 		</xs:complexType>
 	</xs:element>
+	<xs:element name="plugin-aggregation-multifunction">
+		<xs:complexType>
+			<xs:sequence minOccurs="0" maxOccurs="unbounded">
+				<xs:choice>
+					<xs:element ref="esper:init-arg" minOccurs="0" maxOccurs="unbounded"/>
+				</xs:choice>
+			</xs:sequence>
+			<xs:attribute name="function-names" type="xs:string" use="required"/>
+			<xs:attribute name="factory-class" type="xs:string" use="optional"/>
+		</xs:complexType>
+	</xs:element>
 	<xs:element name="plugin-singlerow-function">
 		<xs:complexType>
 			<xs:attribute name="name" type="xs:string" use="required"/>
@@ -455,6 +467,7 @@
 				<xs:sequence>
 					<xs:element ref="esper:class-property-resolution" minOccurs="0"/>
 					<xs:element ref="esper:event-representation" minOccurs="0"/>
+					<xs:element ref="esper:anonymous-cache" minOccurs="0"/>
 				</xs:sequence>
 			</xs:choice>
 		</xs:complexType>
@@ -516,6 +529,11 @@
 	<xs:element name="event-representation">
 		<xs:complexType>
 			<xs:attribute name="type" type="esper:eventRepresentationEnum" use="optional"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="anonymous-cache">
+		<xs:complexType>
+			<xs:attribute name="size" type="xs:int" use="required"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="view-resources">

@@ -90,7 +90,7 @@ public class IndexTreeBuilderRunnable implements Runnable
         }
 
         // Remove the same expression again
-        treeBuilder.remove(eventType, filterCallback, pathAddedTo, topNode);
+        treeBuilder.remove(eventType, filterCallback, new EventTypeIndexBuilderIndexLookupableIterator(pathAddedTo.toArray()), topNode);
         log.debug(".run (" + Thread.currentThread().getId() + ")" + " Completed");
 
         ObjectReservationSingleton.getInstance().unreserve(filterSpec);

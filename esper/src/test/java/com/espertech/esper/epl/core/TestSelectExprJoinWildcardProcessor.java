@@ -13,6 +13,7 @@ package com.espertech.esper.epl.core;
 
 import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.core.service.StatementEventTypeRefImpl;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.epl.SupportStreamTypeSvc3Stream;
@@ -28,7 +29,7 @@ public class TestSelectExprJoinWildcardProcessor extends TestCase
 
     public void setUp() throws ExprValidationException
     {
-        SelectExprEventTypeRegistry selectExprEventTypeRegistry = new SelectExprEventTypeRegistry(new HashSet<String>());
+        SelectExprEventTypeRegistry selectExprEventTypeRegistry = new SelectExprEventTypeRegistry("abc", new StatementEventTypeRefImpl());
         SupportStreamTypeSvc3Stream supportTypes = new SupportStreamTypeSvc3Stream();
 
         processor = SelectExprJoinWildcardProcessorFactory.create(Collections.<Integer>emptyList(), "id", supportTypes.getStreamNames(), supportTypes.getEventTypes(),

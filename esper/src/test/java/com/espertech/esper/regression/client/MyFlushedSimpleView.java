@@ -30,7 +30,7 @@ public class MyFlushedSimpleView extends ViewSupport implements StopCallback
 
     public MyFlushedSimpleView(AgentInstanceViewFactoryChainContext agentInstanceContext)
     {
-        agentInstanceContext.getTerminationCallbacks().add(this);
+        agentInstanceContext.addTerminationCallback(this);
         events = new ArrayList<EventBean>();
     }
 

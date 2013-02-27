@@ -35,12 +35,12 @@ public class ExprNumberSetFrequency extends ExprNodeBase implements ExprEvaluato
 
     public String toExpressionString()
     {
-        return "*/" + this.getChildNodes().get(0);
+        return "*/" + this.getChildNodes()[0];
     }
 
     public boolean isConstantResult()
     {
-        return this.getChildNodes().get(0).isConstantResult();
+        return this.getChildNodes()[0].isConstantResult();
     }
 
     public boolean equalsNode(ExprNode node)
@@ -54,7 +54,7 @@ public class ExprNumberSetFrequency extends ExprNodeBase implements ExprEvaluato
 
     public void validate(ExprValidationContext validationContext) throws ExprValidationException
     {
-        evaluator = this.getChildNodes().get(0).getExprEvaluator();
+        evaluator = this.getChildNodes()[0].getExprEvaluator();
         Class type = evaluator.getType();
         if (!(JavaClassHelper.isNumericNonFP(type)))
         {

@@ -21,9 +21,8 @@ import com.espertech.esper.view.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.ArrayDeque;
+import java.util.Iterator;
 
 /**
  * A data view that aggregates events in a stream and releases them in one batch at every specified time interval.
@@ -97,7 +96,7 @@ public class TimeBatchView extends ViewSupport implements CloneableView, Stoppab
             isCallbackScheduled = true;
         }
 
-        agentInstanceContext.getTerminationCallbacks().add(this);
+        agentInstanceContext.addTerminationCallback(this);
     }
 
     public View cloneView()
@@ -309,7 +308,7 @@ public class TimeBatchView extends ViewSupport implements CloneableView, Stoppab
 
     public void stopView() {
         stopSchedule();
-        agentInstanceContext.getTerminationCallbacks().remove(this);
+        agentInstanceContext.removeTerminationCallback(this);
     }
 
     public void stop() {

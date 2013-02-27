@@ -23,12 +23,7 @@ import com.espertech.esper.support.event.SupportEventBeanFactory;
 import com.espertech.esper.support.event.SupportEventTypeFactory;
 import com.espertech.esper.support.view.*;
 import com.espertech.esper.view.EventStream;
-import com.espertech.esper.view.View;
 import junit.framework.TestCase;
-
-import java.util.ArrayDeque;
-import java.util.Collection;
-import java.util.List;
 
 public class TestGroupByView extends TestCase
 {
@@ -177,12 +172,12 @@ public class TestGroupByView extends TestCase
         assertTrue(subViews != firstElementView_1);
 
         FirstElementView firstEleView = (FirstElementView) subViews;
-        assertEquals(1, firstEleView.getViews().size());
-        assertTrue(firstEleView.getViews().get(0) instanceof AddPropertyValueView);
+        assertEquals(1, firstEleView.getViews().length);
+        assertTrue(firstEleView.getViews()[0] instanceof AddPropertyValueView);
 
-        AddPropertyValueView md = (AddPropertyValueView) firstEleView.getViews().get(0);
-        assertEquals(1, md.getViews().size());
-        assertTrue(md.getViews().get(0) == mergeViewOne);
+        AddPropertyValueView md = (AddPropertyValueView) firstEleView.getViews()[0];
+        assertEquals(1, md.getViews().length);
+        assertTrue(md.getViews()[0] == mergeViewOne);
     }
 
     private EventBean makeTradeBean(String symbol, int price)

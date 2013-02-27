@@ -325,7 +325,18 @@ public class TestFromClauseMethod extends TestCase
         String joinStatement = "select theString, intPrimitive, mapstring, mapint from " +
                 SupportBean.class.getName() + ".win:keepall() as s1, " +
                 "method:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchMap(theString, intPrimitive)";
-        EPStatement stmt = epService.getEPAdministrator().createEPL(joinStatement);
+        runAssertion(joinStatement);
+
+        // test stream alias
+        String eplStreamAlias = "select theString, intPrimitive, mapstring, mapint from " +
+                SupportBean.class.getName() + " as s1, " +
+                "method:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchMapEventBean(s1, 'theString', 'intPrimitive')";
+        runAssertion(eplStreamAlias);
+    }
+
+    private void runAssertion(String epl) {
+
+        EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
         String[] fields = new String[] {"theString", "intPrimitive", "mapstring", "mapint"};
 

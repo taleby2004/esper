@@ -35,6 +35,6 @@ public class SupportEPLTreeWalkerFactory
 
     public static EPLTreeWalker makeWalker(Tree tree, CommonTokenStream tokenStream)
     {
-        return makeWalker(tree, tokenStream, new EngineImportServiceImpl(true, true, true), new VariableServiceImpl(0, null, SupportEventAdapterService.getService(), null));
+        return makeWalker(tree, tokenStream, new EngineImportServiceImpl(true, true, true, false), new VariableServiceImpl(0, null, SupportEventAdapterService.getService(), null));
     }
 }

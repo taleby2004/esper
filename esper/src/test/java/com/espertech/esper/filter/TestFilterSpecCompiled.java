@@ -25,6 +25,7 @@ import com.espertech.esper.util.SimpleNumberCoercerFactory;
 import junit.framework.TestCase;
 
 import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 
@@ -85,16 +86,16 @@ public class TestFilterSpecCompiled extends TestCase
 
         // Assert the generated filter value container
         assertSame(eventType, valueSet.getEventType());
-        assertEquals(2, valueSet.getParameters().size());
+        assertEquals(2, valueSet.getParameters().length);
 
         // Assert the first param
-        FilterValueSetParam param = valueSet.getParameters().getFirst();
+        FilterValueSetParam param = valueSet.getParameters()[0];
         assertEquals("intPrimitive", param.getLookupable().getExpression());
         assertEquals(FilterOperator.EQUAL, param.getFilterOperator());
         assertEquals(2, param.getFilterForValue());
 
         // Assert the second param
-        param = (FilterValueSetParam) valueSet.getParameters().toArray()[1];
+        param = (FilterValueSetParam) valueSet.getParameters()[1];
         assertEquals("doubleBoxed", param.getLookupable().getExpression());
         assertEquals(FilterOperator.EQUAL, param.getFilterOperator());
         assertEquals(999.999, param.getFilterForValue());
@@ -114,7 +115,7 @@ public class TestFilterSpecCompiled extends TestCase
                 "intBoxed", FilterOperator.EQUAL, 2,
                 "floatBoxed", FilterOperator.RANGE_CLOSED, 1.1d, 2.2d);
 
-        ArrayDeque<FilterSpecParam> copy = spec.getParameters();
+        ArrayDeque<FilterSpecParam> copy = new ArrayDeque<FilterSpecParam>(Arrays.asList(spec.getParameters()));
 
         assertEquals("intPrimitive", copy.remove().getLookupable().getExpression());
         assertEquals("string", copy.remove().getLookupable().getExpression());

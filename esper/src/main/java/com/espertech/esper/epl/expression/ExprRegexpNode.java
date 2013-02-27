@@ -49,7 +49,7 @@ public class ExprRegexpNode extends ExprNodeBase implements ExprEvaluator
 
     public void validate(ExprValidationContext validationContext) throws ExprValidationException
     {
-        if (this.getChildNodes().size() != 2)
+        if (this.getChildNodes().length != 2)
         {
             throw new ExprValidationException("The regexp operator requires 2 child expressions");
         }
@@ -61,7 +61,7 @@ public class ExprRegexpNode extends ExprNodeBase implements ExprEvaluator
         {
             throw new ExprValidationException("The regexp operator requires a String-type pattern expression");
         }
-        if (this.getChildNodes().get(1).isConstantResult())
+        if (this.getChildNodes()[1].isConstantResult())
         {
             isConstantPattern = true;
         }
@@ -163,14 +163,14 @@ public class ExprRegexpNode extends ExprNodeBase implements ExprEvaluator
     {
         StringBuilder buffer = new StringBuilder();
 
-        buffer.append(this.getChildNodes().get(0).toExpressionString());
+        buffer.append(this.getChildNodes()[0].toExpressionString());
 
         if (isNot)
         {
             buffer.append(" not");
         }
         buffer.append(" regexp ");
-        buffer.append(this.getChildNodes().get(1).toExpressionString());
+        buffer.append(this.getChildNodes()[1].toExpressionString());
 
         return buffer.toString();
     }

@@ -11,18 +11,18 @@
 
 package com.espertech.esper.support.view;
 
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.support.event.SupportEventTypeFactory;
+import com.espertech.esper.view.EventStream;
+import com.espertech.esper.view.View;
+import com.espertech.esper.view.ViewSupport;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventType;
-import com.espertech.esper.view.EventStream;
-import com.espertech.esper.view.View;
-import com.espertech.esper.support.event.SupportEventTypeFactory;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * Unit test class for view testing that implements the EventStream interface to which views can be attached as child views.
@@ -37,7 +37,7 @@ public class SupportStreamImpl implements EventStream
     private final int depth;
 
     List<EventBean> events;
-    List<View> childViews;
+    View[] childViews;
 
     public SupportStreamImpl(Class clazz, int depth)
     {
@@ -45,7 +45,7 @@ public class SupportStreamImpl implements EventStream
         this.depth = depth;
 
         this.events = new LinkedList<EventBean>();
-        this.childViews = new LinkedList<View>();
+        this.childViews = ViewSupport.EMPTY_VIEW_ARRAY;
     }
 
     /**
@@ -118,31 +118,35 @@ public class SupportStreamImpl implements EventStream
 
     public View addView(View view)
     {
-        childViews.add(view);
+        childViews = ViewSupport.addView(childViews, view);
         view.setParent(this);
         return view;
     }
 
-    public List<View> getViews()
+    public View[] getViews()
     {
         return childViews;
     }
 
     public boolean removeView(View view)
     {
-        boolean isRemoved = childViews.remove(view);
+        int index = ViewSupport.findViewIndex(childViews, view);
+        if (index == -1) {
+            return false;
+        }
+        childViews = ViewSupport.removeView(childViews, index);
         view.setParent(null);
-        return isRemoved;
+        return true;
     }
 
     public void removeAllViews()
     {
-        childViews.clear();
+        childViews = ViewSupport.EMPTY_VIEW_ARRAY;
     }
 
     public boolean hasViews()
     {
-        return (childViews.size() > 0);
+        return childViews.length > 0;
     }
 
     private static final Log log = LogFactory.getLog(SupportStreamImpl.class);

@@ -1818,17 +1818,17 @@ timer:within(125)</programlisting>
 				</para>
 					
 				<para>
-					The syntax is: <literal>timer:at (minutes, hours, days of month, months, days of week [, seconds]).</literal>
+					The syntax is: <literal>timer:at (minutes, hours, days of month, months, days of week [, seconds [, time zone]]).</literal>
 				</para>
 					
 				<para>
-					The value for seconds is optional. Each element allows wildcard <literal>*</literal> values. Ranges can be specified 
+					The value for seconds and time zone is optional. Each element allows wildcard <literal>*</literal> values. Ranges can be specified 
 					by means of lower bounds then a colon ‘:’ then the upper bound. The division operator <literal>*/x</literal> can be used to 
-					specify that every x<subscript>th</subscript> value is valid. Combinations of these operators can be used by placing these into square brackets([]).
+					specify that every x<subscript>th</subscript> value is valid. Combinations of these operators can be used by placing these into square brackets ([]).
 				</para>
 				
 				<para>
-					The <literal>timer:at</literal> observer may also be parameterized by an expression that contains one or more references to properties of prior events in the same pattern, or may also reference variables, substitution parameters or any other expression returning a numeric value. The frequency division operator <literal>*/x</literal> and parameters lists within brackets([]) are an exception: they may only contain variables, substitution parameters or numeric values.
+					The <literal>timer:at</literal> observer may also be parameterized by an expression that contains one or more references to properties of prior events in the same pattern, or may also reference variables, substitution parameters or any other expression returning a numeric value. The frequency division operator <literal>*/x</literal> and parameters lists within brackets ([]) are an exception: they may only contain variables, substitution parameters or numeric values.
 				</para>
 				
 				<para>
@@ -1894,8 +1894,14 @@ timer:within(125)</programlisting>
 							</row>
 							<row>
 								<entry>Seconds</entry>
-								<entry>no</entry>
+								<entry>no (required if specifying a time zone)</entry>
 								<entry>0 - 59</entry>
+								<entry></entry>
+							</row>
+							<row>
+								<entry>Time Zone</entry>
+								<entry>no</entry>
+								<entry>any string (not validated, see TimeZone javadoc)</entry>
 								<entry></entry>
 							</row>
 						</tbody>
@@ -1907,7 +1913,7 @@ timer:within(125)</programlisting>
 				</para>
 					
 				<para>
-					The <literal>last</literal> keyword in the day-of-week field by itself simply means Saturday. If used in the day-of-week field after another value, it means "the last xxx day of the month" - for example "5 last" means "the last friday of the month". 
+					The <literal>last</literal> keyword in the day-of-week field by itself simply means Saturday. If used in the day-of-week field after another value, it means "the last xxx day of the month" - for example "5 last" means "the last Friday of the month". 
 					So the last Friday of the current month will be: <literal>timer:at(*, *, *, *, 5 last)</literal>. And the last Friday of June: <literal>timer:at(*, *, *, 6, 5 last)</literal>.
 				</para>
 	
@@ -1919,6 +1925,15 @@ timer:within(125)</programlisting>
 					The keyword <literal>lastweekday</literal> is a combination of two parameters, the <literal>last</literal> and the <literal>weekday</literal> keywords. A typical example could be: <literal>timer:at(*, *, *, lastweekday, 9, *)</literal> which will define Friday September 28th (example year is 2007).
 				</para>
 				
+				<para>
+					The time zone is a string-type value that specifies the time zone of the schedule. You must specify a value for seconds when specifying a time zone. Esper relies on the <literal>java.util.TimeZone</literal> to interpret the time zone value. Note that <literal>TimeZone</literal> does not validate time zone strings. 
+				</para>
+
+				<para>
+					The following <literal>timer:at</literal> pattern matches at 5:00 pm Pacific Standard Time (PST): 
+				</para>
+				<programlisting><![CDATA[timer:at (0, 17, *, *, *, *, 'PST')]]></programlisting>
+
 				<sect4 xml:id="pattern-timer-at-every" >
 				   <title>timer:at and the <literal>every</literal> Operator</title>
 	

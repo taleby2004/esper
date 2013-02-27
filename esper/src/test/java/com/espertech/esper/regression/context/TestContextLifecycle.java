@@ -12,6 +12,8 @@
 package com.espertech.esper.regression.context;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.core.context.mgr.ContextManagementService;
 import com.espertech.esper.core.service.EPServiceProviderSPI;
 import com.espertech.esper.schedule.SchedulingService;
@@ -38,6 +40,43 @@ public class TestContextLifecycle extends TestCase {
         epService.initialize();
 
         spi = (EPServiceProviderSPI) epService;
+    }
+
+    public void testSplitStream() throws Exception {
+        String eplOne = "create context CtxSegmentedByTarget partition by theString from SupportBean;" +
+           "@Name('out') context CtxSegmentedByTarget on SupportBean insert into NewSupportBean select * where intPrimitive = 100;";
+        epService.getEPAdministrator().getDeploymentAdmin().parseDeploy(eplOne);
+
+        SupportUpdateListener listener = new SupportUpdateListener();
+        epService.getEPAdministrator().createEPL("select * from NewSupportBean").addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        assertFalse(listener.getAndClearIsInvoked());
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 100));
+        assertTrue(listener.getAndClearIsInvoked());
+        epService.getEPAdministrator().destroyAllStatements();
+        listener.reset();
+
+        // test with subquery
+        String[] fields = "mymax".split(",");
+        String eplTwo = "create context CtxSegmentedByTarget partition by theString from SupportBean;" +
+                "context CtxSegmentedByTarget create window NewEvent.std:unique(theString) as SupportBean;" +
+                "@Name('out') context CtxSegmentedByTarget on SupportBean " +
+                "insert into NewEvent select * where intPrimitive = 100 " +
+                "insert into NewEventTwo select (select max(intPrimitive) from NewEvent) as mymax  " +
+                "output all;";
+        epService.getEPAdministrator().getDeploymentAdmin().parseDeploy(eplTwo);
+
+        epService.getEPAdministrator().createEPL("select * from NewEventTwo").addListener(listener);
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null});
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 100));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null});
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 0));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {100});
     }
 
     public void testVirtualDataWindow() {

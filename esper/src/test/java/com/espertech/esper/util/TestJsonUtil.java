@@ -24,7 +24,7 @@ public class TestJsonUtil extends TestCase {
     private EngineImportService engineImportService;
 
     protected void setUp() {
-        engineImportService = new EngineImportServiceImpl(false, false, false);
+        engineImportService = new EngineImportServiceImpl(false, false, false, false);
     }
 
     protected void tearDown() {
