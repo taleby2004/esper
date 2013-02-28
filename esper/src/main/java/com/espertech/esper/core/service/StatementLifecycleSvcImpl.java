@@ -772,7 +772,9 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             stmtNameToIdMap.remove(statement.getName());
             stmtIdToDescMap.remove(statementId);
 
-            ((EPRuntimeSPI) epServiceProvider.getEPRuntime()).clearCaches();
+            if (!epServiceProvider.isDestroyed()) {
+                ((EPRuntimeSPI) epServiceProvider.getEPRuntime()).clearCaches();
+            }
 
             dispatchStatementLifecycleEvent(new StatementLifecycleEvent(statement, StatementLifecycleEvent.LifecycleEventType.STATECHANGE));
         }
