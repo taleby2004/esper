@@ -19,6 +19,7 @@ import com.espertech.esper.epl.expression.ExprNode;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.math.MathContext;
 
 /**
  * Service for engine-level resolution of static methods and aggregation methods.
@@ -163,4 +164,6 @@ public interface EngineImportService
     public boolean isSortUsingCollator();
 
     void addAggregationMultiFunction(ConfigurationPlugInAggregationMultiFunction desc) throws EngineImportException;
+
+    public MathContext getDefaultMathContext();
 }

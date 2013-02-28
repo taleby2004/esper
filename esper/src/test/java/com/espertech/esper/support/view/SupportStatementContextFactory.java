@@ -106,7 +106,7 @@ public class SupportStatementContextFactory
                 new PatternObjectResolutionServiceImpl(null),
                 null,
                 null,
-                new MethodResolutionServiceImpl(new EngineImportServiceImpl(true, true, true, false), null),
+                new MethodResolutionServiceImpl(new EngineImportServiceImpl(true, true, true, false, null), null),
                 null,
                 null,
                 new StatementResultServiceImpl("name", null, null, new ThreadingServiceImpl(new ConfigurationEngineDefaults.Threading())), // statement result svc

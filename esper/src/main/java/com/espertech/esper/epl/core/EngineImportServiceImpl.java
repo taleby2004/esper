@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.math.MathContext;
 import java.util.*;
 
 /**
@@ -42,12 +43,13 @@ public class EngineImportServiceImpl implements EngineImportService
     private final boolean isUdfCache;
     private final boolean isDuckType;
     private final boolean sortUsingCollator;
+    private final MathContext optionalDefaultMathContext;
 
     /**
 	 * Ctor
      * @param allowExtendedAggregationFunc true to allow non-SQL standard builtin agg functions.
 	 */
-	public EngineImportServiceImpl(boolean allowExtendedAggregationFunc, boolean isUdfCache, boolean isDuckType, boolean sortUsingCollator)
+	public EngineImportServiceImpl(boolean allowExtendedAggregationFunc, boolean isUdfCache, boolean isDuckType, boolean sortUsingCollator, MathContext optionalDefaultMathContext)
     {
         imports = new ArrayList<String>();
         aggregationFunctions = new HashMap<String, ConfigurationPlugInAggregationFunction>();
@@ -58,6 +60,7 @@ public class EngineImportServiceImpl implements EngineImportService
         this.isUdfCache = isUdfCache;
         this.isDuckType = isDuckType;
         this.sortUsingCollator = sortUsingCollator;
+        this.optionalDefaultMathContext = optionalDefaultMathContext;
     }
 
     public boolean isUdfCache() {
@@ -583,6 +586,10 @@ public class EngineImportServiceImpl implements EngineImportService
             return new ExprAggMultiFunctionSortedMinMaxByNode(false, false, true);
         }
         return null;
+    }
+
+    public MathContext getDefaultMathContext() {
+        return optionalDefaultMathContext;
     }
 
     public boolean isSortUsingCollator() {

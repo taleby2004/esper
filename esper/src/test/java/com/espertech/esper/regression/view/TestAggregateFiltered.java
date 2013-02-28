@@ -11,10 +11,7 @@
 
 package com.espertech.esper.regression.view;
 
-import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPServiceProviderManager;
-import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.client.EPStatementException;
+import com.espertech.esper.client.*;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
@@ -26,6 +23,8 @@ import junit.framework.TestCase;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.MathContext;
+import java.math.RoundingMode;
 
 public class TestAggregateFiltered extends TestCase
 {
@@ -224,6 +223,20 @@ public class TestAggregateFiltered extends TestCase
         assertEquals(epl, stmt.getText());
 
         runAssertionDistinct();
+
+        // test math context for big decimal and average divide
+        Configuration config = SupportConfigFactory.getConfiguration();
+        config.getEngineDefaults().getExpression().setMathContext(new MathContext(2, RoundingMode.HALF_UP));
+        config.addEventType(SupportBeanNumeric.class);
+        EPServiceProvider engineMathCtx = EPServiceProviderManager.getProvider(TestAggregateFiltered.class.getName(), config);
+
+        engineMathCtx.getEPAdministrator().createEPL("select avg(bigdec) as c0 from SupportBeanNumeric").addListener(listener);
+        engineMathCtx.getEPRuntime().sendEvent(new SupportBeanNumeric(null, makeBigDec(0, 2, RoundingMode.HALF_UP)));
+        engineMathCtx.getEPRuntime().sendEvent(new SupportBeanNumeric(null, makeBigDec(0, 2, RoundingMode.HALF_UP)));
+        engineMathCtx.getEPRuntime().sendEvent(new SupportBeanNumeric(null, makeBigDec(1, 2, RoundingMode.HALF_UP)));
+        assertEquals(0.33, ((BigDecimal) listener.getAndResetLastNewData()[0].get("c0")).doubleValue());
+
+        engineMathCtx.destroy();
     }
 
     private void runAssertionDistinct() {
@@ -315,6 +328,12 @@ public class TestAggregateFiltered extends TestCase
         sb.setIntBoxed(intBoxed);
         sb.setBoolPrimitive(boolPrimitive);
         return sb;
+    }
+
+    private BigDecimal makeBigDec(int value, int scale, RoundingMode rounding) {
+        BigDecimal bd = new BigDecimal(value);
+        bd.setScale(scale, rounding);
+        return bd;
     }
 
     public static class BlackWhiteEvent {

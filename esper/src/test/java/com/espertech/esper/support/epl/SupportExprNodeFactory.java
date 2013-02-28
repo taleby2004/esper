@@ -390,6 +390,6 @@ public class SupportExprNodeFactory
 
     public static MethodResolutionService getMethodResService()
     {
-        return new MethodResolutionServiceImpl(new EngineImportServiceImpl(true, true, true, false), null);
+        return new MethodResolutionServiceImpl(new EngineImportServiceImpl(true, true, true, false, null), null);
     }
 }

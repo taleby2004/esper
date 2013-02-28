@@ -10,15 +10,15 @@ package com.espertech.esper.epl.core;
 
 import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.hook.AggregationFunctionFactory;
-import com.espertech.esper.plugin.PlugInAggregationMultiFunctionStateContext;
-import com.espertech.esper.plugin.PlugInAggregationMultiFunctionStateFactory;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.agg.access.*;
 import com.espertech.esper.epl.agg.aggregator.*;
-import com.espertech.esper.epl.agg.service.AggregationStateFactory;
 import com.espertech.esper.epl.agg.service.AggregationMethodFactory;
+import com.espertech.esper.epl.agg.service.AggregationStateFactory;
 import com.espertech.esper.epl.agg.service.AggregationSupport;
 import com.espertech.esper.epl.expression.ExprEvaluator;
+import com.espertech.esper.plugin.PlugInAggregationMultiFunctionStateContext;
+import com.espertech.esper.plugin.PlugInAggregationMultiFunctionStateFactory;
 import com.espertech.esper.schedule.TimeProvider;
 import com.espertech.esper.type.MinMaxTypeEnum;
 import org.apache.commons.logging.Log;
@@ -237,13 +237,13 @@ public class MethodResolutionServiceImpl implements MethodResolutionService
         if (hasFilter) {
             if ((type == BigDecimal.class) || (type == BigInteger.class))
             {
-                return new AggregatorAvgBigDecimalFilter();
+                return new AggregatorAvgBigDecimalFilter(engineImportService.getDefaultMathContext());
             }
             return new AggregatorAvgFilter();
         }
         if ((type == BigDecimal.class) || (type == BigInteger.class))
         {
-            return new AggregatorAvgBigDecimal();
+            return new AggregatorAvgBigDecimal(engineImportService.getDefaultMathContext());
         }
         return new AggregatorAvg();
     }

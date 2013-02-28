@@ -23,7 +23,7 @@ public class TestEngineImportServiceImpl extends TestCase
 
     public void setUp()
     {
-        this.engineImportService = new EngineImportServiceImpl(true, true, true, false);
+        this.engineImportService = new EngineImportServiceImpl(true, true, true, false, null);
     }
 
     public void testResolveMethodNoArgTypes() throws Exception

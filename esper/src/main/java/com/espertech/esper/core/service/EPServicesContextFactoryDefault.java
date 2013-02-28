@@ -517,7 +517,9 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
     {
         ConfigurationEngineDefaults.Expression expression = configSnapshot.getEngineDefaults().getExpression();
         EngineImportServiceImpl engineImportService = new EngineImportServiceImpl(expression.isExtendedAggregation(),
-                expression.isUdfCache(), expression.isDuckTyping(), configSnapshot.getEngineDefaults().getLanguage().isSortUsingCollator());
+                expression.isUdfCache(), expression.isDuckTyping(),
+                configSnapshot.getEngineDefaults().getLanguage().isSortUsingCollator(),
+                configSnapshot.getEngineDefaults().getExpression().getMathContext());
         engineImportService.addMethodRefs(configSnapshot.getMethodInvocationReferences());
 
         // Add auto-imports

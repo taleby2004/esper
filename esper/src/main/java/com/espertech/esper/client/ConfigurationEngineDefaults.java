@@ -11,6 +11,7 @@ package com.espertech.esper.client;
 import com.espertech.esper.client.soda.StreamSelector;
 
 import java.io.Serializable;
+import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -1283,6 +1284,7 @@ public class ConfigurationEngineDefaults implements Serializable
         private boolean selfSubselectPreeval;
         private boolean extendedAggregation;
         private boolean duckTyping;
+        private MathContext mathContext;
 
         /**
          * Ctor.
@@ -1421,6 +1423,22 @@ public class ConfigurationEngineDefaults implements Serializable
         public void setDuckTyping(boolean duckTyping)
         {
             this.duckTyping = duckTyping;
+        }
+
+        /**
+         * Returns the math context for big decimal operations, or null to leave the math context undefined.
+         * @return math context or null
+         */
+        public MathContext getMathContext() {
+            return mathContext;
+        }
+
+        /**
+         * Sets the math context for big decimal operations, or null to leave the math context undefined.
+         * @param mathContext math context or null
+         */
+        public void setMathContext(MathContext mathContext) {
+            this.mathContext = mathContext;
         }
     }
 

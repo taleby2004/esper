@@ -1205,7 +1205,7 @@ public class TestEPLTreeWalker extends TestCase
 
     public void testWalkPluginAggregationFunction() throws Exception
     {
-        EngineImportService engineImportService = new EngineImportServiceImpl(true, true, true, false);
+        EngineImportService engineImportService = new EngineImportServiceImpl(true, true, true, false, null);
         engineImportService.addAggregation("concat", new ConfigurationPlugInAggregationFunction("concat", SupportPluginAggregationMethodOne.class.getName(), null));
 
         String text = "select * from " + SupportBean.class.getName() + " group by concat(1)";
@@ -1403,7 +1403,7 @@ public class TestEPLTreeWalker extends TestCase
 
     public static EPLTreeWalker parseAndWalkEPL(String expression) throws Exception
     {
-        return parseAndWalkEPL(expression, new EngineImportServiceImpl(true, true, true, false), new VariableServiceImpl(0, null, SupportEventAdapterService.getService(), null));
+        return parseAndWalkEPL(expression, new EngineImportServiceImpl(true, true, true, false, null), new VariableServiceImpl(0, null, SupportEventAdapterService.getService(), null));
     }
 
     private static EPLTreeWalker parseAndWalkEPL(String expression, EngineImportService engineImportService, VariableService variableService) throws Exception
