@@ -27,6 +27,7 @@
 	<modules>
 		<module>autoid</module>
 		<module>benchmark</module>
+		<module>cycledetect</module>
 		<module>marketdatafeed</module>
 		<module>matchmaker</module>
 		<module>namedwinquery</module>
