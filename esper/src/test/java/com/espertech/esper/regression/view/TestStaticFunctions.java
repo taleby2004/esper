@@ -20,7 +20,6 @@ import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.epl.SupportStaticMethodLib;
 import com.espertech.esper.util.SerializableObjectCopier;
-import com.sun.org.apache.bcel.internal.util.ClassLoader;
 import junit.framework.TestCase;
 
 import java.util.ArrayList;
