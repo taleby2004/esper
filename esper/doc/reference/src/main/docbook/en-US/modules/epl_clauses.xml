@@ -6133,7 +6133,7 @@ on PageHitEvent(ip='0.0.0.0') pagehit set varPageHitZero = pagehit]]></programli
 on PageHitEvent(ip='0.0.0.0') pagehit set varPageHitZero.userId = pagehit.userId]]></programlisting>
 
 			<para>
-				When using class or event-type variables, in order for the engine to assign property values,  the underlying event type must allow writing property values. If using JavaBean event classes the class must have setter methods and a default constructor.
+				When using class or event-type variables, in order for the engine to assign property values,  the underlying event type must allow writing property values. If using JavaBean event classes the class must have setter methods and a default constructor. The underlying event type must also be copy-able i.e. implement <literal>Serializable</literal> or configure a copy method.
 			</para>			
 
 			<para>
