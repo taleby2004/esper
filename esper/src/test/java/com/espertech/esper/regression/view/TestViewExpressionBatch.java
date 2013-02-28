@@ -39,10 +39,60 @@ public class TestViewExpressionBatch extends TestCase
         listener = null;
     }
 
+    public void testNewestEventOldestEvent() {
+
+        // try with include-trigger-event
+        String[] fields = new String[] {"theString"};
+        EPStatement stmtOne = epService.getEPAdministrator().createEPL("select irstream * from SupportBean.win:expr_batch(newest_event.intPrimitive != oldest_event.intPrimitive, false)");
+        stmtOne.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 1));
+        assertFalse(listener.isInvoked());
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E3", 2));
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetDataListsFlattened(), fields,
+                new Object[][]{{"E1"}, {"E2"}}, null);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E4", 3));
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetDataListsFlattened(), fields,
+                new Object[][]{{"E3"}}, new Object[][]{{"E1"}, {"E2"}});
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E5", 3));
+        epService.getEPRuntime().sendEvent(new SupportBean("E6", 3));
+        assertFalse(listener.isInvoked());
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E7", 2));
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetDataListsFlattened(), fields,
+                new Object[][]{{"E4"}, {"E5"}, {"E6"}}, new Object[][]{{"E3"}});
+        stmtOne.destroy();
+
+        // try with include-trigger-event
+        EPStatement stmtTwo = epService.getEPAdministrator().createEPL("select irstream * from SupportBean.win:expr_batch(newest_event.intPrimitive != oldest_event.intPrimitive, true)");
+        stmtTwo.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 1));
+        assertFalse(listener.isInvoked());
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E3", 2));
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetDataListsFlattened(), fields,
+                new Object[][]{{"E1"}, {"E2"}, {"E3"}}, null);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E4", 3));
+        epService.getEPRuntime().sendEvent(new SupportBean("E5", 3));
+        epService.getEPRuntime().sendEvent(new SupportBean("E6", 3));
+        assertFalse(listener.isInvoked());
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E7", 2));
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetDataListsFlattened(), fields,
+                new Object[][]{{"E4"}, {"E5"}, {"E6"}, {"E7"}}, new Object[][]{{"E1"}, {"E2"}, {"E3"}});
+    }
+
     public void testLengthBatch()
     {
         String[] fields = new String[] {"theString"};
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select irstream * from SupportBean.win:expr_batch(current_count >= 3)");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select irstream * from SupportBean.win:expr_batch(current_count >= 3, true)");
         stmt.addListener(listener);
         
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));

@@ -676,7 +676,7 @@ following conditions occurs, whichever occurs first: the data window has collect
 				</para>
 				
 				<para>
-				   Use this view to implement rolling and dynamically shrinking or expanding time, length or other windows. Rolling can, for example, be controlled based on event properties of arriving events, based on aggregation values or based on the return result of user-defined functions.
+				   Use this view to implement rolling and dynamically shrinking or expanding time, length or other windows. Rolling can, for example, be controlled based on event properties of arriving events, based on aggregation values or based on the return result of user-defined functions. Use this view to accumulate events until a value changes or other condition occurs based on arriving events or change of a variable value.
 				 </para>
 				
 				<para>
@@ -709,8 +709,8 @@ following conditions occurs, whichever occurs first: the data window has collect
 			   <table frame="topbot">
 					<title>Built-in Properties of the Expiry Expression Data Window View</title>
 					<tgroup cols="3">
-						<colspec colwidth="1.0*"/>
-						<colspec colwidth="1.0*"/>
+						<colspec colwidth="1.1*"/>
+						<colspec colwidth="0.8*"/>
 						<colspec colwidth="3*"/>
 						<thead>
 							<row>
@@ -731,9 +731,19 @@ following conditions occurs, whichever occurs first: the data window has collect
 								<entry>The number of events expired during this evaluation.</entry>
 							</row>
 							<row>
+								<entry>newest_event</entry>
+								<entry>(same event type as arriving events)</entry>
+								<entry>The last-arriving event itself.</entry>
+							</row>
+							<row>
 								<entry>newest_timestamp</entry>
 								<entry>long</entry>
 								<entry>The engine timestamp associated with the last-arriving event.</entry>
+							</row>
+							<row>
+								<entry>oldest_event</entry>
+								<entry>(same event type as arriving events)</entry>
+								<entry>The currently-evaluated event itself.</entry>
 							</row>
 							<row>
 								<entry>oldest_timestamp</entry>
@@ -784,6 +794,12 @@ following conditions occurs, whichever occurs first: the data window has collect
 				</para>
 				<programlisting><![CDATA[select * from MyEvent.win:expr(sum(price) < 1000)]]></programlisting>
 
+				<para>
+					This example retains all events that have the same value of the <literal>flag</literal> event property. When the <literal>flag</literal> value changes,
+					the data window expires all events with the old <literal>flag</literal> value and retains only the most recent event of the new <literal>flag</literal> value:
+				</para>
+				<programlisting><![CDATA[select * from MyEvent.win:expr(newest_event.flag = oldest_event.flag)]]></programlisting>
+
 				<sect3 xml:id="view-win-expr-limit" >
 				   <title>Limitations</title>
 
@@ -814,10 +830,14 @@ following conditions occurs, whichever occurs first: the data window has collect
 				<para>
 					The synopsis is:
 				</para>
-				<synopsis>win:expr_batch(<emphasis>expiry_expression</emphasis>)</synopsis>
+				<synopsis>win:expr_batch(<emphasis>expiry_expression</emphasis>, [<emphasis>include_triggering_event</emphasis>])</synopsis>
 
 				<para>
 					The expiry expression can be any expression including expressions on event properties, variables, aggregation functions or user-defined functions. The view applies this expression to arriving event(s), as described next.
+				</para>
+
+				<para>
+					The optional second parameter <emphasis>include_triggering_event</emphasis> defines whether to include the event that triggers the batch in the current batch (<literal>true</literal>, the default) or in the next batch (<literal>false</literal>).
 				</para>
 
 				<para>
@@ -857,9 +877,19 @@ following conditions occurs, whichever occurs first: the data window has collect
 								<entry>The number of events in the data window including the currently-arriving event.</entry>
 							</row>
 							<row>
+								<entry>newest_event</entry>
+								<entry>(same event type as arriving events)</entry>
+								<entry>The last-arriving event itself.</entry>
+							</row>
+							<row>
 								<entry>newest_timestamp</entry>
 								<entry>long</entry>
 								<entry>The engine timestamp associated with the last-arriving event.</entry>
+							</row>
+							<row>
+								<entry>oldest_event</entry>
+								<entry>(same event type as arriving events)</entry>
+								<entry>The currently-evaluated event itself.</entry>
 							</row>
 							<row>
 								<entry>oldest_timestamp</entry>
@@ -902,6 +932,16 @@ following conditions occurs, whichever occurs first: the data window has collect
 					The next example specifies a tumbling window that posts a batch of events when the total price of all events in the window is greater then 1000:
 				</para>
 				<programlisting><![CDATA[select * from MyEvent.win:expr_batch(sum(price) > 1000)]]></programlisting>
+
+				<para>
+				  Specify the second parameter as <literal>false</literal> when you want the triggering event not included in the current batch.
+				</para>
+
+				<para>
+					This example batches all events that have the same value of the <literal>flag</literal> event property. When the <literal>flag</literal> value changes,
+					the data window releases the batch of events collected for the old <literal>flag</literal> value. The data window collects the most recent event and the future arriving events of the same new <literal>flag</literal> value:
+				</para>
+				<programlisting><![CDATA[select * from MyEvent.win:expr_batch(newest_event.flag != oldest_event.flag, false)]]></programlisting>
 
 				<sect3 xml:id="view-win-exprbatch-limit" >
 				   <title>Limitations</title>

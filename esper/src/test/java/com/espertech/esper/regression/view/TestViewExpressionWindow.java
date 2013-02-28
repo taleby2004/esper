@@ -39,6 +39,44 @@ public class TestViewExpressionWindow extends TestCase
         listener = null;
     }
 
+    public void testNewestEventOldestEvent() {
+
+        String[] fields = new String[] {"theString"};
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select irstream * from SupportBean.win:expr(newest_event.intPrimitive = oldest_event.intPrimitive)");
+        stmt.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1"});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E1"}});
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 1));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2"});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E1"}, {"E2"}});
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E3", 2));
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetDataListsFlattened(), fields,
+                new Object[][]{{"E3"}}, new Object[][]{{"E1"}, {"E2"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E3"}});
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E4", 3));
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetDataListsFlattened(), fields,
+                new Object[][]{{"E4"}}, new Object[][]{{"E3"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E4"}});
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E5", 3));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E5"});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E4"}, {"E5"}});
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E6", 3));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E6"});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E4"}, {"E5"}, {"E6"}});
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E7", 2));
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetDataListsFlattened(), fields,
+                new Object[][]{{"E7"}}, new Object[][]{{"E4"}, {"E5"}, {"E6"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E7"}});
+    }
+
     public void testLengthWindow()
     {
         String[] fields = new String[] {"theString"};
