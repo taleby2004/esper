@@ -20,6 +20,7 @@ import com.espertech.esper.type.StringPatternSetRegex;
 import junit.framework.TestCase;
 
 import javax.xml.xpath.XPathConstants;
+import java.math.RoundingMode;
 import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
@@ -97,6 +98,7 @@ public class TestConfigurationParser extends TestCase
         assertTrue(config.getEngineDefaults().getExpression().isUdfCache());
         assertTrue(config.getEngineDefaults().getExpression().isExtendedAggregation());
         assertFalse(config.getEngineDefaults().getExpression().isDuckTyping());
+        assertNull(config.getEngineDefaults().getExpression().getMathContext());
         assertNull(config.getEngineDefaults().getExceptionHandling().getHandlerFactories());
         assertNull(config.getEngineDefaults().getConditionHandling().getHandlerFactories());
         assertEquals("js", config.getEngineDefaults().getScripts().getDefaultDialect());
@@ -445,6 +447,8 @@ public class TestConfigurationParser extends TestCase
         assertFalse(config.getEngineDefaults().getExpression().isUdfCache());
         assertFalse(config.getEngineDefaults().getExpression().isExtendedAggregation());
         assertTrue(config.getEngineDefaults().getExpression().isDuckTyping());
+        assertEquals(2, config.getEngineDefaults().getExpression().getMathContext().getPrecision());
+        assertEquals(RoundingMode.CEILING, config.getEngineDefaults().getExpression().getMathContext().getRoundingMode());
         assertEquals(2, config.getEngineDefaults().getExceptionHandling().getHandlerFactories().size());
         assertEquals("my.company.cep.LoggingExceptionHandlerFactory", config.getEngineDefaults().getExceptionHandling().getHandlerFactories().get(0));
         assertEquals("my.company.cep.AlertExceptionHandlerFactory", config.getEngineDefaults().getExceptionHandling().getHandlerFactories().get(1));

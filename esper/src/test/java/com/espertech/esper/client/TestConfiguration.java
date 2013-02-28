@@ -14,6 +14,8 @@ package com.espertech.esper.client;
 import junit.framework.TestCase;
 
 import java.io.File;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.net.URL;
 
 public class TestConfiguration extends TestCase

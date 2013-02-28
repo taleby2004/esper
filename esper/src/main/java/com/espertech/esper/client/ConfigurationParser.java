@@ -35,6 +35,7 @@ import javax.xml.xpath.XPathConstants;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.math.MathContext;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
@@ -1436,6 +1437,17 @@ class ConfigurationParser {
         {
             boolean duckTyping = Boolean.parseBoolean(duckTypingStr);
             configuration.getEngineDefaults().getExpression().setDuckTyping(duckTyping);
+        }
+        String mathContextStr = getOptionalAttribute(parentElement, "math-context");
+        if (mathContextStr != null)
+        {
+            try {
+                MathContext mathContext = new MathContext(mathContextStr);
+                configuration.getEngineDefaults().getExpression().setMathContext(mathContext);
+            }
+            catch (IllegalArgumentException ex) {
+                throw new ConfigurationException("Failed to parse '" + mathContextStr + "' as a MathContext");
+            }
         }
     }
 

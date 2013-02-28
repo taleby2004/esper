@@ -1297,7 +1297,7 @@ from LocationReport</programlisting>
 from LocationReport</programlisting>
 
 			<para>
-				If the input is null the method returns null. If the input is empty the method returns double zero or BigDecimal zero.
+				If the input is null the method returns null. If the input is empty the method returns double zero or BigDecimal zero. For BigDecimal precision and rounding, please see <xref linkend="config-engine-expression-mathcontext"/>.
 			</para>
 		</sect2>
 

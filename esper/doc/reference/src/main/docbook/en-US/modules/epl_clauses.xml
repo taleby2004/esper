@@ -434,6 +434,9 @@ epService.getEPAdministrator().createEPL("select * from OrderEvent(
 					</listitem>
 				</orderedlist>
 
+				<para>
+				  For <literal>BigDecimal</literal> precision and rounding, please see <xref linkend="config-engine-expression-mathcontext"/>.
+				</para>
 			</sect3>
 
 		</sect2>

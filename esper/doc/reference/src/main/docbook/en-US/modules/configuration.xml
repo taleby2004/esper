@@ -2241,6 +2241,29 @@ config.getEngineDefaults().getExpression().setDivisionByZeroReturnsNull(true);]]
   </defaults>
 </engine-settings>]]></programlisting>			
 			</sect3>
+			
+			<sect3 xml:id="config-engine-expression-mathcontext" revision="1">
+				<title>Math Context</title>
+				<para>
+					By default, when computing the average of BigDecimal values, the engine does not pass a <literal>java.math.MathContext</literal>.
+					Use the setting herein to specify a default math context.
+				</para>
+	
+				<para>
+					 The below XML configuration sets precision to 2 and rounding mode ceiling:
+				</para>
+	
+				<programlisting><![CDATA[<engine-settings>
+  <defaults>
+    <expression math-context="precision=2 roundingMode=CEILING"/>
+  </defaults>
+</engine-settings>]]></programlisting>
+			
+				<para>
+					 An example API configuration is shown next:
+				</para>
+				<programlisting><![CDATA[config.getEngineDefaults().getExpression().setMathContext();]]></programlisting>			
+			</sect3>
 		</sect2>
 
 		<sect2 xml:id="config-engine-execution" revision="1">

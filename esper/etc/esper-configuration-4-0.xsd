@@ -811,6 +811,7 @@
 			<xs:attribute name="self-subselect-preeval" type="xs:boolean" use="optional"/>
 			<xs:attribute name="extended-agg" type="xs:boolean" use="optional"/>
 			<xs:attribute name="ducktyping" type="xs:boolean" use="optional"/>
+			<xs:attribute name="math-context" type="xs:string" use="optional"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="exceptionHandling">
