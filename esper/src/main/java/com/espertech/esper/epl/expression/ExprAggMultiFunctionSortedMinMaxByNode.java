@@ -19,6 +19,7 @@ import java.util.Set;
 
 public class ExprAggMultiFunctionSortedMinMaxByNode extends ExprAggregateNodeBase implements ExprEvaluatorEnumeration
 {
+    private static final long serialVersionUID = -8407756454712340265L;
     private final boolean max;
     private final boolean ever;
     private final boolean sortedwin;

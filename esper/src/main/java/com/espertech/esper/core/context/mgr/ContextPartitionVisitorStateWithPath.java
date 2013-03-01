@@ -11,10 +11,10 @@
 
 package com.espertech.esper.core.context.mgr;
 
+import com.espertech.esper.client.context.ContextPartitionDescriptor;
 import com.espertech.esper.client.context.ContextPartitionIdentifier;
 import com.espertech.esper.client.context.ContextPartitionIdentifierNested;
-import com.espertech.esper.client.context.EPContextPartitionDescriptor;
-import com.espertech.esper.client.context.EPContextPartitionState;
+import com.espertech.esper.client.context.ContextPartitionState;
 
 import java.util.*;
 
@@ -26,7 +26,7 @@ public class ContextPartitionVisitorStateWithPath implements ContextPartitionVis
     private final TreeMap<ContextStatePathKey, ContextStatePathValue> states = new TreeMap<ContextStatePathKey, ContextStatePathValue>();
     private final ArrayList<Integer> subpaths = new ArrayList<Integer>();
     private final Map<ContextController, List<LeafDesc>> controllerAgentInstances = new HashMap<ContextController, List<LeafDesc>>();
-    private final Map<Integer, EPContextPartitionDescriptor> agentInstanceInfo = new HashMap<Integer, EPContextPartitionDescriptor>();
+    private final Map<Integer, ContextPartitionDescriptor> agentInstanceInfo = new HashMap<Integer, ContextPartitionDescriptor>();
 
     public ContextPartitionVisitorStateWithPath(ContextControllerFactory[] nestedFactories, Map<ContextController, ContextControllerTreeEntry> subcontexts) {
         this.nestedFactories = nestedFactories;
@@ -51,14 +51,14 @@ public class ContextPartitionVisitorStateWithPath implements ContextPartitionVis
             // generate a nice payload text from the paths of keys
             ContextControllerTreeEntry entry = subcontexts.get(contextController);
             ContextPartitionIdentifier[] keys = ContextManagerNested.getTreeCompositeKey(nestedFactories, payload, entry, subcontexts);
-            EPContextPartitionDescriptor descriptor = new EPContextPartitionDescriptor(contextPartitionOrSubPath, new ContextPartitionIdentifierNested(keys), value.getState());
+            ContextPartitionDescriptor descriptor = new ContextPartitionDescriptor(contextPartitionOrSubPath, new ContextPartitionIdentifierNested(keys), value.getState());
             agentInstanceInfo.put(contextPartitionOrSubPath, descriptor);
             states.put(key, value);
         }
         else {
             // handle non-leaf
             subpaths.add(contextPartitionOrSubPath);
-            states.put(key, new ContextStatePathValue(contextPartitionOrSubPath, binding.toByteArray(payload), EPContextPartitionState.STARTED));
+            states.put(key, new ContextStatePathValue(contextPartitionOrSubPath, binding.toByteArray(payload), ContextPartitionState.STARTED));
         }
     }
 
@@ -78,7 +78,7 @@ public class ContextPartitionVisitorStateWithPath implements ContextPartitionVis
         return controllerAgentInstances;
     }
 
-    public Map<Integer,EPContextPartitionDescriptor> getAgentInstanceInfo() {
+    public Map<Integer,ContextPartitionDescriptor> getAgentInstanceInfo() {
         return agentInstanceInfo;
     }
 

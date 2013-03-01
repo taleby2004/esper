@@ -16,6 +16,7 @@ import java.util.Map;
  */
 public class ConfigurationPlugInAggregationMultiFunction implements Serializable
 {
+    private static final long serialVersionUID = -1126332072916978240L;
     private String[] functionNames;
     private String multiFunctionFactoryClassName;
     private Map<String, Object> additionalConfiguredProperties;

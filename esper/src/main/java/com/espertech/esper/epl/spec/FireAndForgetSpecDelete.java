@@ -12,4 +12,5 @@
 package com.espertech.esper.epl.spec;
 
 public class FireAndForgetSpecDelete extends FireAndForgetSpec {
+    private static final long serialVersionUID = -6597047869325330881L;
 }

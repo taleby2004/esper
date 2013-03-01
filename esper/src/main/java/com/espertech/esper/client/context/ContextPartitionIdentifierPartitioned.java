@@ -17,6 +17,7 @@ import java.util.Arrays;
  * Context partition identifier for segmented contexts.
  */
 public class ContextPartitionIdentifierPartitioned extends ContextPartitionIdentifier {
+    private static final long serialVersionUID = 426396467569470582L;
     private Object[] keys;
 
     /**

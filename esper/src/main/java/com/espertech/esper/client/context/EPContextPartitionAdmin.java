@@ -50,7 +50,7 @@ public interface EPContextPartitionAdmin {
      * @throws IllegalArgumentException if a context by that name was not declared
      * @throws InvalidContextPartitionSelector if the selector type and context declaration mismatch
      */
-    public EPContextPartitionCollection destroyContextPartitions(String contextName, ContextPartitionSelector selector);
+    public ContextPartitionCollection destroyContextPartitions(String contextName, ContextPartitionSelector selector);
 
     /**
      * Stop one or more context partitions that are currently started, dropping the associated state and but keeping
@@ -69,7 +69,7 @@ public interface EPContextPartitionAdmin {
      * @throws IllegalArgumentException if a context by that name was not declared
      * @throws InvalidContextPartitionSelector if the selector type and context declaration mismatch
      */
-    public EPContextPartitionCollection stopContextPartitions(String contextName, ContextPartitionSelector selector);
+    public ContextPartitionCollection stopContextPartitions(String contextName, ContextPartitionSelector selector);
 
     /**
      * Start one or more context partitions that were previously stopped.
@@ -87,7 +87,7 @@ public interface EPContextPartitionAdmin {
      * @throws IllegalArgumentException if a context by that name was not declared
      * @throws InvalidContextPartitionSelector if the selector type and context declaration mismatch
      */
-    public EPContextPartitionCollection startContextPartitions(String contextName, ContextPartitionSelector selector);
+    public ContextPartitionCollection startContextPartitions(String contextName, ContextPartitionSelector selector);
 
     /**
      * Returns information about selected context partitions including state.
@@ -97,7 +97,7 @@ public interface EPContextPartitionAdmin {
      * @throws IllegalArgumentException if a context by that name was not declared
      * @throws InvalidContextPartitionSelector if the selector type and context declaration mismatch
      */
-    public EPContextPartitionCollection getContextPartitions(String contextName, ContextPartitionSelector selector);
+    public ContextPartitionCollection getContextPartitions(String contextName, ContextPartitionSelector selector);
 
     /**
      * Destroy the context partition returning its descriptor.
@@ -113,7 +113,7 @@ public interface EPContextPartitionAdmin {
      * @return descriptor or null if the context partition is not found
      * @throws IllegalArgumentException if a context by that name was not declared
      */
-    public EPContextPartitionDescriptor destroyContextPartition(String contextName, int agentInstanceId);
+    public ContextPartitionDescriptor destroyContextPartition(String contextName, int agentInstanceId);
 
     /**
      * Stop the context partition if it is currently started and returning its descriptor.
@@ -122,7 +122,7 @@ public interface EPContextPartitionAdmin {
      * @return descriptor or null if the context partition is not found or is already stopped
      * @throws IllegalArgumentException if a context by that name was not declared
      */
-    public EPContextPartitionDescriptor stopContextPartition(String contextName, int agentInstanceId);
+    public ContextPartitionDescriptor stopContextPartition(String contextName, int agentInstanceId);
 
     /**
      * Start the context partition if it is currently stopped and returning its descriptor.
@@ -131,7 +131,7 @@ public interface EPContextPartitionAdmin {
      * @return descriptor or null if the context partition is not found or is already started
      * @throws IllegalArgumentException if a context by that name was not declared
      */
-    public EPContextPartitionDescriptor startContextPartition(String contextName, int agentInstanceId);
+    public ContextPartitionDescriptor startContextPartition(String contextName, int agentInstanceId);
 
     /**
      * Returning the descriptor of a given context partition.
@@ -140,5 +140,5 @@ public interface EPContextPartitionAdmin {
      * @return descriptor or null if the context partition is not found
      * @throws IllegalArgumentException if a context by that name was not declared
      */
-    public EPContextPartitionDescriptor getDescriptor(String contextName, int agentInstanceId);
+    public ContextPartitionDescriptor getDescriptor(String contextName, int agentInstanceId);
 }

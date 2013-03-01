@@ -11,9 +11,9 @@
 
 package com.espertech.esper.support.util;
 
+import com.espertech.esper.client.context.ContextPartitionState;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.core.context.mgr.*;
-import com.espertech.esper.client.context.EPContextPartitionState;
 import com.espertech.esper.epl.spec.ContextDetailInitiatedTerminated;
 import junit.framework.Assert;
 
@@ -37,7 +37,7 @@ public class SupportContextStateCacheImpl implements ContextStateCache {
             String text = "failed at descriptor " + count;
             ContextStatePathValue value = state.get(new ContextStatePathKey(desc.getLevel(), desc.getParentPath(), desc.getSubpath()));
             Assert.assertEquals(text, desc.getAgentInstanceId(), (int) value.getOptionalContextPartitionId());
-            Assert.assertEquals(text, desc.isStarted() ? EPContextPartitionState.STARTED : EPContextPartitionState.STOPPED, value.getState());
+            Assert.assertEquals(text, desc.isStarted() ? ContextPartitionState.STARTED : ContextPartitionState.STOPPED, value.getState());
 
             Object payloadReceived = ContextStateCacheNoSave.DEFAULT_SPI_TEST_BINDING.byteArrayToObject(value.getBlob(), null);
             if (desc.getPayload() == null) {
@@ -67,7 +67,7 @@ public class SupportContextStateCacheImpl implements ContextStateCache {
     }
 
     public void addContextPath(String contextName, int level, int parentPath, int subPath, Integer optionalContextPartitionId, Object additionalInfo, ContextStatePathValueBinding binding) {
-        state.put(new ContextStatePathKey(level, parentPath, subPath), new ContextStatePathValue(optionalContextPartitionId, binding.toByteArray(additionalInfo), EPContextPartitionState.STARTED));
+        state.put(new ContextStatePathKey(level, parentPath, subPath), new ContextStatePathValue(optionalContextPartitionId, binding.toByteArray(additionalInfo), ContextPartitionState.STARTED));
     }
 
     public void updateContextPath(String contextName, ContextStatePathKey key, ContextStatePathValue value) {

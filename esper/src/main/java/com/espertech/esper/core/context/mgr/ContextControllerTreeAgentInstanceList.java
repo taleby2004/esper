@@ -11,7 +11,7 @@
 
 package com.espertech.esper.core.context.mgr;
 
-import com.espertech.esper.client.context.EPContextPartitionState;
+import com.espertech.esper.client.context.ContextPartitionState;
 
 import java.util.List;
 import java.util.Map;
@@ -22,9 +22,9 @@ public class ContextControllerTreeAgentInstanceList {
     private Object initPartitionKey;
     private Map<String, Object> initContextProperties;
     private List<AgentInstance> agentInstances;
-    private EPContextPartitionState state;
+    private ContextPartitionState state;
 
-    public ContextControllerTreeAgentInstanceList(long filterVersionAfterAllocation, Object initPartitionKey, Map<String, Object> initContextProperties, List<AgentInstance> agentInstances, EPContextPartitionState state) {
+    public ContextControllerTreeAgentInstanceList(long filterVersionAfterAllocation, Object initPartitionKey, Map<String, Object> initContextProperties, List<AgentInstance> agentInstances, ContextPartitionState state) {
         this.filterVersionAfterAllocation = filterVersionAfterAllocation;
         this.initPartitionKey = initPartitionKey;
         this.initContextProperties = initContextProperties;
@@ -48,11 +48,11 @@ public class ContextControllerTreeAgentInstanceList {
         return agentInstances;
     }
 
-    public EPContextPartitionState getState() {
+    public ContextPartitionState getState() {
         return state;
     }
 
-    public void setState(EPContextPartitionState state) {
+    public void setState(ContextPartitionState state) {
         this.state = state;
     }
 

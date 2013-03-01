@@ -11,9 +11,9 @@
 
 package com.espertech.esper.core.context.mgr;
 
+import com.espertech.esper.client.context.ContextPartitionDescriptor;
 import com.espertech.esper.client.context.ContextPartitionIdentifier;
-import com.espertech.esper.client.context.EPContextPartitionDescriptor;
-import com.espertech.esper.client.context.EPContextPartitionState;
+import com.espertech.esper.client.context.ContextPartitionState;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,7 +22,7 @@ import java.util.TreeMap;
 public class ContextPartitionVisitorState implements ContextPartitionVisitor {
 
     private final TreeMap<ContextStatePathKey, ContextStatePathValue> states = new TreeMap<ContextStatePathKey, ContextStatePathValue>();
-    private final Map<Integer, EPContextPartitionDescriptor> contextPartitionInfo = new HashMap<Integer, EPContextPartitionDescriptor>();
+    private final Map<Integer, ContextPartitionDescriptor> contextPartitionInfo = new HashMap<Integer, ContextPartitionDescriptor>();
 
     public ContextPartitionVisitorState() {
     }
@@ -32,9 +32,9 @@ public class ContextPartitionVisitorState implements ContextPartitionVisitor {
         int agentInstanceId = instanceHandle.getContextPartitionOrPathId();
         states.put(key, new ContextStatePathValue(agentInstanceId, binding.toByteArray(payload), instanceHandle.getInstances().getState()));
 
-        EPContextPartitionState state = instanceHandle.getInstances().getState();
+        ContextPartitionState state = instanceHandle.getInstances().getState();
         ContextPartitionIdentifier identifier = contextController.getFactory().keyPayloadToIdentifier(payload);
-        EPContextPartitionDescriptor descriptor = new EPContextPartitionDescriptor(agentInstanceId, identifier, state);
+        ContextPartitionDescriptor descriptor = new ContextPartitionDescriptor(agentInstanceId, identifier, state);
         contextPartitionInfo.put(agentInstanceId, descriptor);
     }
 
@@ -42,7 +42,7 @@ public class ContextPartitionVisitorState implements ContextPartitionVisitor {
         return states;
     }
 
-    public Map<Integer, EPContextPartitionDescriptor> getContextPartitionInfo() {
+    public Map<Integer, ContextPartitionDescriptor> getContextPartitionInfo() {
         return contextPartitionInfo;
     }
 }

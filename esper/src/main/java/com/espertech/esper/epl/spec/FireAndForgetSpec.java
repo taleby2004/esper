@@ -14,4 +14,5 @@ package com.espertech.esper.epl.spec;
 import java.io.Serializable;
 
 public abstract class FireAndForgetSpec implements Serializable {
+    private static final long serialVersionUID = 4888941807553376416L;
 }

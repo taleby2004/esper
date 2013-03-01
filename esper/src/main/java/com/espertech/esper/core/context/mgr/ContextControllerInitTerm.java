@@ -14,7 +14,7 @@ package com.espertech.esper.core.context.mgr;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.context.*;
 import com.espertech.esper.core.context.util.ContextControllerSelectorUtil;
-import com.espertech.esper.client.context.EPContextPartitionState;
+import com.espertech.esper.client.context.ContextPartitionState;
 import com.espertech.esper.epl.spec.ContextDetailCondition;
 import com.espertech.esper.epl.spec.ContextDetailConditionCrontab;
 import com.espertech.esper.event.EventAdapterService;
@@ -81,7 +81,7 @@ public class ContextControllerInitTerm implements ContextController, ContextCont
                 long startTime = factory.getSchedulingService().getTime();
                 Long endTime = endEndpoint.getExpectedEndTime();
                 Map<String, Object> builtinProps = getBuiltinProperties(factory, startTime, endTime, Collections.<String, Object>emptyMap());
-                ContextControllerInstanceHandle instanceHandle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, null, this, optionalTriggeringEvent, optionalTriggeringPattern, null, builtinProps, controllerState, filterAddendum, factory.getFactoryContext().isRecoveringResilient(), EPContextPartitionState.STARTED);
+                ContextControllerInstanceHandle instanceHandle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, null, this, optionalTriggeringEvent, optionalTriggeringPattern, null, builtinProps, controllerState, filterAddendum, factory.getFactoryContext().isRecoveringResilient(), ContextPartitionState.STARTED);
                 endConditions.put(endEndpoint, new ContextControllerInitTermInstance(instanceHandle, null, startTime, endTime, currentSubpathId));
 
                 ContextControllerInitTermState state = new ContextControllerInitTermState(factory.getFactoryContext().getServicesContext().getSchedulingService().getTime(), builtinProps);
@@ -175,7 +175,7 @@ public class ContextControllerInitTerm implements ContextController, ContextCont
             long startTime = factory.getSchedulingService().getTime();
             Long endTime = endEndpoint.getExpectedEndTime();
             Map<String, Object> builtinProps = getBuiltinProperties(factory, startTime, endTime, builtinProperties);
-            ContextControllerInstanceHandle instanceHandle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, null, this, optionalTriggeringEvent, optionalTriggeringPattern, matchedEventMap, builtinProps, null, filterAddendum, factory.getFactoryContext().isRecoveringResilient(), EPContextPartitionState.STARTED);
+            ContextControllerInstanceHandle instanceHandle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, null, this, optionalTriggeringEvent, optionalTriggeringPattern, matchedEventMap, builtinProps, null, filterAddendum, factory.getFactoryContext().isRecoveringResilient(), ContextPartitionState.STARTED);
             endConditions.put(endEndpoint, new ContextControllerInitTermInstance(instanceHandle, builtinProperties, startTime, endTime, currentSubpathId));
 
             ContextControllerInitTermState state = new ContextControllerInitTermState(factory.getFactoryContext().getServicesContext().getSchedulingService().getTime(), builtinProperties);

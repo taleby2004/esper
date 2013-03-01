@@ -25,6 +25,7 @@ import java.util.Collection;
  */
 public class ExprPlugInAggMultiFunctionNode extends ExprAggregateNodeBase implements ExprEvaluatorEnumeration
 {
+    private static final long serialVersionUID = 6356766499476980697L;
     private transient PlugInAggregationMultiFunctionFactory pluginAggregationMultiFunctionFactory;
     private final String functionName;
     private final ConfigurationPlugInAggregationMultiFunction config;

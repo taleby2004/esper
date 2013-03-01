@@ -11,16 +11,16 @@
 
 package com.espertech.esper.core.context.mgr;
 
-import com.espertech.esper.client.context.EPContextPartitionDescriptor;
+import com.espertech.esper.client.context.ContextPartitionDescriptor;
 
 import java.util.Map;
 import java.util.TreeMap;
 
 public class ContextStatePathDescriptor {
     private final TreeMap<ContextStatePathKey, ContextStatePathValue> paths;
-    private final Map<Integer, EPContextPartitionDescriptor> contextPartitionInformation;
+    private final Map<Integer, ContextPartitionDescriptor> contextPartitionInformation;
 
-    public ContextStatePathDescriptor(TreeMap<ContextStatePathKey, ContextStatePathValue> paths, Map<Integer, EPContextPartitionDescriptor> contextPartitionInformation) {
+    public ContextStatePathDescriptor(TreeMap<ContextStatePathKey, ContextStatePathValue> paths, Map<Integer, ContextPartitionDescriptor> contextPartitionInformation) {
         this.paths = paths;
         this.contextPartitionInformation = contextPartitionInformation;
     }
@@ -29,7 +29,7 @@ public class ContextStatePathDescriptor {
         return paths;
     }
 
-    public Map<Integer, EPContextPartitionDescriptor> getContextPartitionInformation() {
+    public Map<Integer, ContextPartitionDescriptor> getContextPartitionInformation() {
         return contextPartitionInformation;
     }
 }

@@ -15,8 +15,7 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.context.*;
 import com.espertech.esper.core.context.util.ContextControllerSelectorUtil;
 import com.espertech.esper.core.context.util.StatementAgentInstanceUtil;
-import com.espertech.esper.client.context.EPContextPartitionState;
-import com.espertech.esper.epl.spec.ContextDetailCategoryItem;
+import com.espertech.esper.client.context.ContextPartitionState;
 import com.espertech.esper.epl.spec.ContextDetailHashItem;
 import com.espertech.esper.type.NumberSetParameter;
 
@@ -119,7 +118,7 @@ public class ContextControllerHash implements ContextController, ContextControll
                         factory.populateContextInternalFilterAddendums(filterAddendumToUse, i);
                     }
 
-                    ContextControllerInstanceHandle handle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, null, this, optionalTriggeringEvent, null, i, properties, controllerState, filterAddendumToUse, factory.getFactoryContext().isRecoveringResilient(), EPContextPartitionState.STARTED);
+                    ContextControllerInstanceHandle handle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, null, this, optionalTriggeringEvent, null, i, properties, controllerState, filterAddendumToUse, factory.getFactoryContext().isRecoveringResilient(), ContextPartitionState.STARTED);
                     partitionKeys.put(i, handle);
 
                     factory.getStateCache().addContextPath(factory.getFactoryContext().getOutermostContextName(), factory.getFactoryContext().getNestingLevel(), pathId, currentSubpathId, handle.getContextPartitionOrPathId(), i, factory.getBinding());
@@ -193,7 +192,7 @@ public class ContextControllerHash implements ContextController, ContextControll
             factory.populateContextInternalFilterAddendums(filterAddendumToUse, id);
         }
 
-        ContextControllerInstanceHandle handle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, null, this, theEvent, null, id, properties, null, filterAddendumToUse, factory.getFactoryContext().isRecoveringResilient(), EPContextPartitionState.STARTED);
+        ContextControllerInstanceHandle handle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, null, this, theEvent, null, id, properties, null, filterAddendumToUse, factory.getFactoryContext().isRecoveringResilient(), ContextPartitionState.STARTED);
         partitionKeys.put(id, handle);
         factory.getStateCache().addContextPath(factoryContext.getOutermostContextName(), factoryContext.getNestingLevel(), pathId, currentSubpathId, handle.getContextPartitionOrPathId(), id, factory.getBinding());
     }

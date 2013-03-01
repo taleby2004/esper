@@ -15,6 +15,7 @@ package com.espertech.esper.client.context;
  * Context partition identifier for category context.
  */
 public class ContextPartitionIdentifierCategory extends ContextPartitionIdentifier {
+    private static final long serialVersionUID = -3619019398605079495L;
     private String label;
 
     /**

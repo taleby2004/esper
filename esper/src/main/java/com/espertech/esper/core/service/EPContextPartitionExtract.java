@@ -11,23 +11,24 @@
 
 package com.espertech.esper.core.service;
 
-import com.espertech.esper.client.context.EPContextPartitionCollection;
+import com.espertech.esper.client.context.ContextPartitionCollection;
 
 import java.io.Serializable;
 
 public class EPContextPartitionExtract implements Serializable
 {
-    private final EPContextPartitionCollection collection;
+    private static final long serialVersionUID = 5200820792354147769L;
+    private final ContextPartitionCollection collection;
     private final EPContextPartitionImportable importable;
     private final int numNestingLevels;
 
-    public EPContextPartitionExtract(EPContextPartitionCollection collection, EPContextPartitionImportable importable, int numNestingLevels) {
+    public EPContextPartitionExtract(ContextPartitionCollection collection, EPContextPartitionImportable importable, int numNestingLevels) {
         this.collection = collection;
         this.importable = importable;
         this.numNestingLevels = numNestingLevels;
     }
 
-    public EPContextPartitionCollection getCollection() {
+    public ContextPartitionCollection getCollection() {
         return collection;
     }
 

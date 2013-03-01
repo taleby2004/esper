@@ -20,6 +20,7 @@ import java.util.Map;
  */
 public class ContextControllerInitTermState implements Serializable {
 
+    private static final long serialVersionUID = 5940952673981877766L;
     private final long startTime;
     private final Map<String, Object> patternData;
 

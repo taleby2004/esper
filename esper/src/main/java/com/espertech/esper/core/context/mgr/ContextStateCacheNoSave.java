@@ -108,6 +108,7 @@ public class ContextStateCacheNoSave implements ContextStateCache {
     }
 
     private static class EventBeanNameValuePair implements Serializable {
+        private static final long serialVersionUID = 1385687612285835734L;
         private final String eventTypeName;
         private final byte[] bytes;
 

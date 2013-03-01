@@ -16,7 +16,7 @@ import com.espertech.esper.client.context.*;
 import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.core.context.util.ContextControllerSelectorUtil;
 import com.espertech.esper.core.context.util.StatementAgentInstanceUtil;
-import com.espertech.esper.client.context.EPContextPartitionState;
+import com.espertech.esper.client.context.ContextPartitionState;
 import com.espertech.esper.epl.spec.ContextDetailPartitionItem;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.type.NumberSetParameter;
@@ -169,7 +169,7 @@ public class ContextControllerPartitioned implements ContextController, ContextC
             factory.populateContextInternalFilterAddendums(filterAddendum, key);
         }
 
-        ContextControllerInstanceHandle handle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, null, this, theEvent, null, key, props, null, filterAddendum, false, EPContextPartitionState.STARTED);
+        ContextControllerInstanceHandle handle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, null, this, theEvent, null, key, props, null, filterAddendum, false, ContextPartitionState.STARTED);
 
         partitionKeys.put(key, handle);
 

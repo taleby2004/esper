@@ -24,8 +24,8 @@ import com.espertech.esper.core.context.util.ContextControllerSelectorUtil;
 import com.espertech.esper.core.context.util.ContextDescriptor;
 import com.espertech.esper.core.context.util.ContextIteratorHandler;
 import com.espertech.esper.core.context.util.StatementAgentInstanceUtil;
-import com.espertech.esper.client.context.EPContextPartitionDescriptor;
-import com.espertech.esper.client.context.EPContextPartitionState;
+import com.espertech.esper.client.context.ContextPartitionDescriptor;
+import com.espertech.esper.client.context.ContextPartitionState;
 import com.espertech.esper.core.service.EPServicesContext;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.spec.ContextDetailPartitionItem;
@@ -155,10 +155,10 @@ public class ContextManagerNested implements ContextManager, ContextControllerLi
             for (ContextPartitionVisitorStateWithPath.LeafDesc leaf : entry.getValue()) {
                 int agentInstanceId = leaf.getValue().getOptionalContextPartitionId();
                 ContextControllerTreeAgentInstanceList list = treeEntry.getAgentInstances().get(agentInstanceId);
-                list.setState(EPContextPartitionState.STOPPED);
+                list.setState(ContextPartitionState.STOPPED);
                 StatementAgentInstanceUtil.stopAgentInstances(list.getAgentInstances(), null, servicesContext, false);
                 list.clearAgentInstances();
-                leaf.getValue().setState(EPContextPartitionState.STOPPED);
+                leaf.getValue().setState(ContextPartitionState.STOPPED);
                 rootContext.getFactory().getStateCache().updateContextPath(contextName, leaf.getKey(), leaf.getValue());
             }
         }
@@ -174,7 +174,7 @@ public class ContextManagerNested implements ContextManager, ContextControllerLi
                 ContextControllerTreeAgentInstanceList list = treeEntry.getAgentInstances().get(agentInstanceId);
                 StatementAgentInstanceUtil.stopAgentInstances(list.getAgentInstances(), null, servicesContext, false);
                 rootContext.getFactory().getStateCache().removeContextPath(contextName, leaf.getKey().getLevel(), leaf.getKey().getParentPath(), leaf.getKey().getSubPath());
-                EPContextPartitionDescriptor descriptor = visitor.getAgentInstanceInfo().get(agentInstanceId);
+                ContextPartitionDescriptor descriptor = visitor.getAgentInstanceInfo().get(agentInstanceId);
                 ContextPartitionIdentifierNested nestedIdent = (ContextPartitionIdentifierNested) descriptor.getIdentifier();
                 entry.getKey().deletePath(nestedIdent.getIdentifiers()[nestedContextFactories.length - 1]);
             }
@@ -182,7 +182,7 @@ public class ContextManagerNested implements ContextManager, ContextControllerLi
         return new ContextStatePathDescriptor(visitor.getStates(), visitor.getAgentInstanceInfo());
     }
 
-    public Map<Integer,EPContextPartitionDescriptor> startPaths(ContextPartitionSelector selector) {
+    public Map<Integer,ContextPartitionDescriptor> startPaths(ContextPartitionSelector selector) {
         ContextPartitionVisitorStateWithPath visitor = getContextPartitionPathsInternal(selector);
         for (Map.Entry<ContextController, List<ContextPartitionVisitorStateWithPath.LeafDesc>> entry : visitor.getControllerAgentInstances().entrySet()) {
             ContextControllerTreeEntry treeEntry = subcontexts.get(entry.getKey());
@@ -190,19 +190,19 @@ public class ContextManagerNested implements ContextManager, ContextControllerLi
             for (ContextPartitionVisitorStateWithPath.LeafDesc leaf : entry.getValue()) {
                 int agentInstanceId = leaf.getValue().getOptionalContextPartitionId();
                 ContextControllerTreeAgentInstanceList list = treeEntry.getAgentInstances().get(agentInstanceId);
-                if (list.getState() == EPContextPartitionState.STARTED) {
+                if (list.getState() == ContextPartitionState.STARTED) {
                     continue;
                 }
                 for (Map.Entry<String, ContextControllerStatementDesc> statement : statements.entrySet()) {
                     AgentInstance instance = startStatement(agentInstanceId, statement.getValue(), rootContext, list.getInitPartitionKey(), list.getInitContextProperties(), false);
                     list.getAgentInstances().add(instance);
                 }
-                list.setState(EPContextPartitionState.STARTED);
-                leaf.getValue().setState(EPContextPartitionState.STARTED);
+                list.setState(ContextPartitionState.STARTED);
+                leaf.getValue().setState(ContextPartitionState.STARTED);
                 rootContext.getFactory().getStateCache().updateContextPath(contextName, leaf.getKey(), leaf.getValue());
             }
         }
-        ContextManagerImpl.setState(visitor.getAgentInstanceInfo(), EPContextPartitionState.STARTED);
+        ContextManagerImpl.setState(visitor.getAgentInstanceInfo(), ContextPartitionState.STARTED);
         return visitor.getAgentInstanceInfo();
     }
 
@@ -243,7 +243,7 @@ public class ContextManagerNested implements ContextManager, ContextControllerLi
                 }
 
                 for (Map.Entry<Integer, ContextControllerTreeAgentInstanceList> entry : subcontext.getValue().getAgentInstances().entrySet()) {
-                    if (entry.getValue().getState() == EPContextPartitionState.STARTED) {
+                    if (entry.getValue().getState() == ContextPartitionState.STARTED) {
                         AgentInstance agentInstance = startStatement(entry.getKey(), desc, subcontext.getKey(), entry.getValue().getInitPartitionKey(), entry.getValue().getInitContextProperties(), isRecoveringResilient);
                         entry.getValue().getAgentInstances().add(agentInstance);
                     }
@@ -303,15 +303,15 @@ public class ContextManagerNested implements ContextManager, ContextControllerLi
         }
         for (Map.Entry<Integer, ContextControllerTreeAgentInstanceList> cpEntry : entry.getAgentInstances().entrySet()) {
 
-            if (cpEntry.getValue().getState() == EPContextPartitionState.STOPPED) {
-                cpEntry.getValue().setState(EPContextPartitionState.STARTED);
+            if (cpEntry.getValue().getState() == ContextPartitionState.STOPPED) {
+                cpEntry.getValue().setState(ContextPartitionState.STARTED);
                 entry.getAgentInstances().clear();
                 for (Map.Entry<String, ContextControllerStatementDesc> statement : statements.entrySet()) {
                     AgentInstance instance = startStatement(existingHandle.getContextPartitionOrPathId(), statement.getValue(), originator, cpEntry.getValue().getInitPartitionKey(), entry.getInitContextProperties(), false);
                     cpEntry.getValue().getAgentInstances().add(instance);
                 }
                 ContextStatePathKey key = new ContextStatePathKey(nestedContextFactories.length, originator.getPathId(), existingHandle.getSubPathId());
-                ContextStatePathValue value = new ContextStatePathValue(existingHandle.getContextPartitionOrPathId(), payload, EPContextPartitionState.STARTED);
+                ContextStatePathValue value = new ContextStatePathValue(existingHandle.getContextPartitionOrPathId(), payload, ContextPartitionState.STARTED);
                 originator.getFactory().getStateCache().updateContextPath(contextName, key, value);
             }
             else {
@@ -355,7 +355,7 @@ public class ContextManagerNested implements ContextManager, ContextControllerLi
             ContextControllerState states,
             ContextInternalFilterAddendum filterAddendum,
             boolean isRecoveringResilient,
-            EPContextPartitionState state) {
+            ContextPartitionState state) {
 
         // detect non-leaf
         int nestingLevel = originator.getFactory().getFactoryContext().getNestingLevel();   // starts at 1 for root
@@ -415,7 +415,7 @@ public class ContextManagerNested implements ContextManager, ContextControllerLi
 
         // handle leaf creation
         List<AgentInstance> newInstances = new ArrayList<AgentInstance>();
-        if (state == EPContextPartitionState.STARTED) {
+        if (state == ContextPartitionState.STARTED) {
             for (Map.Entry<String, ContextControllerStatementDesc> statementEntry : statements.entrySet()) {
                 ContextControllerStatementDesc statementDesc = statementEntry.getValue();
                 AgentInstance instance = startStatement(assignedContextId, statementDesc, originator, partitionKey, contextProperties, isRecoveringResilient);

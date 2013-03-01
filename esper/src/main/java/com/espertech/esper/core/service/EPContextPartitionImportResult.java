@@ -16,6 +16,7 @@ import java.util.Map;
 
 public class EPContextPartitionImportResult implements Serializable
 {
+    private static final long serialVersionUID = -1344280301808943635L;
     private final Map<Integer, Integer> existingToImported;
     private final Map<Integer, Integer> allocatedToImported;
 

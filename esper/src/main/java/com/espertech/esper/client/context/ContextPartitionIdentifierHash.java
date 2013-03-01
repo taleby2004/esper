@@ -15,6 +15,7 @@ package com.espertech.esper.client.context;
  * Context partition identifier for hash context.
  */
 public class ContextPartitionIdentifierHash extends ContextPartitionIdentifier {
+    private static final long serialVersionUID = -4175881385322677930L;
     private int hash;
 
     /**

@@ -19,6 +19,7 @@ import java.util.Map;
  * Context partition identifier for overlapping and non-overlapping contexts.
  */
 public class ContextPartitionIdentifierInitiatedTerminated extends ContextPartitionIdentifier {
+    private static final long serialVersionUID = 1035193605492122638L;
     private Map<String, Object> properties;
     private long startTime;
     private Long endTime;

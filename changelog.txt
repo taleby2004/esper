@@ -1,6 +1,32 @@
 Esper Changelog
 ===================
 
+Changes in version 4.9.0
+------------------------
+Major API or EPL changes
+  - Performance improvements, overall, and related to patterns and self-joins
+  - Reduced memory utilization
+  - Support for new minby, maxby and sorted aggregation functions
+  - Support for context partition administration through a new API 
+  - Support for specifying a timezone as part of crontab schedules
+  - Support for instance method invocation on enumeration values
+  - Support for fire-and-forget (on-demand) queries that delete and update named windows
+  - Support for passing EventBean and collection of EventBean to EPL-to-code method invocations
+  - Support for an optional context object passed in EPL-to-code method invocations
+  - Support for the expression window and expression batch window to the oldest and newest event so that expiry policies are easier to specify that comparing event properties
+  - New powerful extension API for aggregation functions termed aggregation multi-function 
+
+Bug fixes
+  - Fixed Issue MWI-774-78809 ArrayIndexOutOfBoundsException upon statement stop context partitioned statement with aggregation
+  - Fixed Issue QIH-288-93588 ArrayIndexOutOFBoundsException starting a context-partitioned split-stream statement with subquery
+  - Fixed Issue FLQ-115172 NullPointerException with context partitioned statement and split-stream statement
+  - Fixed Issue QXU-776433 Populate map event type using "new" operator not working
+  - Fixed Issue ESPER-726 Aggregation function avg based on BigDecimal with scale defined throws Non-terminating decimal expansion 
+  - Fixed Issue ESPER-727 Thread safety issue with enumeration method in stateless select 
+  - Fixed Issue ESPER-728 Filter improvement for expressions in relationship to other filter ops 
+  - Fixed Issue ESPER-730 Statement Object Model for "is null" 
+
+
 Changes in version 4.8.0
 ------------------------
 Major API or EPL changes

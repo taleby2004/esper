@@ -20,6 +20,7 @@ import java.util.TreeMap;
 
 public class EPContextPartitionImportable implements Serializable
 {
+    private static final long serialVersionUID = 4455652878395126963L;
     private final TreeMap<ContextStatePathKey, ContextStatePathValue> paths;
 
     public EPContextPartitionImportable(TreeMap<ContextStatePathKey, ContextStatePathValue> paths) {

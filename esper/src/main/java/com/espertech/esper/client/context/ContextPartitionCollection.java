@@ -16,15 +16,15 @@ import java.util.Map;
 /**
  * A collection of context partitions each uniquely identified by a context partition id (agent instance id).
  */
-public class EPContextPartitionCollection
+public class ContextPartitionCollection
 {
-    private final Map<Integer, EPContextPartitionDescriptor> descriptors;
+    private final Map<Integer, ContextPartitionDescriptor> descriptors;
 
     /**
      * Ctor.
      * @param descriptors per agent instance id
      */
-    public EPContextPartitionCollection(Map<Integer, EPContextPartitionDescriptor> descriptors) {
+    public ContextPartitionCollection(Map<Integer, ContextPartitionDescriptor> descriptors) {
         this.descriptors = descriptors;
     }
 
@@ -32,7 +32,7 @@ public class EPContextPartitionCollection
      * Returns the descriptors per agent instance id
      * @return descriptors
      */
-    public Map<Integer, EPContextPartitionDescriptor> getDescriptors() {
+    public Map<Integer, ContextPartitionDescriptor> getDescriptors() {
         return descriptors;
     }
 }

@@ -17,6 +17,7 @@ import java.util.List;
  */
 public class FireAndForgetUpdate implements FireAndForgetClause
 {
+    private static final long serialVersionUID = 1335566236342281539L;
     private List<AssignmentPair> assignments = new ArrayList<AssignmentPair>();
 
     /**

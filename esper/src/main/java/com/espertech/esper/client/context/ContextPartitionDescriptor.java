@@ -14,11 +14,11 @@ package com.espertech.esper.client.context;
 /**
  * Descriptor encapsulates information about a context partition.
  */
-public class EPContextPartitionDescriptor
+public class ContextPartitionDescriptor
 {
     private final int agentInstanceId;
     private final ContextPartitionIdentifier identifier;
-    private EPContextPartitionState state;
+    private ContextPartitionState state;
 
     /**
      * Ctor.
@@ -26,7 +26,7 @@ public class EPContextPartitionDescriptor
      * @param identifier identifier object specific to context declaration
      * @param state current state
      */
-    public EPContextPartitionDescriptor(int agentInstanceId, ContextPartitionIdentifier identifier, EPContextPartitionState state) {
+    public ContextPartitionDescriptor(int agentInstanceId, ContextPartitionIdentifier identifier, ContextPartitionState state) {
         this.agentInstanceId = agentInstanceId;
         this.identifier = identifier;
         this.state = state;
@@ -52,7 +52,7 @@ public class EPContextPartitionDescriptor
      * Returns context partition state.
      * @return state
      */
-    public EPContextPartitionState getState() {
+    public ContextPartitionState getState() {
         return state;
     }
 
@@ -60,7 +60,7 @@ public class EPContextPartitionDescriptor
      * Convenience method for updating context partition state, does not affect actual context partition state.
      * @param state of context partition
      */
-    public void setState(EPContextPartitionState state) {
+    public void setState(ContextPartitionState state) {
         this.state = state;
     }
 }

@@ -109,7 +109,7 @@ public class TestAdminContextPartitionSPI extends TestCase implements ContextSta
 
         // stop category "negative"
         SupportContextStateCacheImpl.reset();
-        EPContextPartitionCollection collStop = getSpi(epService).stopContextPartitions("CategoryContext", new SupportSelectorCategory("negative"));
+        ContextPartitionCollection collStop = getSpi(epService).stopContextPartitions("CategoryContext", new SupportSelectorCategory("negative"));
         assertPathInfo(collStop.getDescriptors(), new Object[][] {{0, makeIdentCat("negative"), "+"}});
         assertPathInfo(getAllCPDescriptors(epService, contextName, false), new Object[][] {{0, makeIdentCat("negative"), "-"}, {1, makeIdentCat("positive"), "+"}});
         SupportContextStateCacheImpl.assertState(new ContextState(1, 0, 1, 0, 0, false));
@@ -119,7 +119,7 @@ public class TestAdminContextPartitionSPI extends TestCase implements ContextSta
         EPAssertionUtil.assertPropsPerRow(listener.getAndResetDataListsFlattened().getFirst(), FIELDSCP, new Object[][]{{"E5", 60, 1}});
 
         // start category "negative"
-        EPContextPartitionCollection collStart = getSpi(epService).startContextPartitions("CategoryContext", new SupportSelectorCategory("negative"));
+        ContextPartitionCollection collStart = getSpi(epService).startContextPartitions("CategoryContext", new SupportSelectorCategory("negative"));
         assertPathInfo(collStart.getDescriptors(), new Object[][] {{0, makeIdentCat("negative"), "+"}});
         assertPathInfo(getAllCPDescriptors(epService, contextName, false), new Object[][] {{0, makeIdentCat("negative"), "+"}, {1, makeIdentCat("positive"), "+"}});
         SupportContextStateCacheImpl.assertState(new ContextState(1, 0, 1, 0, 0, true));
@@ -210,7 +210,7 @@ public class TestAdminContextPartitionSPI extends TestCase implements ContextSta
                 new Object[][]{{"E1", 1, 10L, 1}, {"E2", 1, 11L, 3}, {"E1", -1, 12L, 0}, {"E2", -1, 13L, 2}});
 
         // destroy hash for "S0_2"
-        EPContextPartitionCollection collDestroy = getSpi(epService).destroyContextPartitions(contextName, new SupportSelectorNested(new SupportSelectorPartitioned("E2"), new SupportSelectorCategory("negative")));
+        ContextPartitionCollection collDestroy = getSpi(epService).destroyContextPartitions(contextName, new SupportSelectorNested(new SupportSelectorPartitioned("E2"), new SupportSelectorCategory("negative")));
         assertPathInfo(collDestroy.getDescriptors(), new Object[][] {{2, makeIdentNested(makeIdentPart("E2"), makeIdentCat("negative")), "+"}});
         assertPathInfo(getAllCPDescriptors(epService, contextName, true), new Object[][]{
                 {0, makeIdentNested(makeIdentPart("E1"), makeIdentCat("negative")), "+"},
@@ -241,7 +241,7 @@ public class TestAdminContextPartitionSPI extends TestCase implements ContextSta
         EPAssertionUtil.assertPropsPerRow(listener.getAndResetDataListsFlattened().getFirst(), FIELDSCP, new Object[][]{{"S0_1", 1, 0}, {"S0_2", 2, 1}, {"S0_3", 3, 2}});
 
         // destroy hash for "S0_2"
-        EPContextPartitionCollection collDestroy = getSpi(epService).destroyContextPartitions(contextName, new SupportSelectorById(1));
+        ContextPartitionCollection collDestroy = getSpi(epService).destroyContextPartitions(contextName, new SupportSelectorById(1));
         assertPathInfo(collDestroy.getDescriptors(), new Object[][] {{1, null, "+"}});
         assertPathInfo(getAllCPDescriptors(epService, contextName, false), new Object[][]{{0, null, "+"}, {2, null, "+"}});
         SupportContextStateCacheImpl.assertState(new ContextState(1, 0, 1, 0, null, true), new ContextState(1, 0, 3, 2, null, true));
@@ -268,7 +268,7 @@ public class TestAdminContextPartitionSPI extends TestCase implements ContextSta
         EPAssertionUtil.assertPropsPerRow(listener.getAndResetDataListsFlattened().getFirst(), FIELDSCP, new Object[][]{{"E1", 1, 0}, {"E2", 2, 1}, {"E3", 3, 2}});
 
         // destroy hash for "E2"
-        EPContextPartitionCollection collDestroy = getSpi(epService).destroyContextPartitions(contextName, new SupportSelectorByHashCode(hashCodeE2));
+        ContextPartitionCollection collDestroy = getSpi(epService).destroyContextPartitions(contextName, new SupportSelectorByHashCode(hashCodeE2));
         assertPathInfo(collDestroy.getDescriptors(), new Object[][] {{1, makeIdentHash(hashCodeE2), "+"}});
         assertPathInfo(getAllCPDescriptors(epService, contextName, false), new Object[][]{{0, makeIdentHash(hashCodeE1), "+"}, {2, makeIdentHash(hashCodeE3), "+"}});
         SupportContextStateCacheImpl.assertState(new ContextState(1, 0, 1, 0, hashCodeE1, true), new ContextState(1, 0, 3, 2, hashCodeE3, true));
@@ -292,7 +292,7 @@ public class TestAdminContextPartitionSPI extends TestCase implements ContextSta
         EPAssertionUtil.assertPropsPerRow(listener.getAndResetDataListsFlattened().getFirst(), FIELDSCP, new Object[][]{{"E1", 1, 0}, {"E2", 2, 1}, {"E3", 3, 2}});
 
         // destroy hash for "E2"
-        EPContextPartitionCollection collDestroy = getSpi(epService).destroyContextPartitions(contextName, new SupportSelectorPartitioned("E2"));
+        ContextPartitionCollection collDestroy = getSpi(epService).destroyContextPartitions(contextName, new SupportSelectorPartitioned("E2"));
         assertPathInfo(collDestroy.getDescriptors(), new Object[][] {{1, makeIdentPart("E2"), "+"}});
         assertPathInfo(getAllCPDescriptors(epService, contextName, false), new Object[][]{{0, makeIdentPart("E1"), "+"}, {2, makeIdentPart("E3"), "+"}});
         SupportContextStateCacheImpl.assertState(new ContextState(1, 0, 1, 0, new Object[]{"E1"}, true), new ContextState(1, 0, 3, 2, new Object[]{"E3"}, true));
@@ -316,7 +316,7 @@ public class TestAdminContextPartitionSPI extends TestCase implements ContextSta
         EPAssertionUtil.assertPropsPerRow(listener.getAndResetDataListsFlattened().getFirst(), FIELDSCP, new Object[][]{{"E1", 1, 0}, {"E2", 2, 1}, {"E3", 3, 2}});
 
         // destroy hash for "E2"
-        EPContextPartitionDescriptor destroyedOne = getSpi(epService).destroyContextPartition(contextName, 1);
+        ContextPartitionDescriptor destroyedOne = getSpi(epService).destroyContextPartition(contextName, 1);
         assertPathInfo("destroyed", destroyedOne, new Object[] {1, makeIdentPart("E2"), "+"});
 
         // destroy hash for "E3"
@@ -353,7 +353,7 @@ public class TestAdminContextPartitionSPI extends TestCase implements ContextSta
         EPAssertionUtil.assertPropsPerRow(listener.getAndResetDataListsFlattened().getFirst(), FIELDSCP, new Object[][]{{"E1", 1L, 0}, {"E2", 1L, 1}, {"E3", 1L, 2}});
 
         // destroy category "negative"
-        EPContextPartitionCollection collDestroy = getSpi(epService).destroyContextPartitions(contextName, new SupportSelectorCategory("zero"));
+        ContextPartitionCollection collDestroy = getSpi(epService).destroyContextPartitions(contextName, new SupportSelectorCategory("zero"));
         assertPathInfo(collDestroy.getDescriptors(), new Object[][] {{1, makeIdentCat("zero"), "+"}});
         assertPathInfo(getAllCPDescriptors(epService, contextName, false), new Object[][]{{0, makeIdentCat("negative"), "+"}, {2, makeIdentCat("positive"), "+"}});
         SupportContextStateCacheImpl.assertState(new ContextState(1, 0, 1, 0, 0, true), new ContextState(1, 0, 3, 2, 2, true));
@@ -365,7 +365,7 @@ public class TestAdminContextPartitionSPI extends TestCase implements ContextSta
         EPAssertionUtil.assertPropsPerRow(listener.getAndResetDataListsFlattened().getFirst(), FIELDSCP, new Object[][]{{"E4", 2L, 0}, {"E6", 2L, 2}});
 
         // destroy again, should return empty
-        EPContextPartitionCollection collDestroyTwo = getSpi(epService).destroyContextPartitions(contextName, new SupportSelectorCategory("zero"));
+        ContextPartitionCollection collDestroyTwo = getSpi(epService).destroyContextPartitions(contextName, new SupportSelectorCategory("zero"));
         assertTrue(collDestroyTwo.getDescriptors().isEmpty());
 
         epService.getEPAdministrator().destroyAllStatements();
@@ -1106,7 +1106,7 @@ public class TestAdminContextPartitionSPI extends TestCase implements ContextSta
         }
     }
 
-    private static void assertPathInfo(Map<Integer, EPContextPartitionDescriptor> cpinfo,
+    private static void assertPathInfo(Map<Integer, ContextPartitionDescriptor> cpinfo,
                                        Object[][] expected) {
 
         assertEquals(expected.length, cpinfo.size());
@@ -1115,13 +1115,13 @@ public class TestAdminContextPartitionSPI extends TestCase implements ContextSta
             Object[] expectedRow = expected[i];
             String message = "failed assertion for item " + i;
             int expectedId = (Integer) expectedRow[0];
-            EPContextPartitionDescriptor desc = cpinfo.get(expectedId);
+            ContextPartitionDescriptor desc = cpinfo.get(expectedId);
             assertPathInfo(message, desc, expectedRow);
         }
     }
 
     private static void assertPathInfo(String message,
-                                       EPContextPartitionDescriptor desc,
+                                       ContextPartitionDescriptor desc,
                                        Object[] expectedRow) {
         int expectedId = (Integer) expectedRow[0];
         ContextPartitionIdentifier expectedIdent = (ContextPartitionIdentifier) expectedRow[1];
@@ -1135,12 +1135,12 @@ public class TestAdminContextPartitionSPI extends TestCase implements ContextSta
             assertTrue(message, desc.getIdentifier() instanceof ContextPartitionIdentifierInitiatedTerminated);
         }
 
-        EPContextPartitionState stateEnum;
+        ContextPartitionState stateEnum;
         if (expectedState.equals("+")) {
-            stateEnum = EPContextPartitionState.STARTED;
+            stateEnum = ContextPartitionState.STARTED;
         }
         else if (expectedState.equals("-")) {
-            stateEnum = EPContextPartitionState.STOPPED;
+            stateEnum = ContextPartitionState.STOPPED;
         }
         else {
             throw new IllegalStateException("Failed to parse expected state '" + expectedState + "' as {+,-}");
@@ -1148,7 +1148,7 @@ public class TestAdminContextPartitionSPI extends TestCase implements ContextSta
         assertEquals(message, stateEnum, desc.getState());
     }
 
-    private static Map<Integer, EPContextPartitionDescriptor> getAllCPDescriptors(EPServiceProvider epService, String contextName, boolean nested) {
+    private static Map<Integer, ContextPartitionDescriptor> getAllCPDescriptors(EPServiceProvider epService, String contextName, boolean nested) {
         ContextPartitionSelector selector = ContextPartitionSelectorAll.INSTANCE;
         if (nested) {
             selector = new SupportSelectorNested(ContextPartitionSelectorAll.INSTANCE, ContextPartitionSelectorAll.INSTANCE);

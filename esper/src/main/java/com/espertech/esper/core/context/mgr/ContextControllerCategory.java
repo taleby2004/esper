@@ -14,7 +14,7 @@ package com.espertech.esper.core.context.mgr;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.context.*;
 import com.espertech.esper.core.context.util.ContextControllerSelectorUtil;
-import com.espertech.esper.client.context.EPContextPartitionState;
+import com.espertech.esper.client.context.ContextPartitionState;
 import com.espertech.esper.epl.spec.ContextDetailCategoryItem;
 import com.espertech.esper.type.NumberSetParameter;
 
@@ -120,7 +120,7 @@ public class ContextControllerCategory implements ContextController {
                     factory.populateContextInternalFilterAddendums(filterAddendumToUse, category.getName());
                 }
 
-                ContextControllerInstanceHandle handle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, null, this, optionalTriggeringEvent, optionalTriggeringPattern, category.getName(), context, controllerState, filterAddendumToUse, factory.getFactoryContext().isRecoveringResilient(), EPContextPartitionState.STARTED);
+                ContextControllerInstanceHandle handle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, null, this, optionalTriggeringEvent, optionalTriggeringPattern, category.getName(), context, controllerState, filterAddendumToUse, factory.getFactoryContext().isRecoveringResilient(), ContextPartitionState.STARTED);
                 handleCategories.put(count, handle);
 
                 factory.getStateCache().addContextPath(factory.getFactoryContext().getOutermostContextName(), factory.getFactoryContext().getNestingLevel(), pathId, currentSubpathId, handle.getContextPartitionOrPathId(), count, factory.getBinding());

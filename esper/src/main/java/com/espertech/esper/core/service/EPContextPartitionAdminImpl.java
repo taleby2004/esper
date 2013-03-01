@@ -11,10 +11,10 @@
 
 package com.espertech.esper.core.service;
 
+import com.espertech.esper.client.context.ContextPartitionCollection;
+import com.espertech.esper.client.context.ContextPartitionDescriptor;
 import com.espertech.esper.client.context.ContextPartitionSelector;
 import com.espertech.esper.client.context.ContextPartitionSelectorById;
-import com.espertech.esper.client.context.EPContextPartitionCollection;
-import com.espertech.esper.client.context.EPContextPartitionDescriptor;
 import com.espertech.esper.core.context.mgr.*;
 import com.espertech.esper.core.context.util.ContextPartitionImportCallback;
 
@@ -50,13 +50,13 @@ public class EPContextPartitionAdminImpl implements EPContextPartitionAdminSPI
         return contextManager.getNumNestingLevels();
     }
 
-    public EPContextPartitionCollection destroyContextPartitions(String contextName, ContextPartitionSelector selector) {
+    public ContextPartitionCollection destroyContextPartitions(String contextName, ContextPartitionSelector selector) {
         ContextManager contextManager = checkedGetContextManager(contextName);
         ContextStatePathDescriptor descriptor = contextManager.extractDestroyPaths(selector);
-        return new EPContextPartitionCollection(descriptor.getContextPartitionInformation());
+        return new ContextPartitionCollection(descriptor.getContextPartitionInformation());
     }
 
-    public EPContextPartitionDescriptor destroyContextPartition(String contextName, final int agentInstanceId) {
+    public ContextPartitionDescriptor destroyContextPartition(String contextName, final int agentInstanceId) {
         ContextManager contextManager = checkedGetContextManager(contextName);
         ContextStatePathDescriptor descriptor = contextManager.extractDestroyPaths(new CPSelectorById(agentInstanceId));
         return descriptor.getContextPartitionInformation().get(agentInstanceId);
@@ -68,35 +68,35 @@ public class EPContextPartitionAdminImpl implements EPContextPartitionAdminSPI
         return descriptorToExtract(contextManager.getNumNestingLevels(), descriptor);
     }
 
-    public EPContextPartitionCollection stopContextPartitions(String contextName, ContextPartitionSelector selector) {
+    public ContextPartitionCollection stopContextPartitions(String contextName, ContextPartitionSelector selector) {
         ContextManager contextManager = checkedGetContextManager(contextName);
         ContextStatePathDescriptor descriptor = contextManager.extractStopPaths(selector);
-        return new EPContextPartitionCollection(descriptor.getContextPartitionInformation());
+        return new ContextPartitionCollection(descriptor.getContextPartitionInformation());
     }
 
-    public EPContextPartitionCollection startContextPartitions(String contextName, ContextPartitionSelector selector) {
+    public ContextPartitionCollection startContextPartitions(String contextName, ContextPartitionSelector selector) {
         ContextManager contextManager = checkedGetContextManager(contextName);
-        return new EPContextPartitionCollection(contextManager.startPaths(selector));
+        return new ContextPartitionCollection(contextManager.startPaths(selector));
     }
 
-    public EPContextPartitionCollection getContextPartitions(String contextName, ContextPartitionSelector selector) {
+    public ContextPartitionCollection getContextPartitions(String contextName, ContextPartitionSelector selector) {
         ContextManager contextManager = checkedGetContextManager(contextName);
-        return new EPContextPartitionCollection(contextManager.extractPaths(selector).getContextPartitionInformation());
+        return new ContextPartitionCollection(contextManager.extractPaths(selector).getContextPartitionInformation());
     }
 
-    public EPContextPartitionDescriptor stopContextPartition(String contextName, final int agentInstanceId) {
+    public ContextPartitionDescriptor stopContextPartition(String contextName, final int agentInstanceId) {
         ContextManager contextManager = checkedGetContextManager(contextName);
         ContextStatePathDescriptor descriptor = contextManager.extractStopPaths(new CPSelectorById(agentInstanceId));
         return descriptor.getContextPartitionInformation().get(agentInstanceId);
     }
 
-    public EPContextPartitionDescriptor startContextPartition(String contextName, final int agentInstanceId) {
+    public ContextPartitionDescriptor startContextPartition(String contextName, final int agentInstanceId) {
         ContextManager contextManager = checkedGetContextManager(contextName);
-        Map<Integer, EPContextPartitionDescriptor> descriptorMap = contextManager.startPaths(new CPSelectorById(agentInstanceId));
+        Map<Integer, ContextPartitionDescriptor> descriptorMap = contextManager.startPaths(new CPSelectorById(agentInstanceId));
         return descriptorMap.get(agentInstanceId);
     }
 
-    public EPContextPartitionDescriptor getDescriptor(String contextName, final int agentInstanceId) {
+    public ContextPartitionDescriptor getDescriptor(String contextName, final int agentInstanceId) {
         ContextManager contextManager = checkedGetContextManager(contextName);
         ContextStatePathDescriptor descriptor = contextManager.extractPaths(new CPSelectorById(agentInstanceId));
         return descriptor.getContextPartitionInformation().get(agentInstanceId);
@@ -132,7 +132,7 @@ public class EPContextPartitionAdminImpl implements EPContextPartitionAdminSPI
 
     private EPContextPartitionExtract descriptorToExtract(int numNestingLevels, ContextStatePathDescriptor contextPaths) {
         EPContextPartitionImportable importable = new EPContextPartitionImportable(contextPaths.getPaths());
-        return new EPContextPartitionExtract(new EPContextPartitionCollection(contextPaths.getContextPartitionInformation()), importable, numNestingLevels);
+        return new EPContextPartitionExtract(new ContextPartitionCollection(contextPaths.getContextPartitionInformation()), importable, numNestingLevels);
     }
 
     public static class CPImportCallback implements ContextPartitionImportCallback {

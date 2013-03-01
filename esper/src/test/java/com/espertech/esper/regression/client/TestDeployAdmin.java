@@ -475,6 +475,21 @@ public class TestDeployAdmin extends TestCase
         assertEquals("iso1", epService.getEPAdministrator().getStatement("B").getServiceIsolated());
     }
 
+    public void testFlagUndeployNoDestroy() throws Exception {
+        epService.getEPAdministrator().getConfiguration().addEventType(SupportBean.class);
+
+        DeploymentResult resultOne = deploymentAdmin.parseDeploy("@Name('S0') select * from SupportBean");
+        DeploymentResult resultTwo = deploymentAdmin.parseDeploy("@Name('S1') select * from SupportBean");
+
+        UndeploymentOptions options = new UndeploymentOptions();
+        options.setDestroyStatements(false);
+        deploymentAdmin.undeployRemove(resultOne.getDeploymentId(), options);
+        assertNotNull(epService.getEPAdministrator().getStatement("S0"));
+
+        deploymentAdmin.undeploy(resultTwo.getDeploymentId(), options);
+        assertNotNull(epService.getEPAdministrator().getStatement("S1"));
+    }
+
     private Module makeModule(String name, String... statements) {
 
         ModuleItem[] items = new ModuleItem[statements.length];

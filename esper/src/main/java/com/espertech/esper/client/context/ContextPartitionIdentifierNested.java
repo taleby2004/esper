@@ -17,6 +17,7 @@ import java.util.Arrays;
  * Context partition identifier for nested contexts.
  */
 public class ContextPartitionIdentifierNested extends ContextPartitionIdentifier {
+    private static final long serialVersionUID = -6111517958714806085L;
     private ContextPartitionIdentifier[] identifiers;
 
     /**

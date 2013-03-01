@@ -12,9 +12,9 @@
 package com.espertech.esper.core.context.mgr;
 
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.context.ContextPartitionDescriptor;
 import com.espertech.esper.client.context.ContextPartitionSelector;
 import com.espertech.esper.core.context.util.ContextDescriptor;
-import com.espertech.esper.client.context.EPContextPartitionDescriptor;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.filter.FilterFaultHandler;
 import com.espertech.esper.filter.FilterSpecLookupable;
@@ -41,7 +41,7 @@ public interface ContextManager extends FilterFaultHandler {
     public ContextStatePathDescriptor extractStopPaths(ContextPartitionSelector contextPartitionSelector);
     public ContextStatePathDescriptor extractDestroyPaths(ContextPartitionSelector contextPartitionSelector);
     public void importStartPaths(ContextControllerState state, AgentInstanceSelector agentInstanceSelector);
-    public Map<Integer, EPContextPartitionDescriptor> startPaths(ContextPartitionSelector contextPartitionSelector);
+    public Map<Integer, ContextPartitionDescriptor> startPaths(ContextPartitionSelector contextPartitionSelector);
 
     public Collection<Integer> getAgentInstanceIds(ContextPartitionSelector contextPartitionSelector);
     public Map<String, ContextControllerStatementDesc> getStatements();

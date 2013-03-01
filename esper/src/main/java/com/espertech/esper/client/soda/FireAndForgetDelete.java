@@ -15,6 +15,8 @@ import java.io.StringWriter;
  */
 public class FireAndForgetDelete implements FireAndForgetClause
 {
+    private static final long serialVersionUID = -3565886245820109541L;
+
     public void toEPLBeforeFrom(StringWriter writer) {
         writer.append("delete ");
     }
