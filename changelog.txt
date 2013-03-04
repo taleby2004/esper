@@ -4,8 +4,6 @@ Esper Changelog
 Changes in version 4.9.0
 ------------------------
 Major API or EPL changes
-  - Performance improvements, overall, and related to patterns and self-joins
-  - Reduced memory utilization
   - Support for new minby, maxby and sorted aggregation functions
   - Support for context partition administration through a new API 
   - Support for specifying a timezone as part of crontab schedules
@@ -13,8 +11,10 @@ Major API or EPL changes
   - Support for fire-and-forget (on-demand) queries that delete and update named windows
   - Support for passing EventBean and collection of EventBean to EPL-to-code method invocations
   - Support for an optional context object passed in EPL-to-code method invocations
-  - Support for the expression window and expression batch window to the oldest and newest event so that expiry policies are easier to specify that comparing event properties
-  - New powerful extension API for aggregation functions termed aggregation multi-function 
+  - Support for the expression window and expression batch window to the oldest and newest event so that expiry policies are easier to specify that compare event properties
+  - New extension API for aggregation functions termed aggregation multi-function 
+  - Performance improvements, overall, and related to patterns and self-joins
+  - Reduced memory utilization
 
 Bug fixes
   - Fixed Issue MWI-774-78809 ArrayIndexOutOfBoundsException upon statement stop context partitioned statement with aggregation

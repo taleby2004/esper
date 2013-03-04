@@ -12,6 +12,45 @@ Change History
 	[]
 
 
+Version 4.9.0
+
+	Released March 4, 2013
+	
+	Built and tested with JDK 6.0 Update 34; Tested with JDK 7.0 Update 10
+
+* API changes
+
+  * None.
+    
+* Major changes
+
+  * Support for new minby, maxby and sorted aggregation functions
+
+  * Support for context partition administration through a new API 
+
+  * Support for specifying a timezone as part of crontab schedules
+
+  * Support for instance method invocation on enumeration values
+
+  * Support for fire-and-forget (on-demand) queries that delete and update named windows
+
+  * Support for passing EventBean and collection of EventBean to EPL-to-code method invocations
+
+  * Support for an optional context object passed in EPL-to-code method invocations
+
+  * Support for the expression window and expression batch window to the oldest and newest event so that expiry policies are easier to specify that compare event properties
+
+  * New extension API for aggregation functions termed aggregation multi-function 
+
+  * Performance improvements, overall, and related to patterns and self-joins
+
+  * Reduced memory utilization
+
+  * Please review changelog.txt for additional information.
+
+  []
+
+
 Version 4.8.0
 
 	Released January 4, 2013
