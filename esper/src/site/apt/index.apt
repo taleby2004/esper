@@ -6,6 +6,10 @@ Event Processing with Esper and NEsper
 	regardless of whether incoming messages are historical or real-time in nature. Esper and NEsper filter 
 	and analyze events in various ways, and respond to conditions of interest with minimal latency.
 	
+	Esper and Event Processing Language (EPL) thus provide a highly scalable, memory-efficient, 
+	SQL-standard, minimal latency real-time Big Data processing engine for high-velocity and high-variety data.
+
+	
 Technology Introduction
 
 	Complex event processing (CEP) delivers high-speed processing of many events across all the layers of an organization, 

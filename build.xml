@@ -32,6 +32,7 @@
         **/target/**, **/intellij/**, **/_classes/**,
         examples/benchmark/lib/*.jar,
         examples/terminalsvc-jse/lib/*.jar,
+        examples/cycledetect/lib/*.jar,
         **/antlr-3.2.jar,
         **/junit-4.8.1.jar, **/junit.license,
         **/mysql-connector-java-*.jar,**/OTFeed*.jar"/>
