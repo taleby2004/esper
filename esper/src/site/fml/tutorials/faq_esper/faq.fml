@@ -7,7 +7,7 @@
       <question>How does Esper compare to other CEP products?</question>
       <answer>
         <p>
-          Esper is an entirely free open-source component available under the 
+          Esper is an open-source component available under the 
           GNU GPL license (GPL also known as GPL v2). The open-source nature of Esper helps in tailoring the event processing language and other 
           community driven features.
         </p>
@@ -37,20 +37,83 @@
           Esper features a Statement Object Model API, which is a set of classes to directly construct, manipulate or interrogate EPL statements. 
         </p>
         <p>
-          One customer remarked "Many products expose just a GUI to input simple event definitions. EPL provides a way to express complex events."
-        </p>
-        <p>
           Another user stated "Esper can detect all kinds of event patterns, from simple and/or/not to complicated state machines."
+          Many other CEP productions only offer SQL joins and aggregations. Esper in addition offers a pattern language based on university research,
+          and another pattern engine based on NFA regular expressions from proposed SQL standards.
         </p>        
+        <p>
+          Esper offers a rich set of parameterizable data windows (expiry policies). Most other engines provide a very small set of 
+          very simple rolling, sliding or hopping windows. Esper data windows can be put into intersection and union set-logic relationships.
+        </p>        
+        <p>
+          One customer remarked "Many products expose just a GUI to input simple event definitions. EPL provides a way to express complex events."
+          Indeed Esper expression language that is very extensible and makes use of lambda closure-type constructs can handle 
+          complex analysis.
+        </p>
       </answer>
     </faq>
+
+     <faq id="scaling">
+      <question>How does Esper scale?</question>
+      <answer>
+        <p>
+          Scaling has three components. 
+        </p>
+        <p>
+          The first component of scaling is the throughput that can be achieved running single-threaded. For Esper
+          we think this number is very high and likely between 10k to 200k events per second.
+        </p>
+        <p>
+          The second component of scaling is scale-up by adding CPUs and/or memory. For Esper we have tested 32 CPUs
+          and found that, with proper statement design the engine can achieve excellent
+          parallel processing performance. Please contact us if you need help.
+        </p>
+        <p>
+          The third component of scaling is scale-out by adding JVMs and/or systems. 
+          Scaling across JVMs is not a design goal of the core Esper CEP engine itself 
+          however it is a design goal of EsperHA and Enterprise Edition. Please contact us to discuss scaling across JVM.
+        </p>
+      </answer>
+    </faq>
+
+     <faq id="memory_efficient">
+      <question>Is Esper memory efficient?</question>
+      <answer>
+        <p>
+          We have analyzed the memory stack for large statement numbers (100k+ statements) and large context partition numbers (100k+ partitions)
+	  with common types of statements and optimized memory use.
+        </p>
+        <p>
+          The engine design is such that most common operations do not allocate unnecessary objects from heap.
+        </p>
+        <p>
+          It can however be expected that Esper requires more memory then hand-coded specific application code would need.
+        </p>
+      </answer>
+    </faq>
+
+     <faq id="latency_minimal">
+      <question>What latency can be achieved and is it "real-time"?</question>
+      <answer>
+        <p>
+	  Complex Event Processing and Esper are standing queries and latency to the answer is usually below 10us with more than 99% predictability.
+	  Note that mileage varies depending on use case therefore please contact us for tuning information or help.
+        </p>
+        <p>
+          Most existing big data technology requires saving data to someplace and then performing queries on saved data. 
+	  Most Hadoop or Map-Reduce infrastructure answers queries with latency of minutes to hours. Some in-memory databases
+	  and optimizations reduce query answer time to minutes or seconds. 
+        </p>
+      </answer>
+    </faq>
+
     <faq id="advantages_epl">
       <question>What are the advantages of Esper's Event Processing Language (EPL)?</question>
       <answer>
         <p>
 		  The Esper event processing language (EPL) converges event stream processing (filtering, joins, aggregation) 
 		  and complex event processing (causality) into one single language. 
-		  The core language is SQL-like ensuring rapid learning, but is also highly oriented toward support of modern technologies 
+		  The core language is SQL conforming ensuring rapid learning, but is also highly oriented toward support of modern technologies 
 		  so it is for example object oriented (more than table oriented), enabling for simple extension. The language, of course, 
 		  includes event windows and causality patterns as first citizens. 
 		  We natively support several types of event formats, from Java/.Net object, maps, to XML documents.
@@ -156,7 +219,7 @@
       <answer>
         <p>
           Esper uses the JUnit testing framework to automate regression testing of the system.
-          Esper's build process runs the currently around 3100 unit test methods, many running multiple test scenarios, in over 750 JUnit test classes when a build occurs.
+          Esper's build process runs the currently around 3400 unit test methods, many running multiple test scenarios, in over 800 JUnit test classes when a build occurs.
           The test classes test the Esper engine from an end-to-end perspective as well as perform tests against
           individual classes and components. Tests are very detailed in asserting the expected results allowing us
           to detect most problems before they can reach you. There is also a good set of tests for multithread-safety as well as
