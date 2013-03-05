@@ -92,6 +92,15 @@
       </answer>
     </faq>
 
+     <faq id="inmemory">
+      <question>What part of Esper is in-memory computing?</question>
+      <answer>
+        <p>
+          All of Esper computing is in-memory computing.
+        </p>
+      </answer>
+    </faq>
+
      <faq id="latency_minimal">
       <question>What latency can be achieved and is it "real-time"?</question>
       <answer>

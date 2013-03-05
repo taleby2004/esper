@@ -9,6 +9,7 @@ Event Processing with Esper and NEsper
 	Esper and Event Processing Language (EPL) provide a 
 	{{{./tutorials/faq_esper/faq.html#scaling}highly scalable}}, 
 	{{{./tutorials/faq_esper/faq.html#memory_efficient}memory-efficient}}, 
+	{{{./tutorials/faq_esper/faq.html#inmemory}in-memory computing}}, 
 	{{{./tutorials/faq_esper/faq.html#advantages_epl}SQL-standard}}, 
 	{{{./tutorials/faq_esper/faq.html#latency_minimal}minimal latency, real-time}}
 	Big Data processing engine for medium to high-velocity and high-variety data.
