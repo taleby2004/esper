@@ -67,6 +67,8 @@
           The second component of scaling is scale-up by adding CPUs and/or memory. For Esper we have tested 32 CPUs
           and found that, with proper statement design the engine can achieve excellent
           parallel processing performance. Please contact us if you need help.
+          It is not necessary to create 32 statements or 32 engine instances to utilize 32 CPUs: It is sufficient to
+          properly design 2 EPL statements at a minimum.
         </p>
         <p>
           The third component of scaling is scale-out by adding JVMs and/or systems. 

@@ -27,6 +27,12 @@
 		  To join data that resides in a non-relational store the engine offers a two means: First, the virtual data window, as described below, for transparently integrating the external store as a named window. The second mechanism is a special join syntax based on static method invocation, see <xref linkend="joining_method"/>.
 		</para>
 		
+		<tip><title>Tip</title>
+		  <para>
+		  The best way to test that your extension code works correctly is to write unit tests against an EPL statement that utilizes the extension code. Samples can be obtained from Esper regression test code base.
+		  </para>
+	   </tip>
+		
 		<note>
 			<para>
 			  For all extension code and similar to listeners and subscribers, to send events into the engine from extension code the <literal>route</literal> method should be used (and not <literal>sendEvent</literal>) to avoid the possibility of stack overflow due to event-callback looping and ensure correct processing of the current and routed event .

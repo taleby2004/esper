@@ -4629,10 +4629,16 @@ from ServiceOrderEvent as order]]></programlisting>
 			<programlisting><![CDATA[select rstream * from AllOrdersNamedWindow]]></programlisting>
 			
 			<para>
-				The next statement derives an average price per symbol from all events posted by a named window: 
+				The next statement derives an average price per symbol for the events held by the named window: 
 			</para>
 			<programlisting><![CDATA[select symbol, avg(price) from AllOrdersNamedWindow group by symbol]]></programlisting>
 			
+			<para>
+				A statement that consumes from a named window, like the one above, 
+				receives the insert and remove stream of the named window. The insert stream represents the events inserted into the named window. The remove stream represents the events expired from 
+				the named window data window and the events explicitly deleted via <literal>on-delete</literal> for on-demand (fire-and-forget) <literal>delete</literal>.				 
+			</para>
+
 			<para>
 				Your application may create a consuming statement such as above on an empty named window, or your application may create the above statement on an already filled named window. The engine provides correct results in either case: 
 				At the time of statement creation the Esper engine internally initializes the consuming statement from the current named window, also taking your declared filters into consideration. Thus, your statement deriving data from a named window does not start empty if the named window already holds one or more events. A consuming statement also sees the remove stream of an already populated named window, if any.
@@ -4786,6 +4792,25 @@ select * from OrdersNamedWindow as win]]></programlisting>
 select onw.symbol, sum(onw.volume) 
 from OrdersNamedWindow as onw 
 where onw.symbol = trig.symbol]]></programlisting>
+
+			<sect3 xml:id="named_query" revision="1">
+				<title>On-Select Compared To Join</title>
+				
+				<para> 
+				  <literal>On-select</literal> and the unidirectional join can be compared as follows.
+				</para>
+
+				<para> 
+				  <literal>On-select</literal>, <literal>on-merge</literal>, <literal>on-insert</literal>, <literal>on-delete</literal>, <literal>on-update</literal> and <literal>on-select-and-delete</literal>
+				  operate only on named windows. Unidirectional joins however can operate on any stream. 
+				  If the unidirectional join is between a single named window and a triggering event or pattern and that triggering event or pattern is marked unidirectional, the unidirectional join is equivalent to <literal>on-select</literal>.
+				</para>
+
+				 <para>
+					Execution aspects differ in terms of locking. An <literal>on-select</literal> statement executes under a shareable named window context partition lock.
+					A unidirectional join does not execute under such named window context partition lock and instead is a consumer relationship to the named window (see above).
+				 </para>
+			</sect3>
 		</sect2>
 
 		<sect2 xml:id="named_selectdelete" revision="1">
