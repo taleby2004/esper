@@ -11,7 +11,7 @@ Event Processing with Esper and NEsper
 	{{{./tutorials/faq_esper/faq.html#memory_efficient}memory-efficient}}, 
 	{{{./tutorials/faq_esper/faq.html#inmemory}in-memory computing}}, 
 	{{{./tutorials/faq_esper/faq.html#advantages_epl}SQL-standard}}, 
-	{{{./tutorials/faq_esper/faq.html#latency_minimal}minimal latency, real-time}}
+	{{{./tutorials/faq_esper/faq.html#latency_minimal}minimal latency, real-time streaming}}
 	Big Data processing engine for medium to high-velocity and high-variety data.
 
 	
@@ -47,7 +47,9 @@ Commonly Asked Questions
 	
 Esper Enterprise Edition Feature Summary 
 
-	* Rich web-based multi-window GUI based on Flex for design and management of EPL statements and CEP engine in general
+	* Highly scalable, elastic, distributable and fault tolerant event processing
+
+	* Rich web-based multi-window GUI based on Apache Flex for design and management of EPL statements and CEP engine in general
 
 	* Real-time continuously-updating displays (charts, timeline, gauge, grids) that are interactive, composable, configurable and easy to integrate
 

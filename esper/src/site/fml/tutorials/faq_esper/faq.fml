@@ -115,6 +115,15 @@
 	  Most Hadoop or Map-Reduce infrastructure answers queries with latency of minutes to hours. Some in-memory databases
 	  and optimizations reduce query answer time to minutes or seconds. 
         </p>
+        <p>
+          Esper provides real-time Big Data analytics for immediate insight, 
+          turning high velocity log and other machine data into streaming operational intelligence.
+          Why is Esper so fast? Esper is a 'NoDatabase' technology since no data is stored.
+          Instead data arrives as real-time streams and is processed in-memory using continuous SQL-conforming queries. 
+          This allows for massively parallel streaming data processing, ensuring the best use of 
+          today's multi-core, multi-blade servers, while still allowing applications to be deployed in a 
+          fraction of the time and at a fraction of the cost of alternative Big Data analytics solutions. 
+        </p>
       </answer>
     </faq>
 
