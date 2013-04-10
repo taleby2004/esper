@@ -68,7 +68,8 @@
           and found that, with proper statement design the engine can achieve excellent
           parallel processing performance. Please contact us if you need help.
           It is not necessary to create 32 statements or 32 engine instances to utilize 32 CPUs: It is sufficient to
-          properly design 2 EPL statements at a minimum.
+          properly design 2 EPL statements at a minimum. We recommend reviewing Context and Context Partitions
+          in the documentation in detail.
         </p>
         <p>
           The third component of scaling is scale-out by adding JVMs and/or systems. 
