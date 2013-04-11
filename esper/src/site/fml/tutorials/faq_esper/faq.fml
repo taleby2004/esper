@@ -90,6 +90,9 @@
           The engine design is such that most common operations do not allocate unnecessary objects from heap.
         </p>
         <p>
+          It is not necessary to retain any events in memory for performing aggregations or pattern matching.
+        </p>
+        <p>
           It can however be expected that Esper requires more memory then hand-coded specific application code would need.
         </p>
       </answer>
