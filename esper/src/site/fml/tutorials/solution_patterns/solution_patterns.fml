@@ -472,11 +472,12 @@ cepRT.sendEvent(entry);</pre></div>
       <question>I want to get average, count, min and max for a 60-second time window?</question>
       <answer>
         <p>
-          There are a few solutions to consider, mostly depending on how often you want to compute aggregations (continuously or once on output) and output a result (continuously or once after 60 sec).
+          There are a few solutions to consider, mostly depending on how often you want to compute aggregations (continuously or once on output) and output a result (continuously or once after 60 sec)
+          and whether you want the engine to retain events in memory or not.
         </p>
 
         <p>
-          Lets assume we want to output only once after 60 seconds, start fresh every 60 seconds, compute aggregations continuously and don't retain any events for those 60 seconds (only retain aggregated values in memory).
+          Lets assume we want to output only once after 60 seconds, start fresh every 60 seconds, compute aggregations continuously and don't retain any events in memory for those 60 seconds (only retain aggregated values in memory).
           This is the two statements that accomplish this:
         </p>
 	<div class="source"><pre>// Activate now and every 1-minute, terminating after 1 minute
@@ -503,6 +504,43 @@ min(value) as minValue, max(value) as maxValue from MyEvent.win:time(60 sec)</pr
           The first solution (the one with CtxEachMinute) may be preferable for many cases, however solutions two and three can have an advantage depending on
           what output you are looking for and when you want to compute aggregated values. 
         </p>
+      </answer>
+    </faq>    
+
+    <faq id="aggregate-3a">
+      <question>How to continually maintain customer ids that represent the top X customers with total purchases across a sliding time window?</question>
+      <answer>
+        <p>
+          I have a single stream of events that contain 3 properties, a Sale ID, a Customer ID, and a sale amount.
+          I want to continually maintain a set of Customer IDs that represent the top X customers with total purchases 
+          across a sliding time window.
+        </p>
+
+        <p>
+          For example, I'd like to know who my top 30 purchasers based off of sales for the last 7 days.  
+          I'm trying to find a solution that provides me with a place to put an UpdateListener that will process 
+          the insert and remove streams maintaining a highspeed cache (like memcached, but not necessarily) other 
+          programs can leverage.
+        </p>
+        
+        <p>
+          The solution utilizes two statements, one to compute the total per customer over a time window,
+          and the second to rank the output of the first statement.
+        </p>
+        
+	<div class="source"><pre>// define input event 
+create map schema BuyEvent as (saleid int, customerid int, amount double);
+
+// compute current total per customer
+insert into CustomerTotals 
+select customerid, sum(amount) as total
+from BuyEvent.win:time(7 days) cbe
+group by customerid;
+
+// output insert and remove stream of top 30 customers.      
+@Name('TopCustomers')
+select irstream customerid, total
+from CustomerTotals.ext:rank(customerid, 30, total desc);</pre></div>      	
       </answer>
     </faq>    
 
