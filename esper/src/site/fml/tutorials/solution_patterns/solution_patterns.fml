@@ -60,6 +60,13 @@
       	<p>
       	  A stream is unbounded, i.e. there is no end to the sequence {event1, event2, event3, event4, ..., eventN}.
       	</p>
+      	<p>
+      	  Streams are the basic building blocks of event stream processing. 
+      	  Similar to functions in a functional programming language, a CEP engine treats computation as the evaluation of streaming data.
+      	</p>
+      	<p>
+      	  Streams in Esper have zero cost in terms of memory or processing. You could register millions of streams.
+      	</p>
       </answer>
     </faq>
     
