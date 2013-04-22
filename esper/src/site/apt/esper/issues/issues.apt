@@ -26,9 +26,21 @@ Getting Help
 	* The complete stack trace of any exception, if an exception is reported.
 	
 	* A snippet of Java code or a unit test to reproduce the issue or question.
-	  Keep this code very simple and minimal without any additional classes, in the style of our regression test suite.
-	  Remove all random-ness from this test class. We have an example of a test case below.
+	  
+	  	* Keep this code very simple and minimal without any additional classes.
 	  	
+	  	* The test code should not require additional jar files other than those required by Esper itself.
+	  	
+	  	* The test code should not use random data. Please take the time to produce the minimal number of non-random test events.
+	  	
+	  	* The test code should only use threading when it demonstrates a threading problem. Use just the main thread for all testing otherwise.
+	  	
+	  	* For example test classes, please see the regression test suite at {{{http://svn.codehaus.org/esper/esper/trunk/esper/src/test/java/}source code for Esper regression tests}}.
+	  	
+	  	* A sample test class is provided below.
+	  	
+	  	[]
+	  []
 	
 * Please consider obtaining support from EsperTech.
 
