@@ -1,12 +1,12 @@
 Download NEsper
 ~~~~~~~~~~~~~~
 
-	NEsper can be downloaded as a zip-file and as an MSI installer:
+	NEsper can be downloaded as a zip-file:
 
 *------------------------+------------------------------------------------------------------------------+-----------------------------------------------------------------------------------+
 |                        | Download                                                                     | License
 *------------------------+------------------------------------------------------------------------------+-----------------------------------------------------------------------------------+
-| NEsper 4.6.2 (zip)     | {{{http://dist.codehaus.org/esper/NEsper-4.6.2.zip} NEsper-4.6.2.zip  }}| {{{http://www.opensource.org/licenses/gpl-license.php} GNU GPL verison 2}}
+| NEsper 4.6.2 (zip)     | {{{http://dist.codehaus.org/esper/NEsper-4.6.2.zip} NEsper-4.6.2.zip  }}| {{{http://www.opensource.org/licenses/gpl-license.php} GNU GPL version 2}}
 *------------------------+------------------------------------------------------------------------------+-----------------------------------------------------------------------------------+
 	
 

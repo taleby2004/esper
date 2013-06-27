@@ -1098,8 +1098,8 @@ from pattern [every timer:interval(5 sec)]
 from WithdrawalEvent.win:time(60 sec) as withdraw
      left outer join
      LoginEvent.win:time(60 sec) as login
-on fraud.accountNumber = withdraw.accountNumber
-where login.accountNumber = null</pre></div>      
+on login.accountNumber = withdraw.accountNumber
+where login.accountNumber is null</pre></div>      
       </answer>
     </faq>    
 
