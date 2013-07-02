@@ -292,6 +292,10 @@ where sensor.sensorId = loc.sensorId</pre></div>
         <p>
           You can aggregate with and without data windows. Use aggregation with data windows if you can and want to afford to retain events. Use aggregation with context partitions if you do not want to retain events.
         </p>        
+        <p>
+          We recommend using filters where possible for filtering out events, such as for example "StockTick(symbol='IBM')". We recommend 
+          using the where-clause only for correlation criteria.
+        </p>        
       </answer>
     </faq>    
     <faq id="design-3">
