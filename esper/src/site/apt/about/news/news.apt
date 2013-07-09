@@ -1,5 +1,12 @@
 News
 
+* July 9, 2013  -  NEsper 4.8.0 for .NET
+	      
+  * Feature equivalent to Esper version 4.8.0
+  
+  []  
+  
+
 * March 4, 2013  -  Esper 4.9.0 - Update release
 
   * Support for new minby, maxby and sorted aggregation functions
