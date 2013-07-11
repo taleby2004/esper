@@ -64,11 +64,16 @@ public class ExprPlugInAggFunctionFactoryNode extends ExprAggregateNodeBase
         AggregationValidationContext context = new AggregationValidationContext(parameterTypes, isConstant, constant, super.isDistinct(), hasDataWindows, expressions);
         try
         {
+            // the aggregation function factory is transient, obtain if not provided
+            if (aggregationFunctionFactory == null) {
+                aggregationFunctionFactory = validationContext.getMethodResolutionService().getEngineImportService().resolveAggregationFactory(functionName);
+            }
+
             aggregationFunctionFactory.validate(context);
         }
-        catch (RuntimeException ex)
+        catch (Exception ex)
         {
-            throw new ExprValidationException("Plug-in aggregation function factory '" + functionName + "' failed validation: " + ex.getMessage());
+            throw new ExprValidationException("Plug-in aggregation function '" + functionName + "' failed validation: " + ex.getMessage(), ex);
         }
 
         Class childType = null;
