@@ -991,6 +991,32 @@ select * from PersonEvent(department=VAR_DEPARTMENT)]]></programlisting>
 				</para>
 				<programlisting><![CDATA[@Hint('index(explicit, bust)')]]></programlisting>
 		</sect2>
+		<sect2 xml:id="perf-tips-26">
+				<title>Measuring Throughput</title>
+				
+				<para>
+					We recommend using <literal>System.nanoTime()</literal> to measure elapsed time when processing a batch of, for example, 1000 events.
+				</para>
+				
+				<para>
+					Note that <literal>System.nanoTime()</literal> provides nanosecond precision, but not necessarily nanosecond resolution.  
+				</para>
+
+				<para>
+					Therefore don't try to measure the time spent by the engine processing a single event: The resolution of <literal>System.nanoTime()</literal> is not sufficient. 
+					Also, there are reports that <literal>System.nanoTime()</literal> can be actually go "backwards" and may not always behave as expected under threading. 
+					Please check your JVM platform documentation.
+				</para>
+				
+				<para>
+				  In the default configuration, the best way to measure performance is to take nano time, send a large number of events, for example 10.000 events, and take nano time again reporting on the difference between the two numbers.
+				</para>
+
+				<para>
+				  If your configuration has inbound threading or other threading options set, you should either monitor the queue depth to determine performance, or disable 
+				  threading options when measuring performance, or have your application use multiple threads to send events instead.
+				</para>
+		</sect2>
     </sect1>
 
     <sect1 xml:id="performance-kit" revision="1">
