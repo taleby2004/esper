@@ -1017,6 +1017,20 @@ select * from PersonEvent(department=VAR_DEPARTMENT)]]></programlisting>
 				  threading options when measuring performance, or have your application use multiple threads to send events instead.
 				</para>
 		</sect2>
+		<sect2 xml:id="perf-tips-27">
+				<title>Do not create the same EPL Statement X times</title>
+				
+				<para>
+					It is vastly more efficient to create an EPL statement once and attach multiple listeners, then to create the same EPL statement X times.
+				</para>
+
+				<para>
+					Since your goal will be to make all test code as realistic, real-world and production-like as possible, we recommend against production code or test code creating 
+					the same EPL statement multiple times. Instead consider creating the same EPL statement once and attaching multiple listeners.
+					Certain important optimizations that the engine can perform when EPL statements realistically differ, may not take place. 
+					The engine also does not try to detect duplicate EPL statements, since that can easily be done by your application using public APIs. 
+				</para>
+		</sect2>
     </sect1>
 
     <sect1 xml:id="performance-kit" revision="1">
