@@ -81,93 +81,115 @@ testing on small configuration.</programlisting>
 		</sect2>
 
 		<sect2 xml:id="perf-tips-3-a">
-			<title>Advanced Theading</title>
+			<title>Theading</title>
+
 			<para>
-				Esper provides the configuration option to use engine-level queues and threadpools for inbound, outbound and internal executions. See <xref linkend="api-threading-advanced"/> for more information.
+				We recommend using multiple threads to send events into Esper. We provide a test class below. 
+				Our test class does not use a blocking queue and thread pool so as to avoid a point of contention.
 			</para>
+			
 			<para>
-				We recommend using a Java queue and thread pool with <literal>sendEvent()</literal> or alternatively we recommend configuring inbound threading if your application does not already employ threading.
-				An example is provided below.
+				A sample code for testing performance with multiple threads is provided:
+			</para>
+			<programlisting><![CDATA[public class SampleClassThreading {
+
+    public static void main(String[] args) throws InterruptedException {
+
+        int numEvents = 1000000;
+        int numThreads = 3;
+
+        Configuration config = new Configuration();
+        config.getEngineDefaults().getThreading()
+          .setListenerDispatchPreserveOrder(false);
+        config.getEngineDefaults().getThreading()
+          .setInternalTimerEnabled(false);   // remove thread that handles time advancing
+        EPServiceProvider engine = EPServiceProviderManager
+          .getDefaultProvider(config);
+        engine.getEPAdministrator().getConfiguration().addEventType(MyEvent.class);
+
+        engine.getEPAdministrator().createEPL(
+          "create context MyContext coalesce by consistent_hash_crc32(id) " +
+          "from MyEvent granularity 64 preallocate");
+        String epl = "context MyContext select count(*) from MyEvent group by id";
+        EPStatement stmt = engine.getEPAdministrator().createEPL(epl);
+        stmt.setSubscriber(new MySubscriber());
+
+        Thread[] threads = new Thread[numThreads];
+        CountDownLatch latch = new CountDownLatch(numThreads);
+
+        int eventsPerThreads = numEvents / numThreads;
+        for (int i = 0; i < numThreads; i++) {
+            threads[i] = new Thread(
+              new MyRunnable(latch, eventsPerThreads, engine.getEPRuntime()));
+        }
+        long startTime = System.currentTimeMillis();
+        for (int i = 0; i < numThreads; i++) {
+            threads[i].start();
+        }
+
+        latch.await(10, TimeUnit.MINUTES);
+        if (latch.getCount() > 0) {
+            throw new RuntimeException("Failed to complete in 10 minute");
+        }
+        long delta = System.currentTimeMillis() - startTime;
+        System.out.println("Took " + delta + " millis");
+    }
+
+    public static class MySubscriber {
+        public void update(Object[] args) {
+        }
+    }
+
+    public static class MyRunnable implements Runnable {
+        private final CountDownLatch latch;
+        private final int numEvents;
+        private final EPRuntime runtime;
+
+        public MyRunnable(CountDownLatch latch, int numEvents, EPRuntime runtime) {
+            this.latch = latch;
+            this.numEvents = numEvents;
+            this.runtime = runtime;
+        }
+
+        public void run() {
+            Random r = new Random();
+            for (int i = 0; i < numEvents; i++) {
+                runtime.sendEvent(new MyEvent(r.nextInt(512)));
+            }
+            latch.countDown();
+        }
+    }
+
+    public static class MyEvent {
+        private final int id;
+
+        public MyEvent(int id) {
+            this.id = id;
+        }
+
+        public int getId() {
+            return id;
+        }
+    }
+}]]></programlisting>
+						
+			<para>
+				We recommend using Java threads as above, or a blocking queue and thread pool with <literal>sendEvent()</literal> or alternatively we recommend configuring inbound threading if your application does not already employ threading.
+				Esper provides the configuration option to use engine-level queues and threadpools for inbound, outbound and internal executions. See <xref linkend="api-threading-advanced"/> for more information.
 			</para>
 			<para>
 				We recommend the outbound threading if your listeners are blocking. For outbound threading also see the section below on tuning and disabling listener delivery guarantees.
 			</para>
 			<para>
 				If enabling advanced threading options keep in mind that the engine will maintain a queue and thread pool. There is additional overhead associated with entering work units into the queue, maintaining the queue and the hand-off between threads. The Java blocking queues are not necessarily fast on all JVM. 
-				It is not necessarily true that
-				your application will perform better with any of the advanced threading options. 
+				It is not necessarily true that your application will perform better with any of the advanced threading options. 
 			</para>
-			
 			<para>
-				A sample code for testing performance with multiple threads is provided:
+			  We found scalability better on Linux systems and running Java with <literal>-server</literal> and pinning threads to exclusive CPUs and after making sure CPUs are available on your system.
 			</para>
-			<programlisting><![CDATA[public void testPerformance() throws InterruptedException {
-  int numEvents = 1;
-  int numThreads = 2;
-
-  Configuration config = new Configuration();
-  config.getEngineDefaults().getThreading()
-    .setListenerDispatchPreserveOrder(false);
-  EPServiceProvider engine = 
-    EPServiceProviderManager.getDefaultProvider(config);
-
-  engine.getEPAdministrator().getConfiguration().addEventType(MyEvent.class);
-
-  String epl = "select * as from MyEvent";
-  EPStatement stmt = engine.getEPAdministrator().createEPL(epl);
-  stmt.setSubscriber(new MySubscriber());
-
-  LinkedBlockingDeque<Runnable> queue = new LinkedBlockingDeque<Runnable>();
-  CountDownLatch latch = new CountDownLatch(numEvents);
-  for (int i = 0; i < numEvents; i++) {
-    queue.add(new MyRunnable(engine.getEPRuntime(), 
-      latch, new TransactionEvent(1,2,3)));
-  }
-
-  long startTime = System.currentTimeMillis();
-  ThreadPoolExecutor threads = new ThreadPoolExecutor(numThreads, 
-      numThreads, 10, TimeUnit.SECONDS, queue);
-  threads.prestartAllCoreThreads();
-  latch.await(1, TimeUnit.MINUTES);
-  if (latch.getCount() > 0) {
-    throw new RuntimeException("Failed to complete in 1 minute");
-  }
-  long delta = System.currentTimeMillis() - startTime;
-  System.out.println("Took " + delta + " millis");
-  threads.shutdownNow();
-}
-
-  public static class MySubscriber {
-    public void update(Object[] args) {}
-  }
-
-  public static class MyRunnable implements Runnable {
-
-    private final EPRuntime runtime;
-    private final CountDownLatch latch;
-    private final Object event;
-
-    public MyRunnable(EPRuntime runtime, CountDownLatch latch, Object event) {
-      this.runtime = runtime;
-      this.latch = latch;
-      this.event = event;
-    }
-
-    public void run() {
-      try {
-        runtime.sendEvent(event);
-      }
-      catch (RuntimeException ex) {
-        ex.printStackTrace();
-      }
-      finally {
-        latch.countDown();
-      }
-    }
-  }
-
-public static class MyEvent {}]]></programlisting>
-
+			<para>
+				We recommend looking at LMAX Disruptor, an inter-thread messaging library.
+			</para>
 		</sect2>
 
 		<sect2 xml:id="perf-tips-4">
