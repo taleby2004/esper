@@ -37,7 +37,7 @@
 				The following code snippet uses the runtime configuration API to import the File adapter classes:
 			</para>
 			<programlisting><![CDATA[epService.getEPAdministrator().getConfiguration()
-	  .addImport(FileSource.class.getPackage().getName() + ".*");]]></programlisting>
+	  .addImport(FileSourceFactory.class.getPackage().getName() + ".*");]]></programlisting>
 	
 			<para>
 				The File input and output adapter provides the following data flow operators:

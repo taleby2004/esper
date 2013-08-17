@@ -1127,6 +1127,16 @@ select * from PersonEvent(department=VAR_DEPARTMENT)]]></programlisting>
 					The engine also does not try to detect duplicate EPL statements, since that can easily be done by your application using public APIs. 
 				</para>
 		</sect2>
+		<sect2 xml:id="perf-tips-28">
+				<title>Comparing Single-Threaded and Multi-Threaded Performance</title>
+				
+				<para>
+					The Java Virtual Machine optimizes locks such that the time to obtain a read lock, for example, differs widely between single-threaded and multi-threaded applications.
+					 We compared code that obtains an unfair <literal>ReentrantReadWriteLock</literal> read lock 100 million times, without any writer. 
+					 We measured 3 seconds for a single-threaded application and 15 seconds for an application with 2 threads.
+					 It can therefore not be expected that scaling from single-threaded to 2 threads will always double performance. There is a base cost for multiple threads to coordinate.
+				</para>
+		</sect2>
     </sect1>
 
     <sect1 xml:id="performance-kit" revision="1">
