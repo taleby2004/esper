@@ -49,7 +49,7 @@ public class SendableBeanEvent extends AbstractSendableEvent
                 Set<WriteablePropertyDescriptor> props = PropertyHelper.getWritableProperties(beanClass);
                 writers = new HashMap<String, BeanEventPropertyWriter>();
                 writersMap.put(beanClass, writers);
-                FastClass fastClass = FastClass.create(beanClass);
+                FastClass fastClass = FastClass.create(Thread.currentThread().getContextClassLoader(), beanClass);
                 for (WriteablePropertyDescriptor prop : props) {
                     FastMethod writerMethod = fastClass.getMethod(prop.getWriteMethod());
                     writers.put(prop.getPropertyName(), new BeanEventPropertyWriter(beanClass, writerMethod));

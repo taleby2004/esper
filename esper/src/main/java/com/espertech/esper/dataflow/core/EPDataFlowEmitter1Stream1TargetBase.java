@@ -33,7 +33,7 @@ public abstract class EPDataFlowEmitter1Stream1TargetBase implements EPDataFlowE
         this.signalHandler = signalHandler;
         this.exceptionHandler = exceptionHandler;
 
-        FastClass fastClass = FastClass.create(target.getTarget().getClass());
+        FastClass fastClass = FastClass.create(Thread.currentThread().getContextClassLoader(), target.getTarget().getClass());
         fastMethod = fastClass.getMethod(target.getBinding().getConsumingBindingDesc().getMethod());
         targetObject = target.getTarget();
     }

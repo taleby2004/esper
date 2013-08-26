@@ -30,7 +30,7 @@ public class SignalHandlerDefaultWInvoke extends SignalHandlerDefault {
     public SignalHandlerDefaultWInvoke(Object target, Method method) {
         this.target = target;
 
-        FastClass fastClass = FastClass.create(target.getClass());
+        FastClass fastClass = FastClass.create(Thread.currentThread().getContextClassLoader(), target.getClass());
         fastMethod = fastClass.getMethod(method);
     }
 

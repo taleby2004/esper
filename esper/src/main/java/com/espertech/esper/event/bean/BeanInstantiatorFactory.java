@@ -132,7 +132,7 @@ public class BeanInstantiatorFactory
         {
             Method method = engineImportService.resolveMethod(className, methodName, new Class[0], new boolean[0], new boolean[0]);
             if (beanEventType.getFastClass() != null) {
-                FastClass fastClassFactory = FastClass.create(method.getDeclaringClass());
+                FastClass fastClassFactory = FastClass.create(Thread.currentThread().getContextClassLoader(), method.getDeclaringClass());
                 return new BeanInstantiatorByFactoryFastClass(fastClassFactory.getMethod(method));
             }
             else {
