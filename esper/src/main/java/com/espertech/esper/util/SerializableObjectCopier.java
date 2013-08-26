@@ -36,7 +36,7 @@ public class SerializableObjectCopier
             outStream.close();
         }
 
-        ObjectInputStream inStream = new ObjectInputStream(fbos.getInputStream());
+        ObjectInputStream inStream = new ObjectInputStreamWithTCCL(fbos.getInputStream());
         try {
             return inStream.readObject();
         }

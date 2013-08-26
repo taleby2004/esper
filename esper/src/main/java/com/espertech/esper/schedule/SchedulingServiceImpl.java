@@ -8,6 +8,8 @@
  **************************************************************************************/
 package com.espertech.esper.schedule;
 
+import com.espertech.esper.client.util.DateTime;
+import com.espertech.esper.metrics.jmx.JmxGetter;
 import com.espertech.esper.timer.TimeSourceService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -171,9 +173,30 @@ public final class SchedulingServiceImpl implements SchedulingServiceSPI
         handleSetMap.put(handle, handleSet);
     }
 
+    @JmxGetter(name = "TimeHandleCount", description = "Number of outstanding time evaluations")
     public int getTimeHandleCount()
     {
         return timeHandleMap.size();
+    }
+
+    @JmxGetter(name = "FurthestTimeHandle", description = "Furthest outstanding time evaluation")
+    public String getFurthestTimeHandleDate()
+    {
+        Long handle = getFurthestTimeHandle();
+        if (handle != null) {
+            return DateTime.print(handle);
+        }
+        return null;
+    }
+
+    @JmxGetter(name = "NearestTimeHandle", description = "Nearest outstanding time evaluation")
+    public String getNearestTimeHandleDate()
+    {
+        Long handle = getNearestTimeHandle();
+        if (handle != null) {
+            return DateTime.print(handle);
+        }
+        return null;
     }
 
     public Long getFurthestTimeHandle()

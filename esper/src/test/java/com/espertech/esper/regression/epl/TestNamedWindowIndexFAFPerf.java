@@ -229,4 +229,52 @@ public class TestNamedWindowIndexFAFPerf extends TestCase implements IndexBackin
         assertEquals(1, result.getArray().length);
         assertEquals(expectedValue, result.getArray()[0].get("sumi"));
     }
+
+    public void testFAFWithIn() throws Exception {
+        epService.getEPAdministrator().getConfiguration().addEventType(MyEvent.class);
+        epService.getEPAdministrator().getConfiguration().addPlugInSingleRowFunction("justCount", InvocationCounter.class.getName(), "justCount");
+
+        epService.getEPAdministrator().createEPL("create window MyWindow.win:keepall() as MyEvent");
+        epService.getEPAdministrator().createEPL("create index idx on MyWindow(id)");
+        epService.getEPAdministrator().createEPL("insert into MyWindow select * from MyEvent");
+
+        int eventCount = 10;
+        for (int i = 0; i < eventCount; i++) {
+            epService.getEPRuntime().sendEvent(new MyEvent("E" + i));
+        }
+
+        InvocationCounter.setCount(0);
+        String fafEPL = "select * from MyWindow as mw where justCount(mw) and id in ('notfound')";
+        epService.getEPRuntime().executeQuery(fafEPL);
+        assertEquals(0, InvocationCounter.getCount());
+    }
+
+    public static class MyEvent {
+        private String id;
+
+        public MyEvent(String id) {
+            this.id = id;
+        }
+
+        public String getId() {
+            return id;
+        }
+    }
+
+    public static class InvocationCounter {
+        private static int count;
+
+        public static void setCount(int count) {
+            InvocationCounter.count = count;
+        }
+
+        public static int getCount() {
+            return count;
+        }
+
+        public static boolean justCount(Object o) {
+            count++;
+            return true;
+        }
+    }
 }

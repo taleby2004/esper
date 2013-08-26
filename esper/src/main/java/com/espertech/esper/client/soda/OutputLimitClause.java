@@ -26,14 +26,14 @@ public class OutputLimitClause implements Serializable
     private String frequencyVariable;
     private OutputLimitUnit unit;
     private Expression whenExpression;
-    private List<AssignmentPair> thenAssignments;
+    private List<Assignment> thenAssignments;
     private Expression[] crontabAtParameters;
     private Expression timePeriodExpression;
     private Expression afterTimePeriodExpression;
     private Integer afterNumberOfEvents;
     private boolean andAfterTerminate;
     private Expression andAfterTerminateAndExpr;
-    private List<AssignmentPair> andAfterTerminateThenAssignments;
+    private List<Assignment> andAfterTerminateThenAssignments;
 
     /**
      * Ctor.
@@ -141,7 +141,7 @@ public class OutputLimitClause implements Serializable
      */
     public static OutputLimitClause create(Expression whenExpression)
     {
-        return new OutputLimitClause(OutputLimitSelector.DEFAULT, whenExpression, new ArrayList<AssignmentPair>());
+        return new OutputLimitClause(OutputLimitSelector.DEFAULT, whenExpression, new ArrayList<Assignment>());
     }
 
     /**
@@ -248,7 +248,7 @@ public class OutputLimitClause implements Serializable
      * @param whenExpression the boolean expression to evaluate to control output
      * @param thenAssignments the variable assignments, optional or an empty list
      */
-    public OutputLimitClause(OutputLimitSelector selector, Expression whenExpression, List<AssignmentPair> thenAssignments)
+    public OutputLimitClause(OutputLimitSelector selector, Expression whenExpression, List<Assignment> thenAssignments)
     {
         this.selector = selector;
         this.whenExpression = whenExpression;
@@ -350,20 +350,19 @@ public class OutputLimitClause implements Serializable
      * Returns the list of optional then-keyword variable assignments, if any
      * @return list of variable assignments or null if none
      */
-    public List<AssignmentPair> getThenAssignments()
+    public List<Assignment> getThenAssignments()
     {
         return thenAssignments;
     }
 
     /**
      * Adds a then-keyword variable assigment for use with the when-keyword.
-     * @param variableName to set
      * @param assignmentExpression expression to calculate new value
      * @return clause
      */
-    public OutputLimitClause addThenAssignment(String variableName, Expression assignmentExpression)
+    public OutputLimitClause addThenAssignment(Expression assignmentExpression)
     {
-        thenAssignments.add(new AssignmentPair(variableName, assignmentExpression));
+        thenAssignments.add(new Assignment(assignmentExpression));
         return this;
     }
 
@@ -529,7 +528,7 @@ public class OutputLimitClause implements Serializable
      * Set then.
      * @param thenAssignments to set
      */
-    public void setThenAssignments(List<AssignmentPair> thenAssignments) {
+    public void setThenAssignments(List<Assignment> thenAssignments) {
         this.thenAssignments = thenAssignments;
     }
 
@@ -589,7 +588,7 @@ public class OutputLimitClause implements Serializable
      * Returns the set-assignments to execute when a context partition terminates.
      * @return set-assignments
      */
-    public List<AssignmentPair> getAndAfterTerminateThenAssignments() {
+    public List<Assignment> getAndAfterTerminateThenAssignments() {
         return andAfterTerminateThenAssignments;
     }
 
@@ -597,11 +596,11 @@ public class OutputLimitClause implements Serializable
      * Sets the set-assignments to execute when a context partition terminates.
      * @param andAfterTerminateThenAssignments set-assignments
      */
-    public void setAndAfterTerminateThenAssignments(List<AssignmentPair> andAfterTerminateThenAssignments) {
+    public void setAndAfterTerminateThenAssignments(List<Assignment> andAfterTerminateThenAssignments) {
         this.andAfterTerminateThenAssignments = andAfterTerminateThenAssignments;
     }
 
-    private void writeThenAssignments(StringWriter writer, List<AssignmentPair> thenAssignments) {
+    private void writeThenAssignments(StringWriter writer, List<Assignment> thenAssignments) {
         writer.write(" then ");
         UpdateClause.renderEPLAssignments(writer, thenAssignments);
     }

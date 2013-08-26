@@ -28,7 +28,7 @@ import java.util.List;
 /**
  * Expression instance as declared elsewhere.
  */
-public class ExprDeclaredNodeImpl extends ExprNodeBase implements ExprDeclaredNode, ExprDeclaredOrLambdaNode, ExprFilterOptimizableNode
+public class ExprDeclaredNodeImpl extends ExprNodeBase implements ExprDeclaredNode, ExprDeclaredOrLambdaNode, ExprFilterOptimizableNode, ExprNodeInnerNodeProvider
 {
     private static final long serialVersionUID = 9140100131374697808L;
 
@@ -47,6 +47,10 @@ public class ExprDeclaredNodeImpl extends ExprNodeBase implements ExprDeclaredNo
         } catch (Exception e) {
             throw new RuntimeException("Internal error providing expression tree: " + e.getMessage(), e);
         }
+    }
+
+    public List<ExprNode> getAdditionalNodes() {
+        return chainParameters;
     }
 
     public boolean validated() {

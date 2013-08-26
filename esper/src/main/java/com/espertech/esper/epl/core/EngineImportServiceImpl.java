@@ -393,15 +393,20 @@ public class EngineImportServiceImpl implements EngineImportService
 		for(String importName : imports)
 		{
 			boolean isClassName = isClassName(importName);
+            boolean containsPackage = importName.indexOf('.') != -1;
+            String classNameWithDot = "." + className;
+            String classNameWithDollar = "$" + className;
 
-			// Import is a class name
+            // Import is a class name
 			if(isClassName)
 			{
-				if(importName.endsWith(className))
-				{
+                if ((containsPackage && importName.endsWith(classNameWithDot)) ||
+                    (containsPackage && importName.endsWith(classNameWithDollar)) ||
+                    (!containsPackage && importName.equals(className)) ||
+                    (!containsPackage && importName.endsWith(classNameWithDollar))) {
                     ClassLoader cl = Thread.currentThread().getContextClassLoader();
                     return Class.forName(importName, true, cl);
-				}
+                }
 
                 String prefixedClassName = importName + '$' + className;
                 try

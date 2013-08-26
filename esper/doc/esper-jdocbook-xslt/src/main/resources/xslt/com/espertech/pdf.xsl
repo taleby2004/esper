@@ -1192,7 +1192,7 @@
                         <fo:table-row>
                             <fo:table-cell text-align="center">
                                 <fo:block text-align="center">
-                                	Copyright 2006 - 2012 by EsperTech Inc.
+                                	Copyright 2006 - 2013 by EsperTech Inc.
                                 </fo:block>
 				<fo:block>
 				    <fo:external-graphic src="url(../../staging/images/images/esper_logo.png)"/>

@@ -17,6 +17,7 @@ import com.espertech.esper.client.soda.*;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.support.util.SupportModelHelper;
 import com.espertech.esper.util.EventRepresentationEnum;
 import junit.framework.TestCase;
 
@@ -170,6 +171,8 @@ public class TestSplitStream extends TestCase
         stmtOrig = epService.getEPAdministrator().create(newModel);
         assertEquals(stmtOrigText, newModel.toEPL());
         runAssertion(stmtOrig);
+
+        SupportModelHelper.compileCreate(epService, stmtOrigText + " output all");
     }
 
     public void testSubquery()

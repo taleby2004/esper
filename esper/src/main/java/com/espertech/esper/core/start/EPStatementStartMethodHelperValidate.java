@@ -186,7 +186,7 @@ public class EPStatementStartMethodHelperValidate
         }
         for (OnTriggerSetAssignment assign : assignments)
         {
-            ExprNode node = ExprNodeUtility.getValidatedSubtree(assign.getExpression(), validationContext);
+            ExprNode node = ExprNodeUtility.getValidatedAssignment(assign, validationContext);
             assign.setExpression(node);
             EPStatementStartMethodHelperValidate.validateNoAggregations(node, "An aggregate function may not appear in a OUTPUT LIMIT clause");
         }

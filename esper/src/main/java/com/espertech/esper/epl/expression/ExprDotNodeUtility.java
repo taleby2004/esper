@@ -73,8 +73,21 @@ public class ExprDotNodeUtility
                 }
             }
 
+            // determine if there is a matching method
+            boolean matchingMethod = false;
+            Class methodTarget = getMethodTarget(currentInputType);
+            if (methodTarget != null) {
+                try {
+                    getValidateMethodDescriptor(methodTarget, chainElement.getName(), chainElement.getParameters(), validationContext);
+                    matchingMethod = true;
+                }
+                catch (ExprValidationException ex) {
+                    // expected
+                }
+            }
+
             // resolve lambda
-            if (EnumMethodEnum.isEnumerationMethod(chainElement.getName())) {
+            if (EnumMethodEnum.isEnumerationMethod(chainElement.getName()) && (!matchingMethod || methodTarget.isArray() || JavaClassHelper.isImplementsInterface(methodTarget, Collection.class))) {
                 EnumMethodEnum enumerationMethod = EnumMethodEnum.fromName(chainElement.getName());
                 ExprDotEvalEnumMethod eval = (ExprDotEvalEnumMethod) JavaClassHelper.instantiate(ExprDotEvalEnumMethod.class, enumerationMethod.getImplementation().getName());
                 eval.init(enumerationMethod, chainElement.getName(), currentInputType, chainElement.getParameters(), validationContext);
@@ -88,7 +101,7 @@ public class ExprDotNodeUtility
             }
 
             // resolve datetime
-            if (DatetimeMethodEnum.isDateTimeMethod(chainElement.getName())) {
+            if (DatetimeMethodEnum.isDateTimeMethod(chainElement.getName()) && (!matchingMethod  || methodTarget == Calendar.class || methodTarget == Date.class)) {
                 DatetimeMethodEnum datetimeMethod = DatetimeMethodEnum.fromName(chainElement.getName());
                 ExprDotEvalDTMethodDesc datetimeImpl = ExprDotEvalDTFactory.validateMake(validationContext.getStreamTypeService(), chainSpecStack, datetimeMethod, chainElement.getName(), currentInputType, chainElement.getParameters(), inputDesc);
                 currentInputType = datetimeImpl.getReturnType();
@@ -128,26 +141,12 @@ public class ExprDotNodeUtility
                 }
             }
 
-            // Try to resolve the method
-            if (currentInputType.isSingleValueNonNull() || currentInputType.getSingleEventEventType() != null) {
+            // Finally try to resolve the method
+            if (methodTarget != null) {
                 try
                 {
-                    Class target;
-                    if (currentInputType.isSingleValueNonNull()) {
-                        target = currentInputType.getSingleValueType();
-                    }
-                    else {
-                        target = currentInputType.getSingleEventEventType().getUnderlyingType();
-                    }
-
-                    final String methodName = chainElement.getName();
-                    ExprNodeUtilResolveExceptionHandler exceptionHandler = new ExprNodeUtilResolveExceptionHandler() {
-                        public ExprValidationException handle(Exception e) {
-                            return new ExprValidationException("Failed to resolve method '" + methodName + "': " + e.getMessage(), e);
-                        }
-                    };
-                    EventType wildcardType = validationContext.getStreamTypeService().getEventTypes().length != 1 ? null : validationContext.getStreamTypeService().getEventTypes()[0];
-                    ExprNodeUtilMethodDesc desc = ExprNodeUtility.resolveMethodAllowWildcardAndStream(target.getName(), target, methodName, chainElement.getParameters(), validationContext.getMethodResolutionService(), validationContext.getEventAdapterService(), validationContext.getStatementId(), wildcardType != null, wildcardType, exceptionHandler, methodName);
+                    // find descriptor again, allow for duck typing
+                    ExprNodeUtilMethodDesc desc = getValidateMethodDescriptor(methodTarget, chainElement.getName(), chainElement.getParameters(), validationContext);
                     FastMethod fastMethod = desc.getFastMethod();
                     paramEvals = desc.getChildEvals();
 
@@ -201,6 +200,16 @@ public class ExprDotNodeUtility
         return new ExprDotNodeRealizedChain(intermediateEvals, unpackingEvals, filterAnalyzerDesc);
     }
 
+    private static Class getMethodTarget(ExpressionReturnType currentInputType) {
+        if (currentInputType.isSingleValueNonNull()) {
+            return currentInputType.getSingleValueType();
+        }
+        else if (currentInputType.getSingleEventEventType() != null) {
+            return currentInputType.getSingleEventEventType().getUnderlyingType();
+        }
+        return null;
+    }
+
     public static ObjectArrayEventType makeTransientOAType(String enumMethod, String propertyName, Class type) {
         Map<String, Object> propsResult = new HashMap<String, Object>();
         propsResult.put(propertyName, type);
@@ -215,5 +224,16 @@ public class ExprDotNodeUtility
         else {
             return new EventType[] {ExprDotNodeUtility.makeTransientOAType(enumMethodUsedName, goesToNames.get(0), collectionComponentType)};
         }
+    }
+
+    private static ExprNodeUtilMethodDesc getValidateMethodDescriptor(Class methodTarget, final String methodName, List<ExprNode> parameters, ExprValidationContext validationContext)
+        throws ExprValidationException {
+        ExprNodeUtilResolveExceptionHandler exceptionHandler = new ExprNodeUtilResolveExceptionHandler() {
+            public ExprValidationException handle(Exception e) {
+                return new ExprValidationException("Failed to resolve method '" + methodName + "': " + e.getMessage(), e);
+            }
+        };
+        EventType wildcardType = validationContext.getStreamTypeService().getEventTypes().length != 1 ? null : validationContext.getStreamTypeService().getEventTypes()[0];
+        return ExprNodeUtility.resolveMethodAllowWildcardAndStream(methodTarget.getName(), methodTarget, methodName, parameters, validationContext.getMethodResolutionService(), validationContext.getEventAdapterService(), validationContext.getStatementId(), wildcardType != null, wildcardType, exceptionHandler, methodName);
     }
 }

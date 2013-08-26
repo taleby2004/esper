@@ -21,13 +21,13 @@ public class OnUpdateClause extends OnClause
 
     private String windowName;
     private String optionalAsName;
-    private List<AssignmentPair> assignments;
+    private List<Assignment> assignments;
 
     /**
      * Ctor.
      */
     public OnUpdateClause() {
-        assignments = new ArrayList<AssignmentPair>();
+        assignments = new ArrayList<Assignment>();
     }
 
     /**
@@ -50,7 +50,7 @@ public class OnUpdateClause extends OnClause
     {
         this.windowName = windowName;
         this.optionalAsName = optionalAsName;
-        assignments = new ArrayList<AssignmentPair>();
+        assignments = new ArrayList<Assignment>();
     }
 
     /**
@@ -108,13 +108,12 @@ public class OnUpdateClause extends OnClause
 
     /**
      * Adds a variable to set to the clause.
-     * @param variable to set
      * @param expression expression providing the new variable value
      * @return clause
      */
-    public OnUpdateClause addAssignment(String variable, Expression expression)
+    public OnUpdateClause addAssignment(Expression expression)
     {
-        assignments.add(new AssignmentPair(variable, expression));
+        assignments.add(new Assignment(expression));
         return this;
     }
 
@@ -122,7 +121,7 @@ public class OnUpdateClause extends OnClause
      * Returns the list of variable assignments.
      * @return pair of variable name and expression
      */
-    public List<AssignmentPair> getAssignments()
+    public List<Assignment> getAssignments()
     {
         return assignments;
     }
@@ -131,7 +130,7 @@ public class OnUpdateClause extends OnClause
      * Sets a list of variable assignments.
      * @param assignments list of pairs of variable name and expression
      */
-    public void setAssignments(List<AssignmentPair> assignments)
+    public void setAssignments(List<Assignment> assignments)
     {
         this.assignments = assignments;
     }

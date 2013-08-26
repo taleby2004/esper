@@ -228,10 +228,15 @@ public class TestContextSelectionAndFireAndForget extends TestCase {
         EPOnDemandQueryResult result = epService.getEPRuntime().executeQuery(epl, selectors);
         EPAssertionUtil.assertPropsPerRowAnyOrder(result.getArray(), fields.split(","), expected);
 
-        // test prepare and execute
+        // test unparameterized prepare and execute
         EPOnDemandPreparedQuery preparedQuery = epService.getEPRuntime().prepareQuery(epl);
         EPOnDemandQueryResult resultPrepared = preparedQuery.execute(selectors);
         EPAssertionUtil.assertPropsPerRowAnyOrder(resultPrepared.getArray(), fields.split(","), expected);
+
+        // test unparameterized prepare and execute
+        EPOnDemandPreparedQueryParameterized preparedParameterizedQuery = epService.getEPRuntime().prepareQueryWithParameters(epl);
+        EPOnDemandQueryResult resultPreparedParameterized = epService.getEPRuntime().executeQuery(preparedParameterizedQuery, selectors);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(resultPreparedParameterized.getArray(), fields.split(","), expected);
 
         // test SODA prepare and execute
         EPStatementObjectModel modelForPrepare = epService.getEPAdministrator().compileEPL(epl);

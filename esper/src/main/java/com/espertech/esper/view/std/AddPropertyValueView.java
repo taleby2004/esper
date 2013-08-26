@@ -182,14 +182,16 @@ public final class AddPropertyValueView extends ViewSupport implements Cloneable
 
     @Override
     public void stopView() {
-        OneEventCollection oldEvents = new OneEventCollection();
-        for (Map.Entry<EventBean, EventBean> oldEvent : newToOldEventMap.entrySet()) {
-            oldEvents.add(oldEvent.getValue());
+        if (!newToOldEventMap.isEmpty()) {
+            OneEventCollection oldEvents = new OneEventCollection();
+            for (Map.Entry<EventBean, EventBean> oldEvent : newToOldEventMap.entrySet()) {
+                oldEvents.add(oldEvent.getValue());
+            }
+            if (!oldEvents.isEmpty()) {
+                updateChildren(null, oldEvents.toArray());
+            }
+            newToOldEventMap.clear();
         }
-        if (!oldEvents.isEmpty()) {
-            updateChildren(null, oldEvents.toArray());
-        }
-        newToOldEventMap.clear();
     }
 
     /**

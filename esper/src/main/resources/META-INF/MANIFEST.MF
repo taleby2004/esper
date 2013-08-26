@@ -49,7 +49,7 @@ Export-Package: com.espertech.esper.antlr,
  com.espertech.esper.view.window
 Bundle-Name: Esper Event Stream and Complex Event Processing
 Created-By: Apache Maven
-Bundle-RequiredExecutionEnvironment: J2SE-1.6
+Bundle-RequiredExecutionEnvironment: J2SE-1.6, J2SE-1.7
 Bundle-Vendor: EsperTech
 Built-By: EsperTech
 Build-Jdk: 1.6.0_23

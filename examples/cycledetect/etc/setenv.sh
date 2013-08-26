@@ -20,7 +20,7 @@ LIB=../../../esper/lib
 
 CLASSPATH=.
 CLASSPATH=$CLASSPATH:../target/classes
-CLASSPATH=$CLASSPATH:../../../esper-4.9.0.jar
+CLASSPATH=$CLASSPATH:../../../esper-4.10.0.jar
 CLASSPATH=$CLASSPATH:$LIB/jgrapht-0.8.3.jar
 CLASSPATH=$CLASSPATH:$LIB/cglib-nodep-2.2.jar
 CLASSPATH=$CLASSPATH:$LIB/commons-logging-1.1.1.jar

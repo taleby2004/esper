@@ -8,6 +8,8 @@
  **************************************************************************************/
 package com.espertech.esper.schedule;
 
+import com.espertech.esper.type.CronOperatorEnum;
+import com.espertech.esper.type.CronParameter;
 import com.espertech.esper.type.ScheduleUnit;
 import com.espertech.esper.util.ExecutionPathDebugLog;
 import org.apache.commons.logging.Log;
@@ -31,6 +33,12 @@ import java.util.TimeZone;
  */
 public final class ScheduleComputeHelper
 {
+    private static final Log log = LogFactory.getLog(ScheduleComputeHelper.class);
+
+    private static int[] DAY_OF_WEEK_ARRAY = new int[] {Calendar.SUNDAY,
+        Calendar.MONDAY, Calendar.TUESDAY, Calendar.WEDNESDAY, Calendar.THURSDAY,
+        Calendar.FRIDAY, Calendar.SATURDAY};
+
     /**
      * Minimum time to next occurance.
      */
@@ -200,7 +208,47 @@ public final class ScheduleComputeHelper
         int dayOfMonth;
 
         // If days of week is a wildcard, just go by days of month
-        if (daysOfWeekSet == null)
+        if (spec.getOptionalDayOfMonthOperator() != null || spec.getOptionalDayOfWeekOperator() != null) {
+            boolean isWeek = false;
+            CronParameter op = spec.getOptionalDayOfMonthOperator();
+            if (spec.getOptionalDayOfMonthOperator() == null) {
+                op = spec.getOptionalDayOfWeekOperator();
+                isWeek = true;
+            }
+
+            // may return the current day or a future day in the same month,
+            // and may advance the "after" date to the next month
+            int currentYYMMDD = getTimeYYYYMMDD(after);
+            increaseAfterDayOfMonthSpecialOp(op.getOperator(), op.getDay(), op.getMonth(), isWeek, after);
+            int rolledYYMMDD = getTimeYYYYMMDD(after);
+
+            // if rolled then reset time portion
+            if (rolledYYMMDD > currentYYMMDD) {
+                result.setSecond(nextValue(secondsSet, 0));
+                result.setMinute(nextValue(minutesSet, 0));
+                result.setHour(nextValue(hoursSet, 0));
+                return after.get(Calendar.DAY_OF_MONTH);
+            }
+            // rolling backwards is not allowed
+            else if (rolledYYMMDD < currentYYMMDD) {
+                throw new IllegalStateException("Failed to evaluate special date op, rolled date less then current date");
+            }
+            else {
+                Calendar work = (Calendar) after.clone();
+                work.set(Calendar.SECOND, result.getSecond());
+                work.set(Calendar.MINUTE, result.getMinute());
+                work.set(Calendar.HOUR_OF_DAY, result.getHour());
+                if (!work.after(after)) {    // new date is not after current date, so bump
+                    after.add(Calendar.DAY_OF_MONTH, 1);
+                    result.setSecond(nextValue(secondsSet, 0));
+                    result.setMinute(nextValue(minutesSet, 0));
+                    result.setHour(nextValue(hoursSet, 0));
+                    increaseAfterDayOfMonthSpecialOp(op.getOperator(), op.getDay(), op.getMonth(), isWeek, after);
+                }
+                return after.get(Calendar.DAY_OF_MONTH);
+            }
+        }
+        else if (daysOfWeekSet == null)
         {
             dayOfMonth = nextValue(daysOfMonthSet, after.get(Calendar.DAY_OF_MONTH));
             if (dayOfMonth != after.get(Calendar.DAY_OF_MONTH))
@@ -330,5 +378,220 @@ public final class ScheduleComputeHelper
         }
     }
 
-    private static final Log log = LogFactory.getLog(ScheduleComputeHelper.class);
+    private static int getTimeYYYYMMDD(Calendar calendar) {
+        return 10000*calendar.get(Calendar.YEAR) + (calendar.get(Calendar.MONTH) + 1) * 100 + calendar.get(Calendar.DAY_OF_MONTH);
+    }
+
+    private static void increaseAfterDayOfMonthSpecialOp(CronOperatorEnum operator, Integer day, Integer month, boolean week, Calendar after) {
+        DateChecker checker;
+        if (operator == CronOperatorEnum.LASTDAY) {
+            if (!week) {
+                checker = new DateCheckerLastDayOfMonth(day, month);
+            }
+            else {
+                if (day == null) {
+                    checker = new DateCheckerLastDayOfWeek(month);
+                }
+                else {
+                    checker = new DateCheckerLastSpecificDayWeek(day, month);
+                }
+            }
+        }
+        else if (operator == CronOperatorEnum.LASTWEEKDAY) {
+            checker = new DateCheckerLastWeekday(day, month);
+        }
+        else {
+            checker = new DateCheckerMonthWeekday(day, month);
+        }
+
+        int dayCount = 0;
+        while(!checker.fits(after)) {
+            after.add(Calendar.DAY_OF_MONTH, 1);
+            dayCount++;
+            if (dayCount > 10000) {
+                throw new IllegalArgumentException("Invalid crontab expression: failed to find match day");
+            }
+        }
+    }
+
+    private interface DateChecker {
+        public boolean fits(Calendar cal);
+    }
+
+    private static class DateCheckerLastSpecificDayWeek implements DateChecker {
+
+        private final int dayCode;
+        private final Integer month;
+
+        private DateCheckerLastSpecificDayWeek(int day, Integer month) {
+            if (day < 0 || day > 7) {
+                throw new IllegalArgumentException("Last xx day of the month has to be a day of week (0-7)");
+            }
+            dayCode = DAY_OF_WEEK_ARRAY[day];
+            this.month = month;
+        }
+
+        public boolean fits(Calendar cal) {
+            if (dayCode != cal.get(Calendar.DAY_OF_WEEK)) {
+                return false;
+            }
+            if (month != null && month != cal.get(Calendar.MONTH)) {
+                return false;
+            }
+            // e.g. 31=Sun,30=Sat,29=Fri,28=Thu,27=Wed,26=Tue,25=Mon
+            // e.g. 31-7 = 24
+            return cal.get(Calendar.DAY_OF_MONTH) > cal.getActualMaximum(Calendar.DAY_OF_MONTH) - 7;
+        }
+    }
+
+    private static class DateCheckerLastDayOfMonth implements DateChecker {
+        private final Integer dayCode;
+        private final Integer month;
+
+        private DateCheckerLastDayOfMonth(Integer day, Integer month) {
+            if (day != null) {
+                if (day < 0 || day > 7) {
+                    throw new IllegalArgumentException("Last xx day of the month has to be a day of week (0-7)");
+                }
+                dayCode = DAY_OF_WEEK_ARRAY[day];
+            }
+            else {
+                dayCode = null;
+            }
+            this.month = month;
+        }
+
+        public boolean fits(Calendar cal) {
+            if (dayCode != null && dayCode != cal.get(Calendar.DAY_OF_WEEK)) {
+                return false;
+            }
+            if (month != null && month != cal.get(Calendar.MONTH)) {
+                return false;
+            }
+            return (cal.get(Calendar.DAY_OF_MONTH) == cal.getActualMaximum(Calendar.DAY_OF_MONTH));
+        }
+    }
+
+    private static class DateCheckerLastDayOfWeek implements DateChecker {
+        private final Integer month;
+
+        private DateCheckerLastDayOfWeek(Integer month) {
+            this.month = month;
+        }
+
+        public boolean fits(Calendar cal) {
+            if (month != null && month != cal.get(Calendar.MONTH)) {
+                return false;
+            }
+            return (cal.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY);
+        }
+    }
+
+    private static class DateCheckerLastWeekday implements DateChecker {
+        private final Integer dayCode;
+        private final Integer month;
+
+        private DateCheckerLastWeekday(Integer day, Integer month) {
+            if (day != null) {
+                if (day < 0 || day > 7) {
+                    throw new IllegalArgumentException("Last xx day of the month has to be a day of week (0-7)");
+                }
+                dayCode = DAY_OF_WEEK_ARRAY[day];
+            }
+            else {
+                dayCode = null;
+            }
+            this.month = month;
+        }
+
+        public boolean fits(Calendar cal) {
+            if (dayCode != null && dayCode != cal.get(Calendar.DAY_OF_WEEK)) {
+                return false;
+            }
+            if (month != null && month != cal.get(Calendar.MONTH)) {
+                return false;
+            }
+            if (!isWeekday(cal)) {
+                return false;
+            }
+            int day = cal.get(Calendar.DAY_OF_MONTH);
+            int max = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+            if (day == max) {
+                return true;
+            }
+            int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
+            return day >= max-2 && dayOfWeek == Calendar.FRIDAY;
+        }
+    }
+
+    public static class DateCheckerMonthWeekday implements DateChecker {
+        private final Integer day;
+        private final Integer month;
+
+        private DateCheckerMonthWeekday(Integer day, Integer month) {
+            if (day != null) {
+                if (day < 1 || day > 31) {
+                    throw new IllegalArgumentException("xx day of the month has to be a in range (1-31)");
+                }
+            }
+            this.day = day;
+            this.month = month;
+        }
+
+        public boolean fits(Calendar cal) {
+            if (month != null && month != cal.get(Calendar.MONTH)) {
+                return false;
+            }
+            if (!isWeekday(cal)) {
+                return false;
+            }
+            if (day == null) {
+                return true;
+            }
+
+            Calendar work = (Calendar) cal.clone();
+            int target = computeNearestWeekdayDay(day, work);
+            return cal.get(Calendar.DAY_OF_MONTH) == target;
+        }
+
+        private static int computeNearestWeekdayDay(int day, Calendar work) {
+            int max = work.getActualMaximum(Calendar.DAY_OF_MONTH);
+            if (day <= max) {
+                work.set(Calendar.DAY_OF_MONTH, day);
+            }
+            else {
+                work.set(Calendar.DAY_OF_MONTH, max);
+            }
+
+            if (isWeekday(work)) {
+                return work.get(Calendar.DAY_OF_MONTH);
+            }
+            if (work.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
+                if (work.get(Calendar.DAY_OF_MONTH) > 1) {
+                    work.add(Calendar.DAY_OF_MONTH, -1);
+                    return work.get(Calendar.DAY_OF_MONTH);
+                }
+                else {
+                    work.add(Calendar.DAY_OF_MONTH, 2);
+                    return work.get(Calendar.DAY_OF_MONTH);
+                }
+            }
+            else {
+                // handle Sunday
+                if (max == work.get(Calendar.DAY_OF_MONTH)) {
+                    work.add(Calendar.DAY_OF_MONTH, -2);
+                    return work.get(Calendar.DAY_OF_MONTH);
+                }
+                else {
+                    work.add(Calendar.DAY_OF_MONTH, 1);
+                    return work.get(Calendar.DAY_OF_MONTH);
+                }
+            }
+        }
+    }
+
+    private static boolean isWeekday(Calendar cal) {
+        int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
+        return !(dayOfWeek < Calendar.MONDAY || dayOfWeek > Calendar.FRIDAY);
+    }
 }

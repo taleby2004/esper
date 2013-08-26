@@ -18,7 +18,10 @@ import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.client.soda.Expressions;
 import com.espertech.esper.client.soda.UpdateClause;
-import com.espertech.esper.support.bean.*;
+import com.espertech.esper.support.bean.SupportBean;
+import com.espertech.esper.support.bean.SupportBeanCopyMethod;
+import com.espertech.esper.support.bean.SupportBeanErrorTestingOne;
+import com.espertech.esper.support.bean.SupportBeanReadOnly;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.util.EventRepresentationEnum;
 import junit.framework.TestCase;
@@ -113,6 +116,8 @@ public class TestUpdate extends TestCase
                    "Error starting statement: Property named 'theString' must be prefixed by a stream name, use the stream name itself or use the as-clause to name the stream with the property in the format \"stream.property\" [update istream SupportBean set longPrimitive=(select p0 from MyMapType.std:lastevent() where theString=p3)]");
         tryInvalid("update istream XYZ.GYH set a=1",
                    "Failed to resolve event type: Event type or class named 'XYZ.GYH' was not found [update istream XYZ.GYH set a=1]");
+        tryInvalid("update istream SupportBean set 1",
+                    "Error starting statement: Missing property assignment expression in assignment number 0 [update istream SupportBean set 1]");
     }
 
     public void testInsertIntoWBeanWhere() throws Exception
@@ -499,7 +504,7 @@ public class TestUpdate extends TestCase
         epService.getEPAdministrator().getConfiguration().addEventType("MyMapType", type);
 
         EPStatementObjectModel model = new EPStatementObjectModel();
-        model.setUpdateClause(UpdateClause.create("MyMapType", "p1", Expressions.constant("newvalue")));
+        model.setUpdateClause(UpdateClause.create("MyMapType", Expressions.eq(Expressions.property("p1"), Expressions.constant("newvalue"))));
         model.getUpdateClause().setOptionalAsClauseStreamName("mytype");
         model.getUpdateClause().setOptionalWhereClause(Expressions.eq("p0", "E1"));
         assertEquals("update istream MyMapType as mytype set p1 = \"newvalue\" where p0 = \"E1\"", model.toEPL());
@@ -921,5 +926,9 @@ public class TestUpdate extends TestCase
         {
             this.pb = pb;
         }
+    }
+
+    public static void setIntBoxedValue(SupportBean sb, int value) {
+        sb.setIntBoxed(value);
     }
 }

@@ -170,7 +170,7 @@ onUpdateExpr
 	;
 
 onSetAssignment
-	:	^(ON_SET_EXPR_ITEM eventPropertyExpr[false] valueExpr)
+	:	^(ON_SET_EXPR_ITEM valueExpr)
 	;
 	
 onExprFrom
@@ -304,8 +304,8 @@ createContextExpr
 	;
 
 createContextDetail
-	:	^(CREATE_CTX_FIXED createContextRangePoint createContextRangePoint)
-	|	^(CREATE_CTX_INIT createContextRangePoint createContextRangePoint)
+	:	^(CREATE_CTX_FIXED (IDENT | createContextRangePoint) createContextRangePoint)
+	|	^(CREATE_CTX_INIT createContextRangePoint createContextRangePoint IDENT?)
 	|	^(CREATE_CTX_PART createContextPartitionItem+)
 	|	^(CREATE_CTX_CAT createContextCategoryItem+ eventFilterExpr[false])
 	|	^(CREATE_CTX_COAL createContextCoalesceItem+ IDENT number IDENT?)
@@ -562,7 +562,7 @@ rowLimitClause
 	;
 
 crontabLimitParameterSet
-	:	^(CRONTAB_LIMIT_EXPR_PARAM valueExprWithTime valueExprWithTime valueExprWithTime valueExprWithTime valueExprWithTime valueExprWithTime?)
+	:	^(CRONTAB_LIMIT_EXPR_PARAM valueExprWithTime*)
 	;
 
 relationalExpr

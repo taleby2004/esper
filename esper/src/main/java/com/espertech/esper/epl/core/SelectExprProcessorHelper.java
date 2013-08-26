@@ -607,12 +607,12 @@ public class SelectExprProcessorHelper
                 {
                     // recast as a Map-type
                     if (underlyingEventType instanceof MapEventType && targetType instanceof MapEventType) {
-                        return new EvalSelectStreamWUnderlyingRecastMap(selectExprContext, selectedStreams.get(0).getStreamSelected().getStreamNumber(), targetType);
+                        return EvalSelectStreamWUndRecastMapFactory.make(typeService.getEventTypes(), selectExprContext, selectedStreams.get(0).getStreamSelected().getStreamNumber(), targetType, exprNodes, methodResolutionService.getEngineImportService());
                     }
 
                     // recast as a Object-array-type
                     if (underlyingEventType instanceof ObjectArrayEventType && targetType instanceof ObjectArrayEventType) {
-                        return new EvalSelectStreamWUnderlyingRecastObjectArray(selectExprContext, selectedStreams.get(0).getStreamSelected().getStreamNumber(), targetType);
+                        return EvalSelectStreamWUndRecastObjectArrayFactory.make(typeService.getEventTypes(), selectExprContext, selectedStreams.get(0).getStreamSelected().getStreamNumber(), targetType, exprNodes, methodResolutionService.getEngineImportService());
                     }
 
                     // recast as a Bean-type

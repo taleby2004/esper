@@ -14,6 +14,7 @@ import com.espertech.esper.epl.join.util.Eligibility;
 import com.espertech.esper.epl.join.util.EligibilityDesc;
 import com.espertech.esper.epl.join.util.EligibilityUtil;
 import com.espertech.esper.epl.join.util.RangeFilterAnalyzer;
+import com.espertech.esper.type.RelationalOpEnum;
 
 /**
  * Analyzes a filter expression and builds a query graph model.
@@ -85,6 +86,7 @@ public class FilterExprAnalyzer
         int indexedStream = -1;
         String indexedProp = null;
         ExprNode exprNodeNoIdent = null;
+        RelationalOpEnum relop = relNode.getRelationalOpEnum();
 
         if (relNode.getChildNodes()[0] instanceof ExprIdentNode) {
             ExprIdentNode identNode = (ExprIdentNode) relNode.getChildNodes()[0];
@@ -97,6 +99,7 @@ public class FilterExprAnalyzer
             indexedStream = identNode.getStreamId();
             indexedProp = identNode.getResolvedPropertyName();
             exprNodeNoIdent = relNode.getChildNodes()[0];
+            relop = relop.reversed();
         }
         if (indexedStream == -1) {
             return;     // require property of right/left side of equals
@@ -107,7 +110,7 @@ public class FilterExprAnalyzer
             return;
         }
 
-        queryGraph.addRelationalOp(indexedStream, indexedProp, eligibility.getStreamNum(), exprNodeNoIdent, relNode.getRelationalOpEnum());
+        queryGraph.addRelationalOp(indexedStream, indexedProp, eligibility.getStreamNum(), exprNodeNoIdent, relop);
     }
 
     private static void analyzeBetweenNode(ExprBetweenNode betweenNode, QueryGraph queryGraph) {

@@ -2001,6 +2001,28 @@ config.getEngineDefaults().getTimeSource().
 			</sect3>
 		</sect2>
 
+		<sect2 xml:id="config-engine-jmxmetrics" revision="1">
+			<title>Engine Settings related to JMX Metrics</title>
+
+			<para>
+				Please set the flag as described herein to have the engine report key counters and other processing information through the JMX mbean platform server. By default JMX is not enabled.
+			</para>
+			
+			<para>
+			    A sample XML configuration is shown below:
+			</para>
+			<programlisting><![CDATA[<engine-settings>
+  <defaults>
+    <metrics-reporting jmx-engine-metrics="true"/>
+  </defaults>
+</engine-settings>]]></programlisting>
+
+			<para>
+			    A sample code snippet to set this configuration via the API follows:
+			</para>
+			<programlisting><![CDATA[configuration.getEngineDefaults().getMetricsReporting().setJmxEngineMetrics(true);]]></programlisting>
+		</sect2>
+
 		<sect2 xml:id="config-engine-instrumentation" revision="1">
 			<title>Engine Settings related to Metrics Reporting</title>
 

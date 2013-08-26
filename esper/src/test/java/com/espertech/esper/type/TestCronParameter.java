@@ -15,7 +15,7 @@ import junit.framework.TestCase;
 
 public class TestCronParameter extends TestCase {
     public void testFormat() {
-        CronParameter cronParameter = new CronParameter(CronOperatorEnum.LASTDAY, 1, System.currentTimeMillis());
+        CronParameter cronParameter = new CronParameter(CronOperatorEnum.LASTDAY, 1);
         assertEquals("LASTDAY(day 1 month null)", cronParameter.formatted());
     }
 }

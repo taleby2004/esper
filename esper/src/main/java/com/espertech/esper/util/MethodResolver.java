@@ -226,7 +226,10 @@ public class MethodResolver
             if (!parametersMethod[i].isPrimitive()) {
                 continue;
             }
-            if (paramTypes[i] == null || (JavaClassHelper.getBoxedType(parametersMethod[i])) == paramTypes[i]) {
+            // if null-type parameter, or non-JDK class and boxed type matches
+            if (paramTypes[i] == null ||
+                 (!declaringClass.getClass().getName().startsWith("java") &&
+                  (JavaClassHelper.getBoxedType(parametersMethod[i])) == paramTypes[i])) {
                 String paramTypeStr = paramTypes[i] == null ? "null" : paramTypes[i].getSimpleName();
                 log.info("Method '" + methodName + "' in class '" + declaringClass.getName() + "' expects primitive type '" + parametersMethod[i] +
                         "' as parameter " + i + ", but receives a nullable (boxed) type " + paramTypeStr +

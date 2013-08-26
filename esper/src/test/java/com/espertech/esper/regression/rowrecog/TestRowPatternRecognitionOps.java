@@ -159,6 +159,16 @@ public class TestRowPatternRecognitionOps extends TestCase {
                 new Object[][]{{"E2", null, null, null, "E3"}, {"E4", "E5", null, null, "E6"}, {"E7", "E8", "E9", "E10", "E11"}});
 
         stmt.stop();
+
+        // Zero-to-many unfiltered
+        String epl = "select * from MyEvent match_recognize (" +
+                "measures A as a, B as b, C as c " +
+                "pattern (A C*? B) " +
+                "define " +
+                "A as typeof(A) = 'MyEventTypeA'," +
+                "B as typeof(B) = 'MyEventTypeB'" +
+                ")";
+        epService.getEPAdministrator().createEPL(epl);
     }
 
     public void testOneToMany()

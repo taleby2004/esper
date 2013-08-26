@@ -21,6 +21,7 @@ import com.espertech.esper.event.property.IndexedProperty;
 import com.espertech.esper.event.property.MappedProperty;
 import com.espertech.esper.event.property.Property;
 import com.espertech.esper.event.property.PropertyParser;
+import com.espertech.esper.util.JavaClassHelper;
 
 import java.lang.reflect.Array;
 import java.util.HashSet;
@@ -390,6 +391,155 @@ public class BaseNestableEventUtil
         }
 
         return null;
+    }
+
+    public static String comparePropType(String propName, Object setOneType, Object setTwoType, boolean setTwoTypeFound, String otherName) {
+        // allow null for nested event types
+        if ((setOneType instanceof String || setOneType instanceof EventType) && setTwoType == null) {
+            return null;
+        }
+        if ((setTwoType instanceof String || setTwoType instanceof EventType) && setOneType == null) {
+            return null;
+        }
+        if (!setTwoTypeFound) {
+            return "The property '" + propName + "' is not provided but required";
+        }
+        if (setTwoType == null)
+        {
+            return null;
+        }
+        if (setOneType == null)
+        {
+            return "Type by name '" + otherName + "' in property '" + propName + "' incompatible with null-type or property name not found in target";
+        }
+
+        if ((setTwoType instanceof Class) && (setOneType instanceof Class))
+        {
+            Class boxedOther = JavaClassHelper.getBoxedType((Class) setTwoType);
+            Class boxedThis = JavaClassHelper.getBoxedType((Class)setOneType);
+            if (!boxedOther.equals(boxedThis))
+            {
+                if (!JavaClassHelper.isSubclassOrImplementsInterface(boxedOther, boxedThis)) {
+                    return "Type by name '" + otherName + "' in property '" + propName + "' expected " + boxedThis + " but receives " + boxedOther;
+                }
+            }
+        }
+        else if ((setTwoType instanceof BeanEventType) && (setOneType instanceof Class))
+        {
+            Class boxedOther = JavaClassHelper.getBoxedType(((BeanEventType)setTwoType).getUnderlyingType());
+            Class boxedThis = JavaClassHelper.getBoxedType((Class)setOneType);
+            if (!boxedOther.equals(boxedThis))
+            {
+                return "Type by name '" + otherName + "' in property '" + propName + "' expected " + boxedThis + " but receives " + boxedOther;
+            }
+        }
+        else if (setTwoType instanceof EventType[] && ((EventType[])setTwoType)[0] instanceof BeanEventType && setOneType instanceof Class && ((Class) setOneType).isArray())
+        {
+            Class boxedOther = JavaClassHelper.getBoxedType((((EventType[])setTwoType)[0]).getUnderlyingType());
+            Class boxedThis = JavaClassHelper.getBoxedType(((Class)setOneType).getComponentType());
+            if (!boxedOther.equals(boxedThis))
+            {
+                return "Type by name '" + otherName + "' in property '" + propName + "' expected " + boxedThis + " but receives " + boxedOther;
+            }
+        }
+        else if ((setTwoType instanceof Map) && (setOneType instanceof Map))
+        {
+            String messageIsDeepEquals = BaseNestableEventType.isDeepEqualsProperties(propName, (Map<String, Object>)setOneType, (Map<String, Object>)setTwoType);
+            if (messageIsDeepEquals != null)
+            {
+                return messageIsDeepEquals;
+            }
+        }
+        else if ((setTwoType instanceof EventType) && (setOneType instanceof EventType))
+        {
+            boolean mismatch;
+            if (setTwoType instanceof EventTypeSPI && setOneType instanceof EventTypeSPI) {
+                mismatch = !((EventTypeSPI) setOneType).equalsCompareType((EventTypeSPI) setTwoType);
+            }
+            else {
+                mismatch = !setOneType.equals(setTwoType);
+            }
+            if (mismatch) {
+                EventType setOneEventType = (EventType) setOneType;
+                EventType setTwoEventType = (EventType) setTwoType;
+                return "Type by name '" + otherName + "' in property '" + propName + "' expected event type '" + setOneEventType.getName() + "' but receives event type '" + setTwoEventType.getName() + "'";
+            }
+        }
+        else if ((setTwoType instanceof String) && (setOneType instanceof EventType))
+        {
+            if (!((EventType) setOneType).getName().equals(setTwoType))
+            {
+                EventType setOneEventType = (EventType) setOneType;
+                String setTwoEventType = (String) setTwoType;
+                return "Type by name '" + otherName + "' in property '" + propName + "' expected event type '" + setOneEventType.getName() + "' but receives event type '" + setTwoEventType + "'";
+            }
+        }
+        else if ((setTwoType instanceof EventType) && (setOneType instanceof String))
+        {
+            if (!((EventType) setTwoType).getName().equals(setOneType))
+            {
+                String setOneEventType = (String) setOneType;
+                EventType setTwoEventType = (EventType) setTwoType;
+                return "Type by name '" + otherName + "' in property '" + propName + "' expected event type '" + setOneEventType + "' but receives event type '" + setTwoEventType.getName() + "'";
+            }
+        }
+        else if ((setTwoType instanceof String) && (setOneType instanceof String))
+        {
+            if (!setTwoType.equals(setOneType))
+            {
+                String setOneEventType = (String) setOneType;
+                String setTwoEventType = (String) setTwoType;
+                return "Type by name '" + otherName + "' in property '" + propName + "' expected event type '" + setOneEventType + "' but receives event type '" + setTwoEventType + "'";
+            }
+        }
+        else if ((setTwoType instanceof EventType[]) && (setOneType instanceof String))
+        {
+            EventType[] setTwoTypeArr = (EventType[]) setTwoType;
+            EventType setTwoFragmentType = setTwoTypeArr[0];
+            String setOneTypeString = (String)setOneType;
+            if (!(setOneTypeString.endsWith("[]"))) {
+                return "Type by name '" + otherName + "' in property '" + propName + "' expected event type '" + setOneType + "' but receives event type '" + setTwoFragmentType.getName() + "[]'";
+            }
+            String setOneTypeNoArray = (setOneTypeString).replaceAll("\\[\\]", "");
+            if (!(setTwoFragmentType.getName().equals(setOneTypeNoArray)))
+            {
+                return "Type by name '" + otherName + "' in property '" + propName + "' expected event type '" + setOneTypeNoArray + "[]' but receives event type '" + setTwoFragmentType.getName() + "'";
+            }
+        }
+        else
+        {
+            String typeOne = getTypeName(setOneType);
+            String typeTwo = getTypeName(setTwoType);
+            if (typeOne.equals(typeTwo)) {
+                return null;
+            }
+            return "Type by name '" + otherName + "' in property '" + propName + "' expected " + typeOne + " but receives " + typeTwo;
+        }
+
+        return null;
+    }
+
+    private static String getTypeName(Object type)
+    {
+        if (type == null)
+        {
+            return "null";
+        }
+        if (type instanceof Class)
+        {
+            return ((Class) type).getName();
+        }
+        if (type instanceof EventType)
+        {
+            return "event type '" + ((EventType)type).getName() + "'";
+        }
+        if (type instanceof String) {
+            Class boxedType = JavaClassHelper.getBoxedType(JavaClassHelper.getPrimitiveClassForName((String)type));
+            if (boxedType != null) {
+                return boxedType.getName();
+            }
+        }
+        return type.getClass().getName();
     }
 
     public static class MapIndexedPropPair {

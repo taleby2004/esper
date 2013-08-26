@@ -889,85 +889,103 @@ sender.sendEvent(myEvent);]]></programlisting>
 				 For patterns, if no pattern sub-expression is active for an event type, an event of that type also counts as unmatched in regards to the pattern statement.
 			</para>
 		</sect2>
+    </sect1>
 
-	    <sect2 xml:id="api-runtime-ondemand">		
-			<title>On-Demand Fire-And-Forget Query Execution</title>
+	<sect1 xml:id="api-ondemand">		
+		<title>On-Demand Fire-And-Forget Query Execution</title>
 
-			<para>
-				As your application may not require streaming results and may not know each query in advance, the on-demand query facility provides for ad-hoc execution of an EPL expression.
-			</para>
-	
-			<para>
-				On-demand queries are not continuous in nature: The query engine executes the query once and returns all result rows to the application. On-demand query execution is very lightweight as the engine performs no statement creation
-				and the query leaves no traces within the engine.
-			</para>
+		<para>
+			As your application may not require streaming results and may not know each query in advance, the on-demand query facility provides for ad-hoc execution of an EPL expression.
+		</para>
 
-			<para>
-				Esper also provides the facility to explicitly index named windows to speed up queries. Please consult <xref linkend="named_explicit_index"/> for more information.
-			</para>
-			
-			<para>
-			  When named windows are used with contexts and context partitions, the APIs to identify, filter and select context partitions for on-demand queries can be found in <xref linkend="api-contextpartitionselection"/>.
-			</para>
-			
-			<para>
-				The following limitations apply:
-			</para>
+		<para>
+			On-demand queries are not continuous in nature: The query engine executes the query once and returns all result rows to the application. On-demand query execution is very lightweight as the engine performs no statement creation and the query leaves no traces within the engine.
+		</para>
 
-			<itemizedlist>
-				<listitem>
-					<para>
-						An on-demand EPL expression only evaluates against the named windows that your application creates. On-demand queries may not specify any other streams or application event types.
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						The following clauses are not allowed in on-demand EPL: <literal>insert into</literal> and <literal>output</literal>.
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						Views and patterns are not allowed to appear in on-demand queries.
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						On-demand EPL may not perform subqueries.
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						The <literal>previous</literal> and <literal>prior</literal> functions may not be used.
-					</para>
-				</listitem>
-			</itemizedlist>
+		<para>
+			Esper provides the facility to explicitly index named windows to speed up on-demand and continuous queries. Please consult <xref linkend="named_explicit_index"/> for more information.
+		</para>
 		
-			<sect3 xml:id="api-runtime-ondemand-use">		
-				<title>On-Demand Query API</title>
+		<para>
+		  When named windows are used with contexts and context partitions, the APIs to identify, filter and select context partitions for on-demand queries can be found in <xref linkend="api-contextpartitionselection"/>.
+		</para>
+		
+		<para>
+			The <literal>EPRuntime</literal> interface provides three ways to run on-demand queries:
+		</para>
+		
+		<orderedlist>
+			<listitem>
 				<para>
-					The <literal>EPRuntime</literal> provides two ways to run on-demand queries:
+					Use the <literal>executeQuery</literal> method to executes a given on-demand query exactly once, see <xref linkend="api-ondemand-single"/>.
 				</para>
-				
-				<orderedlist>
-					<listitem>
-						<para>
-							Dynamic on-demand queries are executed once through the <literal>executeQuery</literal> method.
-						</para>
-					</listitem>
-					<listitem>
-						<para>
-							Prepared on-demand queries: The <literal>prepareQuery</literal> method returns an <literal>EPOnDemandPreparedQuery</literal> representing the query, and the query can be performed repeatedly via the <literal>execute</literal> method.
-						</para>
-					</listitem>
-				</orderedlist>
-
+			</listitem>
+			<listitem>
 				<para>
-					Prepared on-demand queries are designed for repeated execution and may perform better then the dynamic queries if running the same query multiple times. Placeholders are not allowed in prepared on-demand queries.
-				</para>				
-
-				<para>
-					The next program listing runs an on-demand query against a named window <literal>MyNamedWindow</literal> and prints a column of each row result of the query:
+					Use the <literal>prepareQuery</literal> method to prepare a given on-demand query such that the same query can be executed multiple times without repeated parsing, see <xref linkend="api-ondemand-prepared"/>.
 				</para>
+			</listitem>
+			<listitem>
+				<para>
+					Use the <literal>prepareQueryWithParameters</literal> method to prepare a given on-demand query that may have substitution parameters such that the same query can be parameterized and executed multiple times without repeated parsing, see <xref linkend="api-ondemand-preparedparameterized"/>
+				</para>
+			</listitem>
+		</orderedlist>
+
+		<para>
+		  If your application must execute the same EPL on-demand query multiple times with different parameters use <literal>prepareQueryWithParameters</literal>. 
+		</para>
+
+		<para>
+		  If your application must execute the same EPL on-demand query multiple times without use either <literal>prepareQuery</literal> or <literal>prepareQueryWithParameters</literal> and specify no substitution parameters.
+		</para>
+
+		<para>
+		  By using any of the <literal>prepare...</literal> methods the engine can compile an EPL query string or object model once and reuse the object and thereby speed up repeated execution.
+		</para>
+
+		<para>
+			The following limitations apply:
+		</para>
+
+		<itemizedlist>
+			<listitem>
+				<para>
+					An on-demand EPL expression only evaluates against the named windows that your application creates. On-demand queries may not specify any other streams or application event types.
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					The following clauses are not allowed in on-demand EPL: <literal>insert into</literal> and <literal>output</literal>.
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					Views and patterns are not allowed to appear in on-demand queries.
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					On-demand EPL may not perform subqueries.
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					The <literal>previous</literal> and <literal>prior</literal> functions may not be used.
+				</para>
+			</listitem>
+		</itemizedlist>
+		
+		<sect2 xml:id="api-ondemand-single">
+			<title>On-Demand Query Single Execution</title>
+
+			<para>
+			  Use the <literal>executeQuery</literal> method for executing an on-demand query once. For repeated execution, please consider any of the <literal>prepare...</literal> methods instead.
+			</para>
+
+			<para>
+				The next program listing runs an on-demand query against a named window <literal>MyNamedWindow</literal> and prints a column of each row result of the query:
+			</para>
 
 			<programlisting><![CDATA[String query = "select * from MyNamedWindow";
 EPOnDemandQueryResult result = epRuntime.executeQuery(query);
@@ -975,19 +993,73 @@ for (EventBean row : result.getArray()) {
   System.out.println("name=" + row.get("name"));
 }]]></programlisting>
 
-				<para>
-					The next code snippet demonstrates prepared on-demand queries:
-				</para>				
+		</sect2>
 
-			<programlisting><![CDATA[EPOnDemandPreparedQuery prepared = epRuntime.prepareQuery(query);
+		<sect2 xml:id="api-ondemand-prepared">
+			<title>On-Demand Query Prepared Unparameterized Execution</title>
+
+			<para>
+				Prepared on-demand queries are designed for repeated execution and may perform better then the dynamic single-execution method if running the same query multiple times. 
+				For use with parameter placeholders please see <xref linkend="api-ondemand-preparedparameterized"/>.
+			</para>				
+
+			<para>
+				The next code snippet demonstrates prepared on-demand queries without parameter placeholder:
+			</para>				
+
+			<programlisting><![CDATA[String query = "select * from MyNamedWindow where orderId = '123'"
+EPOnDemandPreparedQuery prepared = epRuntime.prepareQuery(query);
 EPOnDemandQueryResult result = prepared.execute();
-// ...later ...
+
+// ...later on execute once more ...
 prepared.execute();	// execute a second time]]></programlisting>
 
-			</sect3>
+		</sect2>
+
+		<sect2 xml:id="api-ondemand-preparedparameterized">
+			<title>On-Demand Query Prepared Parameterized Execution</title>
+
+			<para>
+				Substitution parameters are inserted into an on-demand query as a single question mark character <literal>'?'</literal>. The engine assigns the first substitution parameter an index of 1 and subsequent parameters increment the index by one.
+			</para>
+	
+			<para>
+				Substitution parameters can be inserted into any EPL construct that takes an expression. 
+			</para>
+	
+			<para>
+				All substitution parameters must be replaced by actual values before an on-demand query with substitution parameters can be executed. Substitution parameters can be replaced with an actual value using the <literal>setObject</literal> method for each index. Substitution parameters can be set to new values and the query executed more than once.
+			</para>
+	
+			<para>
+				While the <literal>setObject</literal> method allows substitution parameters to assume any actual value including application Java objects or enumeration values, the application must provide the correct type of substitution parameter that matches the requirements of the expression the parameter resides in.
+			</para>
+
+			<para>
+				The next program listing runs a prepared and parameterized on-demand query against a named window <literal>MyNamedWindow</literal>:
+			</para>
+
+			<programlisting><![CDATA[String query = "select * from MyNamedWindow where orderId = ?";
+EPOnDemandPreparedQueryParameterized prepared = epRuntime.prepareQueryWithParameters(query);
+
+// Set the required parameter values before each execution
+prepared.setObject(1, "123");
+result = epRuntime.executeQuery(prepared);
+
+// ...execute a second time with new parameter values...
+prepared.setObject(1, "456");
+result = epRuntime.executeQuery(prepared);]]></programlisting>
+
+			<para>
+			  This second example uses the <literal>in</literal> operator and has multiple parameters:
+			</para>
+			<programlisting><![CDATA[String query = "select * from MyNamedWindow where orderId in (?) and price > ?";
+EPOnDemandPreparedQueryParameterized prepared = epRuntime.prepareQueryWithParameters(query);
+prepared.setObject(1, new String[] {"123", "456"});
+prepared.setObject(2, 1000.0});]]></programlisting>
 
 		</sect2>
-    </sect1>
+	</sect1>
 
     <sect1 xml:id="api-event">
         <title>Event and Event Type</title>
@@ -1372,7 +1444,8 @@ listener or subscriber instances then such shared state should be thread-safe.
 			</para>
 
 			<para>
-				If your use cases require ordered processing of events or do not tolerate disorder, the threading options described herein may not be the right choice.
+				If your use cases require ordered processing of events or do not tolerate disorder, the threading options described herein may not be the right choice. For enforcing a processing order within a given criteria, your application must enforce such processing order using Java or .NET code. Esper will not enforce order of processing if you enable inbound or route threading. 
+				Your application code could, for example, utilize a thread per group of criteria keys, a latch per criteria key, or a queue per criteria key, or use Java's completion service, all depending on your ordering requirements.
 			</para>
 
 			<para>
@@ -2368,6 +2441,11 @@ EPStatement statement = epService.getEPAdministrator().create(prepared);]]></pro
         <title>Engine and Statement Metrics Reporting</title>
         
         <para>
+			The engine can report key processing metrics through the JMX platform mbean server by setting a single configuration flag described in <xref linkend="config-engine-jmxmetrics"/>.
+			For additional detailed reporting and metrics events, please read on.
+        </para>
+
+        <para>
 			Metrics reporting is a feature that allows an application to receive ongoing reports about key engine-level and statement-level metrics. Examples are the number of incoming events, the CPU time and wall time taken by statement executions or the number of output events per statement.
         </para>
 
@@ -2376,7 +2454,7 @@ EPStatement statement = epService.getEPAdministrator().create(prepared);]]></pro
         </para>
 
         <para>
-			Your application receives metrics at configurable intervals via EPL statement. A metric datapoint is simply a well-defined event. The events are <literal>EngineMetric</literal> and <literal>StatementMetric</literal> and the Java class representing the events can be found in the client API in package <literal>com.espertech.esper.client.metric</literal>.
+			Your application can receive metrics at configurable intervals via EPL statement. A metric datapoint is simply a well-defined event. The events are <literal>EngineMetric</literal> and <literal>StatementMetric</literal> and the Java class representing the events can be found in the client API in package <literal>com.espertech.esper.client.metric</literal>.
         </para>
 
         <para>

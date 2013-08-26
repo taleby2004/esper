@@ -104,13 +104,15 @@ public class PollExecStrategyDBQuery implements PollExecStrategy
         return result;
     }
 
-    private List<EventBean> execute(PreparedStatement preparedStatement,
+    private synchronized List<EventBean> execute(PreparedStatement preparedStatement,
                                     Object[] lookupValuePerStream)
     {
         if (ExecutionPathDebugLog.isDebugEnabled && log.isInfoEnabled())
         {
             log.info(".execute Executing prepared statement '" + preparedStatementText + "'");
         }
+
+        boolean hasJDBCLogging = enableJDBCLogging && jdbcPerfLog.isInfoEnabled();
 
         // set parameters
         SQLInputParameterContext inputParameterContext = null;
@@ -119,6 +121,10 @@ public class PollExecStrategyDBQuery implements PollExecStrategy
         }
 
         int count = 1;
+        Object[] parameters = null;
+        if (hasJDBCLogging) {
+            parameters = new Object[lookupValuePerStream.length];
+        }
         for (int i = 0; i < lookupValuePerStream.length; i++)
         {
             try
@@ -136,6 +142,9 @@ public class PollExecStrategyDBQuery implements PollExecStrategy
                 }
 
 				setObject(preparedStatement, count, parameter);
+                if (parameters != null) {
+                    parameters[i] = parameter;
+                }
             }
             catch (SQLException ex)
             {
@@ -147,12 +156,12 @@ public class PollExecStrategyDBQuery implements PollExecStrategy
 
         // execute
         ResultSet resultSet;
-        if (enableJDBCLogging && jdbcPerfLog.isInfoEnabled()) {
+        if (hasJDBCLogging) {
             long startTimeNS = System.nanoTime();
             long startTimeMS = System.currentTimeMillis();
             try
             {
-                 resultSet = preparedStatement.executeQuery();
+                resultSet = preparedStatement.executeQuery();
             }
             catch (SQLException ex)
             {
@@ -160,12 +169,14 @@ public class PollExecStrategyDBQuery implements PollExecStrategy
             }
             long endTimeNS = System.nanoTime();
             long endTimeMS = System.currentTimeMillis();
-            jdbcPerfLog.info("Statement '" + preparedStatementText + "' delta nanosec " + (endTimeNS - startTimeNS) + " delta msec " + (endTimeMS - startTimeMS));
+            jdbcPerfLog.info("Statement '" + preparedStatementText + "' delta nanosec " + (endTimeNS - startTimeNS) +
+                    " delta msec " + (endTimeMS - startTimeMS) +
+                    " parameters " + Arrays.toString(parameters));
         }
         else {
             try
             {
-                 resultSet = preparedStatement.executeQuery();
+                resultSet = preparedStatement.executeQuery();
             }
             catch (SQLException ex)
             {

@@ -97,7 +97,7 @@ public class FileSourceLineUnformatted implements DataFlowSourceOperator {
                 throw new EPException("Invalid property type for property '" + propertyNameLineToUse + "', expected a property of type String");
             }
 
-            Set<WriteablePropertyDescriptor> writeables = context.getStatementContext().getEventAdapterService().getWriteableProperties(outputEventType);
+            Set<WriteablePropertyDescriptor> writeables = context.getStatementContext().getEventAdapterService().getWriteableProperties(outputEventType, false);
             List<WriteablePropertyDescriptor> writeableList = new ArrayList<WriteablePropertyDescriptor>();
 
             WriteablePropertyDescriptor writeableLine = EventTypeUtility.findWritable(propertyNameLineToUse, writeables);
@@ -117,7 +117,7 @@ public class FileSourceLineUnformatted implements DataFlowSourceOperator {
             EventBeanManufacturer manufacturer;
             try {
                 WriteablePropertyDescriptor[] writables = writeableList.toArray(new WriteablePropertyDescriptor[writeableList.size()]);
-                manufacturer = context.getStatementContext().getEventAdapterService().getManufacturer(outputEventType, writables, context.getStatementContext().getMethodResolutionService().getEngineImportService());
+                manufacturer = context.getStatementContext().getEventAdapterService().getManufacturer(outputEventType, writables, context.getStatementContext().getMethodResolutionService().getEngineImportService(), false);
             }
             catch (EventBeanManufactureException e) {
                 throw new EPException("Event type '" + outputEventType.getName() + "' cannot be written to: " + e.getMessage(), e);
@@ -214,7 +214,7 @@ public class FileSourceLineUnformatted implements DataFlowSourceOperator {
 
     private FileBeginEndProcessor getBeginEndProcessor(DataFlowOpInitializateContext context, int outputPort) {
         EventType portEventType = context.getOutputPorts().get(outputPort).getOptionalDeclaredType().getEventType();
-        Set<WriteablePropertyDescriptor> writeables = context.getStatementContext().getEventAdapterService().getWriteableProperties(portEventType);
+        Set<WriteablePropertyDescriptor> writeables = context.getStatementContext().getEventAdapterService().getWriteableProperties(portEventType, false);
         List<WriteablePropertyDescriptor> writeableList = new ArrayList<WriteablePropertyDescriptor>();
         EventBeanManufacturer manufacturer;
         if (propertyNameFile != null) {
@@ -225,7 +225,7 @@ public class FileSourceLineUnformatted implements DataFlowSourceOperator {
             writeableList.add(writeableFile);
         }
         try {
-            manufacturer = context.getStatementContext().getEventAdapterService().getManufacturer(portEventType, writeableList.toArray(new WriteablePropertyDescriptor[writeableList.size()]), context.getStatementContext().getMethodResolutionService().getEngineImportService());
+            manufacturer = context.getStatementContext().getEventAdapterService().getManufacturer(portEventType, writeableList.toArray(new WriteablePropertyDescriptor[writeableList.size()]), context.getStatementContext().getMethodResolutionService().getEngineImportService(), false);
         }
         catch (EventBeanManufactureException e) {
             throw new EPException("Event type '" + portEventType.getName() + "' cannot be written to: " + e.getMessage(), e);

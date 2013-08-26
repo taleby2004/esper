@@ -21,7 +21,10 @@ public class ExprNodeAdapterMultiStreamNoTLStmtLock extends ExprNodeAdapterMulti
 
     @Override
     protected boolean evaluatePerStream(EventBean[] eventsPerStream) {
-        evaluatorContext.getAgentInstanceLock().acquireWriteLock(null);
+        boolean obtained = evaluatorContext.getAgentInstanceLock().acquireWriteLock(null, ExprNodeAdapterMultiStreamStmtLock.LOCK_BACKOFF_MSEC);
+        if (!obtained) {
+            throw new FilterLockBackoffException();
+        }
         try {
             return super.evaluatePerStream(eventsPerStream);
         }

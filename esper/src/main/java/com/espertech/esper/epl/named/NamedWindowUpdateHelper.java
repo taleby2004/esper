@@ -10,9 +10,8 @@ package com.espertech.esper.epl.named;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventPropertyDescriptor;
-import com.espertech.esper.epl.expression.ExprEvaluator;
-import com.espertech.esper.epl.expression.ExprEvaluatorContext;
-import com.espertech.esper.epl.expression.ExprValidationException;
+import com.espertech.esper.collection.Pair;
+import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.epl.spec.OnTriggerSetAssignment;
 import com.espertech.esper.event.EventBeanCopyMethod;
 import com.espertech.esper.event.EventPropertyWriter;
@@ -30,20 +29,12 @@ public class NamedWindowUpdateHelper
 {
     private static final Log log = LogFactory.getLog(NamedWindowUpdateHelper.class);
 
-    private final ExprEvaluator[] expressions;
-    private final String[] propertyNames;
-    private final EventPropertyWriter[] writers;
     private final EventBeanCopyMethod copyMethod;
-    private final boolean[] notNullableField;
-    private final TypeWidener[] wideners;
+    private final NamedWindowUpdateItem[] updateItems;
 
-    public NamedWindowUpdateHelper(ExprEvaluator[] expressions, String[] propertyNames, EventPropertyWriter[] writers, EventBeanCopyMethod copyMethod, boolean[] notNullableField, TypeWidener[] wideners) {
-        this.expressions = expressions;
-        this.propertyNames = propertyNames;
-        this.writers = writers;
+    public NamedWindowUpdateHelper(EventBeanCopyMethod copyMethod, NamedWindowUpdateItem[] updateItems) {
         this.copyMethod = copyMethod;
-        this.notNullableField = notNullableField;
-        this.wideners = wideners;
+        this.updateItems = updateItems;
     }
 
     public static NamedWindowUpdateHelper make(String namedWindowName,
@@ -52,53 +43,47 @@ public class NamedWindowUpdateHelper
                                         String namedWindowAlias)
             throws ExprValidationException
     {
-        TypeWidener wideners[] = new TypeWidener[assignments.size()];
+        List<NamedWindowUpdateItem> updateItems = new ArrayList<NamedWindowUpdateItem>();
         List<String> properties = new ArrayList<String>();
-        int len = assignments.size();
-        ExprEvaluator[] expressions = new ExprEvaluator[len];
-        EventPropertyWriter[] writers = new EventPropertyWriter[len];
-        boolean[] notNullableField = new boolean[len];
 
         for (int i = 0; i < assignments.size(); i++)
         {
             OnTriggerSetAssignment assignment = assignments.get(i);
-            String propertyName = assignment.getVariableName(); 
-            expressions[i] = assignment.getExpression().getExprEvaluator();
-            EventPropertyDescriptor writableProperty = eventTypeSPI.getWritableProperty(propertyName);
+            NamedWindowUpdateItem updateItem;
 
-            if (writableProperty == null)
-            {
-                int indexDot = propertyName.indexOf(".");
-                if ((namedWindowAlias != null) && (indexDot != -1)) {
-                    String prefix = propertyName.substring(0, indexDot);
-                    String name = propertyName.substring(indexDot + 1);
-                    if (prefix.equals(namedWindowAlias)) {
-                        writableProperty = eventTypeSPI.getWritableProperty(name);
-                        propertyName = name;
-                    }
-                }
-                if (writableProperty == null && indexDot != -1) {
-                    String prefix = propertyName.substring(0, indexDot);
-                    String name = propertyName.substring(indexDot + 1);
-                    if (prefix.equals(namedWindowName)) {
-                        writableProperty = eventTypeSPI.getWritableProperty(name);
-                        propertyName = name;
-                    }
-                }
+            // determine whether this is a "property=value" assignment, we use property setters in this case
+            Pair<String, ExprNode> possibleAssignment = ExprNodeUtility.checkGetAssignmentToProp(assignment.getExpression());
+
+            // handle assignment "property = value"
+            if (possibleAssignment != null) {
+
+                String propertyName = possibleAssignment.getFirst();
+                EventPropertyDescriptor writableProperty = eventTypeSPI.getWritableProperty(propertyName);
+
                 if (writableProperty == null) {
-                    throw new ExprValidationException("Property '" + propertyName + "' is not available for write access");
+                    Pair<String, EventPropertyDescriptor> nameWriteablePair = checkIndexedOrMappedProp(possibleAssignment.getFirst(), namedWindowName, namedWindowAlias, eventTypeSPI);
+                    propertyName = nameWriteablePair.getFirst();
+                    writableProperty = nameWriteablePair.getSecond();
                 }
+
+                ExprEvaluator evaluator = possibleAssignment.getSecond().getExprEvaluator();
+                EventPropertyWriter writers = eventTypeSPI.getWriter(propertyName);
+                boolean notNullableField = writableProperty.getPropertyType().isPrimitive();
+
+                properties.add(propertyName);
+                TypeWidener widener = TypeWidenerFactory.getCheckPropertyAssignType(possibleAssignment.getSecond().toExpressionString(), possibleAssignment.getSecond().getExprEvaluator().getType(),
+                        writableProperty.getPropertyType(), propertyName);
+                updateItem = new NamedWindowUpdateItem(evaluator, propertyName, writers, notNullableField, widener);
             }
-            writers[i] = eventTypeSPI.getWriter(propertyName);
-            notNullableField[i] = writableProperty.getPropertyType().isPrimitive();
-
-            properties.add(propertyName);
-            wideners[i] = TypeWidenerFactory.getCheckPropertyAssignType(assignment.getExpression().toExpressionString(), assignment.getExpression().getExprEvaluator().getType(),
-                    writableProperty.getPropertyType(), propertyName);
+            // handle non-assignment, i.e. UDF or other expression
+            else {
+                ExprEvaluator evaluator = assignment.getExpression().getExprEvaluator();
+                updateItem = new NamedWindowUpdateItem(evaluator, null, null, false, null);
+            }
+            updateItems.add(updateItem);
         }
-        String[] propertyNames = properties.toArray(new String[properties.size()]);
 
-        // map expression index to property index
+        // obtain copy method
         List<String> propertiesUniqueList = new ArrayList<String>(new HashSet<String>(properties));
         String[] propertiesArray = propertiesUniqueList.toArray(new String[propertiesUniqueList.size()]);
         EventBeanCopyMethod copyMethod = eventTypeSPI.getCopyMethod(propertiesArray);
@@ -106,7 +91,9 @@ public class NamedWindowUpdateHelper
             throw new ExprValidationException("Event type does not support event bean copy");
         }
 
-        return new NamedWindowUpdateHelper(expressions, propertyNames, writers, copyMethod, notNullableField, wideners);
+        NamedWindowUpdateItem[] updateItemsArray = updateItems.toArray(new NamedWindowUpdateItem[updateItems.size()]);
+
+        return new NamedWindowUpdateHelper(copyMethod, updateItemsArray);
     }
 
     public EventBean update(EventBean matchingEvent, EventBean[] eventsPerStream, ExprEvaluatorContext exprEvaluatorContext)
@@ -115,19 +102,48 @@ public class NamedWindowUpdateHelper
         eventsPerStream[0] = copy;
         eventsPerStream[2] = matchingEvent; // initial value
 
-        for (int i = 0; i < expressions.length; i++) {
-            Object result = expressions[i].evaluate(eventsPerStream, true, exprEvaluatorContext);
+        for (NamedWindowUpdateItem updateItem : updateItems) {
+            Object result = updateItem.getExpression().evaluate(eventsPerStream, true, exprEvaluatorContext);
 
-            if (result == null && notNullableField[i]) {
-                log.warn("Null value returned by expression for assignment to property '" + propertyNames[i] + " is ignored as the property type is not nullable for expression");
-                continue;
-            }
+            if (updateItem.getOptionalWriter() != null) {
+                if (result == null && updateItem.isNotNullableField()) {
+                    log.warn("Null value returned by expression for assignment to property '" + updateItem.getOptinalPropertyName() + " is ignored as the property type is not nullable for expression");
+                    continue;
+                }
 
-            if (wideners[i] != null) {
-                result = wideners[i].widen(result);
+                if (updateItem.getOptionalWidener() != null) {
+                    result = updateItem.getOptionalWidener().widen(result);
+                }
+                updateItem.getOptionalWriter().write(result, copy);
             }
-            writers[i].write(result, copy);
         }
         return copy;
+    }
+
+    private static Pair<String, EventPropertyDescriptor> checkIndexedOrMappedProp(String propertyName, String namedWindowName, String namedWindowAlias, EventTypeSPI eventTypeSPI) throws ExprValidationException {
+
+        EventPropertyDescriptor writableProperty = null;
+
+        int indexDot = propertyName.indexOf(".");
+        if ((namedWindowAlias != null) && (indexDot != -1)) {
+            String prefix = propertyName.substring(0, indexDot);
+            String name = propertyName.substring(indexDot + 1);
+            if (prefix.equals(namedWindowAlias)) {
+                writableProperty = eventTypeSPI.getWritableProperty(name);
+                propertyName = name;
+            }
+        }
+        if (writableProperty == null && indexDot != -1) {
+            String prefix = propertyName.substring(0, indexDot);
+            String name = propertyName.substring(indexDot + 1);
+            if (prefix.equals(namedWindowName)) {
+                writableProperty = eventTypeSPI.getWritableProperty(name);
+                propertyName = name;
+            }
+        }
+        if (writableProperty == null) {
+            throw new ExprValidationException("Property '" + propertyName + "' is not available for write access");
+        }
+        return new Pair<String, EventPropertyDescriptor>(propertyName, writableProperty);
     }
 }

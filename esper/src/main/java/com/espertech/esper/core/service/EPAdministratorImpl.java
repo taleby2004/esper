@@ -167,7 +167,7 @@ public class EPAdministratorImpl implements EPAdministratorSPI
 
         // the prepared statement is the object model plus a list of substitution parameters
         // map to specification will refuse any substitution parameters that are unfilled
-        return new EPPreparedStatementImpl(unmapped.getObjectModel(), unmapped.getIndexedParams());
+        return new EPPreparedStatementImpl(unmapped.getObjectModel(), unmapped.getIndexedParams(), eplExpression);
     }
 
     public EPPreparedStatement preparePattern(String patternExpression) throws EPException
@@ -179,7 +179,7 @@ public class EPAdministratorImpl implements EPAdministratorSPI
 
         // the prepared statement is the object model plus a list of substitution parameters
         // map to specification will refuse any substitution parameters that are unfilled
-        return new EPPreparedStatementImpl(unmapped.getObjectModel(), unmapped.getIndexedParams());
+        return new EPPreparedStatementImpl(unmapped.getObjectModel(), unmapped.getIndexedParams(), null);
     }
 
     public EPStatement create(EPPreparedStatement prepared, String statementName, Object userObject, String statementId) throws EPException

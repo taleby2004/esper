@@ -105,7 +105,7 @@ public class SODAAnalyzer
                 expressions.add(model.getUpdateClause().getOptionalWhereClause());
             }
             if (model.getUpdateClause().getAssignments() != null) {
-                for (AssignmentPair pair : model.getUpdateClause().getAssignments()) {
+                for (Assignment pair : model.getUpdateClause().getAssignments()) {
                     expressions.add(pair.getValue());
                 } 
             }
@@ -133,7 +133,7 @@ public class SODAAnalyzer
             if (model.getOnExpr() instanceof OnSetClause) {
                 OnSetClause onSet = (OnSetClause) model.getOnExpr();
                 if (onSet.getAssignments() != null) {
-                    for (AssignmentPair aitem : onSet.getAssignments()) {
+                    for (Assignment aitem : onSet.getAssignments()) {
                         expressions.add(aitem.getValue());
                     }
                 }
@@ -141,7 +141,7 @@ public class SODAAnalyzer
             if (model.getOnExpr() instanceof OnUpdateClause) {
                 OnUpdateClause onUpdate = (OnUpdateClause) model.getOnExpr();
                 if (onUpdate.getAssignments() != null) {
-                    for (AssignmentPair bitem : onUpdate.getAssignments()) {
+                    for (Assignment bitem : onUpdate.getAssignments()) {
                         expressions.add(bitem.getValue());
                     }
                 }
@@ -164,7 +164,7 @@ public class SODAAnalyzer
                             if (update.getWhereClause() != null) {
                                 expressions.add(update.getWhereClause());
                             }
-                            for (AssignmentPair assignment : update.getAssignments()) {
+                            for (Assignment assignment : update.getAssignments()) {
                                 expressions.add(assignment.getValue());
                             }
                         }
@@ -279,12 +279,12 @@ public class SODAAnalyzer
                 expressions.add(model.getOutputLimitClause().getAndAfterTerminateAndExpr());
             }
             if (model.getOutputLimitClause().getThenAssignments() != null) {
-                for (AssignmentPair thenAssign : model.getOutputLimitClause().getThenAssignments()) {
+                for (Assignment thenAssign : model.getOutputLimitClause().getThenAssignments()) {
                     expressions.add(thenAssign.getValue());
                 }					
             }
             if (model.getOutputLimitClause().getAndAfterTerminateThenAssignments() != null) {
-                for (AssignmentPair thenAssign : model.getOutputLimitClause().getAndAfterTerminateThenAssignments()) {
+                for (Assignment thenAssign : model.getOutputLimitClause().getAndAfterTerminateThenAssignments()) {
                     expressions.add(thenAssign.getValue());
                 }
             }

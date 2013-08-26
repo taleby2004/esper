@@ -56,8 +56,8 @@ public class TestMergeViewFactory extends TestCase
         factory.setViewParameters(viewFactoryContext, TestViewSupport.toExprListMD(new Object[] {"symbol", "feed"}));
         factory.attach(SupportEventTypeFactory.createBeanType(SupportMarketDataBean.class), SupportStatementContextFactory.makeContext(), null, parents);
         assertFalse(factory.canReuse(new FirstElementView()));
-        assertFalse(factory.canReuse(new MergeView(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext(), SupportExprNodeFactory.makeIdentNodesMD("symbol"), null)));
-        assertTrue(factory.canReuse(new MergeView(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext(), SupportExprNodeFactory.makeIdentNodesMD("symbol", "feed"), null)));
+        assertFalse(factory.canReuse(new MergeView(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext(), SupportExprNodeFactory.makeIdentNodesMD("symbol"), null, true)));
+        assertTrue(factory.canReuse(new MergeView(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext(), SupportExprNodeFactory.makeIdentNodesMD("symbol", "feed"), null, true)));
     }
 
     private void tryInvalidParameter(Object[] parameters) throws Exception

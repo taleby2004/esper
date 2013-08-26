@@ -12,6 +12,33 @@ Change History
 	[]
 
 
+Version 4.10.0
+
+	Released Sept. 9, 2013 
+	
+	Built and tested with JDK 6; Tested with JDK 7
+
+* API changes
+
+  * None.
+    
+* Major changes
+
+  * Support for context declarations to perform initiate or start immediately
+  
+  * Support for mutation expressions for merge and update
+  
+  * Support for parameterized fire-and-forget queries
+  
+  * Support for fire-and-forget queries to consider the "in" opertator for index lookup
+  
+  * Support for having-clause to have subquery
+  
+  * Please review changelog.txt for additional information.
+
+  []
+  
+
 Version 4.9.0
 
 	Released March 4, 2013

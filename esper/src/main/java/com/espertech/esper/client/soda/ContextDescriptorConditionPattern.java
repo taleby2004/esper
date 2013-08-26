@@ -21,6 +21,7 @@ public class ContextDescriptorConditionPattern implements ContextDescriptorCondi
     private static final long serialVersionUID = -481920039587982117L;
     private PatternExpr pattern;
     private boolean inclusive;  // statements declaring the context are inclusive of the events matching the pattern
+    private boolean now;        // statements declaring the context initiate now and matching the pattern
 
     /**
      * Ctor.
@@ -33,9 +34,10 @@ public class ContextDescriptorConditionPattern implements ContextDescriptorCondi
      * @param pattern pattern expression
      * @param inclusive if the events of the pattern should be included in the contextual statements
      */
-    public ContextDescriptorConditionPattern(PatternExpr pattern, boolean inclusive) {
+    public ContextDescriptorConditionPattern(PatternExpr pattern, boolean inclusive, boolean now) {
         this.pattern = pattern;
         this.inclusive = inclusive;
+        this.now = now;
     }
 
     /**
@@ -70,7 +72,18 @@ public class ContextDescriptorConditionPattern implements ContextDescriptorCondi
         this.inclusive = inclusive;
     }
 
+    public boolean isNow() {
+        return now;
+    }
+
+    public void setNow(boolean now) {
+        this.now = now;
+    }
+
     public void toEPL(StringWriter writer, EPStatementFormatter formatter) {
+        if (now) {
+            writer.write("@now and");
+        }
         writer.write("pattern [");
         if (pattern != null) {
             pattern.toEPL(writer, PatternExprPrecedenceEnum.MINIMUM, formatter);

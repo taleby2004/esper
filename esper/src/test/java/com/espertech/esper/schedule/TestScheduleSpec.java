@@ -11,14 +11,14 @@
 
 package com.espertech.esper.schedule;
 
-import junit.framework.*;
-
+import com.espertech.esper.type.ScheduleUnit;
+import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.*;
-
-import com.espertech.esper.type.ScheduleUnit;
+import java.util.EnumMap;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class TestScheduleSpec extends TestCase
 {
@@ -35,7 +35,7 @@ public class TestScheduleSpec extends TestCase
 
         // Test all units are wildcards
         unitValues = (new ScheduleSpec()).getUnitValues();
-        new ScheduleSpec(unitValues, null);
+        new ScheduleSpec(unitValues, null, null, null);
 
         // Test invalid value in month
         SortedSet<Integer> values = new TreeSet<Integer>();
@@ -48,7 +48,7 @@ public class TestScheduleSpec extends TestCase
         values.add(1);
         values.add(5);
         unitValues.put(ScheduleUnit.MONTHS, values);
-        new ScheduleSpec(unitValues, null);
+        new ScheduleSpec(unitValues, null, null, null);
     }
 
     public void testCompress()
@@ -65,7 +65,7 @@ public class TestScheduleSpec extends TestCase
         unitValues.put(ScheduleUnit.MONTHS, monthValues);
 
         // Construct spec, test that month was replaced with wildcards
-        ScheduleSpec spec = new ScheduleSpec(unitValues, null);
+        ScheduleSpec spec = new ScheduleSpec(unitValues, null, null, null);
         assertTrue(spec.getUnitValues().get(ScheduleUnit.MONTHS) == null);
     }
 
@@ -73,7 +73,7 @@ public class TestScheduleSpec extends TestCase
     {
         try
         {
-            new ScheduleSpec(unitValues, null);
+            new ScheduleSpec(unitValues, null, null, null);
             assertFalse(true);
         }
         catch (IllegalArgumentException ex)

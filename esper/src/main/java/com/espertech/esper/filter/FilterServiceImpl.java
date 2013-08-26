@@ -10,6 +10,8 @@ package com.espertech.esper.filter;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.metrics.jmx.JmxGetter;
+import com.espertech.esper.metrics.jmx.JmxOperation;
 import com.espertech.esper.util.AuditPath;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -19,6 +21,7 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.LockSupport;
 
 /**
  * Implementation of the filter service interface.
@@ -71,8 +74,8 @@ public final class FilterServiceImpl implements FilterServiceSPI
         long version = filtersVersion;
         numEventsEvaluated.incrementAndGet();
 
-        // Finds all matching filters and return their callbacks
-        eventTypeIndex.matchEvent(theEvent, matches);
+        // Finds all matching filters and return their callbacks.
+        retryableMatchEvent(theEvent, matches);
 
         if ((AuditPath.isAuditEnabled) && (!filterServiceListeners.isEmpty())) {
             for (FilterServiceListener listener : filterServiceListeners) {
@@ -91,7 +94,7 @@ public final class FilterServiceImpl implements FilterServiceSPI
         ArrayDeque<FilterHandle> allMatches = new ArrayDeque<FilterHandle>();
 
         // Finds all matching filters
-        eventTypeIndex.matchEvent(theEvent, allMatches);
+        retryableMatchEvent(theEvent, allMatches);
 
         // Add statement matches to collection passed
         for (FilterHandle match : allMatches) {
@@ -109,11 +112,13 @@ public final class FilterServiceImpl implements FilterServiceSPI
         return version;
     }
 
+    @JmxGetter(name="NumEventsEvaluated", description = "Number of events evaluated (main)")
     public final long getNumEventsEvaluated()
     {
         return numEventsEvaluated.get();
     }
 
+    @JmxOperation(description = "Reset number of events evaluated")
     public void resetStats() {
         numEventsEvaluated.set(0);
     }
@@ -138,15 +143,55 @@ public final class FilterServiceImpl implements FilterServiceSPI
         indexBuilder.apply(filterSet);
     }
 
+    @JmxGetter(name="NumFiltersApprox", description = "Number of filters managed (approximately)")
     public int getFilterCountApprox() {
         return eventTypeIndex.getFilterCountApprox();
     }
 
+    @JmxGetter(name="NumEventTypes", description = "Number of event types considered")
     public int getCountTypes() {
         return eventTypeIndex.size();
     }
 
     public void removeType(EventType type) {
         eventTypeIndex.removeType(type);
+    }
+
+    private void retryableMatchEvent(EventBean theEvent, Collection<FilterHandle> matches) {
+        // Install lock backoff exception handler that retries the evaluation.
+        try {
+            eventTypeIndex.matchEvent(theEvent, matches);
+        }
+        catch (FilterLockBackoffException ex) {
+            // retry on lock back-off
+            // lock-backoff may occur when stateful evaluations take place such as boolean expressions that are subqueries
+            // statements that contain subqueries in pattern filter expression can themselves modify filters, leading to a theoretically possible deadlock
+            long delayNs = 10;
+            while(true) {
+                try {
+                    // yield
+                    try {
+                        Thread.sleep(0);
+                    }
+                    catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+
+                    // delay
+                    LockSupport.parkNanos(delayNs);
+                    if (delayNs < 1000000000) {
+                        delayNs = delayNs * 2;
+                    }
+
+                    // evaluate
+                    matches.clear();
+                    eventTypeIndex.matchEvent(theEvent, matches);
+                    break;
+                }
+                catch (FilterLockBackoffException ex2) {
+                    // retried
+                }
+            }
+        }
     }
 }

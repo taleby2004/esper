@@ -160,7 +160,7 @@ public class FileSourceCSV implements DataFlowSourceOperator {
     }
 
     private static ParseMakePropertiesDesc setupProperties(boolean requireOneMatch, String[] propertyNamesOffered, EventType outputEventType, StatementContext statementContext) {
-        Set<WriteablePropertyDescriptor> writeables = statementContext.getEventAdapterService().getWriteableProperties(outputEventType);
+        Set<WriteablePropertyDescriptor> writeables = statementContext.getEventAdapterService().getWriteableProperties(outputEventType, false);
 
         List<Integer> indexesList = new ArrayList<Integer>();
         List<SimpleTypeParser> parserList = new ArrayList<SimpleTypeParser>();
@@ -197,7 +197,7 @@ public class FileSourceCSV implements DataFlowSourceOperator {
         int[] indexes = CollectionUtil.intArray(indexesList);
         EventBeanManufacturer manufacturer;
         try {
-            manufacturer = statementContext.getEventAdapterService().getManufacturer(outputEventType, writables, statementContext.getMethodResolutionService().getEngineImportService());
+            manufacturer = statementContext.getEventAdapterService().getManufacturer(outputEventType, writables, statementContext.getMethodResolutionService().getEngineImportService(), false);
         }
         catch (EventBeanManufactureException e) {
             throw new EPException("Event type '" + outputEventType.getName() + "' cannot be written to: " + e.getMessage(), e);

@@ -210,14 +210,6 @@ public class ResultSetProcessorFactoryFactory
         // Validate having clause, if present
         if (optionalHavingNode != null)
         {
-            // Ensure there is no subselects
-            ExprNodeSubselectDeclaredDotVisitor visitor = new ExprNodeSubselectDeclaredDotVisitor();
-            optionalHavingNode.accept(visitor);
-            if (visitor.getSubselects().size() > 0)
-            {
-                throw new ExprValidationException("Subselects not allowed within having-clause");
-            }
-
             optionalHavingNode = ExprNodeUtility.getValidatedSubtree(optionalHavingNode, validationContext);
         }
 

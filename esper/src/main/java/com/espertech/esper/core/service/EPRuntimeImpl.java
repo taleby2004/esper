@@ -40,6 +40,7 @@ import com.espertech.esper.epl.variable.VariableReader;
 import com.espertech.esper.event.util.EventRendererImpl;
 import com.espertech.esper.filter.FilterHandle;
 import com.espertech.esper.filter.FilterHandleCallback;
+import com.espertech.esper.metrics.jmx.JmxGetter;
 import com.espertech.esper.schedule.*;
 import com.espertech.esper.timer.TimerCallback;
 import com.espertech.esper.util.ExecutionPathDebugLog;
@@ -147,11 +148,13 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         this.internalEventRouter = internalEventRouter;
     }
 
+    @JmxGetter(name="NumInsertIntoEvents", description = "Number of inserted-into events")
     public long getRoutedInternal()
     {
         return routedInternal.get();
     }
 
+    @JmxGetter(name="NumRoutedEvents", description = "Number of routed events")
     public long getRoutedExternal()
     {
         return routedExternal.get();
@@ -1435,29 +1438,37 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         if (contextPartitionSelectors == null) {
             throw new IllegalArgumentException("No context partition selectors provided");
         }
-        return executeQueryInternal(epl, null, contextPartitionSelectors);
+        return executeQueryInternal(epl, null, null, contextPartitionSelectors);
     }
 
     public EPOnDemandQueryResult executeQuery(String epl) {
-        return executeQueryInternal(epl, null, null);
+        return executeQueryInternal(epl, null, null, null);
     }
 
     public EPOnDemandQueryResult executeQuery(EPStatementObjectModel model) {
-        return executeQueryInternal(null, model, null);
+        return executeQueryInternal(null, model, null, null);
     }
 
     public EPOnDemandQueryResult executeQuery(EPStatementObjectModel model, ContextPartitionSelector[] contextPartitionSelectors) {
         if (contextPartitionSelectors == null) {
             throw new IllegalArgumentException("No context partition selectors provided");
         }
-        return executeQueryInternal(null, model, contextPartitionSelectors);
+        return executeQueryInternal(null, model, null, contextPartitionSelectors);
     }
 
-    private EPOnDemandQueryResult executeQueryInternal(String epl, EPStatementObjectModel model, ContextPartitionSelector[] contextPartitionSelectors)
+    public EPOnDemandQueryResult executeQuery(EPOnDemandPreparedQueryParameterized parameterizedQuery) {
+        return executeQueryInternal(null, null, parameterizedQuery, null);
+    }
+
+    public EPOnDemandQueryResult executeQuery(EPOnDemandPreparedQueryParameterized parameterizedQuery, ContextPartitionSelector[] contextPartitionSelectors) {
+        return executeQueryInternal(null, null, parameterizedQuery, contextPartitionSelectors);
+    }
+
+    private EPOnDemandQueryResult executeQueryInternal(String epl, EPStatementObjectModel model, EPOnDemandPreparedQueryParameterized parameterizedQuery, ContextPartitionSelector[] contextPartitionSelectors)
     {
         try
         {
-            EPPreparedExecuteMethod executeMethod = getExecuteMethod(epl, model);
+            EPPreparedExecuteMethod executeMethod = getExecuteMethod(epl, model, parameterizedQuery);
             EPPreparedQueryResult result = executeMethod.execute(contextPartitionSelectors);
             return new EPQueryResultImpl(result);
         }
@@ -1483,11 +1494,24 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         return prepareQueryInternal(null, model);
     }
 
+    public EPOnDemandPreparedQueryParameterized prepareQueryWithParameters(String epl) {
+        // compile to specification
+        String stmtName = UuidGenerator.generate();
+        StatementSpecRaw statementSpec = EPAdministratorHelper.compileEPL(epl, epl, true, stmtName, services, SelectClauseStreamSelectorEnum.ISTREAM_ONLY);
+
+        // map to object model thus finding all substitution parameters and their indexes
+        StatementSpecUnMapResult unmapped = StatementSpecMapper.unmap(statementSpec);
+
+        // the prepared statement is the object model plus a list of substitution parameters
+        // map to specification will refuse any substitution parameters that are unfilled
+        return new EPPreparedStatementImpl(unmapped.getObjectModel(), unmapped.getIndexedParams(), epl);
+    }
+
     private EPOnDemandPreparedQuery prepareQueryInternal(String epl, EPStatementObjectModel model)
     {
         try
         {
-            EPPreparedExecuteMethod startMethod = getExecuteMethod(epl, model);
+            EPPreparedExecuteMethod startMethod = getExecuteMethod(epl, model, null);
             return new EPPreparedQueryImpl(startMethod, epl);
         }
         catch (EPStatementException ex)
@@ -1502,7 +1526,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         }
     }
 
-    private EPPreparedExecuteMethod getExecuteMethod(String epl, EPStatementObjectModel model)
+    private EPPreparedExecuteMethod getExecuteMethod(String epl, EPStatementObjectModel model, EPOnDemandPreparedQueryParameterized parameterizedQuery)
     {
         String stmtName = UuidGenerator.generate();
         String stmtId = UuidGenerator.generate();
@@ -1513,9 +1537,17 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
             if (epl != null) {
                 spec = EPAdministratorHelper.compileEPL(epl, epl, true, stmtName, services, SelectClauseStreamSelectorEnum.ISTREAM_ONLY);
             }
-            else {
+            else if (model != null) {
                 spec = StatementSpecMapper.map(model, services.getEngineImportService(), services.getVariableService(), services.getConfigSnapshot(), services.getSchedulingService(), services.getEngineURI(), services.getPatternNodeFactory(), services.getNamedWindowService(), services.getContextManagementService(), services.getExprDeclaredService());
                 epl = model.toEPL();
+            }
+            else {
+                EPPreparedStatementImpl prepared = (EPPreparedStatementImpl) parameterizedQuery;
+                spec = StatementSpecMapper.map(prepared.getModel(), services.getEngineImportService(), services.getVariableService(), services.getConfigSnapshot(), services.getSchedulingService(), services.getEngineURI(), services.getPatternNodeFactory(), services.getNamedWindowService(), services.getContextManagementService(), services.getExprDeclaredService());
+                epl = prepared.getOptionalEPL();
+                if (epl == null) {
+                    epl = model.toEPL();
+                }
             }
             Annotation[] annotations = AnnotationUtil.compileAnnotations(spec.getAnnotations(), services.getEngineImportService(), epl);
             StatementContext statementContext =  services.getStatementContextFactory().makeContext(stmtId, stmtName, epl, services, null, true, annotations, null, true, spec);

@@ -1,5 +1,22 @@
 News
 
+* Sept 9, 2013  -  Esper 4.10.0 - Update release
+
+  * Support for context declarations to perform initiate or start immediately
+  
+  * Support for mutation expressions for merge and update
+  
+  * Support for parameterized fire-and-forget queries
+  
+  * Support for fire-and-forget queries to consider the "in" opertator for index lookup
+  
+  * Support for having-clause to have subquery
+  
+  * Please review changelog.txt for additional information.
+
+  []
+
+
 * July 9, 2013  -  NEsper 4.8.0 for .NET
 	      
   * Feature equivalent to Esper version 4.8.0

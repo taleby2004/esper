@@ -46,7 +46,9 @@ public class ViewServiceHelper
             if (viewFactory.get(1) instanceof DataWindowViewFactoryUniqueCandidate) {
                 DataWindowViewFactoryUniqueCandidate uniqueFactory = (DataWindowViewFactoryUniqueCandidate) viewFactory.get(1);
                 Set<String> uniqueCandidates = uniqueFactory.getUniquenessCandidatePropertyNames();
-                uniqueCandidates.addAll(groupedCriteria);
+                if (uniqueCandidates != null) {
+                    uniqueCandidates.addAll(groupedCriteria);
+                }
                 return uniqueCandidates;
             }
             return null;

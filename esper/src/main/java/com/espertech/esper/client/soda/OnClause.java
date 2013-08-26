@@ -9,8 +9,6 @@
 package com.espertech.esper.client.soda;
 
 import java.io.Serializable;
-import java.io.StringWriter;
-import java.util.List;
 
 /**
  * A clause to delete from a named window based on a triggering event arriving and correlated to the named window events to be deleted.
@@ -61,24 +59,22 @@ public abstract class OnClause implements Serializable
      * Creates an on-update clause for updating a named window.
      * @param windowName is the named window name
      * @param asName is the as-provided name of the named window
-     * @param variableName name of variable
      * @param expression expression
      * @return on-update clause
      */
-    public static OnUpdateClause createOnUpdate(String windowName, String asName, String variableName, Expression expression)
+    public static OnUpdateClause createOnUpdate(String windowName, String asName, Expression expression)
     {
-        return OnUpdateClause.create(windowName, asName).addAssignment(variableName, expression);
+        return OnUpdateClause.create(windowName, asName).addAssignment(expression);
     }
 
     /**
      * Creates an on-set clause for setting variable values.
-     * @param variableName is the name of the first variable to set, additional ones can be added to the clause itself
      * @param expression is the assignment expression
      * @return on-set clause
      */
-    public static OnSetClause createOnSet(String variableName, Expression expression)
+    public static OnSetClause createOnSet(Expression expression)
     {
-        return OnSetClause.create(variableName, expression);
+        return OnSetClause.create(expression);
     }
 
     

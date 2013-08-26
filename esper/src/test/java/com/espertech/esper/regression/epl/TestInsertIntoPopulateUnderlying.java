@@ -132,6 +132,18 @@ public class TestInsertIntoPopulateUnderlying extends TestCase
         assertEquals("E1", eventOne.getTheString());
         assertEquals(99, eventOne.getIntPrimitive());
         assertEquals((Integer) 5, eventOne.getIntBoxed());
+
+        // test Ctor accepting same types
+        epService.getEPAdministrator().destroyAllStatements();
+        epService.getEPAdministrator().getConfiguration().addEventType(MyEventWithCtorSameType.class);
+        String epl = "insert into MyEventWithCtorSameType select c1,c2 from SupportBean(theString='b1').std:lastevent() as c1, SupportBean(theString='b2').std:lastevent() as c2";
+        EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
+        stmt.addListener(listener);
+        epService.getEPRuntime().sendEvent(new SupportBean("b1", 1));
+        epService.getEPRuntime().sendEvent(new SupportBean("b2", 2));
+        MyEventWithCtorSameType result = (MyEventWithCtorSameType) listener.assertOneGetNewAndReset().getUnderlying();
+        assertEquals(1, result.getB1().getIntPrimitive());
+        assertEquals(2, result.getB2().getIntPrimitive());
     }
 
     public void testCtorWithPattern() {
@@ -828,6 +840,24 @@ public class TestInsertIntoPopulateUnderlying extends TestCase
 
         public void setThemap(Map themap) {
             this.themap = themap;
+        }
+    }
+
+    private static class MyEventWithCtorSameType {
+        private final SupportBean b1;
+        private final SupportBean b2;
+
+        public MyEventWithCtorSameType(SupportBean b1, SupportBean b2) {
+            this.b1 = b1;
+            this.b2 = b2;
+        }
+
+        public SupportBean getB1() {
+            return b1;
+        }
+
+        public SupportBean getB2() {
+            return b2;
         }
     }
 }

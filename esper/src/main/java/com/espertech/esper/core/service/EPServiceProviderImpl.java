@@ -22,6 +22,9 @@ import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.vaevent.ValueAddEventService;
 import com.espertech.esper.filter.FilterService;
+import com.espertech.esper.metrics.codahale_metrics.metrics.MetricNameFactory;
+import com.espertech.esper.metrics.codahale_metrics.metrics.core.MetricName;
+import com.espertech.esper.metrics.jmx.CommonJMXUtil;
 import com.espertech.esper.plugin.PluginLoader;
 import com.espertech.esper.plugin.PluginLoaderInitContext;
 import com.espertech.esper.schedule.SchedulingMgmtService;
@@ -321,6 +324,10 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
                 }
             }
 
+            if (configSnapshot.getEngineDefaults().getMetricsReporting().isJmxEngineMetrics()) {
+                destroyEngineMetrics(engine.getServices().getEngineURI());
+            }
+
             // assign null value
             EPServiceEngine engineToDestroy = engine;
 
@@ -420,6 +427,10 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
             catch (InterruptedException ex)
             {
                 Thread.currentThread().interrupt();
+            }
+
+            if (configSnapshot.getEngineDefaults().getMetricsReporting().isJmxEngineMetrics()) {
+                destroyEngineMetrics(engine.getServices().getEngineURI());
             }
 
             engine.getRuntime().initialize();
@@ -631,6 +642,11 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
             services.getMetricsReportingService().setContext(runtimeSPI, services);
         }
 
+        // Start engine metrics report
+        if (configSnapshot.getEngineDefaults().getMetricsReporting().isJmxEngineMetrics()) {
+            startEngineMetrics(services, runtimeSPI);
+        }
+
         // call initialize listeners
         for (EPServiceStateListener listener : serviceListeners)
         {
@@ -642,7 +658,22 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
             {
                 log.error("Runtime exception caught during an onEPServiceInitialized callback:" + ex.getMessage(), ex);
             }
-        }        
+        }
+    }
+
+    private synchronized void startEngineMetrics(EPServicesContext services, EPRuntime runtime) {
+        MetricName filterName = MetricNameFactory.name(services.getEngineURI(), "filter");
+        CommonJMXUtil.registerMbean(services.getFilterService(), filterName);
+        MetricName scheduleName = MetricNameFactory.name(services.getEngineURI(), "schedule");
+        CommonJMXUtil.registerMbean(services.getSchedulingService(), scheduleName);
+        MetricName runtimeName = MetricNameFactory.name(services.getEngineURI(), "runtime");
+        CommonJMXUtil.registerMbean(runtime, runtimeName);
+    }
+
+    private synchronized void destroyEngineMetrics(String engineURI) {
+        CommonJMXUtil.unregisterMbean(MetricNameFactory.name(engineURI, "filter"));
+        CommonJMXUtil.unregisterMbean(MetricNameFactory.name(engineURI, "schedule"));
+        CommonJMXUtil.unregisterMbean(MetricNameFactory.name(engineURI, "runtime"));
     }
 
     /**

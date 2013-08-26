@@ -11,6 +11,8 @@
 
 package com.espertech.esper.event.util;
 
+import com.espertech.esper.util.JavaClassHelper;
+
 /**
  * For rendering an output value returned by a property.
  */
@@ -32,7 +34,11 @@ public class OutputValueRendererFactory
         {
             type = type.getComponentType();
         }
-        if ((type == String.class) || (type == Character.class) || (type == char.class) || type.isEnum())
+        if (type == String.class ||
+            type == Character.class ||
+            type == char.class ||
+            type.isEnum() ||
+            (!JavaClassHelper.isNumeric(type) && JavaClassHelper.getBoxedType(type) != Boolean.class))
         {
             if (options.isXmlOutput())
             {

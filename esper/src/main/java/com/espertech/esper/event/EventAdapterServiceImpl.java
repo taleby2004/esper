@@ -99,15 +99,15 @@ public class EventAdapterServiceImpl implements EventAdapterService
         return beanEventAdapter.getClassToLegacyConfigs(className);
     }
 
-    public Set<WriteablePropertyDescriptor> getWriteableProperties(EventType eventType)
+    public Set<WriteablePropertyDescriptor> getWriteableProperties(EventType eventType, boolean allowAnyType)
     {
-        return EventAdapterServiceHelper.getWriteableProperties(eventType);
+        return EventAdapterServiceHelper.getWriteableProperties(eventType, allowAnyType);
     }
 
-    public EventBeanManufacturer getManufacturer(EventType eventType, WriteablePropertyDescriptor[] properties, EngineImportService engineImportService)
+    public EventBeanManufacturer getManufacturer(EventType eventType, WriteablePropertyDescriptor[] properties, EngineImportService engineImportService, boolean allowAnyType)
             throws EventBeanManufactureException
     {
-        return EventAdapterServiceHelper.getManufacturer(this, eventType, properties, engineImportService);
+        return EventAdapterServiceHelper.getManufacturer(this, eventType, properties, engineImportService, allowAnyType);
     }
 
     public EventType[] getAllTypes()

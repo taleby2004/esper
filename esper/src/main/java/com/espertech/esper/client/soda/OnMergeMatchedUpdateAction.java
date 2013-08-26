@@ -19,7 +19,7 @@ public class OnMergeMatchedUpdateAction implements OnMergeMatchedAction
 {
     private static final long serialVersionUID = 0L;
 
-    private List<AssignmentPair> assignments = Collections.emptyList();
+    private List<Assignment> assignments = Collections.emptyList();
     private Expression whereClause;
 
     /**
@@ -33,7 +33,7 @@ public class OnMergeMatchedUpdateAction implements OnMergeMatchedAction
      * @param assignments assignments of values to columns
      * @param whereClause optional condition or null
      */
-    public OnMergeMatchedUpdateAction(List<AssignmentPair> assignments, Expression whereClause) {
+    public OnMergeMatchedUpdateAction(List<Assignment> assignments, Expression whereClause) {
         this.assignments = assignments;
         this.whereClause = whereClause;
     }
@@ -58,7 +58,7 @@ public class OnMergeMatchedUpdateAction implements OnMergeMatchedAction
      * Returns the assignments to execute against any rows found in a named window
      * @return assignments
      */
-    public List<AssignmentPair> getAssignments() {
+    public List<Assignment> getAssignments() {
         return assignments;
     }
 
@@ -66,7 +66,7 @@ public class OnMergeMatchedUpdateAction implements OnMergeMatchedAction
      * Sets the assignments to execute against any rows found in a named window
      * @param assignments to set
      */
-    public void setAssignments(List<AssignmentPair> assignments) {
+    public void setAssignments(List<Assignment> assignments) {
         this.assignments = assignments;
     }
 

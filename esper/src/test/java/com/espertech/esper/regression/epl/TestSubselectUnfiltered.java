@@ -190,9 +190,6 @@ public class TestSubselectUnfiltered extends TestCase {
         tryInvalid("select * from S0 group by id + (select id from S1)",
                    "Error starting statement: Subselects not allowed within group-by [select * from S0 group by id + (select id from S1)]");
 
-        tryInvalid("select * from S0 group by id having (select id from S1)",
-                   "Error starting statement: Subselects not allowed within having-clause [select * from S0 group by id having (select id from S1)]");
-
         tryInvalid("select * from S0 order by (select id from S1) asc",
                    "Error starting statement: Subselects not allowed within order-by clause [select * from S0 order by (select id from S1) asc]");
 

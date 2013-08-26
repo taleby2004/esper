@@ -498,7 +498,7 @@ cepRT.sendEvent(entry);</pre></div>
           This is the two statements that accomplish this:
         </p>
 	<div class="source"><pre>// Activate now and every 1-minute, terminating after 1 minute
-create context CtxEachMinute initiated by pattern [timer:interval(0) or every timer:interval(1 min)] terminated after 1 minute</pre></div>      
+create context CtxEachMinute initiated @now and pattern [every timer:interval(1 min)] terminated after 1 minute</pre></div>      
 	<div class="source"><pre>context CtxEachMinute select avg(value) as avgValue, count(value) as countValue, 
 min(value) as minValue, max(value) as maxValue from MyEvent
 output snapshot when terminated</pre></div>      

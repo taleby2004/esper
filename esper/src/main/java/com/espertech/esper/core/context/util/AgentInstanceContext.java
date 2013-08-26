@@ -22,9 +22,9 @@ import com.espertech.esper.event.MappedEventBean;
 import com.espertech.esper.schedule.TimeProvider;
 import com.espertech.esper.util.StopCallback;
 
-import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 
 public class AgentInstanceContext implements ExprEvaluatorContext {
 
@@ -104,7 +104,7 @@ public class AgentInstanceContext implements ExprEvaluatorContext {
         }
         else {
             StopCallback cb = (StopCallback) terminationCallbacks;
-            ArrayDeque<StopCallback> q = new ArrayDeque<StopCallback>(2);
+            HashSet<StopCallback> q = new HashSet<StopCallback>(2);
             q.add(cb);
             q.add(callback);
             terminationCallbacks = q;

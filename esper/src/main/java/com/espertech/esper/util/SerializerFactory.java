@@ -42,7 +42,7 @@ public class SerializerFactory {
 
         public Object deserialize(DataInputStream stream) throws IOException {
             try {
-                return new ObjectInputStream(stream).readObject();
+                return new ObjectInputStreamWithTCCL(stream).readObject();
             } catch (ClassNotFoundException e) {
                 throw new IOException(e);
             }

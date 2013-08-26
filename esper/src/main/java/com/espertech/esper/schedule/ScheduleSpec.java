@@ -8,11 +8,12 @@
  **************************************************************************************/
 package com.espertech.esper.schedule;
 
-import com.espertech.esper.util.MetaDefItem;
+import com.espertech.esper.type.CronParameter;
 import com.espertech.esper.type.ScheduleUnit;
+import com.espertech.esper.util.MetaDefItem;
 
-import java.util.*;
 import java.io.Serializable;
+import java.util.*;
 
 /**
  * Holds a schedule specification which consists of a set of integer values or a null
@@ -26,6 +27,8 @@ public final class ScheduleSpec implements MetaDefItem, Serializable
     // The seconds unit is optional.
     private final EnumMap<ScheduleUnit, SortedSet<Integer>> unitValues;
     private String optionalTimeZone;
+    private CronParameter optionalDayOfMonthOperator;
+    private CronParameter optionalDayOfWeekOperator;
     private static final long serialVersionUID = -7050807714879367353L;
 
     /**
@@ -33,7 +36,7 @@ public final class ScheduleSpec implements MetaDefItem, Serializable
      * @param unitValues are the values for each minute, hour, day, month etc.
      * @throws IllegalArgumentException - if validation of value set per unit fails
      */
-    public ScheduleSpec(EnumMap<ScheduleUnit, SortedSet<Integer>> unitValues, String optionalTimeZone) throws IllegalArgumentException
+    public ScheduleSpec(EnumMap<ScheduleUnit, SortedSet<Integer>> unitValues, String optionalTimeZone, CronParameter optionalDayOfMonthOperator, CronParameter optionalDayOfWeekOperator) throws IllegalArgumentException
     {
         validate(unitValues);
 
@@ -42,6 +45,8 @@ public final class ScheduleSpec implements MetaDefItem, Serializable
 
         this.unitValues = unitValues;
         this.optionalTimeZone = optionalTimeZone;
+        this.optionalDayOfMonthOperator = optionalDayOfMonthOperator;
+        this.optionalDayOfWeekOperator = optionalDayOfWeekOperator;
     }
 
     /**
@@ -56,6 +61,14 @@ public final class ScheduleSpec implements MetaDefItem, Serializable
         unitValues.put(ScheduleUnit.MONTHS, null);
         unitValues.put(ScheduleUnit.DAYS_OF_WEEK, null);
         optionalTimeZone = null;
+    }
+
+    public CronParameter getOptionalDayOfMonthOperator() {
+        return optionalDayOfMonthOperator;
+    }
+
+    public CronParameter getOptionalDayOfWeekOperator() {
+        return optionalDayOfWeekOperator;
     }
 
     public void setOptionalTimeZone(String optionalTimeZone) {

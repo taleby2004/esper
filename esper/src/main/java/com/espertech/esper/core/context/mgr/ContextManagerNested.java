@@ -425,9 +425,7 @@ public class ContextManagerNested implements ContextManager, ContextControllerLi
 
         // for all new contexts: evaluate this event for this statement
         if (optionalTriggeringEvent != null) {
-            for (AgentInstance context : newInstances) {
-                StatementAgentInstanceUtil.evaluateEventForStatement(servicesContext, optionalTriggeringEvent, optionalTriggeringPattern, context.getAgentInstanceContext());
-            }
+            StatementAgentInstanceUtil.evaluateEventForStatement(servicesContext, optionalTriggeringEvent, optionalTriggeringPattern, newInstances);
         }
 
         // save leaf

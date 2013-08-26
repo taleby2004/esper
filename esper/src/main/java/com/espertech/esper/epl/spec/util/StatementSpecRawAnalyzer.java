@@ -71,6 +71,10 @@ public class StatementSpecRawAnalyzer
         {
             spec.getFilterRootNode().accept(visitor);
         }
+        if (spec.getHavingExprRootNode() != null)
+        {
+            spec.getHavingExprRootNode().accept(visitor);
+        }
         if (spec.getUpdateDesc() != null)
         {
             if (spec.getUpdateDesc().getOptionalWhereClause() != null)

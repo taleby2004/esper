@@ -60,6 +60,10 @@ public class ContextControllerConditionTimePeriod implements ContextControllerCo
         return scheduleHandle != null;
     }
 
+    public boolean isImmediate() {
+        return spec.isImmediate();
+    }
+
     private void startContextCallback(long timeOffset) {
         ScheduleHandleCallback scheduleCallback = new ScheduleHandleCallback() {
             public void scheduledTrigger(ExtensionServicesContext extensionServicesContext)

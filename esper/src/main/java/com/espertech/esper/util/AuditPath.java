@@ -24,6 +24,8 @@ public class AuditPath {
 
     private static final Log auditLogDestination = LogFactory.getLog(AuditPath.AUDIT_LOG);
 
+    private volatile static AuditCallback auditCallback;
+
     /**
      * Log destination for the query plan logging.
      */
@@ -37,7 +39,7 @@ public class AuditPath {
     /**
      * Log destination for the audit logging.
      */
-    public static final String AUDIT_LOG = "com.espertech.esper.audit"; 
+    public static final String AUDIT_LOG = "com.espertech.esper.audit";
 
     /**
      * Public access.
@@ -56,22 +58,27 @@ public class AuditPath {
 
     public static void auditLog(String engineURI, String statementName, AuditEnum category, String message) {
         if (auditPattern == null) {
-            StringBuilder buf = new StringBuilder();
-            buf.append("Statement ");
-            buf.append(statementName);
-            buf.append(" ");
-            buf.append(category.getPrettyPrintText());
-            buf.append(" ");
-            buf.append(message);
-            auditLogDestination.info(buf.toString());
+            String text = AuditContext.defaultFormat(statementName, category, message);
+            auditLogDestination.info(text);
         }
         else {
             String result = auditPattern.replace("%s", statementName).replace("%u", engineURI).replace("%c", category.getValue()).replace("%m", message);
             auditLogDestination.info(result);
         }
+        if (auditCallback != null) {
+            auditCallback.audit(new AuditContext(engineURI, statementName, category, message));
+        }
     }
 
     public static boolean isInfoEnabled() {
         return auditLogDestination.isInfoEnabled();
+    }
+
+    public static void setAuditCallback(AuditCallback auditCallback) {
+        AuditPath.auditCallback = auditCallback;
+    }
+
+    public static AuditCallback getAuditCallback() {
+        return auditCallback;
     }
 }

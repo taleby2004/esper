@@ -8,17 +8,23 @@
  **************************************************************************************/
 package com.espertech.esper.client;
 
-import com.espertech.esper.type.*;
 import com.espertech.esper.collection.Pair;
+import com.espertech.esper.type.StringPatternSet;
+import com.espertech.esper.type.StringPatternSetLike;
+import com.espertech.esper.type.StringPatternSetRegex;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Configuratiom for metrics reporting.
  */
 public class ConfigurationMetricsReporting implements Serializable
 {
+    private boolean jmxEngineMetrics;
     private boolean enableMetricsReporting;
     private boolean isThreading;
     private long engineInterval;
@@ -31,6 +37,7 @@ public class ConfigurationMetricsReporting implements Serializable
      */
     public ConfigurationMetricsReporting()
     {
+        jmxEngineMetrics = false;
         enableMetricsReporting = false;
         isThreading = true;
         engineInterval = 10 * 1000; // 10 seconds
@@ -137,6 +144,24 @@ public class ConfigurationMetricsReporting implements Serializable
     public Map<String, StmtGroupMetrics> getStatementGroups()
     {
         return statementGroups;
+    }
+
+    /**
+     * Returns true if the engine registers JMX mbeans, with the platform mbean server,
+     * that provide key engine metrics.
+     * @return indicator
+     */
+    public boolean isJmxEngineMetrics() {
+        return jmxEngineMetrics;
+    }
+
+    /**
+     * Set to true to have the the engine register JMX mbeans, with the platform mbean server,
+     * that provide key engine metrics.
+     * @param jmxEngineMetrics
+     */
+    public void setJmxEngineMetrics(boolean jmxEngineMetrics) {
+        this.jmxEngineMetrics = jmxEngineMetrics;
     }
 
     /**

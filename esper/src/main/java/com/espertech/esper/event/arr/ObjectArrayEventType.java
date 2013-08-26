@@ -254,4 +254,32 @@ public class ObjectArrayEventType extends BaseNestableEventType {
         }
         return dataTarget;
     }
+
+    public boolean isDeepEqualsConsiderOrder(ObjectArrayEventType other) {
+        EventTypeNestableGetterFactoryObjectArray factoryOther = (EventTypeNestableGetterFactoryObjectArray) other.getterFactory;
+        EventTypeNestableGetterFactoryObjectArray factoryMe = (EventTypeNestableGetterFactoryObjectArray) getterFactory;
+
+        if (factoryOther.getPropertiesIndex().size() != factoryMe.getPropertiesIndex().size()) {
+            return false;
+        }
+
+        for (Map.Entry<String, Integer> propMeEntry : factoryMe.getPropertiesIndex().entrySet()) {
+            Integer otherIndex = factoryOther.getPropertiesIndex().get(propMeEntry.getKey());
+            if (otherIndex == null || !otherIndex.equals(propMeEntry.getValue())) {
+                return false;
+            }
+
+            String propName = propMeEntry.getKey();
+            Object setOneType = this.nestableTypes.get(propName);
+            Object setTwoType = other.nestableTypes.get(propName);
+            boolean setTwoTypeFound = other.nestableTypes.containsKey(propName);
+
+            String comparedMessage = BaseNestableEventUtil.comparePropType(propName, setOneType, setTwoType, setTwoTypeFound, other.getName());
+            if (comparedMessage != null) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }

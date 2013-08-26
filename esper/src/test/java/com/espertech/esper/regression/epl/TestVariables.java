@@ -519,7 +519,7 @@ public class TestVariables extends TestCase
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsSelect, new Object[]{10d, 11L, "E1"});
 
         model = new EPStatementObjectModel();
-        model.setOnExpr(OnClause.createOnSet("var1", Expressions.property("intPrimitive")).addAssignment("var2", Expressions.property("intBoxed")));
+        model.setOnExpr(OnClause.createOnSet(Expressions.eq(Expressions.property("var1"), Expressions.property("intPrimitive"))).addAssignment(Expressions.eq(Expressions.property("var2"), Expressions.property("intBoxed"))));
         model.setFromClause(FromClause.create(FilterStream.create(SupportBean.class.getName())));
         String stmtTextSet = "on " + SupportBean.class.getName() + " set var1 = intPrimitive, var2 = intBoxed";
         EPStatement stmtSet = epService.getEPAdministrator().create(model);
@@ -855,6 +855,7 @@ public class TestVariables extends TestCase
         tryInvalidSet("on " + SupportBean.class.getName() + " set var2 = 'false'", null);
         tryInvalidSet("on " + SupportBean.class.getName() + " set var3 = 1.1", null);
         tryInvalidSet("on " + SupportBean.class.getName() + " set var3 = 22222222222222", null);
+        tryInvalidSet("on " + SupportBean.class.getName() + " set var3", "Error starting statement: Missing variable assignment expression in assignment number 0 [on com.espertech.esper.support.bean.SupportBean set var3]");
     }
 
     private void tryInvalidSet(String stmtText, String message)

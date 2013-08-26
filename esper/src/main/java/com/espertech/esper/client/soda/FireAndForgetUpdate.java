@@ -18,7 +18,7 @@ import java.util.List;
 public class FireAndForgetUpdate implements FireAndForgetClause
 {
     private static final long serialVersionUID = 1335566236342281539L;
-    private List<AssignmentPair> assignments = new ArrayList<AssignmentPair>();
+    private List<Assignment> assignments = new ArrayList<Assignment>();
 
     /**
      * Ctor.
@@ -30,7 +30,7 @@ public class FireAndForgetUpdate implements FireAndForgetClause
      * Returns the set-assignments.
      * @return assignments
      */
-    public List<AssignmentPair> getAssignments() {
+    public List<Assignment> getAssignments() {
         return assignments;
     }
 
@@ -39,7 +39,7 @@ public class FireAndForgetUpdate implements FireAndForgetClause
      * @param assignment to add
      * @return assignment
      */
-    public List<AssignmentPair> addAssignment(AssignmentPair assignment) {
+    public List<Assignment> addAssignment(Assignment assignment) {
         assignments.add(assignment);
         return assignments;
     }
@@ -48,7 +48,7 @@ public class FireAndForgetUpdate implements FireAndForgetClause
      * Sets the assignments.
      * @param assignments to set
      */
-    public void setAssignments(List<AssignmentPair> assignments) {
+    public void setAssignments(List<Assignment> assignments) {
         this.assignments = assignments;
     }
 

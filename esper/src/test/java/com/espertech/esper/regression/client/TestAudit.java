@@ -15,21 +15,27 @@ import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.annotation.AuditEnum;
 import com.espertech.esper.client.dataflow.EPDataFlowInstance;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.time.CurrentTimeEvent;
+import com.espertech.esper.core.service.EPServiceProviderSPI;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_ST0;
 import com.espertech.esper.support.bean.SupportBean_ST1;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.util.AuditCallback;
+import com.espertech.esper.util.AuditContext;
 import com.espertech.esper.util.AuditPath;
 import com.espertech.esper.util.EventRepresentationEnum;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 public class TestAudit extends TestCase {
 
@@ -68,10 +74,19 @@ public class TestAudit extends TestCase {
 
     public void testAudit() throws Exception {
 
-        // stream
+        // stream, and test audit callback
+        SupportAuditCallback callback = new SupportAuditCallback();
+        AuditPath.setAuditCallback(callback);
         auditLog.info("*** Stream: ");
         EPStatement stmtInput = epService.getEPAdministrator().createEPL("@Name('ABC') @Audit('stream') select * from SupportBean(theString = 'E1')");
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        assertEquals(1, callback.getAudits().size());
+        AuditContext cb = callback.getAudits().get(0);
+        assertEquals("SupportBean(theString=...) inserted SupportBean[SupportBean(E1, 1)]", cb.getMessage());
+        assertEquals("ABC", cb.getStatementName());
+        assertEquals(EPServiceProviderSPI.DEFAULT_ENGINE_URI, cb.getEngineURI());
+        assertEquals(AuditEnum.STREAM, cb.getCategory());
+        AuditPath.setAuditCallback(null);
         stmtInput.destroy();
 
         auditLog.info("*** Named Window And Insert-Into: ");
@@ -186,5 +201,17 @@ public class TestAudit extends TestCase {
         df.start();
         epService.getEPRuntime().sendEvent(new SupportBean("I1", 1));
         df.cancel();
+    }
+
+    private static class SupportAuditCallback implements AuditCallback {
+        private List<AuditContext> audits = new ArrayList<AuditContext>();
+
+        public void audit(AuditContext auditContext) {
+            audits.add(auditContext);
+        }
+
+        public List<AuditContext> getAudits() {
+            return audits;
+        }
     }
 }

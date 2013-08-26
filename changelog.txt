@@ -1,6 +1,38 @@
 Esper Changelog
 ===================
 
+Changes in version 4.10.0
+------------------------
+Major API or EPL changes
+  - Support for context declarations to perform initiate or start immediately
+  - Support for mutation expressions for merge and update
+  - Support for parameterized fire-and-forget queries
+  - Support for fire-and-forget queries to consider the "in" opertator for index lookup
+  - Support for having-clause to have subquery
+
+Bug fixes
+  - Fixed Issue ESPER-733 Passing aggregate scalars to global script
+  - Fixed Issue ESPER-734 Unclear exception for invalid match_recognize
+  - Fixed Issue ESPER-735 Esper 4.9.0 OSGi bundle execution environment restricted to J2SE 1.6
+  - Fixed Issue ESPER-737 NullPointerException with grouped data window intersecting time window and last/first event
+  - Fixed Issue ESPER-738 Performance issue with 8 threads, keyed context partitioned, synchronized listener, event sequence for same partition
+  - Fixed Issue ESPER-739 All calls methods named "get" assumed to be Date-Time method
+  - Fixed Issue ESPER-740 POJO event populated by selectclause and via POJO constructor and select clause selects same type twice is created using wrong parameters
+  - Fixed Issue ESPER-741 Named window on-action with relational operator (<, <=) where-clause incorrect behavior when reversing comparison
+  - Fixed Issue ESPER-742 Static method lookup selects incorrect classstatic method lookup
+  - Fixed Issue ESPER-743 Join accross ObjectArrayEvent and MapEvent leaks data from MapEvent
+  - Fixed Issue ESPER-744 parse error in prepared statement for count(*,filter_expr)
+  - Fixed Issue ESPER-746 Self-Join between derived value streams provides incorrect result
+  - Fixed Issue ESPER-747 Cron timer is skipping months
+  - Fixed Issue ESPER-749 split stream with "output all" not working with prepared statement
+  - Fixed Issue ESPER-750 @audit miscounts pattern instances with "not"
+  - Fixed Issue ESPER-751 StackOverflow when routing new event during high volume processing
+  - Fixed Issue ESPER-752 @Drop annotation with context: First event not dropped
+  - Fixed Issue KPH-656-86796 EPL module with javascript incorrectly parsed
+  - Fixed Issue PJM-181-84952 Possible deadlock for patterns that have filters that have subqueries
+  - Fixed Issue IGC-717-55951 efficiency of group reclaim with grouped data windows
+  - Fixed Issue TBC-634-19891 use thread context class loader for default deserialize
+
 Changes in version 4.9.0
 ------------------------
 Major API or EPL changes

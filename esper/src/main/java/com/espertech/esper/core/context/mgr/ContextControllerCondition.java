@@ -20,4 +20,5 @@ public interface ContextControllerCondition {
     public void deactivate();
     public boolean isRunning();
     public Long getExpectedEndTime();
+    public boolean isImmediate();
 }

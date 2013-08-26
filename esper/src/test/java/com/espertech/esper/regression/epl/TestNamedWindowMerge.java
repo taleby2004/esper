@@ -59,6 +59,21 @@ public class TestNamedWindowMerge extends TestCase {
         mergeListener = null;
     }
 
+    public void testUpdateNonPropertySet() {
+        epService.getEPAdministrator().getConfiguration().addPlugInSingleRowFunction("increaseIntCopyDouble", this.getClass().getName(), "increaseIntCopyDouble");
+        epService.getEPAdministrator().createEPL("create window MyWindow.win:keepall() as SupportBean");
+        epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportBean");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("on SupportBean_S0 as sb " +
+                "merge MyWindow as mywin when matched then " +
+                "update set mywin.setDoublePrimitive(id), increaseIntCopyDouble(initial, mywin)");
+        stmt.addListener(mergeListener);
+        String[] fields = "intPrimitive,doublePrimitive,doubleBoxed".split(",");
+
+        epService.getEPRuntime().sendEvent(makeSupportBean("E1", 10, 2));
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(5, "E1"));
+        EPAssertionUtil.assertProps(mergeListener.getAndResetLastNewData()[0], fields, new Object[]{11, 5d, 5d});
+    }
+
     public void testUpdateOrderOfFields() throws Exception {
         epService.getEPAdministrator().createEPL("create window MyWindow.win:keepall() as SupportBean");
         epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportBean");
@@ -900,5 +915,10 @@ public class TestNamedWindowMerge extends TestCase {
         SupportBean sb = new SupportBean(theString, intPrimitive);
         sb.setDoublePrimitive(doublePrimitive);
         return sb;
+    }
+
+    public static void increaseIntCopyDouble(SupportBean initialBean, SupportBean updatedBean) {
+        updatedBean.setIntPrimitive(initialBean.getIntPrimitive() + 1);
+        updatedBean.setDoubleBoxed(updatedBean.getDoublePrimitive());
     }
 }

@@ -481,7 +481,7 @@ public class EPRuntimeIsolatedImpl implements EPRuntimeIsolatedSPI, InternalEven
             }
 
             if (!queues.getFrontQueue().isEmpty()) {
-                processThreadWorkQueue();
+                processThreadWorkQueueFront(queues);
             }
         }
     }

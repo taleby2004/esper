@@ -872,8 +872,8 @@ onSetExpr
 	;
 	
 onSetAssignment
-	:	eventProperty EQUALS expression
-		-> ^(ON_SET_EXPR_ITEM eventProperty expression)
+	:	expression
+		-> ^(ON_SET_EXPR_ITEM expression)
 	;
 		
 onExprFrom
@@ -1068,10 +1068,10 @@ contextContextNested
 	;
 	
 createContextChoice
-	:	START createContextRangePoint END createContextRangePoint
-		-> ^(CREATE_CTX_FIXED createContextRangePoint createContextRangePoint)
-	|	INITIATED (BY)? createContextRangePoint TERMINATED (BY)? createContextRangePoint
-		-> ^(CREATE_CTX_INIT createContextRangePoint createContextRangePoint)
+	:	START (ATCHAR i=IDENT | createContextRangePoint) END createContextRangePoint
+		-> ^(CREATE_CTX_FIXED $i? createContextRangePoint+)
+	|	INITIATED (BY)? (ATCHAR i=IDENT AND_EXPR)? createContextRangePoint TERMINATED (BY)? createContextRangePoint
+		-> ^(CREATE_CTX_INIT createContextRangePoint createContextRangePoint $i?)
 	|	PARTITION (BY)? createContextPartitionItem (COMMA createContextPartitionItem)* 
 		-> ^(CREATE_CTX_PART createContextPartitionItem+)
 	|	createContextGroupItem (COMMA createContextGroupItem)* FROM eventFilterExpression
@@ -1086,7 +1086,7 @@ createContextRangePoint
 	|	crontabLimitParameterSet
 	|	AFTER timePeriod -> ^(AFTER timePeriod)
 	;
-	
+		
 createContextFilter
 	:	eventFilterExpression (AS? i=IDENT)?
 		-> ^(STREAM_EXPR eventFilterExpression $i?)
@@ -1408,8 +1408,8 @@ rowLimit
 	;	
 
 crontabLimitParameterSet
-	:	LPAREN expressionWithTime COMMA expressionWithTime COMMA expressionWithTime COMMA expressionWithTime COMMA expressionWithTime (COMMA expressionWithTime)? RPAREN 
-		-> ^(CRONTAB_LIMIT_EXPR_PARAM expressionWithTime*)			
+	:	LPAREN expressionWithTimeList RPAREN 
+		-> ^(CRONTAB_LIMIT_EXPR_PARAM expressionWithTimeList)			
 	;			
 
 whenClause

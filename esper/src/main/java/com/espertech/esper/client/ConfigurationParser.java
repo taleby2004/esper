@@ -1354,6 +1354,12 @@ class ConfigurationParser {
             configuration.getEngineDefaults().getMetricsReporting().setThreading(Boolean.parseBoolean(threading));
         }
 
+        String jmxEngineMetrics = getOptionalAttribute(parentElement, "jmx-engine-metrics");
+        if (jmxEngineMetrics != null)
+        {
+            configuration.getEngineDefaults().getMetricsReporting().setJmxEngineMetrics(Boolean.parseBoolean(jmxEngineMetrics));
+        }
+
         DOMElementIterator nodeIterator = new DOMElementIterator(parentElement.getChildNodes());
         while (nodeIterator.hasNext())
         {

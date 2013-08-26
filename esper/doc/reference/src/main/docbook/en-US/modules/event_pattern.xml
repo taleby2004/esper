@@ -115,7 +115,11 @@
 				value of the <literal>latency</literal> event property is over 20 seconds, and on every <literal>ServiceMeasurement</literal> event in which the
 				<literal>success</literal> property is false. Either one or the other condition must be true for this pattern to match.
 			</para>
-			<programlisting><![CDATA[every (spike=ServiceMeasurement(latency>20000) or error=ServiceMeasurement(success=false))]]></programlisting>
+<programlisting><![CDATA[every (
+  spike=ServiceMeasurement(latency>20000) 
+  or 
+  error=ServiceMeasurement(success=false)
+)]]></programlisting>
 			
 			<para>
 				In the example above, the pattern expression starts with an <literal>every</literal> operator to indicate that the pattern should fire for every matching events and not just the first
@@ -1847,7 +1851,7 @@ timer:within(125)</programlisting>
 				</para>
 	
 			   <table frame="topbot">
-					<title>Properties offered by sample statement aggregating price</title>
+					<title>Crontab Fields</title>
 					<tgroup cols="4">
 						<colspec colwidth="0.7*"/>
 						<colspec colwidth="0.7*"/>
@@ -1918,7 +1922,7 @@ timer:within(125)</programlisting>
 				</para>
 	
 				<para>
-					The keyword <literal>weekday</literal> is used to specify the weekday (Monday-Friday) nearest the given day. Variant could include month like in: <literal>timer:at(*, *, 30 weekday, 9, *)</literal> which is Friday September 28th (no jump over month).
+					The keyword <literal>weekday</literal> is used to specify the weekday (Monday-Friday) nearest the given day. Variant could include month like in: <literal>timer:at(*, *, 30 weekday, 9, *)</literal> which for year 2007 is Friday September 28th (no jump over month).
 				</para>
 	
 				<para>
@@ -1933,6 +1937,22 @@ timer:within(125)</programlisting>
 					The following <literal>timer:at</literal> pattern matches at 5:00 pm Pacific Standard Time (PST): 
 				</para>
 				<programlisting><![CDATA[timer:at (0, 17, *, *, *, *, 'PST')]]></programlisting>
+
+				<para>
+					Any expression may occur among the parameters. This example invokes a user-defined function <literal>computeHour</literal> to return an hour:
+				</para>
+				<programlisting><![CDATA[timer:at (0, computeHour(), *, *, *, *)]]></programlisting>
+
+				<para>
+					The following restrictions apply to crontab parameters:
+				</para>        
+				<itemizedlist spacing="compact">
+					<listitem>
+						<para>
+							It is not possible to specify both Days Of Month and Days Of Week.
+						</para>
+					</listitem>
+				</itemizedlist>
 
 				<sect4 xml:id="pattern-timer-at-every" >
 				   <title>timer:at and the <literal>every</literal> Operator</title>

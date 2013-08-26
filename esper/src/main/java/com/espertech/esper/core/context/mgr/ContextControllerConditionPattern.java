@@ -119,6 +119,10 @@ public class ContextControllerConditionPattern implements ContextControllerCondi
         return null;
     }
 
+    public boolean isImmediate() {
+        return endpointPatternSpec.isImmediate();
+    }
+
     public static class ConditionPatternMatchCallback implements PatternMatchCallback {
         private final ContextControllerConditionPattern condition;
 

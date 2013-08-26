@@ -102,6 +102,16 @@ public class TestDeployParse extends TestCase
         assertEquals("glob.update.me", deploySvc.parse("module glob.update.me; select * from java.lang.Object;").getName());
         assertEquals("seconds.until.every.where", deploySvc.parse("uses seconds.until.every.where; select * from java.lang.Object;").getUses().toArray()[0]);
         assertEquals("seconds.until.every.where", deploySvc.parse("import seconds.until.every.where; select * from java.lang.Object;").getImports().toArray()[0]);
+
+        // Test script square brackets
+        module = deploySvc.read("regression/test_module_13.epl");
+        assertEquals(1, module.getItems().size());
+
+        module = deploySvc.read("regression/test_module_14.epl");
+        assertEquals(4, module.getItems().size());
+
+        module = deploySvc.read("regression/test_module_15.epl");
+        assertEquals(1, module.getItems().size());
     }
 
     public void testParseFail() throws Exception {

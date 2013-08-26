@@ -157,10 +157,10 @@ public class StatementSpecMapper
         else if (fireAndForgetClause instanceof FireAndForgetUpdate) {
             FireAndForgetUpdate upd = (FireAndForgetUpdate) fireAndForgetClause;
             List<OnTriggerSetAssignment> assignments = new ArrayList<OnTriggerSetAssignment>();
-            for (AssignmentPair pair : upd.getAssignments())
+            for (Assignment pair : upd.getAssignments())
             {
                 ExprNode expr = mapExpressionDeep(pair.getValue(), mapContext);
-                assignments.add(new OnTriggerSetAssignment(pair.getName(), expr));
+                assignments.add(new OnTriggerSetAssignment(expr));
             }
             FireAndForgetSpecUpdate updspec = new FireAndForgetSpecUpdate(assignments);
             raw.setFireAndForgetSpec(updspec);
@@ -232,7 +232,7 @@ public class StatementSpecMapper
             for (OnTriggerSetAssignment assignment : upd.getAssignments())
             {
                 Expression expr = unmapExpressionDeep(assignment.getExpression(), unmapContext);
-                faf.addAssignment(new AssignmentPair(assignment.getVariableName(), expr));
+                faf.addAssignment(new Assignment(expr));
             }
             model.setFireAndForgetClause(faf);
         }
@@ -272,7 +272,7 @@ public class StatementSpecMapper
             for (OnTriggerSetAssignment assignment : window.getAssignments())
             {
                 Expression expr = unmapExpressionDeep(assignment.getExpression(), unmapContext);
-                clause.addAssignment(assignment.getVariableName(), expr);
+                clause.addAssignment(expr);
             }
             model.setOnExpr(clause);
         }
@@ -290,7 +290,7 @@ public class StatementSpecMapper
             for (OnTriggerSetAssignment assignment : trigger.getAssignments())
             {
                 Expression expr = unmapExpressionDeep(assignment.getExpression(), unmapContext);
-                clause.addAssignment(assignment.getVariableName(), expr);
+                clause.addAssignment(expr);
             }
             model.setOnExpr(clause);
         }
@@ -310,6 +310,7 @@ public class StatementSpecMapper
                 clause.addItem(OnInsertSplitStreamItem.create(insertIntoClause, selectClause, whereClause));
             }
             model.setOnExpr(clause);
+            clause.setFirst(trigger.isFirst());
         }
         else if (onTriggerDesc.getOnTriggerType() == OnTriggerType.ON_MERGE)
         {
@@ -330,11 +331,11 @@ public class StatementSpecMapper
                     }
                     else if (actionitem instanceof OnTriggerMergeActionUpdate) {
                         OnTriggerMergeActionUpdate merge = (OnTriggerMergeActionUpdate) actionitem;
-                        List<AssignmentPair> assignments = new ArrayList<AssignmentPair>();
+                        List<Assignment> assignments = new ArrayList<Assignment>();
                         for (OnTriggerSetAssignment pair : merge.getAssignments())
                         {
                             Expression expr = unmapExpressionDeep(pair.getExpression(), unmapContext);
-                            assignments.add(new AssignmentPair(pair.getVariableName(), expr));
+                            assignments.add(new Assignment(expr));
                         }
                         Expression optionalCondition = merge.getOptionalWhereClause() == null ? null : unmapExpressionDeep(merge.getOptionalWhereClause(), unmapContext);
                         action = new OnMergeMatchedUpdateAction(assignments, optionalCondition);
@@ -371,7 +372,7 @@ public class StatementSpecMapper
         for (OnTriggerSetAssignment assignment : updateDesc.getAssignments())
         {
             Expression expr = unmapExpressionDeep(assignment.getExpression(), unmapContext);
-            clause.addAssignment(assignment.getVariableName(), expr);
+            clause.addAssignment(expr);
         }
         model.setUpdateClause(clause);
 
@@ -452,12 +453,12 @@ public class StatementSpecMapper
         if (endpoint instanceof ContextDetailConditionCrontab) {
             ContextDetailConditionCrontab crontab = (ContextDetailConditionCrontab) endpoint;
             List<Expression> crontabExpr = unmapExpressionDeep(crontab.getCrontab(), unmapContext);
-            return new ContextDescriptorConditionCrontab(crontabExpr);
+            return new ContextDescriptorConditionCrontab(crontabExpr, crontab.isImmediate());
         }
         else if (endpoint instanceof ContextDetailConditionPattern) {
             ContextDetailConditionPattern pattern = (ContextDetailConditionPattern) endpoint;
             PatternExpr patternExpr = unmapPatternEvalDeep(pattern.getPatternRaw(), unmapContext);
-            return new ContextDescriptorConditionPattern(patternExpr, pattern.isInclusive());
+            return new ContextDescriptorConditionPattern(patternExpr, pattern.isInclusive(), pattern.isImmediate());
         }
         else if (endpoint instanceof ContextDetailConditionFilter) {
             ContextDetailConditionFilter filter = (ContextDetailConditionFilter) endpoint;
@@ -467,7 +468,7 @@ public class StatementSpecMapper
         else if (endpoint instanceof ContextDetailConditionTimePeriod) {
             ContextDetailConditionTimePeriod period = (ContextDetailConditionTimePeriod) endpoint;
             TimePeriodExpression expression = (TimePeriodExpression) unmapExpressionDeep(period.getTimePeriod(), unmapContext);
-            return new ContextDescriptorConditionTimePeriod(expression);
+            return new ContextDescriptorConditionTimePeriod(expression, period.isImmediate());
         }
         throw new IllegalStateException("Unrecognized endpoint " + endpoint);
     }
@@ -692,14 +693,14 @@ public class StatementSpecMapper
         {
             unit = OutputLimitUnit.WHEN_EXPRESSION;
             Expression whenExpression = unmapExpressionDeep(outputLimitSpec.getWhenExpressionNode(), unmapContext);
-            List<AssignmentPair> thenAssignments = new ArrayList<AssignmentPair>();
+            List<Assignment> thenAssignments = new ArrayList<Assignment>();
             clause = new OutputLimitClause(selector, whenExpression, thenAssignments);
             if (outputLimitSpec.getThenExpressions() != null)
             {
                 for (OnTriggerSetAssignment assignment : outputLimitSpec.getThenExpressions())
                 {
                     Expression expr = unmapExpressionDeep(assignment.getExpression(), unmapContext);
-                    clause.addThenAssignment(assignment.getVariableName(), expr);
+                    clause.addThenAssignment(expr);
                 }
             }
         }
@@ -728,10 +729,10 @@ public class StatementSpecMapper
             clause.setAndAfterTerminateAndExpr(unmapExpressionDeep(outputLimitSpec.getAndAfterTerminateExpr(), unmapContext));
         }
         if (outputLimitSpec.getAndAfterTerminateThenExpressions() != null) {
-            List<AssignmentPair> thenAssignments = new ArrayList<AssignmentPair>();
+            List<Assignment> thenAssignments = new ArrayList<Assignment>();
             for (OnTriggerSetAssignment assignment : outputLimitSpec.getAndAfterTerminateThenExpressions()) {
                 Expression expr = unmapExpressionDeep(assignment.getExpression(), unmapContext);
-                thenAssignments.add(new AssignmentPair(assignment.getVariableName(), expr));
+                thenAssignments.add(new Assignment(expr));
             }
             clause.setAndAfterTerminateThenAssignments(thenAssignments);
         }
@@ -862,10 +863,10 @@ public class StatementSpecMapper
             whenExpression = mapExpressionDeep(outputLimitClause.getWhenExpression(), mapContext);
 
             assignments = new ArrayList<OnTriggerSetAssignment>();
-            for (AssignmentPair pair : outputLimitClause.getThenAssignments())
+            for (Assignment pair : outputLimitClause.getThenAssignments())
             {
                 ExprNode expr = mapExpressionDeep(pair.getValue(), mapContext);
-                assignments.add(new OnTriggerSetAssignment(pair.getName(), expr));
+                assignments.add(new OnTriggerSetAssignment(expr));
             }
         }
 
@@ -895,10 +896,10 @@ public class StatementSpecMapper
         List<OnTriggerSetAssignment> afterTerminateAssignments = null;
         if (outputLimitClause.getAndAfterTerminateThenAssignments() != null) {
             afterTerminateAssignments = new ArrayList<OnTriggerSetAssignment>();
-            for (AssignmentPair pair : outputLimitClause.getAndAfterTerminateThenAssignments())
+            for (Assignment pair : outputLimitClause.getAndAfterTerminateThenAssignments())
             {
                 ExprNode expr = mapExpressionDeep(pair.getValue(), mapContext);
-                afterTerminateAssignments.add(new OnTriggerSetAssignment(pair.getName(), expr));
+                afterTerminateAssignments.add(new OnTriggerSetAssignment(expr));
             }
         }
 
@@ -928,10 +929,10 @@ public class StatementSpecMapper
             OnSetClause setClause = (OnSetClause) onExpr;
             mapContext.setHasVariables(true);
             List<OnTriggerSetAssignment> assignments = new ArrayList<OnTriggerSetAssignment>();
-            for (AssignmentPair pair : setClause.getAssignments())
+            for (Assignment pair : setClause.getAssignments())
             {
                 ExprNode expr = mapExpressionDeep(pair.getValue(), mapContext);
-                assignments.add(new OnTriggerSetAssignment(pair.getName(), expr));
+                assignments.add(new OnTriggerSetAssignment(expr));
             }
             OnTriggerSetDesc desc = new OnTriggerSetDesc(assignments);
             raw.setOnTriggerDesc(desc);
@@ -940,10 +941,10 @@ public class StatementSpecMapper
         {
             OnUpdateClause updateClause = (OnUpdateClause) onExpr;
             List<OnTriggerSetAssignment> assignments = new ArrayList<OnTriggerSetAssignment>();
-            for (AssignmentPair pair : updateClause.getAssignments())
+            for (Assignment pair : updateClause.getAssignments())
             {
                 ExprNode expr = mapExpressionDeep(pair.getValue(), mapContext);
-                assignments.add(new OnTriggerSetAssignment(pair.getName(), expr));
+                assignments.add(new OnTriggerSetAssignment(expr));
             }
             OnTriggerWindowUpdateDesc desc = new OnTriggerWindowUpdateDesc(updateClause.getWindowName(), updateClause.getOptionalAsName(), assignments);
             raw.setOnTriggerDesc(desc);
@@ -986,10 +987,10 @@ public class StatementSpecMapper
                     else if (action instanceof OnMergeMatchedUpdateAction) {
                         OnMergeMatchedUpdateAction update = (OnMergeMatchedUpdateAction) action;
                         List<OnTriggerSetAssignment> assignments = new ArrayList<OnTriggerSetAssignment>();
-                        for (AssignmentPair pair : update.getAssignments())
+                        for (Assignment pair : update.getAssignments())
                         {
                             ExprNode expr = mapExpressionDeep(pair.getValue(), mapContext);
-                            assignments.add(new OnTriggerSetAssignment(pair.getName(), expr));
+                            assignments.add(new OnTriggerSetAssignment(expr));
                         }
                         ExprNode optionalCondition = update.getWhereClause() == null ? null : mapExpressionDeep(update.getWhereClause(), mapContext);
                         actionItem = new OnTriggerMergeActionUpdate(optionalCondition, assignments);
@@ -1359,7 +1360,7 @@ public class StatementSpecMapper
         if (condition instanceof ContextDescriptorConditionCrontab) {
             ContextDescriptorConditionCrontab crontab = (ContextDescriptorConditionCrontab) condition;
             List<ExprNode> expr = mapExpressionDeep(crontab.getCrontabExpressions(), mapContext);
-            return new ContextDetailConditionCrontab(expr);
+            return new ContextDetailConditionCrontab(expr, crontab.isNow());
         }
         else if (condition instanceof ContextDescriptorConditionFilter) {
             ContextDescriptorConditionFilter filter = (ContextDescriptorConditionFilter) condition;
@@ -1369,12 +1370,12 @@ public class StatementSpecMapper
         if (condition instanceof ContextDescriptorConditionPattern) {
             ContextDescriptorConditionPattern pattern = (ContextDescriptorConditionPattern) condition;
             EvalFactoryNode patternExpr = mapPatternEvalDeep(pattern.getPattern(), mapContext);
-            return new ContextDetailConditionPattern(patternExpr, pattern.isInclusive());
+            return new ContextDetailConditionPattern(patternExpr, pattern.isInclusive(), pattern.isNow());
         }
         if (condition instanceof ContextDescriptorConditionTimePeriod) {
             ContextDescriptorConditionTimePeriod timePeriod = (ContextDescriptorConditionTimePeriod) condition;
             ExprNode expr = mapExpressionDeep(timePeriod.getTimePeriod(), mapContext);
-            return new ContextDetailConditionTimePeriod((ExprTimePeriod) expr);
+            return new ContextDetailConditionTimePeriod((ExprTimePeriod) expr, timePeriod.isNow());
         }
         throw new IllegalStateException("Unrecognized condition " + condition);
     }
@@ -1423,10 +1424,10 @@ public class StatementSpecMapper
             return;
         }
         List<OnTriggerSetAssignment> assignments = new ArrayList<OnTriggerSetAssignment>();
-        for (AssignmentPair pair : updateClause.getAssignments())
+        for (Assignment pair : updateClause.getAssignments())
         {
             ExprNode expr = mapExpressionDeep(pair.getValue(), mapContext);
-            assignments.add(new OnTriggerSetAssignment(pair.getName(), expr));
+            assignments.add(new OnTriggerSetAssignment(expr));
         }
         ExprNode whereClause = null;
         if (updateClause.getOptionalWhereClause() != null)
@@ -2279,7 +2280,7 @@ public class StatementSpecMapper
         else if (expr instanceof ExprCountNode)
         {
             ExprCountNode sub = (ExprCountNode) expr;
-            if (sub.getChildNodes().length == 0)
+            if (sub.getChildNodes().length == 0 || (sub.getChildNodes().length == 1 && sub.isHasFilter()))
             {
                 return new CountStarProjectionExpression();
             }

@@ -16,10 +16,7 @@ import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.event.EventAdapterService;
-import com.espertech.esper.view.CloneableView;
-import com.espertech.esper.view.View;
-import com.espertech.esper.view.ViewFieldEnum;
-import com.espertech.esper.view.ViewSupport;
+import com.espertech.esper.view.*;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -29,7 +26,7 @@ import java.util.Map;
  * View for computing statistics, which the view exposes via fields representing the sum, count, standard deviation
  * for sample and for population and variance.
  */
-public class UnivariateStatisticsView extends ViewSupport implements CloneableView
+public class UnivariateStatisticsView extends ViewSupport implements CloneableView, DerivedValueView
 {
     protected final AgentInstanceContext agentInstanceContext;
     private final EventType eventType;

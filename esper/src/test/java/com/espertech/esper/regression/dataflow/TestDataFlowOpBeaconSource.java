@@ -218,7 +218,14 @@ public class TestDataFlowOpBeaconSource extends TestCase {
         output = futureFour.get(1, TimeUnit.SECONDS);
         assertEquals(2, output.length);
 
-        Thread.sleep(1000);
+        // test Beacon with define typed
+        epService.getEPAdministrator().createEPL("create objectarray schema MyTestOAType(p1 string)");
+        epService.getEPAdministrator().createEPL("create dataflow MyDataFlowFive " +
+                "BeaconSource -> BeaconStream<MyTestOAType> {" +
+                "  interval: 0.5," +
+                "  p1 : 'abc'" +
+                "}");
+        epService.getEPRuntime().getDataFlowRuntime().instantiate("MyDataFlowFive");
     }
 
     public static String generateTagId() {

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Export-Package: com.espertech.esperio,
  com.espertech.esperio.jms\
 Bundle-Name: Esper CEP engine for Java - Input Output Adapters
-Bundle-RequiredExecutionEnvironment: J2SE-1.6
+Bundle-RequiredExecutionEnvironment: J2SE-1.6, J2SE-1.7
 Bundle-Vendor: EsperTech
 Built-By: EsperTech
 Build-Jdk: 1.6.0_23

@@ -1,4 +1,4 @@
-// $ANTLR 3.2 Sep 23, 2009 12:02:23 EsperEPL2Grammar.g 2013-02-27 14:55:22
+// $ANTLR 3.2 Sep 23, 2009 12:02:23 EsperEPL2Grammar.g 2013-08-26 08:18:44
 
   package com.espertech.esper.epl.generated;
 
@@ -122,7 +122,7 @@ public class EsperEPL2GrammarLexer extends Lexer {
     public static final int MOD_ASSIGN=371;
     public static final int IN_SUBSELECT_QUERY_EXPR=231;
     public static final int JSON_FIELD=322;
-    public static final int EQUALS=334;
+    public static final int EQUALS=335;
     public static final int COUNT=26;
     public static final int RETAININTERSECTION=65;
     public static final int TERMINATED=128;
@@ -363,7 +363,7 @@ public class EsperEPL2GrammarLexer extends Lexer {
     public static final int TIMEPERIOD_HOUR=96;
     public static final int ALL=47;
     public static final int BOR=341;
-    public static final int DOT=335;
+    public static final int DOT=334;
     public static final int CURRENT_TIMESTAMP=80;
     public static final int MATCHREC_MEASURES=318;
     public static final int EVERY_DISTINCT_EXPR=15;

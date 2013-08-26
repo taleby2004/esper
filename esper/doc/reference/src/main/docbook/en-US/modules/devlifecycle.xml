@@ -555,4 +555,16 @@ epService.getEPAdministrator().getDeploymentAdmin()
 }]]></programlisting>			
 		</sect2>
 	</sect1>
+
+    <sect1 xml:id="devlifecycle-monitoring">
+        <title>Monitoring and JMX</title>
+        
+        <para>
+			The engine can report key processing metrics through the JMX platform mbean server by setting a single configuration flag described in <xref linkend="config-engine-jmxmetrics"/>.
+        </para>
+
+        <para>
+			Engine and statement-level metrics reporting is described in <xref linkend="api-instrumentation"/>.			
+        </para>
+	</sect1>
 </chapter>

@@ -27,7 +27,7 @@ public class UpdateClause implements MetaDefItem, Serializable
 
     private String eventType;
     private String optionalAsClauseStreamName;
-    private List<AssignmentPair> assignments;
+    private List<Assignment> assignments;
     private Expression optionalWhereClause;
 
     /**
@@ -39,14 +39,13 @@ public class UpdateClause implements MetaDefItem, Serializable
     /**
      * Ctor.
      * @param eventType the name of the type to update
-     * @param propertyName a property to write
      * @param expression expression returning a value to write
      * @return update clause
      */
-    public static UpdateClause create(String eventType, String propertyName, Expression expression)
+    public static UpdateClause create(String eventType, Expression expression)
     {
         UpdateClause clause = new UpdateClause(eventType, null);
-        clause.addAssignment(propertyName, expression);
+        clause.addAssignment(expression);
         return clause;
     }
 
@@ -59,18 +58,17 @@ public class UpdateClause implements MetaDefItem, Serializable
     {
         this.eventType = eventType;
         this.optionalAsClauseStreamName = optionalAsClauseStreamName;
-        assignments = new ArrayList<AssignmentPair>();
+        assignments = new ArrayList<Assignment>();
     }
 
     /**
      * Adds a property to set to the clause.
-     * @param property to set
      * @param expression expression providing the new property value
      * @return clause
      */
-    public UpdateClause addAssignment(String property, Expression expression)
+    public UpdateClause addAssignment(Expression expression)
     {
-        assignments.add(new AssignmentPair(property, expression));
+        assignments.add(new Assignment(expression));
         return this;
     }
 
@@ -78,7 +76,7 @@ public class UpdateClause implements MetaDefItem, Serializable
      * Returns the list of property assignments.
      * @return pair of property name and expression
      */
-    public List<AssignmentPair> getAssignments()
+    public List<Assignment> getAssignments()
     {
         return assignments;
     }
@@ -87,7 +85,7 @@ public class UpdateClause implements MetaDefItem, Serializable
      * Sets a list of property assignments.
      * @param assignments list of pairs of property name and expression
      */
-    public void setAssignments(List<AssignmentPair> assignments)
+    public void setAssignments(List<Assignment> assignments)
     {
         this.assignments = assignments;
     }
@@ -171,14 +169,12 @@ public class UpdateClause implements MetaDefItem, Serializable
      * @param writer to write to
      * @param assignments to write
      */
-    public static void renderEPLAssignments(StringWriter writer, List<AssignmentPair> assignments) {
+    public static void renderEPLAssignments(StringWriter writer, List<Assignment> assignments) {
         writer.write("set ");
         String delimiter = "";
-        for (AssignmentPair pair : assignments)
+        for (Assignment pair : assignments)
         {
             writer.write(delimiter);
-            writer.write(pair.getName());
-            writer.write(" = ");
             pair.getValue().toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
             delimiter = ", ";
         }

@@ -39,7 +39,8 @@ public class SendEventCallable implements Callable
         {
             while (events.hasNext())
             {
-                engine.getEPRuntime().sendEvent(events.next());
+                Object event = events.next();
+                engine.getEPRuntime().sendEvent(event);
             }
         }
         catch (RuntimeException ex)

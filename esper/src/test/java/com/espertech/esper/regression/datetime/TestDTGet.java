@@ -67,6 +67,12 @@ public class TestDTGet extends TestCase {
         
         epService.getEPRuntime().sendEvent(SupportTimeStartEndA.make("A0", startTime, 0));
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "val0".split(","), new Object[]{4});
+
+        // test "get" method on object is preferred
+        epService.getEPAdministrator().getConfiguration().addEventType(MyEvent.class);
+        epService.getEPAdministrator().createEPL("select e.get() as c0, e.get('abc') as c1 from MyEvent as e").addListener(listener);
+        epService.getEPRuntime().sendEvent(new MyEvent());
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "c0,c1".split(","), new Object[]{1, 2});
     }
 
     public void testFields() {
@@ -89,5 +95,15 @@ public class TestDTGet extends TestCase {
         String startTime = "2002-05-30T09:01:02.003";
         epService.getEPRuntime().sendEvent(SupportDateTime.make(startTime));
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{3, 2, 1, 9, 30, 4, 2002, 22});
+    }
+
+    public static class MyEvent {
+        public int get() {
+            return 1;
+        }
+
+        public int get(String abc) {
+            return 2;
+        }
     }
 }

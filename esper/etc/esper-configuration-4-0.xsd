@@ -796,6 +796,7 @@
 			<xs:attribute name="threading" type="xs:boolean" use="optional"/>
 			<xs:attribute name="engine-interval" type="xs:long" use="optional"/>
 			<xs:attribute name="statement-interval" type="xs:long" use="optional"/>
+			<xs:attribute name="jmx-engine-metrics" type="xs:boolean" use="optional"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="language">

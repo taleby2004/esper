@@ -13,4 +13,6 @@ import com.espertech.esper.epl.expression.ExprNode;
 public interface GroupByViewFactoryMarker
 {
     public ExprNode[] getCriteriaExpressions();
+
+    public boolean isRetainAged();
 }

@@ -63,6 +63,10 @@ public class ExprCountNode extends ExprAggregateNodeBase
         return "count";
     }
 
+    public boolean isHasFilter() {
+        return hasFilter;
+    }
+
     public final boolean equalsNodeAggregate(ExprAggregateNode node)
     {
         if (!(node instanceof ExprCountNode))

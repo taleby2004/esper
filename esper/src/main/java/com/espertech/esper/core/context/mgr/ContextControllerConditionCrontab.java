@@ -81,4 +81,8 @@ public class ContextControllerConditionCrontab implements ContextControllerCondi
     public Long getExpectedEndTime() {
         return ScheduleComputeHelper.computeNextOccurance(spec.getSchedule(), statementContext.getTimeProvider().getTime());
     }
+
+    public boolean isImmediate() {
+        return spec.isImmediate();
+    }
 }

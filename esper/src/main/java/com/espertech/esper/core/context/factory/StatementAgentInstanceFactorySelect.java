@@ -245,7 +245,7 @@ public class StatementAgentInstanceFactorySelect implements StatementAgentInstan
                             final FilterSpecCompiled preloadFilterSpec = namedWindowPostloadFilters[i];
                             preloadList.add(new StatementAgentInstancePreload() {
                                 public void executePreload() {
-                                    Collection<EventBean> snapshot = consumerView.snapshotNoLock(preloadFilterSpec, statementContext.getAnnotations());
+                                    Collection<EventBean> snapshot = consumerView.snapshot(preloadFilterSpec, statementContext.getAnnotations());
                                     List<EventBean> eventsInWindow = new ArrayList<EventBean>(snapshot.size());
                                     ExprNodeUtility.applyFilterExpressionsIterable(snapshot, namedSpec.getFilterExpressions(), agentInstanceContext, eventsInWindow);
                                     EventBean[] newEvents = eventsInWindow.toArray(new EventBean[eventsInWindow.size()]);

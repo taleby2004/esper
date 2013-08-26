@@ -52,12 +52,16 @@ public class TestEventRendererJSON extends TestCase
         String result = epService.getEPRuntime().getEventRenderer().renderJSON("supportBean", statement.iterator().next());
 
         //System.out.println(result);
-        String expected = "{ \"supportBean\": { \"bigDecimal\": null, \"boolBoxed\": null, \"boolPrimitive\": false, \"byteBoxed\": null, \"bytePrimitive\": 0, \"charBoxed\": null, \"charPrimitive\": \"x\", \"doubleBoxed\": null, \"doublePrimitive\": 0.0, \"enumValue\": \"ENUM_VALUE_1\", \"floatBoxed\": null, \"floatPrimitive\": 0.0, \"intBoxed\": 992, \"intPrimitive\": 1, \"longBoxed\": null, \"longPrimitive\": 0, \"shortBoxed\": null, \"shortPrimitive\": 0, \"theString\": \"a\\nc\", \"this\": { \"bigDecimal\": null, \"boolBoxed\": null, \"boolPrimitive\": false, \"byteBoxed\": null, \"bytePrimitive\": 0, \"charBoxed\": null, \"charPrimitive\": \"x\", \"doubleBoxed\": null, \"doublePrimitive\": 0.0, \"enumValue\": \"ENUM_VALUE_1\", \"floatBoxed\": null, \"floatPrimitive\": 0.0, \"intBoxed\": 992, \"intPrimitive\": 1, \"longBoxed\": null, \"longPrimitive\": 0, \"shortBoxed\": null, \"shortPrimitive\": 0, \"theString\": \"a\\nc\" } } }";
+        String valuesOnly = "{ \"bigDecimal\": null, \"boolBoxed\": null, \"boolPrimitive\": false, \"byteBoxed\": null, \"bytePrimitive\": 0, \"charBoxed\": null, \"charPrimitive\": \"x\", \"doubleBoxed\": null, \"doublePrimitive\": 0.0, \"enumValue\": \"ENUM_VALUE_1\", \"floatBoxed\": null, \"floatPrimitive\": 0.0, \"intBoxed\": 992, \"intPrimitive\": 1, \"longBoxed\": null, \"longPrimitive\": 0, \"shortBoxed\": null, \"shortPrimitive\": 0, \"theString\": \"a\\nc\", \"this\": { \"bigDecimal\": null, \"boolBoxed\": null, \"boolPrimitive\": false, \"byteBoxed\": null, \"bytePrimitive\": 0, \"charBoxed\": null, \"charPrimitive\": \"x\", \"doubleBoxed\": null, \"doublePrimitive\": 0.0, \"enumValue\": \"ENUM_VALUE_1\", \"floatBoxed\": null, \"floatPrimitive\": 0.0, \"intBoxed\": 992, \"intPrimitive\": 1, \"longBoxed\": null, \"longPrimitive\": 0, \"shortBoxed\": null, \"shortPrimitive\": 0, \"theString\": \"a\\nc\" } }";
+        String expected = "{ \"supportBean\": " + valuesOnly + " }";
         assertEquals(removeNewline(expected), removeNewline(result));
         
         JSONEventRenderer renderer = epService.getEPRuntime().getEventRenderer().getJSONRenderer(statement.getEventType());
         String jsonEvent = renderer.render("supportBean", statement.iterator().next());
         assertEquals(removeNewline(expected), removeNewline(jsonEvent));
+
+        jsonEvent = renderer.render(statement.iterator().next());
+        assertEquals(removeNewline(valuesOnly), removeNewline(jsonEvent));
     }
 
     public void testMapAndNestedArray()

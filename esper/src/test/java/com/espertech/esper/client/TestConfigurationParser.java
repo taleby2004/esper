@@ -69,6 +69,7 @@ public class TestConfigurationParser extends TestCase
         assertEquals(null, config.getEngineDefaults().getThreading().getThreadPoolRouteExecCapacity());
         assertEquals(null, config.getEngineDefaults().getThreading().getThreadPoolTimerExecCapacity());
         assertFalse(config.getEngineDefaults().getThreading().isEngineFairlock());
+        assertFalse(config.getEngineDefaults().getMetricsReporting().isJmxEngineMetrics());
 
         assertEquals(Configuration.PropertyResolutionStyle.CASE_SENSITIVE, config.getEngineDefaults().getEventMeta().getClassPropertyResolutionStyle());
         assertEquals(ConfigurationEventTypeLegacy.AccessorStyle.JAVABEAN, config.getEngineDefaults().getEventMeta().getDefaultAccessorStyle());
@@ -423,6 +424,7 @@ public class TestConfigurationParser extends TestCase
         assertEquals(500L, metrics.getStatementInterval());
         assertFalse(metrics.isThreading());
         assertEquals(2, metrics.getStatementGroups().size());
+        assertTrue(metrics.isJmxEngineMetrics());
         ConfigurationMetricsReporting.StmtGroupMetrics def = metrics.getStatementGroups().get("MyStmtGroup");
         assertEquals(5000, def.getInterval());
         assertTrue(def.isDefaultInclude());

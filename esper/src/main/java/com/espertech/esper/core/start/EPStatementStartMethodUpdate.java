@@ -98,7 +98,7 @@ public class EPStatementStartMethodUpdate extends EPStatementStartMethodBase
         ExprValidationContext validationContext = new ExprValidationContext(typeService, statementContext.getMethodResolutionService(), null, statementContext.getSchedulingService(), statementContext.getVariableService(), evaluatorContextStmt, statementContext.getEventAdapterService(), statementContext.getStatementName(), statementContext.getStatementId(), statementContext.getAnnotations(), statementContext.getContextDescriptor());
         for (OnTriggerSetAssignment assignment : updateSpec.getAssignments())
         {
-            ExprNode validated = ExprNodeUtility.getValidatedSubtree(assignment.getExpression(), validationContext);
+            ExprNode validated = ExprNodeUtility.getValidatedAssignment(assignment, validationContext);
             assignment.setExpression(validated);
             EPStatementStartMethodHelperValidate.validateNoAggregations(validated, "Aggregation functions may not be used within an update-clause");
         }

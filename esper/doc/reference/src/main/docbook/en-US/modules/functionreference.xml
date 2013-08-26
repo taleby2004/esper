@@ -1899,7 +1899,7 @@ from StockTick.win:time(30 sec)]]></programlisting>
 		<programlisting><![CDATA[select origin, transpose(makeEvent(oi)) from OrderIndication oi]]></programlisting>
 
 		<para>
-		  If the <literal>transpose</literal> function is not a top-level function, i.e. if it occurs within another expression or within any other clause then the select-clause, the function simple returns the expression result of the parameter expression.
+		  If the <literal>transpose</literal> function is not a top-level function, i.e. if it occurs within another expression or within any other clause then the select-clause, the function simply returns the expression result of the parameter expression.
 		</para>
 
 		<sect2 xml:id="functionreference-transpose-insert-into">

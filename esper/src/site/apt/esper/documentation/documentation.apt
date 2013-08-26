@@ -3,6 +3,21 @@ Documentation
 
 	Links to reference documentation and API JavaDocs can be found here.
 
+* Esper and EsperIO 4.10.0
+	
+	<<Esper Reference documentation>> : {{{../../esper-4.10.0/doc/reference/en-US/pdf/esper_reference.pdf}PDF print version}} \
+ 		{{{../../esper-4.10.0/doc/reference/en-US/html/index.html}Online HTML}} \
+ 		{{{../../esper-4.10.0/doc/reference/en-US/html_single/index.html}Single page HTML}}
+
+	<<Esper API JavaDoc>> : {{{../../esper-4.10.0/doc/api/index.html}API JavaDoc}}
+
+	<<EsperIO Reference documentation>> : {{{../../esperio-4.10.0/doc/reference/en-US/pdf/esper_adapter_reference.pdf}PDF print version}} \
+ 		{{{../../esperio-4.10.0/doc/reference/en-US/html/index.html}Online HTML}} \
+ 		{{{../../esperio-4.10.0/doc/reference/en-US/html_single/index.html}Single page HTML}}
+
+	<<EsperIO API JavaDoc>> : {{{../../esperio-4.10.0/doc/api/index.html}API JavaDoc}}
+
+
 * Esper and EsperIO 4.9.0
 	
 	<<Esper Reference documentation>> : {{{../../esper-4.9.0/doc/reference/en-US/pdf/esper_reference.pdf}PDF print version}} \

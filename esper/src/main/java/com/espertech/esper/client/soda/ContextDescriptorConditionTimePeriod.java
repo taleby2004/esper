@@ -20,6 +20,7 @@ public class ContextDescriptorConditionTimePeriod implements ContextDescriptorCo
 
     private static final long serialVersionUID = 212201302878097145L;
     private Expression timePeriod;
+    private boolean now;
 
     /**
      * Ctor.
@@ -31,8 +32,9 @@ public class ContextDescriptorConditionTimePeriod implements ContextDescriptorCo
      * Ctor.
      * @param timePeriod time period expression
      */
-    public ContextDescriptorConditionTimePeriod(Expression timePeriod) {
+    public ContextDescriptorConditionTimePeriod(Expression timePeriod, boolean now) {
         this.timePeriod = timePeriod;
+        this.now = now;
     }
 
     /**
@@ -51,7 +53,18 @@ public class ContextDescriptorConditionTimePeriod implements ContextDescriptorCo
         this.timePeriod = timePeriod;
     }
 
+    public boolean isNow() {
+        return now;
+    }
+
+    public void setNow(boolean now) {
+        this.now = now;
+    }
+
     public void toEPL(StringWriter writer, EPStatementFormatter formatter) {
+        if (now) {
+            writer.append("@now and");
+        }
         writer.append("after ");
         timePeriod.toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
     }

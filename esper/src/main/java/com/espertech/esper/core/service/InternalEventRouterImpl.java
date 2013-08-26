@@ -16,8 +16,10 @@ import com.espertech.esper.client.EventPropertyDescriptor;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.annotation.Drop;
 import com.espertech.esper.client.annotation.Priority;
+import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.epl.expression.ExprNodeUtility;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.spec.OnTriggerSetAssignment;
 import com.espertech.esper.epl.spec.UpdateDesc;
@@ -128,17 +130,21 @@ public class InternalEventRouterImpl implements InternalEventRouter
         List<String> properties = new ArrayList<String>();
         for (int i = 0; i < desc.getAssignments().size(); i++)
         {
-            OnTriggerSetAssignment assignment = desc.getAssignments().get(i);
-            EventPropertyDescriptor writableProperty = eventTypeSPI.getWritableProperty(assignment.getVariableName());
+            OnTriggerSetAssignment xxx = desc.getAssignments().get(i);
+            Pair<String, ExprNode> assignmentPair = ExprNodeUtility.checkGetAssignmentToProp(xxx.getExpression());
+            if (assignmentPair == null) {
+                throw new ExprValidationException("Missing property assignment expression in assignment number " + i);
+            }
+            EventPropertyDescriptor writableProperty = eventTypeSPI.getWritableProperty(assignmentPair.getFirst());
 
             if (writableProperty == null)
             {
-                throw new ExprValidationException("Property '" + assignment.getVariableName() + "' is not available for write access");
+                throw new ExprValidationException("Property '" + assignmentPair.getFirst() + "' is not available for write access");
             }
 
-            wideners[i] = TypeWidenerFactory.getCheckPropertyAssignType(assignment.getExpression().toExpressionString(), assignment.getExpression().getExprEvaluator().getType(),
-                    writableProperty.getPropertyType(), assignment.getVariableName());
-            properties.add(assignment.getVariableName());
+            wideners[i] = TypeWidenerFactory.getCheckPropertyAssignType(assignmentPair.getSecond().toExpressionString(), assignmentPair.getSecond().getExprEvaluator().getType(),
+                    writableProperty.getPropertyType(), assignmentPair.getFirst());
+            properties.add(assignmentPair.getFirst());
         }
 
         // check copy-able
@@ -271,9 +277,10 @@ public class InternalEventRouterImpl implements InternalEventRouter
             for (int i = 0; i < entry.getKey().getAssignments().size(); i++)
             {
                 OnTriggerSetAssignment assignment = entry.getKey().getAssignments().get(i);
-                expressions[i] = assignment.getExpression();
-                properties.add(assignment.getVariableName());
-                eventPropertiesWritten.add(assignment.getVariableName());
+                Pair<String, ExprNode> assignmentPair = ExprNodeUtility.checkGetAssignmentToProp(assignment.getExpression());
+                expressions[i] = assignmentPair.getSecond();
+                properties.add(assignmentPair.getFirst());
+                eventPropertiesWritten.add(assignmentPair.getFirst());
             }
             EventBeanWriter writer = eventTypeSPI.getWriter(properties.toArray(new String[properties.size()]));
             desc.add(new InternalEventRouterEntry(priority, isDrop, entry.getKey().getOptionalWhereClause(), expressions, writer, entry.getValue().getWideners(), entry.getValue().getOutputView(), entry.getValue().getAgentInstanceLock(), entry.getValue().hasSubselect));

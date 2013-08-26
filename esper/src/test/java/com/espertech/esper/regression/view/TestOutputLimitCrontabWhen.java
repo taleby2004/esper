@@ -165,8 +165,8 @@ public class TestOutputLimitCrontabWhen extends TestCase
         model.setSelectClause(SelectClause.create("symbol"));
         model.setFromClause(FromClause.create(FilterStream.create("MarketData").addView("win", "length", Expressions.constant(2))));
         model.setOutputLimitClause(OutputLimitClause.create(Expressions.eq("myvar", 1))
-                                    .addThenAssignment("myvar", Expressions.constant(0))
-                                    .addThenAssignment("count_insert_var", Expressions.property("count_insert")));
+                                    .addThenAssignment(Expressions.eq(Expressions.property("myvar"), Expressions.constant(0)))
+                                    .addThenAssignment(Expressions.eq(Expressions.property("count_insert_var"), Expressions.property("count_insert"))));
 
         String epl = model.toEPL();
         assertEquals(expression, epl);
@@ -449,6 +449,9 @@ public class TestOutputLimitCrontabWhen extends TestCase
 
         tryInvalid("select * from MarketData output when true then set myvardummy = sum(myvardummy)",
                    "Error validating expression: An aggregate function may not appear in a OUTPUT LIMIT clause [select * from MarketData output when true then set myvardummy = sum(myvardummy)]");
+
+        tryInvalid("select * from MarketData output when true then set 1",
+                    "Error starting statement: Missing variable assignment expression in assignment number 0 [select * from MarketData output when true then set 1]");
     }
 
     private void tryInvalid(String expression, String message)

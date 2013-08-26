@@ -737,6 +737,15 @@ public class EventBeanUtility
         writer.append("]");
     }
 
+    public static String summarizeUnderlying(Object underlying) {
+        if (underlying == null) {
+            return "(null)";
+        }
+        StringWriter writer = new StringWriter();
+        summarizeUnderlying(underlying, writer);
+        return writer.toString();
+    }
+
     public static void summarizeUnderlying(Object underlying, StringWriter writer) {
         if (underlying.getClass().isArray()) {
             if (underlying instanceof Object[]) {

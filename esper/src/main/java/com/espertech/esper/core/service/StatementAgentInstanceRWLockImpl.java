@@ -10,6 +10,7 @@ package com.espertech.esper.core.service;
 
 import com.espertech.esper.util.ThreadLogUtil;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
@@ -43,6 +44,28 @@ public class StatementAgentInstanceRWLockImpl implements StatementAgentInstanceL
         {
             ThreadLogUtil.traceLock(ACQUIRED_TEXT + " write ", lock);
         }
+    }
+
+    public boolean acquireWriteLock(StatementLockFactory statementLockFactory, long msecTimeout) {
+        if (ThreadLogUtil.ENABLED_TRACE)
+        {
+            ThreadLogUtil.traceLock(ACQUIRE_TEXT + " write ", lock);
+        }
+
+        boolean result = false;
+        try {
+            result = lock.writeLock().tryLock(msecTimeout, TimeUnit.MILLISECONDS);
+        }
+        catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        if (ThreadLogUtil.ENABLED_TRACE)
+        {
+            ThreadLogUtil.traceLock(ACQUIRED_TEXT + " write ", lock);
+        }
+
+        return result;
     }
 
     /**

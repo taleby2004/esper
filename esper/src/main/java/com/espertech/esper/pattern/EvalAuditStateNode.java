@@ -76,6 +76,7 @@ public final class EvalAuditStateNode extends EvalStateNode implements Evaluator
             AuditPath.auditLog(evalAuditNode.getContext().getStatementContext().getEngineURI(), evalAuditNode.getContext().getPatternContext().getStatementName(), AuditEnum.PATTERN, message);
         }
 
+        evalAuditNode.getFactoryNode().decreaseRefCount(this, evalAuditNode.getContext().getPatternContext());
         this.getParentEvaluator().evaluateFalse(this);
     }
 

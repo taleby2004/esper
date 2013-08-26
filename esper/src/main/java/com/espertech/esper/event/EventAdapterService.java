@@ -36,7 +36,7 @@ public interface EventAdapterService
      * @param eventType to reflect on
      * @return list of writable properties
      */
-    public Set<WriteablePropertyDescriptor> getWriteableProperties(EventType eventType);
+    public Set<WriteablePropertyDescriptor> getWriteableProperties(EventType eventType, boolean allowAnyType);
 
     /**
      * Returns a factory for creating and populating event object instances for the given type. 
@@ -47,7 +47,7 @@ public interface EventAdapterService
      * @return factory
      * @throws EventBeanManufactureException if a factory cannot be created for the type
      */
-    public EventBeanManufacturer getManufacturer(EventType eventType, WriteablePropertyDescriptor[] properties, EngineImportService engineImportService)
+    public EventBeanManufacturer getManufacturer(EventType eventType, WriteablePropertyDescriptor[] properties, EngineImportService engineImportService, boolean allowAnyType)
         throws EventBeanManufactureException;
 
     /**

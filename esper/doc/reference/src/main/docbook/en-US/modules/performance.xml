@@ -217,7 +217,7 @@ select assetId, zone, xlocation, ylocation from RFIDEvent ]]></programlisting>
 		</sect2>
 		
 		<sect2 xml:id="perf-tips-5">
-			<title>Prefer stream-level filtering over post-data-window filtering</title>
+			<title>Prefer stream-level filtering over where-clause filtering</title>
 
 			<para>
 				Esper stream-level filtering is very well optimized, while filtering via the where-clause post any data windows is not optimized. 				
@@ -289,6 +289,23 @@ from WithdrawalNamedWindow(accountNumber = '123')]]></programlisting>
 
 			</sect3>
 
+			<sect3 xml:id="perf-tips-5-whereclausecomputations">
+				<title>Common computations in where-clauses</title>
+			
+				<para>
+					If you have a number of queries performing a given computation on incoming events, consider moving the computation from the where-clause to a 
+					plug-in user-defined function that is listed as part of stream-level filter criteria.
+					The engine optimizes evaluation of user-defined functions in filters such that an incoming event can undergo the computation just once even in the presence of N queries.
+				</para>
+
+				<programlisting><![CDATA[// Prefer stream-level filtering with a user-defined function
+select * from MarketData(vstCompare(*))]]></programlisting>
+
+				<programlisting><![CDATA[// Less preferable when there are N similar queries: 
+// Move the computation in the where-clause to the "vstCompare" function.
+select * from MarketData where (VST * RT) – (VST / RT) > 1]]></programlisting>
+			</sect3>
+
 		</sect2>
 	
 		<sect2 xml:id="perf-tips-6">
@@ -323,6 +340,48 @@ select * from MarketData(price+10>50) ]]></programlisting>
 			<para>
 				If your statement specifies <literal>group by</literal> but does not use aggregation functions, consider removing <literal>group by</literal>.
 			</para>
+
+			<para>
+				If your statement specifies <literal>group by</literal> but the filter criteria only allows one group, consider removing <literal>group by</literal>:
+			</para>
+<programlisting><![CDATA[// Prefer:
+select * from MarketData(symbol = 'GE') having sum(price) > 1000
+
+// Don't use this since the filter specifies a single symbol:
+select * from MarketData(symbol = 'GE') group by symbol having sum(price) > 1000]]></programlisting>
+
+			<para>
+				If your statement specifies the grouped data window <literal>std:groupwin</literal> but the window being grouped retains the same set of events regardless of grouping, 
+				remove <literal>std:groupwin</literal>:
+			</para>
+<programlisting><![CDATA[// Prefer:
+create window MarketDataWindow.win:keepall() as MarketDataEventType
+
+// Don't use this, since keeping all events 
+// or keeping all events per symbol is the same thing:
+create window MarketDataWindow.std:groupwin(symbol).win:keepall() as MarketDataEventType
+
+// Don't use this, since keeping the last 1-minute of events 
+// or keeping 1-minute of events per symbol is the same thing:
+create window MarketDataWindow.std:groupwin(symbol).win:time(1 min) as MarketDataEventType]]></programlisting>
+
+			<para>
+				It is not necessary to specify a data window for each stream.
+			</para>
+<programlisting><![CDATA[// Prefer:
+select * from MarketDataWindow
+
+// Don't have a data window if just listening to events, prefer the above
+select * from MarketDataWindow.std:lastevent()]]></programlisting>
+
+			<para>
+				If your statement specifies unique data window but the filter criteria only allows one unique criteria, consider removing the unique data window:
+			</para>
+<programlisting><![CDATA[// Prefer:
+select * from MarketDataWindow(symbol = 'GE').std:lastevent()
+
+// Don't have a unique-key data window if your filter specifies a single value
+select * from MarketDataWindow(symbol = 'GE').std:unique(symbol)]]></programlisting>
 		</sect2>
 
 		<sect2 xml:id="perf-tips-6b">
@@ -1137,6 +1196,89 @@ select * from PersonEvent(department=VAR_DEPARTMENT)]]></programlisting>
 					 It can therefore not be expected that scaling from single-threaded to 2 threads will always double performance. There is a base cost for multiple threads to coordinate.
 				</para>
 		</sect2>
+		<sect2 xml:id="perf-tips-29">
+				<title>Incremental Versus Recomputed Aggregation for Named Window Events</title>
+
+				<para>
+				  Whether aggregations of named window rows are computed incrementally or are recomputed from scratch depends on the type of query.
+				</para>
+
+				<para>
+				  When the engine computes aggregation values incrementally, meaning it continuously updates the aggregation value as events enter and leave a named window,
+				  it means that the engine internally subscribes to named window updates and applies these updates as they occur. For some applications this is the desired behavior.
+				</para>
+				
+				<para>
+				  For some applications re-computing aggregation values from scratch when a certain condition occurs, for example when a triggering event arrives or time passes, is beneficial. Re-computing an aggregation
+				  can be less expensive if the number of rows to consider is small and/or when the triggering event or time condition triggers infrequently.
+				</para>
+				
+				<para>
+				  The next paragraph assumes that a named window has been created to hold some historical financial data per symbol and minute:
+				</para>
+				<programlisting><![CDATA[create window HistoricalWindow.win:keepall() as (symbol string, int minute, double price)]]></programlisting>
+				<programlisting><![CDATA[insert into HistoricalWindow select symbol, minute, price from HistoricalTick]]></programlisting>
+
+				<para>
+				  For statements that simply select from a named window (excludes on-select) the engine computes aggregation values incrementally, continuously updating the aggregation, as events enter and leave the named window.
+				</para>
+
+				<para>
+				  For example, the below statement updates the total price incrementally as events enter and leave the named window. If events in the named window already 
+				  exist at the time the statement gets created, the total price gets pre-computed once when the statement gets created and incrementally updated when events enter and leave the named window:
+				</para>
+				<programlisting><![CDATA[select sum(price) from HistoricalWindow(symbol='GE')]]></programlisting>
+
+				<para>
+				  The same is true for uncorrelated subqueries. 
+				  For statements that sub-select from a named window, the engine computes aggregation values incrementally, continuously updating the aggregation, as events enter and leave the named window.
+				  This is only true for uncorrelated subqueries that don't have a where-clause.
+				</para>
+
+				<para>
+				  For example, the below statement updates the total price incrementally as events enter and leave the named window. If events in the named window already 
+				  exist at the time the statement gets created, the total price gets pre-computed once when the statement gets created and incrementally updated when events enter and leave the named window:
+				</para>
+				<programlisting><![CDATA[// Output GE symbol total price, incrementally computed
+// Outputs every 15 minutes on the hour.
+select (sum(price) from HistoricalWindow(symbol='GE')) 
+from pattern [every timer:at(0, 15, 30, 45), *, *, *, *, 0)]]]></programlisting>
+
+				<para>
+				  If instead your application uses <literal>on-select</literal> or a correlated subquery, the engine recomputes aggregation values from scratch every time the triggering event fires.
+				</para>
+
+				<para>
+				  For example, the below statement does not incrementally compute the total price (use a plain select or subselect as above instead). 
+				  Instead the engine computes the total price from scratch based on the where-clause and matching rows:
+				</para>
+				<programlisting><![CDATA[// Output GE symbol total price (recomputed from scratch) every 15 minutes on the hour
+on pattern [every timer:at(0, 15, 30, 45), *, *, *, *, 0)]
+select sum(price) from HistoricalWindow where symbol='GE']]></programlisting>
+
+				<para>
+				  Unidirectional joins against named windows also do not incrementally compute aggregation values.
+				</para>
+
+				<para>
+				  Joins and outer joins, that are not unidirectional, compute aggregation values incrementally.
+				</para>
+		</sect2>
+		<sect2 xml:id="perf-tips-30">
+				<title>When Does Memory Get Released</title>
+				
+				<para> 
+					Java Virtual Machines (JVMs) release memory only when a garbage collection occurs. Depending on your JVM settings a garbage collection can occur frequently or
+					infrequently and may consider all or only parts of heap memory.
+				</para>
+				
+				<para>
+				  Esper is optimized towards latency and throughput. Esper does not force garbage collection or interfere with garbage collection. 
+				  For performance-sensitive code areas, Esper utilizes thread-local buffers such as arrays or ringbuffers that can retain small amounts of recently processed state. 
+				  Esper does not try to clean such buffers after every event for performance reasons. It does clean such buffers when destroying the engine and stopping or destroying statements.
+				  It is therefore normal to see a small non-increasing amount of memory to be retained after processing events that the garbage collector may not free immediately.
+				</para>				
+		</sect2>
     </sect1>
 
     <sect1 xml:id="performance-kit" revision="1">
@@ -1214,10 +1356,10 @@ select * from PersonEvent(department=VAR_DEPARTMENT)]]></programlisting>
                         1.7.0)
                         and its dependencies as in the sample below (with Esper 2.1) :
                         <programlisting><![CDATA[# classpath on Unix/Linux (on one single line)
-etc:build:lib/esper-4.9.0.jar:lib/commons-logging-1.1.1.jar:lib/cglib-nodep-2.2.jar
+etc:build:lib/esper-4.10.0.jar:lib/commons-logging-1.1.1.jar:lib/cglib-nodep-2.2.jar
    :lib/antlr-runtime-3.2.jar:lib/log4j-1.2.16.jar
 @rem  classpath on Windows (on one single line)
-etc;build;lib\esper-4.9.0.jar;lib\commons-logging-1.1.1.jar;lib\cglib-nodep-2.2.jar
+etc;build;lib\esper-4.10.0.jar;lib\commons-logging-1.1.1.jar;lib\cglib-nodep-2.2.jar
    ;lib\antlr-runtime-3.2.jar;lib\log4j-1.2.16.jar]]></programlisting>
                         Note that <literal>./etc</literal> and <literal>./build</literal> have to be in the classpath.
                         At that stage you should also start to set min and max JVM heap. A good start is 1GB as in

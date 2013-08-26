@@ -31,6 +31,7 @@ public interface StatementAgentInstanceLock
     public final static String RELEASED_TEXT = "Freed   ";
 
     public void acquireWriteLock(StatementLockFactory statementLockFactory);
+    public boolean acquireWriteLock(StatementLockFactory statementLockFactory, long msecTimeout);
     public void releaseWriteLock(StatementLockFactory statementLockFactory);
     public void acquireReadLock();
     public void releaseReadLock();

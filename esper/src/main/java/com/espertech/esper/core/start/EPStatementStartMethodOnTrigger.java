@@ -26,6 +26,7 @@ import com.espertech.esper.core.context.subselect.SubSelectStrategyFactoryDesc;
 import com.espertech.esper.core.context.subselect.SubSelectStrategyHolder;
 import com.espertech.esper.core.context.util.AgentInstanceContext;
 import com.espertech.esper.core.context.util.ContextMergeView;
+import com.espertech.esper.core.context.util.ContextMergeViewForwarding;
 import com.espertech.esper.core.context.util.ContextPropertyRegistry;
 import com.espertech.esper.core.service.*;
 import com.espertech.esper.epl.agg.service.AggregationService;
@@ -185,7 +186,7 @@ public class EPStatementStartMethodOnTrigger extends EPStatementStartMethodBase
                 ExprValidationContext validationContext = new ExprValidationContext(assignmentTypeService, statementContext.getMethodResolutionService(), null, statementContext.getSchedulingService(), statementContext.getVariableService(), getDefaultAgentInstanceContext(statementContext), statementContext.getEventAdapterService(), statementContext.getStatementName(), statementContext.getStatementId(), statementContext.getAnnotations(), statementContext.getContextDescriptor());
                 for (OnTriggerSetAssignment assignment : updateDesc.getAssignments())
                 {
-                    ExprNode validated = ExprNodeUtility.getValidatedSubtree(assignment.getExpression(), validationContext);
+                    ExprNode validated = ExprNodeUtility.getValidatedAssignment(assignment, validationContext);
                     assignment.setExpression(validated);
                     EPStatementStartMethodHelperValidate.validateNoAggregations(validated, "Aggregation functions may not be used within an on-update-clause");
                 }
@@ -241,7 +242,7 @@ public class EPStatementStartMethodOnTrigger extends EPStatementStartMethodBase
             subSelectStrategyCollection = EPStatementStartMethodHelperSubselect.planSubSelect(services, statementContext, isQueryPlanLogging(services), subSelectStreamDesc, new String[]{streamSpec.getOptionalStreamName()}, new EventType[]{activatorResultEventType}, new String[]{triggereventTypeName}, stopCallbacks, statementSpec.getAnnotations(), statementSpec.getDeclaredExpressions(), contextPropertyRegistry);
 
             for (OnTriggerSetAssignment assignment : desc.getAssignments()) {
-                ExprNode validated = ExprNodeUtility.getValidatedSubtree(assignment.getExpression(), validationContext);
+                ExprNode validated = ExprNodeUtility.getValidatedAssignment(assignment, validationContext);
                 assignment.setExpression(validated);
             }
 
@@ -363,7 +364,7 @@ public class EPStatementStartMethodOnTrigger extends EPStatementStartMethodBase
                 subselectStrategyInstances.put(entry.getKey(), new SubSelectStrategyHolder(specificService, subselectAggregation, subselectPriorStrategies, subselectPreviousStrategies, null, null));
             }
 
-            ContextMergeView mergeView = new ContextMergeView(resultEventType);
+            ContextMergeViewForwarding mergeView = new ContextMergeViewForwarding(resultEventType);
             finalViewable = mergeView;
 
             ContextManagedStatementOnTriggerDesc statement = new ContextManagedStatementOnTriggerDesc(statementSpec, statementContext, mergeView, contextFactory);

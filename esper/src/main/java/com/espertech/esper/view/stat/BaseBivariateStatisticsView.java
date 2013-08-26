@@ -15,6 +15,7 @@ import com.espertech.esper.core.context.util.AgentInstanceContext;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.view.DerivedValueView;
 import com.espertech.esper.view.ViewSupport;
 
 import java.util.Iterator;
@@ -23,7 +24,7 @@ import java.util.Iterator;
  * View for computing statistics that require 2 input variable arrays containing X and Y datapoints.
  * Subclasses compute correlation or regression values, for instance.
  */
-public abstract class BaseBivariateStatisticsView extends ViewSupport
+public abstract class BaseBivariateStatisticsView extends ViewSupport implements DerivedValueView
 {
     /**
      * This bean can be overridden by subclasses providing extra values such as correlation, regression.

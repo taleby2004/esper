@@ -62,7 +62,7 @@ public class SelectExprInsertEventBeanFactory
         }
 
         // handle writing to defined columns
-        Set<WriteablePropertyDescriptor> writableProps = eventAdapterService.getWriteableProperties(eventType);
+        Set<WriteablePropertyDescriptor> writableProps = eventAdapterService.getWriteableProperties(eventType, false);
         boolean isEligible = checkEligible(eventType, writableProps);
         if (!isEligible) {
             return null;
@@ -92,7 +92,7 @@ public class SelectExprInsertEventBeanFactory
                             String[] streamNames, EventType[] streamTypes, EngineImportService engineImportService)
         throws ExprValidationException
     {
-        Set<WriteablePropertyDescriptor> writableProps = eventAdapterService.getWriteableProperties(eventType);
+        Set<WriteablePropertyDescriptor> writableProps = eventAdapterService.getWriteableProperties(eventType, false);
         boolean isEligible = checkEligible(eventType, writableProps);
         if (!isEligible) {
             return null;
@@ -356,7 +356,7 @@ public class SelectExprInsertEventBeanFactory
         EventBeanManufacturer eventManufacturer;
         try
         {
-            eventManufacturer = eventAdapterService.getManufacturer(eventType, writableProperties, engineImportService);
+            eventManufacturer = eventAdapterService.getManufacturer(eventType, writableProperties, engineImportService, false);
         }
         catch (EventBeanManufactureException e)
         {
@@ -386,20 +386,11 @@ public class SelectExprInsertEventBeanFactory
             if (columnType instanceof EventType) {
                 EventType columnEventType = (EventType) columnType;
                 final Class returnType = columnEventType.getUnderlyingType();
-                int streamNum = 0;
-                for (int j = 0; j < typeService.getEventTypes().length; j++)
-                {
-                    if (typeService.getEventTypes()[j] == columnEventType)
-                    {
-                        streamNum = j;
-                        break;
-                    }
-                }
-                final int streamNumEval = streamNum;
+                final ExprEvaluator inner = exprEvaluators[i];
                 evaluators[i] = new ExprEvaluator() {
                     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
                     {
-                        EventBean theEvent = eventsPerStream[streamNumEval];
+                        EventBean theEvent = (EventBean) inner.evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
                         if (theEvent != null)
                         {
                             return theEvent.getUnderlying();
@@ -416,6 +407,7 @@ public class SelectExprInsertEventBeanFactory
                         return null;
                     }
                 };
+                ctorTypes[i] = returnType;
                 continue;
             }
 
@@ -541,7 +533,7 @@ public class SelectExprInsertEventBeanFactory
         EventBeanManufacturer eventManufacturer;
         try
         {
-            eventManufacturer = eventAdapterService.getManufacturer(eventType, writableProperties, engineImportService);
+            eventManufacturer = eventAdapterService.getManufacturer(eventType, writableProperties, engineImportService, false);
         }
         catch (EventBeanManufactureException e)
         {

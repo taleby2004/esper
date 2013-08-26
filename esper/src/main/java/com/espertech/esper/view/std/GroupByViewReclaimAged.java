@@ -238,15 +238,17 @@ public class GroupByViewReclaimAged extends ViewSupport implements CloneableView
     private void recursiveMergeViewRemove(View view)
     {
         for (View child : view.getViews()) {
-            if (child instanceof StoppableView) {
-                ((StoppableView) child).stopView();
-            }
             if (child instanceof MergeView) {
                 MergeView mergeView = (MergeView) child;
                 mergeView.removeParentView(view);
             }
             else {
-                recursiveMergeViewRemove(child);
+                if (child instanceof StoppableView) {
+                    ((StoppableView) child).stopView();
+                }
+                if (child.getViews().length > 0) {
+                    recursiveMergeViewRemove(child);
+                }
             }
         }
     }

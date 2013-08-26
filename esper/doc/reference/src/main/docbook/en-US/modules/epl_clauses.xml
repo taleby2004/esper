@@ -588,8 +588,8 @@ select count(*) from ProcessEvent(processId in (1, 2, 3).win:time(30)]]></progra
 									<para>Provides a statement textual description. Attributes are:</para>
 									<para>value : Statement description.</para>
 								</entry>
-								<entry><programlisting><![CDATA[@Description("A statement description 
-is placed here.")]]></programlisting></entry>
+								<entry><programlisting><![CDATA[@Description("Place statement
+description here.")]]></programlisting></entry>
 							</row>
 							<row>
 								<entry>Tag</entry>
@@ -632,7 +632,8 @@ is placed here.")]]></programlisting></entry>
 									<para>Use this annotation to register one or more statement-specific hooks providing a hook type for each individual hook, such as for SQL parameter, column or row conversion.</para>
 									<para>Attributes are the hook <literal>type</literal> and the <literal>hook</literal> itself (usually a import or class name):</para>
 								</entry>
-								<entry><programlisting><![CDATA[@Hook(type=HookType.SQLCOL, hook='MyDBTypeConvertor')]]></programlisting></entry>
+								<entry><programlisting><![CDATA[@Hook(type=HookType.SQLCOL,
+  hook='MyDBTypeConvertor')]]></programlisting></entry>
 							</row>
 							<row>
 								<entry>Audit</entry>
@@ -2976,7 +2977,7 @@ from PurchaseOrder.std:lastevent() as order, ServiceEvent:std:lastevent() as ser
 		<indexterm><primary>EPL</primary><secondary>subqueries</secondary></indexterm>
 
 		<para>
-			A subquery is a <literal>select</literal> within another statement. Esper supports subqueries in the <literal>select</literal> clause, in the <literal>where</literal> clause and in stream and pattern filter expressions. Subqueries provide an alternative way to perform operations that would otherwise require complex joins. Subqueries can also make statements more readable then complex joins.
+			A subquery is a <literal>select</literal> within another statement. Esper supports subqueries in the <literal>select</literal> clause, <literal>where</literal> clause, <literal>having</literal> clause and in stream and pattern filter expressions. Subqueries provide an alternative way to perform operations that would otherwise require complex joins. Subqueries can also make statements more readable then complex joins.
 	    </para>
 
 		<para>
@@ -4890,7 +4891,7 @@ select [and] delete <emphasis>select_list</emphasis>...
 			</para>
 			<synopsis>on <emphasis>event_type</emphasis>[<emphasis>(filter_criteria)</emphasis>] [as <emphasis>stream_name</emphasis>]
 update <emphasis>window_name</emphasis> [as <emphasis>stream_name</emphasis>]
-set <emphasis>property_name</emphasis> = <emphasis>expression</emphasis> [, <emphasis>property_name</emphasis> = <emphasis>expression</emphasis> [,...]]
+set <emphasis>mutation_expression</emphasis> [, <emphasis>mutation_expression</emphasis> [,...]]
 [where <emphasis>criteria_expression</emphasis>]</synopsis>
 				
 			<para>
@@ -4902,9 +4903,51 @@ set <emphasis>property_name</emphasis> = <emphasis>expression</emphasis> [, <emp
 			</para>
 				
 			<para>
-				The comma-separated list of property names and expressions set the value of one or more properties. Subqueries may by part of expressions however aggregation functions and the <literal>prev</literal> or <literal>prior</literal> function may not be used in expressions.
+				After the <literal>set</literal> keyword follows a list of comma-separated <emphasis>mutation_expression</emphasis> expressions. A mutation expression is any valid EPL expression. 
+				Subqueries may by part of expressions however aggregation functions and the <literal>prev</literal> or <literal>prior</literal> function may not be used in expressions.
 			</para>
 			
+			<para>
+				The below table shows some typical mutation expessions:
+			</para>
+
+			<table frame="topbot">
+				<title>Mutation Expressions in Named Window Update And Merge</title>
+				<tgroup cols="3">
+					<colspec colwidth="1*"/>
+					<colspec colwidth="0.75*"/>
+					<thead>
+						<row>
+							<entry>Description</entry>
+							<entry>Syntax and Examples</entry>
+						</row>
+					</thead>
+					<tbody>
+						<row>
+							<entry>Assignment</entry>
+							<entry>
+							  <synopsis><emphasis>property_name</emphasis> = <emphasis>value_expression</emphasis></synopsis>
+							  <programlisting>price = 10, side = 'BUY'</programlisting>
+							</entry>
+						</row>
+						<row>
+							<entry>Event Method Invocation</entry>
+							<entry>
+								<synopsis><emphasis>alias_or_windowname</emphasis>.<emphasis>methodname</emphasis>(...)</synopsis>
+							   <programlisting>orderWindow.clear()</programlisting>
+							</entry>
+						</row>
+						<row>
+							<entry>User-Defined Function Call</entry>
+							<entry>
+								<synopsis><emphasis>functionname</emphasis>(...)</synopsis>
+							   <programlisting>clearQuantities(orderRow)</programlisting>
+							</entry>
+						</row>
+					</tbody>
+				</tgroup>				
+			</table>
+
 			<para>
 				The optional <literal>where</literal> clause contains a <emphasis>criteria_expression</emphasis> that correlates the arriving (triggering) event to the events to be updated in the named window. The <emphasis>criteria_expression</emphasis> may also simply filter for events in the named window to be updated.
 			</para>
@@ -4972,6 +5015,17 @@ update MyWindow as win
 set field_a = 1, 
   field_b = win.field_a, // assigns the value 1 
   field_c = initial.field_a // assigns the field_a original value before update]]></programlisting>
+  
+			 <para>
+			   The next example assumes that your application provides a user-defined function <literal>copyFields</literal> that receives 3 parameters:
+			   The update event, the new row and the initial state before-update row.
+			 </para>
+			<programlisting><![CDATA[on UpdateEvent as upd update MyWindow as win set copyFields(win, upd, initial)]]></programlisting>
+
+			 <para>
+			   The following example assumes that your event type provides a method by name <literal>populateFrom</literal> that receives the update event as a parameter:
+			 </para>
+			<programlisting><![CDATA[on UpdateEvent as upd update MyWindow as win set win.populateFrom(upd)]]></programlisting>
 
 			<para>
 				The following restrictions apply:
@@ -4979,7 +5033,7 @@ set field_a = 1,
 			<orderedlist spacing="compact">
 				<listitem>
 					<para>
-						Each property to be updated must be writable.
+						Each property to be updated via assignment must be writable.
 					</para>
 				</listitem>
 				<listitem>
@@ -5009,14 +5063,14 @@ set field_a = 1,
 			<indexterm><primary>EPL</primary><secondary>named window</secondary><tertiary>updating</tertiary></indexterm>
 
 			<para>
-				Your application can update named window rows using on-demand (fire-and-forget, non-continuous) queries as described in <xref linkend="api-runtime-ondemand"/>.
+				Your application can update named window rows using on-demand (fire-and-forget, non-continuous) queries as described in <xref linkend="api-ondemand"/>.
 			</para>
 
 			<para>
 				The syntax for the <literal>update</literal> clause is as follows: 
 			</para>
 			<synopsis>update <emphasis>window_name</emphasis> [as <emphasis>stream_name</emphasis>]
-set <emphasis>property_name</emphasis> = <emphasis>expression</emphasis> [, <emphasis>property_name</emphasis> = <emphasis>expression</emphasis> [,...]]
+set <emphasis>mutation_expression</emphasis> [, <emphasis>mutation_expression</emphasis> [,...]]
 [where <emphasis>criteria_expression</emphasis>]</synopsis>
 				
 			<para>
@@ -5024,7 +5078,7 @@ set <emphasis>property_name</emphasis> = <emphasis>expression</emphasis> [, <emp
 			</para>
 				
 			<para>
-				The comma-separated list of property names and expressions set the value of one or more properties. For fire-and-forget queries the following restriction applies: Subqueries, aggregation functions and the <literal>prev</literal> or <literal>prior</literal> function may not be used in expressions.
+				After the <literal>set</literal> keyword follows a comma-separated list of mutation expressions. For fire-and-forget queries the following restriction applies: Subqueries, aggregation functions and the <literal>prev</literal> or <literal>prior</literal> function may not be used in expressions. Mutation expressions are detailed in <xref linkend="named_update"/>.
 			</para>
 
 			<para>
@@ -5147,7 +5201,7 @@ where ord.id = win.id or flush.id = win.id]]></programlisting>
 			<indexterm><primary>EPL</primary><secondary>named window</secondary><tertiary>deleting from</tertiary></indexterm>
 
 			<para>
-				Your application can delete rows from a named window using on-demand (fire-and-forget, non-continuous) queries as described in <xref linkend="api-runtime-ondemand"/>.
+				Your application can delete rows from a named window using on-demand (fire-and-forget, non-continuous) queries as described in <xref linkend="api-ondemand"/>.
 			</para>
 
 			<para>
@@ -5198,7 +5252,7 @@ merge [into] <emphasis>window_name</emphasis> [as <emphasis>stream_name</emphasi
           select <emphasis>select_expression</emphasis> [, <emphasis>select_expression</emphasis>[,...]]
           [where <emphasis>filter_expression</emphasis>]
       |
-      update set <emphasis>property_name</emphasis> = <emphasis>expression</emphasis> [, <emphasis>property_name</emphasis> = <emphasis>expression</emphasis> [,...]]
+      update set <emphasis>mutation_expression</emphasis> [, <emphasis>mutation_expression</emphasis> [,...]]
           [where <emphasis>filter_expression</emphasis>]
       |
       delete
@@ -5238,7 +5292,8 @@ merge [into] <emphasis>window_name</emphasis> [as <emphasis>stream_name</emphasi
 			</para>
 
 			<para>
-			     After <literal>update</literal> follows the <literal>set</literal> keyword and one or more assignment pairs. It follows an optional where-clause that may return Boolean false to indicate that the action should not be applied. See on-update above for information on the order of assignment evaluation and the use of the <literal>initial</literal> prefix to obtain the before-update value. 
+			     After <literal>update</literal> follows the <literal>set</literal> keyword and one or more mutation expressions. For mutation expressions please see <xref linkend="named_update"/>.
+			     It follows an optional where-clause that may return Boolean false to indicate that the action should not be applied. 			     
 			</para>
 
 			<para>
@@ -5321,13 +5376,14 @@ merge [into] <emphasis>window_name</emphasis> [as <emphasis>stream_name</emphasi
 			</para>
 			
 			<para>
-				This example specifies two update actions and uses the where-clause to trigger different update behavior depending on whether the order event price is less then zero:
+				This example specifies two update actions and uses the where-clause to trigger different update behavior depending on whether the order event price is less than zero.
+				This example assumes that the host application defined a <literal>clearorder</literal> user-defined function, to demonstrate calling a user-defined function as part of the update mutation expressions: 
 			</para>
 			<programlisting><![CDATA[on OrderEvent oe
   merge OrderWindow pw
   where pw.orderId = oe.orderId
   when matched
-    then update set pw.quantity = 0, pw.price = 0 where oe.price < 0
+    then update set clearorder(pw) where oe.price < 0
     then update set pw.quantity = oe.quantity, pw.price = oe.price where oe.price >= 0]]></programlisting>
 
 			<para>
@@ -5390,7 +5446,7 @@ merge [into] <emphasis>window_name</emphasis> [as <emphasis>stream_name</emphasi
 		    <orderedlist>
 			  <listitem>
 				  <para>
-                      On-demand (fire-and-forget, non-continuous) queries as described in <xref linkend="api-runtime-ondemand"/>.
+                      On-demand (fire-and-forget, non-continuous) queries as described in <xref linkend="api-ondemand"/>.
                   </para>
 				  <para>
                       <literal>On-select</literal>, <literal>on-merge</literal>, <literal>on-update</literal>, <literal>on-delete</literal> and <literal>on-insert</literal>.

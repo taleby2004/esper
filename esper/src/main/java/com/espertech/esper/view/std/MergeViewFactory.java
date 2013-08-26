@@ -29,6 +29,7 @@ public class MergeViewFactory implements ViewFactory
 
     private ExprNode[] criteriaExpressions;
     private EventType eventType;
+    private boolean removable = false;  // set to true when retain-age
 
     public void setViewParameters(ViewFactoryContext viewFactoryContext, List<ExprNode> expressionParameters) throws ViewParameterException
     {
@@ -59,6 +60,7 @@ public class MergeViewFactory implements ViewFactory
             throw new ViewParameterException("Groupwin view for this merge view could not be found among parent views");
         }
         criteriaExpressions = groupByViewFactory.getCriteriaExpressions();
+        removable = groupByViewFactory.isRetainAged();
 
         // determine types of fields
         Class[] fieldTypes = new Class[criteriaExpressions.length];
@@ -106,7 +108,7 @@ public class MergeViewFactory implements ViewFactory
 
     public View makeView(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext)
     {
-        return new MergeView(agentInstanceViewFactoryContext, criteriaExpressions, eventType);
+        return new MergeView(agentInstanceViewFactoryContext, criteriaExpressions, eventType, removable);
     }
 
     public EventType getEventType()

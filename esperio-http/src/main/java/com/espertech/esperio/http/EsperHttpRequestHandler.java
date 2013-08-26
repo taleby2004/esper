@@ -98,7 +98,7 @@ public class EsperHttpRequestHandler implements HttpRequestHandler {
 
         EventTypeSPI eventTypeSPI = (EventTypeSPI) eventType;
 
-        Set<WriteablePropertyDescriptor> writablesSet = engineSPI.getEventAdapterService().getWriteableProperties(eventTypeSPI);
+        Set<WriteablePropertyDescriptor> writablesSet = engineSPI.getEventAdapterService().getWriteableProperties(eventTypeSPI, false);
         List<WriteablePropertyDescriptor> writablePropertiesList = new ArrayList<WriteablePropertyDescriptor>();
         List<SimpleTypeParser> parserList = new ArrayList<SimpleTypeParser>();
 
@@ -119,7 +119,7 @@ public class EsperHttpRequestHandler implements HttpRequestHandler {
 
         EventBeanManufacturer eventBeanManufacturer;
         try {
-            eventBeanManufacturer = engineSPI.getEventAdapterService().getManufacturer(eventType, writableProperties, methods.getEngineImportService());
+            eventBeanManufacturer = engineSPI.getEventAdapterService().getManufacturer(eventType, writableProperties, methods.getEngineImportService(), false);
         }
         catch (EventBeanManufactureException e) {
             log.info("Unable to create manufacturer for event type: " + e.getMessage(), e);

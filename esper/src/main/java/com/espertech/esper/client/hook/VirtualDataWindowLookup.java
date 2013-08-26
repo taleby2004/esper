@@ -26,7 +26,17 @@ public interface VirtualDataWindowLookup {
     /**
      * Invoked by an EPL statement that queries a virtual data window to perform a lookup.
      * <p>
-     * Keys passed are the actual query lookup values.
+     * Keys passed are the actual query lookup values. For range lookups, the key
+     * passed is an instance of {@link VirtualDataWindowKeyRange}.
+     * <p>
+     *     Key values follow {@link VirtualDataWindowLookupContext}.
+     * </p>
+     * <p>
+     *     EventsPerStream contains the events participating in the subquery or join.
+     *     It is not necessary to use eventsPerStream and the events
+     *     are provided for additional information.
+     *     Please consider eventsPerStream for Esper internal use.
+     * </p>
      * @param keys lookup values
      * @param eventsPerStream input events for the lookup
      * @return set of events

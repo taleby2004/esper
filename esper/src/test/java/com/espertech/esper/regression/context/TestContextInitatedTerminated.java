@@ -11,10 +11,7 @@
 
 package com.espertech.esper.regression.context;
 
-import com.espertech.esper.client.Configuration;
-import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPServiceProviderManager;
-import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.*;
 import com.espertech.esper.client.context.ContextPartitionSelectorSegmented;
 import com.espertech.esper.client.context.InvalidContextPartitionSelector;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
@@ -899,6 +896,15 @@ public class TestContextInitatedTerminated extends TestCase {
         expected = new Object[][]{{"E8", 30}, {"E8", 21}, {"E8", 11}};
         EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, expected);
         EPAssertionUtil.assertPropsPerRow(statement.iterator(), statement.safeIterator(), fields, expected);
+
+        // assert certain keywords are valid: last keyword, timezone
+        epService.getEPAdministrator().createEPL("create context CtxMonthly1 start (0, 0, 1, *, *, 0) end(59, 23, last, *, *, 59)");
+        epService.getEPAdministrator().createEPL("create context CtxMonthly2 start (0, 0, 1, *, *) end(59, 23, last, *, *)");
+        epService.getEPAdministrator().createEPL("create context CtxMonthly3 start (0, 0, 1, *, *, 0, 'GMT-5') end(59, 23, last, *, *, 59, 'GMT-8')");
+        tryInvalid("create context CtxMonthly4 start (0) end(*,*,*,*,*)",
+                "Error starting statement: Invalid schedule specification: Invalid number of crontab parameters, expecting between 5 and 7 parameters, received 1 [create context CtxMonthly4 start (0) end(*,*,*,*,*)]");
+        tryInvalid("create context CtxMonthly4 start (*,*,*,*,*) end(*,*,*,*,*,*,*,*)",
+                "Error starting statement: Invalid schedule specification: Invalid number of crontab parameters, expecting between 5 and 7 parameters, received 8 [create context CtxMonthly4 start (*,*,*,*,*) end(*,*,*,*,*,*,*,*)]");
     }
 
     private void sendTimeEvent(String time) {
@@ -917,5 +923,15 @@ public class TestContextInitatedTerminated extends TestCase {
         EPStatement stmtModel = epService.getEPAdministrator().create(model);
         assertEquals(epl, stmtModel.getText());
         stmtModel.destroy();
+    }
+
+    private void tryInvalid(String epl, String message) {
+        try {
+            epService.getEPAdministrator().createEPL(epl);
+            fail();
+        }
+        catch (EPStatementException ex) {
+            assertEquals(message, ex.getMessage());
+        }
     }
 }

@@ -44,8 +44,24 @@ public class TestNamedWindowUpdate extends TestCase
         listenerWindow = null;
     }
 
+    public void testUpdateNonPropertySet() {
+        epService.getEPAdministrator().getConfiguration().addPlugInSingleRowFunction("setBeanLongPrimitive999", this.getClass().getName(), "setBeanLongPrimitive999");
+        epService.getEPAdministrator().getConfiguration().addEventType(SupportBean_S0.class);
+        epService.getEPAdministrator().createEPL("create window MyWindow.win:keepall() as SupportBean");
+        epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportBean");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("on SupportBean_S0 as sb " +
+                "update MyWindow as mywin" +
+                " set mywin.setIntPrimitive(10)," +
+                "     setBeanLongPrimitive999(mywin)");
+        stmt.addListener(listenerWindow);
+
+        String[] fields = "intPrimitive,longPrimitive".split(",");
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(1));
+        EPAssertionUtil.assertProps(listenerWindow.getAndResetLastNewData()[0], fields, new Object[]{10, 999L});
+    }
+
     public void testUpdateOrderOfFields() throws Exception {
-        epService.getEPAdministrator().getConfiguration().addEventType(SupportBean.class);
         epService.getEPAdministrator().getConfiguration().addEventType(SupportBean_S0.class);
 
         epService.getEPAdministrator().createEPL("create window MyWindow.win:keepall() as SupportBean");
@@ -212,5 +228,9 @@ public class TestNamedWindowUpdate extends TestCase
         SupportBean sb = new SupportBean(theString, intPrimitive);
         sb.setDoublePrimitive(doublePrimitive);
         return sb;
+    }
+
+    public static void setBeanLongPrimitive999(SupportBean event) {
+        event.setLongPrimitive(999);
     }
 }

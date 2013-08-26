@@ -14,44 +14,27 @@ package com.espertech.esper.client.soda;
 import java.io.Serializable;
 
 /**
- * An assignment to a variable or property name of an expression value.
+ * An assignment is an expression specifically for the purpose of usage in updates.
+ * Usually an assignment is an equal-expression with the lhs being an event property or variable
+ * and the rhs being the new value expression.
  */
-public class AssignmentPair implements Serializable {
+public class Assignment implements Serializable {
     private static final long serialVersionUID = -2713092091207302856L;
     
-    private String name;
     private Expression value;
 
     /**
      * Ctor.
      */
-    public AssignmentPair() {
+    public Assignment() {
     }
 
     /**
      * Ctor.
-     * @param name property or variable
      * @param value value to assign
      */
-    public AssignmentPair(String name, Expression value) {
-        this.name = name;
+    public Assignment(Expression value) {
         this.value = value;
-    }
-
-    /**
-     * Returns property or variable name.
-     * @return name
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * Sets property or variable name.
-     * @param name to set
-     */
-    public void setName(String name) {
-        this.name = name;
     }
 
     /**

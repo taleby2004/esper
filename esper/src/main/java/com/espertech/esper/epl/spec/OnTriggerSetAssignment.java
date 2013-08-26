@@ -18,28 +18,16 @@ import java.io.Serializable;
  */
 public class OnTriggerSetAssignment implements MetaDefItem, Serializable
 {
-    private String variableName;
     private ExprNode expression;
     private static final long serialVersionUID = -3672553372059354285L;
 
     /**
      * Ctor.
-     * @param variableName variable name
      * @param expression expression providing new variable value
      */
-    public OnTriggerSetAssignment(String variableName, ExprNode expression)
+    public OnTriggerSetAssignment(ExprNode expression)
     {
-        this.variableName = variableName;
         this.expression = expression;
-    }
-
-    /**
-     * Returns the variable name
-     * @return variable name
-     */
-    public String getVariableName()
-    {
-        return variableName;
     }
 
     /**

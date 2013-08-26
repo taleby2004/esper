@@ -80,6 +80,14 @@ public class JSONRendererImpl implements JSONEventRenderer
         return buf.toString();
     }
 
+    public String render(EventBean theEvent) {
+        StringBuilder buf = new StringBuilder();
+        buf.append('{');
+        recursiveRender(theEvent, buf, 2, meta, rendererOptions);
+        buf.append('}');
+        return buf.toString();
+    }
+
     private static void ident(StringBuilder buf, int level)
     {
         for (int i = 0; i < level; i++)

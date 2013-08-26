@@ -13,7 +13,6 @@ package com.espertech.esper.core.service;
 
 import com.espertech.esper.client.EPAdministrator;
 import com.espertech.esper.client.EPException;
-import com.espertech.esper.client.EPPreparedStatementImpl;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.epl.expression.ExprNode;

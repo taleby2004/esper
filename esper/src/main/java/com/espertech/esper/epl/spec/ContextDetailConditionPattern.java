@@ -25,12 +25,14 @@ public class ContextDetailConditionPattern implements ContextDetailCondition {
     private static final long serialVersionUID = -5855240089039407834L;
     private final EvalFactoryNode patternRaw;
     private final boolean inclusive;
+    private final boolean immediate;
 
     private transient PatternStreamSpecCompiled patternCompiled;
 
-    public ContextDetailConditionPattern(EvalFactoryNode patternRaw, boolean inclusive) {
+    public ContextDetailConditionPattern(EvalFactoryNode patternRaw, boolean inclusive, boolean immediate) {
         this.patternRaw = patternRaw;
         this.inclusive = inclusive;
+        this.immediate = immediate;
     }
 
     public EvalFactoryNode getPatternRaw() {
@@ -47,6 +49,10 @@ public class ContextDetailConditionPattern implements ContextDetailCondition {
 
     public boolean isInclusive() {
         return inclusive;
+    }
+
+    public boolean isImmediate() {
+        return immediate;
     }
 
     public List<FilterSpecCompiled> getFilterSpecIfAny() {

@@ -69,7 +69,7 @@ public class ContextControllerInitTerm implements ContextController, ContextCont
             startCondition = makeEndpoint(factory.getContextDetail().getStart(), filterAddendum, true, 0);
 
             // if this is single-instance mode, check if we are currently running according to schedule
-            boolean currentlyRunning = false;
+            boolean currentlyRunning = startCondition.isImmediate();
             if (!factory.getContextDetail().isOverlapping()) {
                 currentlyRunning = determineCurrentlyRunning(startCondition);
             }
@@ -87,7 +87,10 @@ public class ContextControllerInitTerm implements ContextController, ContextCont
                 ContextControllerInitTermState state = new ContextControllerInitTermState(factory.getFactoryContext().getServicesContext().getSchedulingService().getTime(), builtinProps);
                 factory.getStateCache().addContextPath(factory.getFactoryContext().getOutermostContextName(), factory.getFactoryContext().getNestingLevel(), pathId, currentSubpathId, instanceHandle.getContextPartitionOrPathId(), state, factory.getBinding());
             }
-            else {
+
+            // non-overlapping and not currently running, or overlapping
+            if ((!factory.getContextDetail().isOverlapping() && !currentlyRunning) ||
+                factory.getContextDetail().isOverlapping()) {
                 startCondition.activate(optionalTriggeringEvent, null, 0, factory.getFactoryContext().isRecoveringResilient());
             }
             return;
@@ -152,8 +155,32 @@ public class ContextControllerInitTerm implements ContextController, ContextCont
     }
 
     public void rangeNotification(Map<String, Object> builtinProperties, ContextControllerCondition originCondition, EventBean optionalTriggeringEvent, Map<String, Object> optionalTriggeringPattern, ContextInternalFilterAddendum filterAddendum) {
+        boolean endConditionNotification = originCondition != startCondition;
+
+        boolean startNow = false;
+        if (endConditionNotification) {
+            if (originCondition.isRunning()) {
+                originCondition.deactivate();
+            }
+
+            // indicate terminate
+            ContextControllerInitTermInstance instance = endConditions.remove(originCondition);
+            if (instance == null) {
+                return;
+            }
+            activationCallback.contextPartitionTerminate(instance.getInstanceHandle(), builtinProperties);
+
+            // re-activate start condition if not overlapping
+            if (!factory.getContextDetail().isOverlapping()) {
+                startCondition.activate(optionalTriggeringEvent, null, 0, false);
+                startNow = startCondition instanceof ContextControllerConditionImmediate;
+            }
+
+            factory.getStateCache().removeContextPath(factory.getFactoryContext().getOutermostContextName(), factory.getFactoryContext().getNestingLevel(), pathId, instance.getSubPathId());
+        }
+
         // handle start-condition notification
-        if (originCondition == startCondition) {
+        if (!endConditionNotification || startNow) {
 
             // For single-instance mode, deactivate
             if (!factory.getContextDetail().isOverlapping()) {
@@ -180,25 +207,6 @@ public class ContextControllerInitTerm implements ContextController, ContextCont
 
             ContextControllerInitTermState state = new ContextControllerInitTermState(factory.getFactoryContext().getServicesContext().getSchedulingService().getTime(), builtinProperties);
             factory.getStateCache().addContextPath(factory.getFactoryContext().getOutermostContextName(), factory.getFactoryContext().getNestingLevel(), pathId, currentSubpathId, instanceHandle.getContextPartitionOrPathId(), state, factory.getBinding());
-        }
-        else {
-            if (originCondition.isRunning()) {
-                originCondition.deactivate();
-            }
-
-            // indicate terminate
-            ContextControllerInitTermInstance instance = endConditions.remove(originCondition);
-            if (instance == null) {
-                return;
-            }
-            activationCallback.contextPartitionTerminate(instance.getInstanceHandle(), builtinProperties);
-
-            // re-activate start condition if not overlapping
-            if (!factory.getContextDetail().isOverlapping()) {
-                startCondition.activate(optionalTriggeringEvent, null, 0, false);
-            }
-
-            factory.getStateCache().removeContextPath(factory.getFactoryContext().getOutermostContextName(), factory.getFactoryContext().getNestingLevel(), pathId, instance.getSubPathId());
         }
     }
 
@@ -235,7 +243,7 @@ public class ContextControllerInitTerm implements ContextController, ContextCont
             }
         }
 
-        return false;
+        return startCondition instanceof ContextControllerConditionImmediate;
     }
 
     public ContextControllerFactory getFactory() {

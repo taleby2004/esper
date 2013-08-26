@@ -19,6 +19,7 @@ import com.espertech.esper.core.service.EPStatementSPI;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanNumeric;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.support.util.SupportModelHelper;
 import junit.framework.TestCase;
 
 import java.math.BigDecimal;
@@ -49,7 +50,8 @@ public class TestAggregateFiltered extends TestCase
     public void testBlackWhitePercent()
     {
         String[] fields = "cb,cnb,c,pct".split(",");
-        EPStatementSPI stmt = (EPStatementSPI) epService.getEPAdministrator().createEPL("select count(*, black) as cb, count(*, not black) as cnb, count(*) as c, count(*, black)/count(*) as pct from BlackWhiteEvent.win:length(3)");
+        String epl = "select count(*, black) as cb, count(*, not black) as cnb, count(*) as c, count(*, black) / count(*) as pct from BlackWhiteEvent.win:length(3)";
+        EPStatementSPI stmt = (EPStatementSPI) epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
         assertFalse(stmt.getStatementContext().isStatelessSelect());
 
@@ -64,6 +66,9 @@ public class TestAggregateFiltered extends TestCase
 
         epService.getEPRuntime().sendEvent(new BlackWhiteEvent(false));
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{0L, 3L, 3L, 0d});
+
+        SupportModelHelper.compileCreate(epService, epl);
+        SupportModelHelper.compileCreate(epService, "select count(distinct black, not black), count(black, black) from BlackWhiteEvent");
     }
 
     public void testCountVariations()

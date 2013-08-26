@@ -30,4 +30,12 @@ public interface JSONEventRenderer
      * @return JSON formatted text
      */
     public String render(String title, EventBean theEvent);
+
+    /**
+     * Render a given event in the JSON format.
+     * @param theEvent the event to render
+     * @return JSON formatted text
+     */
+    public String render(EventBean theEvent);
+
 }

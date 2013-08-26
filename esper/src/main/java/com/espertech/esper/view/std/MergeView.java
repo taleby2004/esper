@@ -19,9 +19,7 @@ import com.espertech.esper.view.ViewSupport;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.ArrayDeque;
-import java.util.Arrays;
-import java.util.Iterator;
+import java.util.*;
 
 /**
  * The merge view works together with a group view that splits the data in a stream to multiple subviews, based on
@@ -36,17 +34,28 @@ import java.util.Iterator;
 public final class MergeView extends ViewSupport implements CloneableView, MergeViewMarker
 {
     private final AgentInstanceViewFactoryChainContext agentInstanceContext;
-    private final ArrayDeque<View> parentViews = new ArrayDeque<View>();
+    private final Collection<View> parentViews;
     private final ExprNode[] groupFieldNames;
     private final EventType eventType;
+    private final boolean removable;
 
     /**
      * Constructor.
      * @param groupCriteria is the fields from which to pull the value to group by
      * @param resultEventType is passed by the factory as the factory adds the merged fields to an event type
      */
-    public MergeView(AgentInstanceViewFactoryChainContext agentInstanceContext, ExprNode[] groupCriteria, EventType resultEventType)
+    public MergeView(AgentInstanceViewFactoryChainContext agentInstanceContext,
+                     ExprNode[] groupCriteria,
+                     EventType resultEventType,
+                     boolean removable)
     {
+        this.removable = removable;
+        if (!removable) {
+            parentViews = new ArrayDeque<View>();
+        }
+        else {
+            parentViews = new HashSet<View>();
+        }
         this.agentInstanceContext = agentInstanceContext;
         this.groupFieldNames = groupCriteria;
         this.eventType = resultEventType;
@@ -54,7 +63,7 @@ public final class MergeView extends ViewSupport implements CloneableView, Merge
 
     public View cloneView()
     {
-        return new MergeView(agentInstanceContext, groupFieldNames, eventType);
+        return new MergeView(agentInstanceContext, groupFieldNames, eventType, removable);
     }
 
     /**

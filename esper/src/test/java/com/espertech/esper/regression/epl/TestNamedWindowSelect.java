@@ -202,6 +202,24 @@ public class TestNamedWindowSelect extends TestCase implements IndexBackingTable
                         new IndexAssertion(null, "d1 between 1 and 10", "Two", BACKING_SORTED_COERCED, noAssertion),
                         new IndexAssertion("@Hint('index(One, bust)')", "d1 between 1 and 10"),// busted
                 });
+
+        // rel ops
+        Object[] preloadedEventsRelOp = new Object[] {new SupportSimpleBeanOne("E1", 10, 11, 12)};
+        IndexAssertionEventSend relOpAssertion = new IndexAssertionEventSend() {
+            public void run() {
+                String[] fields = "ssb2.s2,ssb1.s1,ssb1.i1".split(",");
+                epService.getEPRuntime().sendEvent(new SupportSimpleBeanTwo("EX", 0, 0, 0));
+                EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[]{"EX", "E1", 10});
+            }
+        };
+        assertIndexChoice(new String[0], preloadedEventsRelOp, "win:keepall()",
+                new IndexAssertion[] {
+                        new IndexAssertion(null, "9 < i1", null, BACKING_SORTED_COERCED, relOpAssertion),
+                        new IndexAssertion(null, "10 <= i1", null, BACKING_SORTED_COERCED, relOpAssertion),
+                        new IndexAssertion(null, "i1 <= 10", null, BACKING_SORTED_COERCED, relOpAssertion),
+                        new IndexAssertion(null, "i1 < 11", null, BACKING_SORTED_COERCED, relOpAssertion),
+                        new IndexAssertion(null, "11 > i1", null, BACKING_SORTED_COERCED, relOpAssertion),
+                });
     }
 
     private void assertIndexChoice(String[] indexes, Object[] preloadedEvents, String datawindow,

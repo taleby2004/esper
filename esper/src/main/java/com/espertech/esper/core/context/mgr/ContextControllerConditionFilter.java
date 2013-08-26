@@ -100,4 +100,8 @@ public class ContextControllerConditionFilter implements ContextControllerCondit
     public Long getExpectedEndTime() {
         return null;
     }
+
+    public boolean isImmediate() {
+        return false;
+    }
 }

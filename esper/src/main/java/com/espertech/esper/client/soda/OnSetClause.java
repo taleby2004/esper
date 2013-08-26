@@ -19,18 +19,17 @@ public class OnSetClause extends OnClause
 {
     private static final long serialVersionUID = 0L;
 
-    private List<AssignmentPair> assignments;
+    private List<Assignment> assignments;
 
     /**
      * Creates a new on-set clause for setting variables, and adds a variable to set.
-     * @param variableName is the variable name
      * @param expression is the assignment expression providing the new variable value
      * @return on-set clause
      */
-    public static OnSetClause create(String variableName, Expression expression)
+    public static OnSetClause create(Expression expression)
     {
         OnSetClause clause = new OnSetClause();
-        clause.addAssignment(variableName, expression);
+        clause.addAssignment(expression);
         return clause;
     }
 
@@ -39,18 +38,17 @@ public class OnSetClause extends OnClause
      */
     public OnSetClause()
     {
-        assignments = new ArrayList<AssignmentPair>();
+        assignments = new ArrayList<Assignment>();
     }
 
     /**
      * Adds a variable to set to the clause.
-     * @param variable to set
      * @param expression expression providing the new variable value
      * @return clause
      */
-    public OnSetClause addAssignment(String variable, Expression expression)
+    public OnSetClause addAssignment(Expression expression)
     {
-        assignments.add(new AssignmentPair(variable, expression));
+        assignments.add(new Assignment(expression));
         return this;
     }
 
@@ -58,7 +56,7 @@ public class OnSetClause extends OnClause
      * Returns the list of variable assignments.
      * @return pair of variable name and expression
      */
-    public List<AssignmentPair> getAssignments()
+    public List<Assignment> getAssignments()
     {
         return assignments;
     }
@@ -67,7 +65,7 @@ public class OnSetClause extends OnClause
      * Sets a list of variable assignments.
      * @param assignments list of pairs of variable name and expression
      */
-    public void setAssignments(List<AssignmentPair> assignments)
+    public void setAssignments(List<Assignment> assignments)
     {
         this.assignments = assignments;
     }

@@ -246,6 +246,9 @@ public class TestDataWindowIntersectExpiry extends TestCase
         EPAssertionUtil.assertProps(listener.assertOneGetOld(), fields, new Object[] {"E5"});
         EPAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[] {"E8"});
         listener.reset();
+
+        // another combination
+        epService.getEPAdministrator().createEPL("select * from SupportBean.std:groupwin(theString).win:time(.0083 sec).std:firstevent()");
     }
 
     public void testIntersectSubselect()

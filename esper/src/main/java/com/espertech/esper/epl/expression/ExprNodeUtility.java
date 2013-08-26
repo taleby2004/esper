@@ -21,6 +21,7 @@ import com.espertech.esper.epl.core.*;
 import com.espertech.esper.epl.declexpr.ExprDeclaredNode;
 import com.espertech.esper.epl.enummethod.dot.ExprDeclaredOrLambdaNode;
 import com.espertech.esper.epl.enummethod.dot.ExprLambdaGoesNode;
+import com.espertech.esper.epl.spec.OnTriggerSetAssignment;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.EventBeanUtility;
 import com.espertech.esper.schedule.ScheduleParameterException;
@@ -41,6 +42,34 @@ public class ExprNodeUtility {
 
     public static final ExprNode[] EMPTY_EXPR_ARRAY = new ExprNode[0];
     public static final ExprDeclaredNode[] EMPTY_DECLARED_ARR = new ExprDeclaredNode[0];
+
+    public static Pair<String, ExprNode> checkGetAssignmentToProp(ExprNode node) {
+        if (!(node instanceof ExprEqualsNode)) {
+            return null;
+        }
+        ExprEqualsNode equals = (ExprEqualsNode) node;
+        if (!(equals.getChildNodes()[0] instanceof ExprIdentNode)) {
+            return null;
+        }
+        ExprIdentNode identNode = (ExprIdentNode) equals.getChildNodes()[0];
+        return new Pair<String, ExprNode>(identNode.getFullUnresolvedName(), equals.getChildNodes()[1]);
+    }
+
+    public static Pair<String, ExprNode> checkGetAssignmentToVariableOrProp(ExprNode node) {
+        Pair<String, ExprNode> prop = checkGetAssignmentToProp(node);
+        if (prop != null) {
+            return prop;
+        }
+        if (!(node instanceof ExprEqualsNode)) {
+            return null;
+        }
+        ExprEqualsNode equals = (ExprEqualsNode) node;
+        if (!(equals.getChildNodes()[0] instanceof ExprVariableNode)) {
+            return null;
+        }
+        ExprVariableNode variableNode = (ExprVariableNode) equals.getChildNodes()[0];
+        return new Pair<String, ExprNode>(variableNode.getVariableNameWithSubProp(), equals.getChildNodes()[1]);
+    }
 
     public static void applyFilterExpressionsIterable(Iterable<EventBean> iterable, List<ExprNode> filterExpressions, ExprEvaluatorContext exprEvaluatorContext, Collection<EventBean> eventsInWindow) {
         ExprEvaluator[] evaluators = ExprNodeUtility.getEvaluators(filterExpressions);
@@ -120,6 +149,19 @@ public class ExprNodeUtility {
         }
 
         return getValidatedSubtreeInternal(exprNode, validationContext, true);
+    }
+
+    public static ExprNode getValidatedAssignment(OnTriggerSetAssignment assignment, ExprValidationContext validationContext) throws ExprValidationException
+    {
+        Pair<String, ExprNode> strictAssignment = checkGetAssignmentToVariableOrProp(assignment.getExpression());
+        if (strictAssignment != null) {
+            ExprNode validatedRightSide = getValidatedSubtreeInternal(strictAssignment.getSecond(), validationContext, true);
+            assignment.getExpression().setChildNode(1, validatedRightSide);
+            return assignment.getExpression();
+        }
+        else {
+            return getValidatedSubtreeInternal(assignment.getExpression(), validationContext, true);
+        }
     }
 
     private static ExprNode getValidatedSubtreeInternal(ExprNode exprNode, ExprValidationContext validationContext, boolean isTopLevel) throws ExprValidationException
@@ -1153,7 +1195,7 @@ public class ExprNodeUtility {
         }
         catch (ScheduleParameterException e)
         {
-            throw new IllegalArgumentException("Invalid schedule specification : " + e.getMessage(), e);
+            throw new ExprValidationException("Invalid schedule specification: " + e.getMessage(), e);
         }
     }
 

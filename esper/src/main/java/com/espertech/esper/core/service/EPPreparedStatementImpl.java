@@ -6,8 +6,11 @@
  * The software in this package is published under the terms of the GPL license       *
  * a copy of which has been included with this distribution in the license.txt file.  *
  **************************************************************************************/
-package com.espertech.esper.client;
+package com.espertech.esper.core.service;
 
+import com.espertech.esper.client.EPException;
+import com.espertech.esper.client.EPOnDemandPreparedQueryParameterized;
+import com.espertech.esper.client.EPPreparedStatement;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.epl.spec.SubstitutionParameterExpression;
 
@@ -19,21 +22,23 @@ import java.util.Map;
  * a list of substitution parameters, to be mapped into an internal representation upon
  * creation.
  */
-public class EPPreparedStatementImpl implements EPPreparedStatement, Serializable
+public class EPPreparedStatementImpl implements EPPreparedStatement, EPOnDemandPreparedQueryParameterized, Serializable
 {
     private static final long serialVersionUID = 821297634350548600L;
-    private EPStatementObjectModel model;
-    private Map<Integer, SubstitutionParameterExpression> subParams;
+    private final EPStatementObjectModel model;
+    private final Map<Integer, SubstitutionParameterExpression> subParams;
+    private final String optionalEPL;
 
     /**
      * Ctor.
      * @param model is the statement object model
      * @param subParams is the substitution parameter list
+     * @param optionalEPL the EPL provided if any
      */
-    public EPPreparedStatementImpl(EPStatementObjectModel model, Map<Integer, SubstitutionParameterExpression> subParams)
-    {
+    public EPPreparedStatementImpl(EPStatementObjectModel model, Map<Integer, SubstitutionParameterExpression> subParams, String optionalEPL) {
         this.model = model;
         this.subParams = subParams;
+        this.optionalEPL = optionalEPL;
     }
 
     public void setObject(int parameterIndex, Object value) throws EPException
@@ -63,12 +68,7 @@ public class EPPreparedStatementImpl implements EPPreparedStatement, Serializabl
         return model;
     }
 
-    /**
-     * Returns the indexed substitution parameters.
-     * @return map of index and parameter
-     */
-    public Map<Integer, SubstitutionParameterExpression> getSubParams()
-    {
-        return subParams;
+    public String getOptionalEPL() {
+        return optionalEPL;
     }
 }

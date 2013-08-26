@@ -32,6 +32,9 @@ public class ScheduleSpecUtil
      */
     public static ScheduleSpec computeValues(Object[] args) throws ScheduleParameterException
     {
+        if (args == null || args.length <= 4 || args.length >= 8) {
+            throw new ScheduleParameterException("Invalid number of crontab parameters, expecting between 5 and 7 parameters, received " + args.length);
+        }
         EnumMap<ScheduleUnit, SortedSet<Integer>> unitMap = new EnumMap<ScheduleUnit, SortedSet<Integer>>(ScheduleUnit.class);
         Object minutes = args[0];
         Object hours = args[1];
@@ -103,7 +106,16 @@ public class ScheduleSpecUtil
                 timezone = (String) args[6];
             }
         }
-        return new ScheduleSpec(unitMap, timezone);
+        CronParameter optionalDayOfMonthOp = getOptionalSpecialOp(daysOfMonth);
+        CronParameter optionalDayOfWeekOp = getOptionalSpecialOp(daysOfWeek);
+        return new ScheduleSpec(unitMap, timezone, optionalDayOfMonthOp, optionalDayOfWeekOp);
+    }
+
+    private static CronParameter getOptionalSpecialOp(Object unitParameter) {
+        if (!(unitParameter instanceof CronParameter)) {
+            return null;
+        }
+        return (CronParameter) unitParameter;
     }
 
     private static SortedSet<Integer> computeValues(Object unitParameter, ScheduleUnit unit) throws ScheduleParameterException
@@ -113,6 +125,11 @@ public class ScheduleSpecUtil
             SortedSet<Integer> result = new TreeSet<Integer>();
             result.add((Integer) unitParameter);
             return result;
+        }
+
+        // cron parameters not handled as number sets
+        if (unitParameter instanceof CronParameter) {
+            return null;
         }
 
         NumberSetParameter numberSet = (NumberSetParameter) unitParameter;

@@ -24,6 +24,7 @@ import com.espertech.esper.epl.join.table.EventTable;
 import com.espertech.esper.epl.join.table.EventTableUtil;
 import com.espertech.esper.epl.join.table.HistoricalStreamIndexList;
 import com.espertech.esper.epl.spec.OuterJoinDesc;
+import com.espertech.esper.view.DerivedValueView;
 import com.espertech.esper.view.HistoricalEventViewable;
 import com.espertech.esper.view.Viewable;
 import org.apache.commons.logging.Log;
@@ -191,7 +192,7 @@ public class JoinSetComposerPrototypeImpl implements JoinSetComposerPrototype {
             }
 
             Iterator<EventBean> it = null;
-            if (!(streamViews[i] instanceof HistoricalEventViewable))
+            if (!(streamViews[i] instanceof HistoricalEventViewable) && !(streamViews[i] instanceof DerivedValueView))
             {
                 try
                 {

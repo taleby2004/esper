@@ -10,6 +10,8 @@ package com.espertech.esper.epl.named;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.collection.CombinationEnumeration;
+import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.core.context.util.AgentInstanceContext;
 import com.espertech.esper.epl.core.ResultSetProcessor;
@@ -190,10 +192,14 @@ public class NamedWindowRootViewInstance extends ViewSupport
         Set<String> keysAvailable = new HashSet<String>();
         Set<String> rangesAvailable = new HashSet<String>();
         for (FilterSpecParam param : optionalFilter.getParameters()) {
-            if (!(param instanceof FilterSpecParamConstant || param instanceof FilterSpecParamRange)) {
+            if (!(param instanceof FilterSpecParamConstant ||
+                  param instanceof FilterSpecParamRange ||
+                  param instanceof FilterSpecParamIn)) {
                 continue;
             }
-            if (param.getFilterOperator() == FilterOperator.EQUAL || param.getFilterOperator() == FilterOperator.IS) {
+            if (param.getFilterOperator() == FilterOperator.EQUAL ||
+                param.getFilterOperator() == FilterOperator.IS ||
+                param.getFilterOperator() == FilterOperator.IN_LIST_OF_VALUES) {
                 keysAvailable.add(param.getLookupable().getExpression());
             }
             else if (param.getFilterOperator().isRangeOperator() ||
@@ -240,13 +246,29 @@ public class NamedWindowRootViewInstance extends ViewSupport
             return null;    // indicates table scan
         }
 
-        // Compile key index lookup values
+        // Compile key sets which contain key index lookup values
         String[] keyIndexProps = IndexedPropDesc.getIndexProperties(tablePair.getFirst().getHashIndexedProps());
+        boolean hasKeyWithInClause = false;
         Object[] keyValues = new Object[keyIndexProps.length];
         for (int keyIndex = 0; keyIndex < keyIndexProps.length; keyIndex++) {
             for (FilterSpecParam param : optionalFilter.getParameters()) {
                 if (param.getLookupable().getExpression().equals(keyIndexProps[keyIndex])) {
-                    keyValues[keyIndex] = param.getFilterValue(null, agentInstanceContext);
+                    if (param.getFilterOperator() == FilterOperator.IN_LIST_OF_VALUES) {
+                        Object[] keyValuesList = ((MultiKeyUntyped) param.getFilterValue(null, agentInstanceContext)).getKeys();
+                        if (keyValuesList.length == 0) {
+                            continue;
+                        }
+                        else if (keyValuesList.length == 1) {
+                            keyValues[keyIndex] = keyValuesList[0];
+                        }
+                        else {
+                            keyValues[keyIndex] = keyValuesList;
+                            hasKeyWithInClause = true;
+                        }
+                    }
+                    else {
+                        keyValues[keyIndex] = param.getFilterValue(null, agentInstanceContext);
+                    }
                     break;
                 }
             }
@@ -263,11 +285,40 @@ public class NamedWindowRootViewInstance extends ViewSupport
         }
 
         EventTable eventTable = tablePair.getSecond().getEventTable();
+        IndexMultiKey indexMultiKey = tablePair.getFirst();
+
+        // table lookup without in-clause
+        if (!hasKeyWithInClause) {
+            return fafTableLookup(virtualDataWindow, indexMultiKey, eventTable, keyValues, rangeValues, annotations);
+        }
+
+        // table lookup with in-clause: determine combinations
+        Object[][] combinations = new Object[keyIndexProps.length][];
+        for (int i = 0; i < keyValues.length; i++) {
+            if (keyValues[i] instanceof Object[]) {
+                combinations[i] = (Object[]) keyValues[i];
+            }
+            else {
+                combinations[i] = new Object[] {keyValues[i]};
+            }
+        }
+
+        // enumerate combinations
+        CombinationEnumeration enumeration = new CombinationEnumeration(combinations);
+        HashSet<EventBean> events = new HashSet<EventBean>();
+        for (;enumeration.hasMoreElements();) {
+            Object[] keys = enumeration.nextElement();
+            Collection<EventBean> result = fafTableLookup(virtualDataWindow, indexMultiKey, eventTable, keys, rangeValues, annotations);
+            events.addAll(result);
+        }
+        return events;
+    }
+
+    private Collection<EventBean> fafTableLookup(VirtualDWView virtualDataWindow, IndexMultiKey indexMultiKey, EventTable eventTable, Object[] keyValues, RangeIndexLookupValue[] rangeValues, Annotation[] annotations) {
         if (virtualDataWindow != null) {
             return virtualDataWindow.getFireAndForgetData(eventTable, keyValues, rangeValues, annotations);
         }
 
-        IndexMultiKey indexMultiKey = tablePair.getFirst();
         Set<EventBean> result;
         if (indexMultiKey.getHashIndexedProps().length > 0 && indexMultiKey.getRangeIndexedProps().length == 0) {
             if (indexMultiKey.getHashIndexedProps().length == 1) {

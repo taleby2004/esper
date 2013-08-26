@@ -973,7 +973,7 @@ select Part.zone from pattern [
 		</para>
 		
 		<para>
-		   See the <literal></literal> folder for example code, compile and run scripts.
+		   See the <literal>examples/cycledetect</literal> folder for example code, compile and run scripts.
 		</para>
 
     </sect1>

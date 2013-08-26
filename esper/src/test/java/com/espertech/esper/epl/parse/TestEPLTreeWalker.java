@@ -248,16 +248,18 @@ public class TestEPLTreeWalker extends TestCase
         assertEquals(3, setDesc.getAssignments().size());
 
         OnTriggerSetAssignment assign = setDesc.getAssignments().get(0);
-        assertEquals("var1", assign.getVariableName());
-        assertTrue(assign.getExpression() instanceof ExprConstantNode);
+        assertEquals("var1", ((ExprVariableNode)(assign.getExpression().getChildNodes()[0])).getVariableName());
+        assertTrue(assign.getExpression() instanceof ExprEqualsNode);
+        assertTrue(assign.getExpression().getChildNodes()[1] instanceof ExprConstantNode);
 
         assign = setDesc.getAssignments().get(1);
-        assertEquals("var2", assign.getVariableName());
-        assertTrue(assign.getExpression() instanceof ExprMathNode);
+        assertEquals("var2", ((ExprIdentNode)(assign.getExpression().getChildNodes()[0])).getFullUnresolvedName());
+        assertTrue(assign.getExpression() instanceof ExprEqualsNode);
+        assertTrue(assign.getExpression().getChildNodes()[1] instanceof ExprMathNode);
 
         assign = setDesc.getAssignments().get(2);
-        assertEquals("var3", assign.getVariableName());
-        ExprVariableNode varNode = (ExprVariableNode) assign.getExpression();
+        assertEquals("var3", ((ExprIdentNode)(assign.getExpression().getChildNodes()[0])).getFullUnresolvedName());
+        ExprVariableNode varNode = (ExprVariableNode) assign.getExpression().getChildNodes()[1];
         assertEquals("var1", varNode.getVariableName());
 
         assertTrue(raw.isHasVariables());
@@ -285,8 +287,8 @@ public class TestEPLTreeWalker extends TestCase
         assertEquals(2, setDesc.getAssignments().size());
 
         OnTriggerSetAssignment assign = setDesc.getAssignments().get(0);
-        assertEquals("prop1", assign.getVariableName());
-        assertTrue(assign.getExpression() instanceof ExprConstantNode);
+        assertEquals("prop1", ((ExprIdentNode)(assign.getExpression().getChildNodes()[0])).getFullUnresolvedName());
+        assertTrue(assign.getExpression().getChildNodes()[1] instanceof ExprConstantNode);
 
         assertEquals("a = b", raw.getFilterExprRootNode().toExpressionString());
     }

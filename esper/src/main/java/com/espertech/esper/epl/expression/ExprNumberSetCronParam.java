@@ -32,7 +32,6 @@ public class ExprNumberSetCronParam extends ExprNodeBase implements ExprEvaluato
     private static final Log log = LogFactory.getLog(ExprNumberSetCronParam.class);
 
     private final CronOperatorEnum cronOperator;
-    private transient TimeProvider timeProvider;
     private transient ExprEvaluator evaluator;
     private static final long serialVersionUID = -1315999998249935318L;
 
@@ -93,7 +92,6 @@ public class ExprNumberSetCronParam extends ExprNodeBase implements ExprEvaluato
 
     public void validate(ExprValidationContext validationContext) throws ExprValidationException
     {
-        this.timeProvider = validationContext.getTimeProvider();
         if (this.getChildNodes().length == 0)
         {
             return;
@@ -113,24 +111,20 @@ public class ExprNumberSetCronParam extends ExprNodeBase implements ExprEvaluato
 
     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
     {
-        if (timeProvider == null)
-        {
-            throw new EPException("Expression node has not been validated");
-        }
         if (this.getChildNodes().length == 0)
         {
-            return new CronParameter(cronOperator, null, timeProvider.getTime());
+            return new CronParameter(cronOperator, null);
         }
         Object value = evaluator.evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
         if (value == null)
         {
             log.warn("Null value returned for cron parameter");
-            return new CronParameter(cronOperator, null, timeProvider.getTime());
+            return new CronParameter(cronOperator, null);
         }
         else
         {
             int intValue = ((Number) value).intValue();
-            return new CronParameter(cronOperator, intValue, timeProvider.getTime());
+            return new CronParameter(cronOperator, intValue);
         }
     }
 }

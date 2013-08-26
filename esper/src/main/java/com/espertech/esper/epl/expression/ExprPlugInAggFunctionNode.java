@@ -67,7 +67,7 @@ public class ExprPlugInAggFunctionNode extends ExprAggregateNodeBase
         }
         catch (RuntimeException ex)
         {
-            throw new ExprValidationException("Plug-in aggregation function '" + aggregationSupport.getFunctionName() + "' failed validation: " + ex.getMessage());
+            throw new ExprValidationException("Plug-in aggregation function '" + aggregationSupport.getFunctionName() + "' failed validation: " + ex.getMessage(), ex);
         }
 
         Class childType = null;

@@ -314,6 +314,8 @@ public class TestScriptExpression extends TestCase {
         if (TEST_MVEL) {
             tryNested("mvel");
         }
+
+        tryAggregation();
     }
 
     public void testParserMVELSelectNoArgConstant() {
@@ -632,6 +634,14 @@ public class TestScriptExpression extends TestCase {
         EventBean theEvent = listener.assertOneGetNewAndReset();
         assertEquals(value, theEvent.get("getResultOne()"));
         stmt.destroy();
+    }
+
+    private void tryAggregation() {
+        epService.getEPAdministrator().createEPL("create expression change(open, close) [ (open - close) / close ]");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select change(first(intPrimitive), last(intPrimitive)) as ch from SupportBean.win:time(1 day)");
+        stmt.addListener(listener);
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 10));
     }
 
     private void tryParseMVEL(String mvelExpression, Class type, Object value) {

@@ -168,9 +168,7 @@ public class ContextManagerImpl implements ContextManager, ContextControllerLife
 
         // for all new contexts: evaluate this event for this statement
         if (optionalTriggeringEvent != null || optionalTriggeringPattern != null) {
-            for (AgentInstance context : newInstances) {
-                StatementAgentInstanceUtil.evaluateEventForStatement(servicesContext, optionalTriggeringEvent, optionalTriggeringPattern, context.getAgentInstanceContext());
-            }
+            StatementAgentInstanceUtil.evaluateEventForStatement(servicesContext, optionalTriggeringEvent, optionalTriggeringPattern, newInstances);
         }
 
         // save leaf

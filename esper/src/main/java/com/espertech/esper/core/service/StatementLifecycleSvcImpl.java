@@ -1161,6 +1161,9 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         if (spec.getOutputLimitSpec() != null) {
             return false;
         }
+        if (spec.getMatchRecognizeSpec() != null) {
+            return false;
+        }
 
         List<ExprNode> expressions = StatementSpecRawAnalyzer.collectExpressionsShallow(spec);
         if (expressions.isEmpty()) {

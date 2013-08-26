@@ -57,7 +57,7 @@ public class EventAdapterServiceHelper
      * @param eventType to reflect on
      * @return list of writable properties
      */
-    public static Set<WriteablePropertyDescriptor> getWriteableProperties(EventType eventType)
+    public static Set<WriteablePropertyDescriptor> getWriteableProperties(EventType eventType, boolean allowAnyType)
     {
         if (!(eventType instanceof EventTypeSPI))
         {
@@ -69,14 +69,14 @@ public class EventAdapterServiceHelper
             return PropertyHelper.getWritableProperties(beanEventType.getUnderlyingType());
         }
         EventTypeSPI typeSPI = (EventTypeSPI) eventType;
-        if (!typeSPI.getMetadata().isApplicationConfigured() && typeSPI.getMetadata().getTypeClass() != EventTypeMetadata.TypeClass.ANONYMOUS)
+        if (!allowAnyType && (!typeSPI.getMetadata().isApplicationConfigured() && typeSPI.getMetadata().getTypeClass() != EventTypeMetadata.TypeClass.ANONYMOUS))
         {
             return null;
         }
         if (eventType instanceof BaseNestableEventType)
         {
             Map<String, Object> mapdef = ((BaseNestableEventType) eventType).getTypes();
-            Set<WriteablePropertyDescriptor> writables = new HashSet<WriteablePropertyDescriptor>();
+            Set<WriteablePropertyDescriptor> writables = new LinkedHashSet<WriteablePropertyDescriptor>();
             for (Map.Entry<String, Object> types : mapdef.entrySet())
             {
                 if (types.getValue() instanceof Class)
@@ -144,7 +144,7 @@ public class EventAdapterServiceHelper
      * @return factory
      * @throws EventBeanManufactureException if a factory cannot be created for the type
      */
-    public static EventBeanManufacturer getManufacturer(EventAdapterService eventAdapterService, EventType eventType, WriteablePropertyDescriptor[] properties, EngineImportService engineImportService)
+    public static EventBeanManufacturer getManufacturer(EventAdapterService eventAdapterService, EventType eventType, WriteablePropertyDescriptor[] properties, EngineImportService engineImportService, boolean allowAnyType)
             throws EventBeanManufactureException
     {
         if (!(eventType instanceof EventTypeSPI))
@@ -157,7 +157,7 @@ public class EventAdapterServiceHelper
             return new EventBeanManufacturerBean(beanEventType, eventAdapterService, properties, engineImportService);
         }
         EventTypeSPI typeSPI = (EventTypeSPI) eventType;
-        if (!typeSPI.getMetadata().isApplicationConfigured() && typeSPI.getMetadata().getTypeClass() != EventTypeMetadata.TypeClass.ANONYMOUS)
+        if (!allowAnyType && (!typeSPI.getMetadata().isApplicationConfigured() && typeSPI.getMetadata().getTypeClass() != EventTypeMetadata.TypeClass.ANONYMOUS))
         {
             return null;
         }

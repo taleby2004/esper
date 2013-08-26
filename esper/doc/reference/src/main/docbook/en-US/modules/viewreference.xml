@@ -1049,6 +1049,11 @@ select * from StockTickEvent.std:groupwin(symbol).win:length(1)]]></programlisti
 select symbol, sum(price) from StockTickEvent.std:groupwin(symbol).win:length(5)]]></programlisting>
 
 				<para>
+					Reclaim executes when an event arrives and not in the timer thread. In the example above reclaim can occur up to 40 seconds of engine time after the newest event arrives.
+					Reclaim may affect iteration order for the statement and iteration order becomes indeterministic with reclaim.
+				</para>
+
+				<para>
 					To compute the total price for the last 5 events considering the last 5 events per each symbol and outputting a price per symbol, add the <literal>group by</literal> clause:
 				</para>
 	
@@ -1144,7 +1149,7 @@ select * from Market.std:groupwin(ticker).win:length(1000000).std:merge(ticker)
 				<synopsis>std:size([<emphasis>expression</emphasis>, ...] [ * ])</synopsis>
 
 				<para>					
-					The view posts a single long-typed property named <literal>size</literal>. The view posts the prior size as old data, and the current size as new data to update listeners of the view. Via the <literal>iterator</literal> method of the statement the size value can also be polled (read).
+					The view posts a single long-typed property named <literal>size</literal>. The view posts the prior size as old data, and the current size as new data to update listeners of the view. Via the <literal>iterator</literal> method of the statement the size value can also be polled (read). The view only posts output events when the <literal>size</literal> count changes and does not stay the same.
 				</para>
 				
 				<para>

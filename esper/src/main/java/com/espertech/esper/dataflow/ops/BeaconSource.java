@@ -35,7 +35,7 @@ import java.util.*;
 public class BeaconSource implements DataFlowSourceOperator {
     private static final Log log = LogFactory.getLog(BeaconSource.class);
 
-    private final static List<String> PARAMETER_PROPERTIES = Arrays.asList("iterations", "initialDelay", "period");
+    private final static List<String> PARAMETER_PROPERTIES = Arrays.asList("interval", "iterations", "initialDelay");
 
     @DataFlowContext
     private EPDataFlowEmitter graphContext;
@@ -83,10 +83,10 @@ public class BeaconSource implements DataFlowSourceOperator {
             Set<String> props = allProperties.keySet();
             props.removeAll(PARAMETER_PROPERTIES);
             WriteablePropertyDescriptor[] writables = setupProperties(props.toArray(new String[props.size()]), outputEventType, context.getStatementContext());
-            manufacturer = context.getServicesContext().getEventAdapterService().getManufacturer(outputEventType, writables, context.getServicesContext().getEngineImportService());
+            manufacturer = context.getServicesContext().getEventAdapterService().getManufacturer(outputEventType, writables, context.getServicesContext().getEngineImportService(), false);
 
             int index = 0;
-            evaluators = new ExprEvaluator[outputEventType.getPropertyDescriptors().length];
+            evaluators = new ExprEvaluator[writables.length];
             for (WriteablePropertyDescriptor writeable : writables) {
 
                 ExprNode exprNode = (ExprNode) allProperties.get(writeable.getPropertyName());
@@ -199,7 +199,9 @@ public class BeaconSource implements DataFlowSourceOperator {
             if (evaluators != null) {
                 Object[] row = new Object[evaluators.length];
                 for (int i = 0; i < row.length; i++) {
-                    row[i] = evaluators[i].evaluate(null, true, null);
+                    if (evaluators[i] != null) {
+                        row[i] = evaluators[i].evaluate(null, true, null);
+                    }
                 }
                 if (log.isDebugEnabled()) {
                     log.debug("BeaconSource submitting row " + Arrays.toString(row));
@@ -240,7 +242,7 @@ public class BeaconSource implements DataFlowSourceOperator {
     private static WriteablePropertyDescriptor[] setupProperties(String[] propertyNamesOffered, EventType outputEventType, StatementContext statementContext)
             throws ExprValidationException
     {
-        Set<WriteablePropertyDescriptor> writeables = statementContext.getEventAdapterService().getWriteableProperties(outputEventType);
+        Set<WriteablePropertyDescriptor> writeables = statementContext.getEventAdapterService().getWriteableProperties(outputEventType, false);
 
         List<WriteablePropertyDescriptor> writablesList = new ArrayList<WriteablePropertyDescriptor>();
 

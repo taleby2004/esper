@@ -28,6 +28,7 @@ import com.espertech.esper.epl.script.AgentInstanceScriptContext;
 import com.espertech.esper.epl.view.OutputProcessViewTerminable;
 import com.espertech.esper.event.MappedEventBean;
 import com.espertech.esper.filter.FilterHandle;
+import com.espertech.esper.filter.FilterHandleCallback;
 import com.espertech.esper.util.StopCallback;
 import com.espertech.esper.view.Viewable;
 import org.apache.commons.logging.Log;
@@ -42,9 +43,7 @@ public class StatementAgentInstanceUtil {
     public static void handleFilterFault(EventBean theEvent, long version, EPServicesContext servicesContext, Map<Integer, ContextControllerTreeAgentInstanceList> agentInstanceListMap) {
         for (Map.Entry<Integer, ContextControllerTreeAgentInstanceList> agentInstanceEntry : agentInstanceListMap.entrySet()) {
             if (agentInstanceEntry.getValue().getFilterVersionAfterAllocation() > version) {
-                for (AgentInstance context : agentInstanceEntry.getValue().getAgentInstances()) {
-                    StatementAgentInstanceUtil.evaluateEventForStatement(servicesContext, theEvent, null, context.getAgentInstanceContext());
-                }
+                StatementAgentInstanceUtil.evaluateEventForStatement(servicesContext, theEvent, null, agentInstanceEntry.getValue().getAgentInstances());
             }
         }
     }
@@ -221,51 +220,115 @@ public class StatementAgentInstanceUtil {
         }
     }
 
-    public static void evaluateEventForStatement(EPServicesContext servicesContext, EventBean theEvent, Map<String, Object> optionalTriggeringPattern, AgentInstanceContext agentInstanceContext) {
+    public static void evaluateEventForStatement(EPServicesContext servicesContext, EventBean theEvent, Map<String, Object> optionalTriggeringPattern, List<AgentInstance> agentInstances) {
         if (theEvent != null) {
-            evaluateEventForStatementInternal(servicesContext, theEvent, agentInstanceContext);
+            evaluateEventForStatementInternal(servicesContext, theEvent, agentInstances);
         }
         if (optionalTriggeringPattern != null) {
             // evaluation order definition is up to the originator of the triggering pattern
             for (Map.Entry<String, Object> entry : optionalTriggeringPattern.entrySet()) {
                 if (entry.getValue() instanceof EventBean) {
-                    evaluateEventForStatementInternal(servicesContext, (EventBean) entry.getValue(), agentInstanceContext);
+                    evaluateEventForStatementInternal(servicesContext, (EventBean) entry.getValue(), agentInstances);
                 }
                 else if (entry.getValue() instanceof EventBean[]) {
                     EventBean[] eventsArray = (EventBean[]) entry.getValue();
                     for (EventBean eventElement : eventsArray) {
-                        evaluateEventForStatementInternal(servicesContext, eventElement, agentInstanceContext);
+                        evaluateEventForStatementInternal(servicesContext, eventElement, agentInstances);
                     }
                 }
             }
         }
     }
 
-    private static void evaluateEventForStatementInternal(EPServicesContext servicesContext, EventBean theEvent, AgentInstanceContext agentInstanceContext) {
+    private static void evaluateEventForStatementInternal(EPServicesContext servicesContext, EventBean theEvent, List<AgentInstance> agentInstances) {
         // context was created - reevaluate for the given event
-        ArrayDeque<FilterHandle> callbacks = new ArrayDeque<FilterHandle>();
-        servicesContext.getFilterService().evaluate(theEvent, callbacks, agentInstanceContext.getStatementContext().getStatementId());
-
-        try
-        {
-            servicesContext.getVariableService().setLocalVersion();
-
-            // sub-selects always go first
-            for (FilterHandle handle : callbacks)
-            {
-                EPStatementHandleCallback callback = (EPStatementHandleCallback) handle;
-                if (callback.getAgentInstanceHandle() != agentInstanceContext.getEpStatementAgentInstanceHandle()) {
-                    continue;
-                }
-                callback.getFilterCallback().matchFound(theEvent, null);
-            }
-            agentInstanceContext.getEpStatementAgentInstanceHandle().internalDispatch(agentInstanceContext);
-
-            // No thread work queue processing: leave that for later, but dispatch (i.e. no processThreadWorkQueue);
-            servicesContext.getInternalEventEngineRouteDest().dispatch();
+        ArrayDeque<FilterHandle> callbacks = new ArrayDeque<FilterHandle>(2);
+        servicesContext.getFilterService().evaluate(theEvent, callbacks);   // evaluates for ALL statements
+        if (callbacks.isEmpty()) {
+            return;
         }
-        catch (RuntimeException ex) {
-            servicesContext.getExceptionHandlingService().handleException(ex, agentInstanceContext.getEpStatementAgentInstanceHandle());
+
+        // there is a single callback and a single context, if they match we are done
+        if (agentInstances.size() == 1 && callbacks.size() == 1) {
+            AgentInstance agentInstance = agentInstances.get(0);
+            if (agentInstance.getAgentInstanceContext().getStatementId().equals(callbacks.getFirst().getStatementId())) {
+                process(agentInstance, servicesContext, callbacks, theEvent);
+            }
+            return;
+        }
+
+        // use the right sorted/unsorted Map keyed by AgentInstance to sort
+        boolean isPrioritized = servicesContext.getConfigSnapshot().getEngineDefaults().getExecution().isPrioritized();
+        Map<AgentInstance, Object> stmtCallbacks;
+        if (!isPrioritized) {
+            stmtCallbacks = new HashMap<AgentInstance, Object>();
+        }
+        else {
+            stmtCallbacks = new TreeMap<AgentInstance, Object>(AgentInstanceComparator.INSTANCE);
+        }
+
+        // process all callbacks
+        for (FilterHandle filterHandle : callbacks)
+        {
+            // determine if this filter entry applies to any of the affected agent instances
+            String statementId = filterHandle.getStatementId();
+            AgentInstance agentInstanceFound = null;
+            for (AgentInstance agentInstance : agentInstances) {
+                if (agentInstance.getAgentInstanceContext().getStatementId().equals(statementId)) {
+                    agentInstanceFound = agentInstance;
+                    break;
+                }
+            }
+            if (agentInstanceFound == null) {   // when the callback is for some other stmt
+                continue;
+            }
+
+            EPStatementHandleCallback handleCallback = (EPStatementHandleCallback) filterHandle;
+            EPStatementAgentInstanceHandle handle = handleCallback.getAgentInstanceHandle();
+
+            // Self-joins require that the internal dispatch happens after all streams are evaluated.
+            // Priority or preemptive settings also require special ordering.
+            if (handle.isCanSelfJoin() || isPrioritized)
+            {
+                Object stmtCallback = stmtCallbacks.get(agentInstanceFound);
+                if (stmtCallback == null) {
+                    stmtCallbacks.put(agentInstanceFound, handleCallback);
+                }
+                else if (stmtCallback instanceof ArrayDeque) {
+                    ArrayDeque<EPStatementHandleCallback> q = (ArrayDeque<EPStatementHandleCallback>) stmtCallback;
+                    q.add(handleCallback);
+                }
+                else {
+                    ArrayDeque<EPStatementHandleCallback> q = new ArrayDeque<EPStatementHandleCallback>(4);
+                    q.add((EPStatementHandleCallback) stmtCallback);
+                    q.add(handleCallback);
+                    stmtCallbacks.put(agentInstanceFound, q);
+                }
+                continue;
+            }
+
+            // no need to be sorted, process
+            process(agentInstanceFound, servicesContext, Collections.<FilterHandle>singletonList(handleCallback), theEvent);
+        }
+
+        if (stmtCallbacks.isEmpty()) {
+            return;
+        }
+
+        // Process self-join or sorted prioritized callbacks
+        for (Map.Entry<AgentInstance, Object> entry : stmtCallbacks.entrySet())
+        {
+            AgentInstance agentInstance = entry.getKey();
+            Object callbackList = entry.getValue();
+            if (callbackList instanceof ArrayDeque) {
+                process(agentInstance, servicesContext, (Collection<FilterHandle>) callbackList, theEvent);
+            }
+            else {
+                process(agentInstance, servicesContext, Collections.<FilterHandle>singletonList((FilterHandle) callbackList), theEvent);
+            }
+            if (agentInstance.getAgentInstanceContext().getEpStatementAgentInstanceHandle().isPreemptive()) {
+                return;
+            }
         }
     }
 
@@ -285,6 +348,7 @@ public class StatementAgentInstanceUtil {
                     return true;
                 }
             }
+
             agentInstanceContext.getEpStatementAgentInstanceHandle().internalDispatch(agentInstanceContext);
 
         }
@@ -302,5 +366,34 @@ public class StatementAgentInstanceUtil {
                 StatementAgentInstanceUtil.stopSafe(agentInstanceContext.getTerminationCallbackRO(), stopCallbackArr, agentInstanceContext.getStatementContext());
             }
         };
+    }
+
+    private static void process(AgentInstance agentInstance,
+                                EPServicesContext servicesContext,
+                                Collection<FilterHandle> callbacks,
+                                EventBean theEvent) {
+        AgentInstanceContext agentInstanceContext = agentInstance.getAgentInstanceContext();
+        agentInstance.getAgentInstanceContext().getAgentInstanceLock().acquireWriteLock(servicesContext.getStatementLockFactory());
+        try {
+            servicesContext.getVariableService().setLocalVersion();
+
+            // sub-selects always go first
+            for (FilterHandle handle : callbacks)
+            {
+                EPStatementHandleCallback callback = (EPStatementHandleCallback) handle;
+                if (callback.getAgentInstanceHandle() != agentInstanceContext.getEpStatementAgentInstanceHandle()) {
+                    continue;
+                }
+                callback.getFilterCallback().matchFound(theEvent, null);
+            }
+
+            agentInstanceContext.getEpStatementAgentInstanceHandle().internalDispatch(agentInstanceContext);
+        }
+        catch (RuntimeException ex) {
+            servicesContext.getExceptionHandlingService().handleException(ex, agentInstanceContext.getEpStatementAgentInstanceHandle());
+        }
+        finally {
+            agentInstanceContext.getAgentInstanceLock().releaseWriteLock(servicesContext.getStatementLockFactory());
+        }
     }
 }

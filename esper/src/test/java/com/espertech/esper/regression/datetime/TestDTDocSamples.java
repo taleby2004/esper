@@ -82,4 +82,11 @@ public class TestDTDocSamples extends TestCase {
 
         stmt.destroy();
     }
+
+    public static class MyEvent {
+
+        public String get() {
+            return "abc";
+        }
+    }
 }

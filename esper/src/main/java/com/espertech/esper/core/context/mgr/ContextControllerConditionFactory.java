@@ -47,6 +47,9 @@ public class ContextControllerConditionFactory {
             ScheduleSlot scheduleSlot = agentInstanceContext.getStatementContext().getScheduleBucket().allocateSlot();
             return new ContextControllerConditionTimePeriod(contextName, agentInstanceContext, scheduleSlot, timePeriod, callback, filterAddendum);
         }
+        else if (endpoint instanceof ContextDetailConditionImmediate) {
+            return new ContextControllerConditionImmediate();
+        }
         throw new IllegalStateException("Unrecognized context range endpoint " + endpoint.getClass());
     }
 }

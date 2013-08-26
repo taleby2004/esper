@@ -37,6 +37,13 @@ public class StatementNoLockImpl implements StatementAgentInstanceLock
     }
 
     /**
+     * Lock write lock.
+     */
+    public boolean acquireWriteLock(StatementLockFactory statementLockFactory, long msecTimeout) {
+        return true;
+    }
+
+    /**
      * Unlock write lock.
      */
     public void releaseWriteLock(StatementLockFactory statementLockFactory)

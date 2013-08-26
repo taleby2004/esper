@@ -42,7 +42,7 @@ public class TestGroupByView extends TestCase
 
         SupportBeanClassView childView = new SupportBeanClassView(SupportMarketDataBean.class);
 
-        MergeView myMergeView = new MergeView(agentInstanceContext, SupportExprNodeFactory.makeIdentNodesMD("symbol"), SupportEventTypeFactory.createBeanType(SupportMarketDataBean.class));
+        MergeView myMergeView = new MergeView(agentInstanceContext, SupportExprNodeFactory.makeIdentNodesMD("symbol"), SupportEventTypeFactory.createBeanType(SupportMarketDataBean.class), false);
 
         ultimateChildView = new SupportBeanClassView(SupportMarketDataBean.class);
 
@@ -144,7 +144,7 @@ public class TestGroupByView extends TestCase
         }
 
         // Invalid for child node is a merge node - doesn't make sense to group and merge only
-        MergeView mergeViewOne = new MergeView(agentInstanceContext, SupportExprNodeFactory.makeIdentNodesMD("symbol"), null);
+        MergeView mergeViewOne = new MergeView(agentInstanceContext, SupportExprNodeFactory.makeIdentNodesMD("symbol"), null, false);
         groupView.addView(mergeViewOne);
         try
         {
@@ -163,7 +163,7 @@ public class TestGroupByView extends TestCase
 
         groupView.addView(firstElementView_1);
         groupView.setParent(eventStream);
-        mergeViewOne = new MergeView(agentInstanceContext, SupportExprNodeFactory.makeIdentNodesMD("symbol"), null);
+        mergeViewOne = new MergeView(agentInstanceContext, SupportExprNodeFactory.makeIdentNodesMD("symbol"), null, false);
         firstElementView_1.addView(mergeViewOne);
 
         Object subViews = GroupByViewImpl.makeSubViews(groupView, "symbol".split(","), groupByValue, agentInstanceContext);

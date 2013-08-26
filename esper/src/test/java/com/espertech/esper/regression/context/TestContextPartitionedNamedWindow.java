@@ -75,11 +75,19 @@ public class TestContextPartitionedNamedWindow extends TestCase {
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 0));
 
+        String expected = "Error executing statement: Named window 'MyWindow' is associated to context 'SegmentedByString' that is not available for querying without context partition selector, use the executeQuery(epl, selector) method instead [select * from MyWindow]";
         try {
             epService.getEPRuntime().executeQuery("select * from MyWindow");
         }
         catch (EPException ex) {
-            String expected = "Error executing statement: Named window 'MyWindow' is associated to context 'SegmentedByString' that is not available for querying without context partition selector, use the executeQuery(epl, selector) method instead [select * from MyWindow]";
+            assertEquals(expected, ex.getMessage());
+        }
+
+        EPOnDemandPreparedQueryParameterized prepared = epService.getEPRuntime().prepareQueryWithParameters("select * from MyWindow");
+        try {
+            epService.getEPRuntime().executeQuery(prepared);
+        }
+        catch (EPException ex) {
             assertEquals(expected, ex.getMessage());
         }
     }
@@ -257,5 +265,28 @@ public class TestContextPartitionedNamedWindow extends TestCase {
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(0, "Gx"));
         assertFalse(listenerNamedWindow.isInvoked());
+    }
+
+    public void testSegmentedOnSelect() {
+        epService.getEPAdministrator().createEPL("@Name('context') create context SegmentedByString " +
+                "partition by theString from SupportBean, p00 from SupportBean_S0");
+
+        epService.getEPAdministrator().createEPL("@Name('named window') context SegmentedByString create window MyWindow.win:keepall() as SupportBean");
+        epService.getEPAdministrator().createEPL("@Name('insert') insert into MyWindow select * from SupportBean");
+
+        String[] fieldsNW = new String[] {"theString", "intPrimitive"};
+        EPStatement stmtSelect = epService.getEPAdministrator().createEPL("context SegmentedByString " +
+                "on SupportBean_S0 select mywin.* from MyWindow as mywin");
+        stmtSelect.addListener(listenerSelect);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("G1", 1));
+        epService.getEPRuntime().sendEvent(new SupportBean("G2", 2));
+        epService.getEPRuntime().sendEvent(new SupportBean("G1", 3));
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(0, "G1"));
+        EPAssertionUtil.assertPropsPerRow(listenerSelect.getAndResetLastNewData(), fieldsNW, new Object[][]{{"G1", 1}, {"G1", 3}});
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(0, "G2"));
+        EPAssertionUtil.assertPropsPerRow(listenerSelect.getAndResetLastNewData(), fieldsNW, new Object[][]{{"G2", 2}});
     }
 }

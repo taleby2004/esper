@@ -169,10 +169,8 @@ public class ASTExprHelper {
             }
 
             Tree childNode = node.getChild(i);
-            String variableName = ASTFilterSpecHelper.getPropertyName(childNode.getChild(0), 0);
-            ExprNode childEvalNode = astExprNodeMap.get(childNode.getChild(1));
-            astExprNodeMap.remove(childNode.getChild(1));
-            assignments.add(new OnTriggerSetAssignment(variableName, childEvalNode));
+            ExprNode childEvalNode = astExprNodeMap.remove(childNode.getChild(0));
+            assignments.add(new OnTriggerSetAssignment(childEvalNode));
         }
         return assignments;
     }

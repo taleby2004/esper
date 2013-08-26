@@ -29,10 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class EPLModuleUtil
 {
@@ -270,10 +267,15 @@ public class EPLModuleUtil
         Integer lineNum = null;
         int charPosStart = 0;
         int charPos = 0;
-        for (Object token : tokens.getTokens()) // Call getTokens first before invoking tokens.size! ANTLR problem
+        List<Token> tokenList = tokens.getTokens();
+        Set<Integer> skippedSemicolonIndexes = getSkippedSemicolons(tokenList);
+        int index = -1;
+        for (Object token : tokenList) // Call getTokens first before invoking tokens.size! ANTLR problem
         {
+            index++;
             Token t = (Token) token;
-            if (t.getType() == EsperEPL2GrammarParser.SEMI) {
+            boolean semi = t.getType() == EsperEPL2GrammarParser.SEMI && !skippedSemicolonIndexes.contains(index);
+            if (semi) {
                 if (current.toString().trim().length() > 0) {
                     statements.add(new EPLModuleParseItem(current.toString().trim(), lineNum == null ? 0 : lineNum, charPosStart, charPos));
                     lineNum = null;
@@ -341,5 +343,67 @@ public class EPLModuleUtil
                 log.debug("Error closing input stream", e);
             }
         }
+    }
+
+    /**
+     * Find expression declarations and skip semicolon content between square brackets for scripts
+     */
+    private static Set<Integer> getSkippedSemicolons(List<Token> tokens) {
+        Set<Integer> result = null;
+
+        int index = -1;
+        for (Object token : tokens)
+        {
+            index++;
+            Token t = (Token) token;
+            if (t.getType() == EsperEPL2GrammarParser.EXPRESSIONDECL) {
+                if (result == null) {
+                    result = new HashSet<Integer>();
+                }
+                getSkippedSemicolonsBetweenSquareBrackets(index, tokens, result);
+            }
+        }
+
+        return result == null ? Collections.<Integer>emptySet() : result;
+    }
+
+    /**
+     * Find content between square brackets
+     */
+    private static void getSkippedSemicolonsBetweenSquareBrackets(int index, List<Token> tokens, Set<Integer> result) {
+        // Handle EPL expression "{text}" and script expression "[text]"
+        int indexFirstCurly = indexFirstToken(index, tokens, EsperEPL2GrammarParser.LCURLY);
+        int indexFirstSquare = indexFirstToken(index, tokens, EsperEPL2GrammarParser.LBRACK);
+        if (indexFirstSquare == -1) {
+            return;
+        }
+        if (indexFirstCurly != -1 && indexFirstCurly < indexFirstSquare) {
+            return;
+        }
+        int indexCloseSquare = indexFirstToken(indexFirstSquare, tokens, EsperEPL2GrammarParser.RBRACK);
+        if (indexCloseSquare == -1) {
+            return;
+        }
+
+        int current = indexFirstSquare;
+        while(current < indexCloseSquare) {
+            Token t = tokens.get(current);
+            if (t.getType() == EsperEPL2GrammarParser.SEMI) {
+                result.add(current);
+            }
+            current++;
+        }
+    }
+
+    private static int indexFirstToken(int startIndex, List<Token> tokens, int tokenType) {
+        int index = startIndex;
+        while(index < tokens.size()) {
+            Token t = tokens.get(index);
+            if (t.getType() == tokenType) {
+                return index;
+            }
+            index++;
+        }
+        return -1;
     }
 }

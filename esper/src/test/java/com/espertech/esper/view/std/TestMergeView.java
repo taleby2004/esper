@@ -33,7 +33,7 @@ public class TestMergeView extends TestCase
         // Set up length window view and a test child view
         myView = new MergeView(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext(),
                 SupportExprNodeFactory.makeIdentNodesMD("symbol"),
-                SupportEventTypeFactory.createBeanType(SupportBean.class));
+                SupportEventTypeFactory.createBeanType(SupportBean.class), false);
 
         childView = new SupportBeanClassView(SupportMarketDataBean.class);
         myView.addView(childView);

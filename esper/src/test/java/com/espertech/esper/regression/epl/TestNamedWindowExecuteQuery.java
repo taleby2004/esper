@@ -62,6 +62,69 @@ public class TestNamedWindowExecuteQuery extends TestCase implements IndexBackin
         listener = null;
     }
 
+    public void testParameterizedQuery() {
+
+        for (int i = 0; i < 10; i++) {
+            epService.getEPRuntime().sendEvent(makeBean("E" + i, i, i*1000));
+        }
+
+        // test one parameter
+        String eplOneParam = "select * from MyWindow where intPrimitive = ?";
+        EPOnDemandPreparedQueryParameterized pqOneParam = epService.getEPRuntime().prepareQueryWithParameters(eplOneParam);
+        for (int i = 0; i < 10; i++) {
+            runParameterizedQuery(pqOneParam, new Object[] {i}, new String[] {"E" + i});
+        }
+        runParameterizedQuery(pqOneParam, new Object[] {-1}, null); // not found
+
+        // test two parameter
+        String eplTwoParam = "select * from MyWindow where intPrimitive = ? and longPrimitive = ?";
+        EPOnDemandPreparedQueryParameterized pqTwoParam = epService.getEPRuntime().prepareQueryWithParameters(eplTwoParam);
+        for (int i = 0; i < 10; i++) {
+            runParameterizedQuery(pqTwoParam, new Object[] {i, (long) i*1000}, new String[] {"E" + i});
+        }
+        runParameterizedQuery(pqTwoParam, new Object[] {-1, 1000}, null); // not found
+
+        // test in-clause with string objects
+        String eplInSimple = "select * from MyWindow where theString in (?, ?, ?)";
+        EPOnDemandPreparedQueryParameterized pqInSimple = epService.getEPRuntime().prepareQueryWithParameters(eplInSimple);
+        runParameterizedQuery(pqInSimple, new Object[] {"A", "A", "A"}, null); // not found
+        runParameterizedQuery(pqInSimple, new Object[] {"A", "E3", "A"}, new String[] {"E3"});
+
+        // test in-clause with string array
+        String eplInArray = "select * from MyWindow where theString in (?)";
+        EPOnDemandPreparedQueryParameterized pqInArray = epService.getEPRuntime().prepareQueryWithParameters(eplInArray);
+        runParameterizedQuery(pqInArray, new Object[] { new String[] {"E3", "E6", "E8"}}, new String[] {"E3", "E6", "E8"});
+
+        // various combinations
+        runParameterizedQuery(epService.getEPRuntime().prepareQueryWithParameters("select * from MyWindow where theString in (?) and longPrimitive = 4000"),
+                new Object[] { new String[] {"E3", "E4", "E8"}}, new String[] {"E4"});
+        runParameterizedQuery(epService.getEPRuntime().prepareQueryWithParameters("select * from MyWindow where longPrimitive > 8000"),
+                new Object[] {}, new String[] {"E9"});
+        runParameterizedQuery(epService.getEPRuntime().prepareQueryWithParameters("select * from MyWindow where longPrimitive < ?"),
+                new Object[] { 2000}, new String[] {"E0", "E1"});
+        runParameterizedQuery(epService.getEPRuntime().prepareQueryWithParameters("select * from MyWindow where longPrimitive between ? and ?"),
+                new Object[] { 2000, 4000}, new String[] {"E2", "E3", "E4"});
+    }
+
+    private void runParameterizedQuery(EPOnDemandPreparedQueryParameterized parameterizedQuery, Object[] parameters, String[] expected) {
+
+        for (int i = 0; i < parameters.length; i++) {
+            parameterizedQuery.setObject(i+1, parameters[i]);
+        }
+        EPOnDemandQueryResult result = epService.getEPRuntime().executeQuery(parameterizedQuery);
+        if (expected == null) {
+            assertEquals(0, result.getArray().length);
+        }
+        else {
+            assertEquals(expected.length, result.getArray().length);
+            String[] resultStrings = new String[result.getArray().length];
+            for (int i = 0; i < resultStrings.length; i++) {
+                resultStrings[i] = (String) result.getArray()[i].get("theString");
+            }
+            EPAssertionUtil.assertEqualsAnyOrder(expected, resultStrings);
+        }
+    }
+
     public void testFAFUpdate() {
         // test update-all
         for (int i = 0; i < 2; i++) {
@@ -112,6 +175,14 @@ public class TestNamedWindowExecuteQuery extends TestCase implements IndexBackin
         stmt.addListener(listener);
         epService.getEPRuntime().executeQuery("update MyWindow set intPrimitive=1000 where theString = 'E0'");
         EPAssertionUtil.assertProps(listener.assertPairGetIRAndReset(), FIELDS, new Object[] {"E0", 1000}, new Object[] {"E0", 0});
+
+        // test update via UDF and setter
+        epService.getEPAdministrator().getConfiguration().addPlugInSingleRowFunction("doubleInt", this.getClass().getName(), "doubleInt");
+        epService.getEPRuntime().executeQuery("delete from MyWindow");
+        epService.getEPRuntime().sendEvent(new SupportBean("A", 10));
+        epService.getEPRuntime().executeQuery("update MyWindow mw set mw.setTheString('XYZ'), doubleInt(mw)");
+        EPAssertionUtil.assertPropsPerRow(epService.getEPAdministrator().getStatement("TheWindow").iterator(),
+                "theString,intPrimitive".split(","), new Object[][] {{"XYZ", 20}});
     }
 
     public void testFAFDelete() {
@@ -461,6 +532,50 @@ public class TestNamedWindowExecuteQuery extends TestCase implements IndexBackin
         EPAssertionUtil.assertPropsPerRow(result.iterator(), fields, new Object[][]{{14}});
     }
 
+    public void testInClause() {
+        epService.getEPRuntime().sendEvent(makeBean("E1", 10, 100L));
+        epService.getEPRuntime().sendEvent(makeBean("E2", 20, 200L));
+        epService.getEPRuntime().sendEvent(makeBean("E3", 30, 300L));
+        epService.getEPRuntime().sendEvent(makeBean("E4", 40, 400L));
+
+        // try no index
+        runAssertionIn();
+
+        // try suitable index
+        EPStatement stmtIdx1 = epService.getEPAdministrator().createEPL("create index Idx1 on MyWindow(theString, intPrimitive)");
+        runAssertionIn();
+        stmtIdx1.destroy();
+
+        // backwards index
+        EPStatement stmtIdx2 = epService.getEPAdministrator().createEPL("create index Idx2 on MyWindow(intPrimitive, theString)");
+        runAssertionIn();
+        stmtIdx2.destroy();
+
+        // partial index
+        EPStatement stmtIdx3 = epService.getEPAdministrator().createEPL("create index Idx3 on MyWindow(intPrimitive)");
+        runAssertionIn();
+        stmtIdx3.destroy();
+    }
+
+    private void runAssertionIn() {
+        tryAssertionIn("theString in ('E2', 'E3') and intPrimitive in (10, 20)", new Long[]{200L});
+        tryAssertionIn("intPrimitive in (30, 20) and theString in ('E4', 'E1')", new Long[]{});
+        tryAssertionIn("intPrimitive in (30, 20) and theString in ('E2', 'E1')", new Long[]{200L});
+        tryAssertionIn("theString in ('E2', 'E3') and intPrimitive in (20, 30)", new Long[]{200L, 300L});
+        tryAssertionIn("theString in ('E2', 'E3') and intPrimitive in (30, 20)", new Long[]{200L, 300L});
+        tryAssertionIn("theString in ('E1', 'E2', 'E3', 'E4') and intPrimitive in (10, 20, 30)", new Long[]{100L, 200L, 300L});
+    }
+
+    private void tryAssertionIn(String filter, Long[] expected) {
+        EPOnDemandQueryResult result = epService.getEPRuntime().executeQuery("select * from MyWindow where " + filter);
+        assertEquals(result.getArray().length, expected.length);
+        List<Long> values = new ArrayList<Long>();
+        for (EventBean event : result.getArray()) {
+            values.add((Long) event.get("longPrimitive"));
+        }
+        EPAssertionUtil.assertEqualsAnyOrder(expected, values.toArray());
+    }
+
     public void testAggUngroupedRowForEvent() throws Exception
     {
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 0));
@@ -610,5 +725,15 @@ public class TestNamedWindowExecuteQuery extends TestCase implements IndexBackin
     private long getCtxWindowCatCount(String categoryName) {
         EPOnDemandQueryResult result = epService.getEPRuntime().executeQuery("select count(*) as c0 from CtxWindowCat", new ContextPartitionSelector[] {new SupportSelectorCategory(categoryName)});
         return (Long) result.getArray()[0].get("c0");
+    }
+
+    private SupportBean makeBean(String theString, int intPrimitive, long longPrimitive) {
+        SupportBean bean = new SupportBean(theString, intPrimitive);
+        bean.setLongPrimitive(longPrimitive);
+        return bean;
+    }
+
+    public static void doubleInt(SupportBean bean) {
+        bean.setIntPrimitive(bean.getIntPrimitive() * 2);
     }
 }

@@ -15,13 +15,18 @@ import com.espertech.esper.epl.variable.VariableService;
 
 public class ExprNodeAdapterMultiStreamStmtLock extends ExprNodeAdapterMultiStream
 {
+    public static final long LOCK_BACKOFF_MSEC = 10;
+
     public ExprNodeAdapterMultiStreamStmtLock(String statementName, ExprNode exprNode, ExprEvaluatorContext evaluatorContext, VariableService variableService, EventBean[] prototype) {
         super(statementName, exprNode, evaluatorContext, variableService, prototype);
     }
 
     @Override
     protected boolean evaluatePerStream(EventBean[] eventsPerStream) {
-        evaluatorContext.getAgentInstanceLock().acquireWriteLock(null);
+        boolean obtained = evaluatorContext.getAgentInstanceLock().acquireWriteLock(null, LOCK_BACKOFF_MSEC);
+        if (!obtained) {
+            throw new FilterLockBackoffException();
+        }
         try {
             return super.evaluatePerStream(eventsPerStream);
         }

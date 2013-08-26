@@ -21,6 +21,7 @@ public class ContextDescriptorConditionCrontab implements ContextDescriptorCondi
 
     private static final long serialVersionUID = 5676956299459269157L;
     private List<Expression> crontabExpressions;
+    private boolean now;
 
     /**
      * Ctor.
@@ -32,8 +33,9 @@ public class ContextDescriptorConditionCrontab implements ContextDescriptorCondi
      * Ctor.
      * @param crontabExpressions crontab expressions returning number sets for each crontab position
      */
-    public ContextDescriptorConditionCrontab(List<Expression> crontabExpressions) {
+    public ContextDescriptorConditionCrontab(List<Expression> crontabExpressions, boolean now) {
         this.crontabExpressions = crontabExpressions;
+        this.now = now;
     }
 
     /**
@@ -53,10 +55,21 @@ public class ContextDescriptorConditionCrontab implements ContextDescriptorCondi
     }
 
     public void toEPL(StringWriter writer, EPStatementFormatter formatter) {
-        write(writer, crontabExpressions);
+        write(writer, crontabExpressions, now);
     }
 
-    private static void write(StringWriter writer, List<Expression> expressions) {
+    public boolean isNow() {
+        return now;
+    }
+
+    public void setNow(boolean now) {
+        this.now = now;
+    }
+
+    private static void write(StringWriter writer, List<Expression> expressions, boolean now) {
+        if (now) {
+            writer.append("@now and ");
+        }
         writer.append("(");
         String delimiter = "";
         for (Expression e : expressions) {

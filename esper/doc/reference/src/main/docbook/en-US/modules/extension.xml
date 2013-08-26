@@ -942,6 +942,19 @@ public EventType getEventType() {
 			</para>
 		</sect2>
 
+		<sect2 xml:id="custom-views-derivedvalue" revision="1">
+			<title>Requirement for Derived-Value Views</title>
+			
+			<para>
+				Your custom view may compute derived information from the arriving stream, instead of retaining events, and thus act as a derived-value view. 
+			</para>
+		
+			<para>
+				Your view class should implement the <literal>com.espertech.esper.view.DerivedValueView</literal> interface. This marker interface indicates that your view is a derived-value view,
+				affecting correct behavior of the view when used in joins.
+			</para>
+		</sect2>
+
 		<sect2 xml:id="custom-views-grouped" revision="1">
 			<title>Requirement for Grouped Views</title>
 			

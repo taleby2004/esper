@@ -35,7 +35,7 @@ public class RegexNFAStateZeroToMany extends RegexNFAStateBase implements RegexN
     public RegexNFAStateZeroToMany(String nodeNum, String variableName, int streamNum, boolean multiple, boolean isGreedy, ExprNode exprNode)
     {
         super(nodeNum, variableName, streamNum, multiple, isGreedy);
-        this.exprNode = exprNode.getExprEvaluator();
+        this.exprNode = exprNode == null ? null : exprNode.getExprEvaluator();
         this.addState(this);
     }
 

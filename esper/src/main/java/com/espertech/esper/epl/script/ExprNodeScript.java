@@ -28,7 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ExprNodeScript extends ExprNodeBase {
+public class ExprNodeScript extends ExprNodeBase implements ExprNodeInnerNodeProvider {
 
     public static String CONTEXT_BINDING_NAME = "epl";
     private static final long serialVersionUID = 2661218104424440161L;
@@ -43,6 +43,10 @@ public class ExprNodeScript extends ExprNodeBase {
         this.defaultDialect = defaultDialect;
         this.script = script;
         this.parameters = parameters;
+    }
+
+    public List<ExprNode> getAdditionalNodes() {
+        return parameters;
     }
 
     public ExprEvaluator getExprEvaluator() {

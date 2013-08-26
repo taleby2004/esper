@@ -177,9 +177,12 @@ public class EPStatementStartMethodCreateContext extends EPStatementStartMethodB
 
             // compile as pattern if there are prior matches to consider, since this is a type of followed-by relationship
             EvalFactoryNode factoryNode = servicesContext.getPatternNodeFactory().makeFilterNode(filter.getFilterSpecRaw(), filter.getOptionalFilterAsName(), 0);
-            ContextDetailConditionPattern pattern = new ContextDetailConditionPattern(factoryNode, true);
+            ContextDetailConditionPattern pattern = new ContextDetailConditionPattern(factoryNode, true, false);
             Pair<MatchEventSpec, Set<String>> matches = validatePatternContextConditionPattern(statementContext, pattern, eventTypesReferenced, priorMatches, priorAllTags);
             return new ContextDetailMatchPair(pattern, matches.getFirst(), matches.getSecond());
+        }
+        else if (endpoint instanceof ContextDetailConditionImmediate) {
+            return new ContextDetailMatchPair(endpoint, new MatchEventSpec(), new LinkedHashSet<String>());
         }
         else {
             throw new IllegalStateException("Unrecognized endpoint type " + endpoint);

@@ -15,10 +15,7 @@ import com.espertech.esper.core.context.util.AgentInstanceContext;
 import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprNode;
-import com.espertech.esper.view.CloneableView;
-import com.espertech.esper.view.View;
-import com.espertech.esper.view.ViewFieldEnum;
-import com.espertech.esper.view.ViewSupport;
+import com.espertech.esper.view.*;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -30,7 +27,7 @@ import java.util.Map;
  * as   (sum(price * volume) / sum(volume)).
  * Example: weighted_avg("price", "volume")
  */
-public class WeightedAverageView extends ViewSupport implements CloneableView
+public class WeightedAverageView extends ViewSupport implements CloneableView, DerivedValueView
 {
     private final EventType eventType;
     private final AgentInstanceContext agentInstanceContext;

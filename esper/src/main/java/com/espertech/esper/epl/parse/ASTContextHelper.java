@@ -36,8 +36,31 @@ public class ASTContextHelper
 
         // temporal fixed (start+end) and overlapping (initiated/terminated)
         if (detailParent.getType() == EsperEPL2Ast.CREATE_CTX_INIT || detailParent.getType() == EsperEPL2Ast.CREATE_CTX_FIXED) {
-            ContextDetailCondition startEndpoint = getContextCondition(detailParent.getChild(0), astExprNodeMap, astPatternNodeMap, propertyEvalSpec);
-            ContextDetailCondition endEndpoint = getContextCondition(detailParent.getChild(1), astExprNodeMap, astPatternNodeMap, propertyEvalSpec);
+            ContextDetailCondition startEndpoint;
+            if (detailParent.getType() == EsperEPL2Ast.CREATE_CTX_FIXED) {
+                if (detailParent.getChild(0).getType() == EsperEPL2Ast.IDENT) {
+                    String ident = detailParent.getChild(0).getText().toLowerCase();
+                    if (!ident.equals("now")) {
+                        throw new ASTWalkException("Expected 'now' keyword after '@', found '" + ident + "' instead");
+                    }
+                    startEndpoint = new ContextDetailConditionImmediate();
+                }
+                else {
+                    startEndpoint = getContextCondition(detailParent.getChild(0), astExprNodeMap, astPatternNodeMap, propertyEvalSpec, false);
+                }
+            }
+            else {
+                boolean immediate = false;
+                if (detailParent.getChild(detailParent.getChildCount()-1).getType() == EsperEPL2Ast.IDENT) {
+                    String ident = detailParent.getChild(detailParent.getChildCount()-1).getText().toLowerCase();
+                    if (!ident.equals("now")) {
+                        throw new ASTWalkException("Expected 'now' keyword after '@', found '" + ident + "' instead");
+                    }
+                    immediate = true;
+                }
+                startEndpoint = getContextCondition(detailParent.getChild(0), astExprNodeMap, astPatternNodeMap, propertyEvalSpec, immediate);
+            }
+            ContextDetailCondition endEndpoint = getContextCondition(detailParent.getChild(1), astExprNodeMap, astPatternNodeMap, propertyEvalSpec, false);
             boolean overlapping = detailParent.getType() == EsperEPL2Ast.CREATE_CTX_INIT;
             contextDetail = new ContextDetailInitiatedTerminated(startEndpoint, endEndpoint, overlapping);
         }
@@ -120,10 +143,10 @@ public class ASTContextHelper
         return new CreateContextDesc(contextName, contextDetail);
     }
 
-    private static ContextDetailCondition getContextCondition(Tree parent, Map<Tree, ExprNode> astExprNodeMap, Map<Tree, EvalFactoryNode> astPatternNodeMap, PropertyEvalSpec propertyEvalSpec) {
+    private static ContextDetailCondition getContextCondition(Tree parent, Map<Tree, ExprNode> astExprNodeMap, Map<Tree, EvalFactoryNode> astPatternNodeMap, PropertyEvalSpec propertyEvalSpec, boolean immediate) {
         if (parent.getType() == EsperEPL2Ast.CRONTAB_LIMIT_EXPR_PARAM) {
             List<ExprNode> crontab = ASTExprHelper.getRemoveAllChildExpr(parent, astExprNodeMap);
-            return new ContextDetailConditionCrontab(crontab);
+            return new ContextDetailConditionCrontab(crontab, immediate);
         }
         else if (parent.getType() == EsperEPL2Ast.CREATE_CTX_PATTERN) {
             EvalFactoryNode evalNode = astPatternNodeMap.remove(parent.getChild(0).getChild(0));
@@ -135,16 +158,19 @@ public class ASTContextHelper
                 }
                 inclusive = true;
             }
-            return new ContextDetailConditionPattern(evalNode, inclusive);
+            return new ContextDetailConditionPattern(evalNode, inclusive, immediate);
         }
         else if (parent.getType() == EsperEPL2Ast.STREAM_EXPR) {
             FilterSpecRaw filterSpecRaw = ASTExprHelper.walkFilterSpec(parent.getChild(0), propertyEvalSpec, astExprNodeMap);
             String asName = parent.getChildCount() > 1 ? parent.getChild(1).getText() : null;
+            if (immediate) {
+                throw new ASTWalkException("Invalid use of 'now' with initiated-by stream, this combination is not supported");
+            }
             return new ContextDetailConditionFilter(filterSpecRaw, asName);
         }
         else if (parent.getType() == EsperEPL2Ast.AFTER) {
             ExprTimePeriod timePeriod = (ExprTimePeriod) astExprNodeMap.remove(parent.getChild(0));
-            return new ContextDetailConditionTimePeriod(timePeriod);
+            return new ContextDetailConditionTimePeriod(timePeriod, immediate);
         }
         else {
             throw new IllegalStateException("Unrecognized child type " + parent.getType());
