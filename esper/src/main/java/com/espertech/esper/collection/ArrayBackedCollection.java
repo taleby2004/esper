@@ -10,6 +10,7 @@ package com.espertech.esper.collection;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  * A fast collection backed by an array with severe limitations. Allows direct access to the backing array
@@ -93,7 +94,7 @@ public class ArrayBackedCollection<T> implements Collection<T>
 
     public Iterator<T> iterator()
     {
-        throw new UnsupportedOperationException();
+        return new ArrayBackedCollectionIterator(handles, currentIndex);
     }
 
     public Object[] toArray()
@@ -130,4 +131,39 @@ public class ArrayBackedCollection<T> implements Collection<T>
     {
         throw new UnsupportedOperationException();
     }
+
+    public class ArrayBackedCollectionIterator implements Iterator<T>
+    {
+        private final Object[] items;
+        private final int lastIndex;
+        private int position;
+
+        public ArrayBackedCollectionIterator(Object[] items, int lastIndex)
+        {
+            this.items = items;
+            this.lastIndex = lastIndex;
+        }
+
+        public boolean hasNext()
+        {
+            if (position >= lastIndex) {
+                return false;
+            }
+            return true;
+        }
+
+        public T next()
+        {
+            if (position >= lastIndex) {
+                throw new NoSuchElementException();
+            }
+            return (T) items[position++];
+        }
+
+        public void remove()
+        {
+            throw new UnsupportedOperationException();
+        }
+    }
+
 }

@@ -15,7 +15,7 @@ We add the most recent material to the top of the Presentation Materials list.
 *------------------------+
 | {{{http://java.dzone.com/articles/complex-event-processing-made} Complex Event Processing Made Easy }}
 *------------------------+
-| {{{www.mulesoft.org/connectors/esper-connector} Mule ESB Esper Connector}}
+| {{{http://www.mulesoft.org/connectors/esper-connector} Mule ESB Esper Connector}}
 *------------------------+
 | {{{http://dist.codehaus.org/esper/OpenSpliceDDS-EsperCEP-webinar.pdf} Stream Processing by DDS and CEP by Angelo Corsaro from OpenSplice}}
 *------------------------+
