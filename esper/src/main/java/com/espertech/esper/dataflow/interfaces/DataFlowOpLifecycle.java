@@ -12,7 +12,7 @@
 package com.espertech.esper.dataflow.interfaces;
 
 public interface DataFlowOpLifecycle {
-    public DataFlowOpInitializeResult initialize(DataFlowOpInitializateContext context) throws Exception;
+    public DataFlowOpInitializeResult initialize(DataFlowOpInitializateContext initContext) throws Exception;
     public void open(DataFlowOpOpenContext openContext);
-    public void close(DataFlowOpCloseContext openContext);
+    public void close(DataFlowOpCloseContext closeContext);
 }

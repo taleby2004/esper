@@ -17,6 +17,7 @@ import com.espertech.esper.client.EventPropertyDescriptor;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.annotation.AuditEnum;
 import com.espertech.esper.client.dataflow.*;
+import com.espertech.esper.collection.Pair;
 import com.espertech.esper.core.context.util.AgentInstanceContext;
 import com.espertech.esper.core.service.EPRuntimeEventSender;
 import com.espertech.esper.core.service.EPServicesContext;

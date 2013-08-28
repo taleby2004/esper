@@ -13,6 +13,7 @@ package com.espertech.esper.dataflow.core;
 
 import com.espertech.esper.client.annotation.AuditEnum;
 import com.espertech.esper.client.dataflow.*;
+import com.espertech.esper.collection.Pair;
 import com.espertech.esper.dataflow.interfaces.DataFlowOpCloseContext;
 import com.espertech.esper.dataflow.interfaces.DataFlowOpLifecycle;
 import com.espertech.esper.dataflow.interfaces.DataFlowOpOpenContext;
@@ -38,7 +39,7 @@ public class EPDataFlowInstanceImpl implements EPDataFlowInstance, CompletionLis
     private final String instanceId;
     private volatile EPDataFlowState state;
     private final List<GraphSourceRunnable> sourceRunnables;
-    private final Map<Integer, Object> operators;
+    private final Map<Integer, Pair<Object, Boolean>> operators;
     private final Set<Integer> operatorBuildOrder;
     private final EPDataFlowInstanceStatistics statisticsProvider;
 
@@ -54,7 +55,10 @@ public class EPDataFlowInstanceImpl implements EPDataFlowInstance, CompletionLis
         this.userObject = userObject;
         this.instanceId = instanceId;
         this.sourceRunnables = sourceRunnables;
-        this.operators = operators;
+        this.operators = new TreeMap<Integer, Pair<Object, Boolean>>();
+        for (Map.Entry<Integer, Object> entry : operators.entrySet()) {
+            this.operators.put(entry.getKey(), new Pair<Object, Boolean>(entry.getValue(), false));
+        }
         this.operatorBuildOrder = operatorBuildOrder;
         this.statisticsProvider = statisticsProvider;
         setState(state);
@@ -85,9 +89,9 @@ public class EPDataFlowInstanceImpl implements EPDataFlowInstance, CompletionLis
         callOperatorOpen();
 
         Map<String, Emitter> emitters = new HashMap<String, Emitter>();
-        for (Object operator : operators.values()) {
-            if (operator instanceof Emitter) {
-                Emitter emitter = (Emitter) operator;
+        for (Pair<Object, Boolean> operatorStatePair : operators.values()) {
+            if (operatorStatePair.getFirst() instanceof Emitter) {
+                Emitter emitter = (Emitter) operatorStatePair.getFirst();
                 emitters.put(emitter.getName(), emitter);
             }
         }
@@ -259,29 +263,30 @@ public class EPDataFlowInstanceImpl implements EPDataFlowInstance, CompletionLis
 
     private void callOperatorClose() {
         for (Integer opNum : operatorBuildOrder) {
-            Object operator = operators.get(opNum);
-            if (operator instanceof DataFlowOpLifecycle) {
+            Pair<Object, Boolean> operatorStatePair = operators.get(opNum);
+            if (operatorStatePair.getFirst() instanceof DataFlowOpLifecycle && !operatorStatePair.getSecond()) {
                 try {
-                    DataFlowOpLifecycle lf = (DataFlowOpLifecycle) operator;
+                    DataFlowOpLifecycle lf = (DataFlowOpLifecycle) operatorStatePair.getFirst();
                     lf.close(new DataFlowOpCloseContext());
                 }
                 catch (RuntimeException ex) {
                     log.error("Exception encountered closing data flow '" + dataFlowName + "': " + ex.getMessage(), ex);
                 }
+                operatorStatePair.setSecond(true);
             }
         }
     }
 
     private void callOperatorOpen() {
         for (Integer opNum : operatorBuildOrder) {
-            Object operator = operators.get(opNum);
-            if (operator instanceof DataFlowOpLifecycle) {
+            Pair<Object, Boolean> operatorStatePair = operators.get(opNum);
+            if (operatorStatePair.getFirst() instanceof DataFlowOpLifecycle) {
                 try {
-                    DataFlowOpLifecycle lf = (DataFlowOpLifecycle) operator;
+                    DataFlowOpLifecycle lf = (DataFlowOpLifecycle) operatorStatePair.getFirst();
                     lf.open(new DataFlowOpOpenContext());
                 }
                 catch (RuntimeException ex) {
-                    throw new EPDataFlowExecutionException("Exception encountered opening data flow 'FlowOne' in operator " + operator.getClass().getSimpleName() + ": " + ex.getMessage(), ex, dataFlowName);
+                    throw new EPDataFlowExecutionException("Exception encountered opening data flow 'FlowOne' in operator " + operatorStatePair.getFirst().getClass().getSimpleName() + ": " + ex.getMessage(), ex, dataFlowName);
                 }
             }
         }
