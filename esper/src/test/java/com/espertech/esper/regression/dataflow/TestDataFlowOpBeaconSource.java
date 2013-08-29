@@ -68,8 +68,6 @@ public class TestDataFlowOpBeaconSource extends TestCase {
     }
 
     public void testBeaconFields() throws Exception {
-        /*
-        TODO
         runAssertionFields(EventRepresentationEnum.MAP, true);
         runAssertionFields(EventRepresentationEnum.OBJECTARRAY, true);
         runAssertionFields(EventRepresentationEnum.MAP, false);
@@ -103,7 +101,6 @@ public class TestDataFlowOpBeaconSource extends TestCase {
                 "  }";
         epService.getEPAdministrator().createEPL(epl);
         epService.getEPRuntime().getDataFlowRuntime().instantiate("MyDataFlow");
-        */
 
         // test options-provided beacon field
         epService.getEPAdministrator().getConfiguration().addEventType(SupportBean.class);
@@ -119,7 +116,7 @@ public class TestDataFlowOpBeaconSource extends TestCase {
         SupportUpdateListener listener = new SupportUpdateListener();
         epService.getEPAdministrator().createEPL("select * from SupportBean").addListener(listener);
         instance.run();
-        Thread.sleep(500);  // TODO
+        Thread.sleep(200);
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "theString".split(","), new Object[]{"E1"});
 
         // invalid: no output stream
