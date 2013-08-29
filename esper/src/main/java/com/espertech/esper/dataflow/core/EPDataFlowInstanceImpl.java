@@ -155,10 +155,10 @@ public class EPDataFlowInstanceImpl implements EPDataFlowInstance, CompletionLis
                     }
                 }
             });
-            setState(EPDataFlowState.RUNNING);
             threads.add(thread);
             thread.start();
         }
+        setState(EPDataFlowState.RUNNING);
     }
 
     public void join() throws InterruptedException {
@@ -261,7 +261,7 @@ public class EPDataFlowInstanceImpl implements EPDataFlowInstance, CompletionLis
         }
     }
 
-    private void callOperatorClose() {
+    private synchronized void callOperatorClose() {
         for (Integer opNum : operatorBuildOrder) {
             Pair<Object, Boolean> operatorStatePair = operators.get(opNum);
             if (operatorStatePair.getFirst() instanceof DataFlowOpLifecycle && !operatorStatePair.getSecond()) {
