@@ -64,7 +64,7 @@ public class GraphSourceRunnable implements BaseRunnable, DataFlowSignalListener
             runLoop();
         }
         catch (InterruptedException ex) {
-            log.info("Interruped runnable: " + ex.getMessage(), ex);
+            log.debug("Interruped runnable: " + ex.getMessage(), ex);
         }
         catch (RuntimeException ex) {
             log.error("Exception encountered: " + ex.getMessage(), ex);
