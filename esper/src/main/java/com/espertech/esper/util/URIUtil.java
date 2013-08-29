@@ -78,7 +78,7 @@ public class URIUtil
         return result.values();
     }
 
-    private static String[] parsePathElements(URI uri) {
+    public static String[] parsePathElements(URI uri) {
 
         String path = uri.getPath();
         if (path == null)

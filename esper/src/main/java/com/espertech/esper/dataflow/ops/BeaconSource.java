@@ -89,25 +89,13 @@ public class BeaconSource implements DataFlowSourceOperator {
             evaluators = new ExprEvaluator[writables.length];
             for (WriteablePropertyDescriptor writeable : writables) {
 
-                ExprNode exprNode = (ExprNode) allProperties.get(writeable.getPropertyName());
-                if (exprNode == null) {
-                    evaluators[index] = new ExprEvaluator() {
-                        public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
-                            return null;
-                        }
-                        public Class getType() {
-                            return null;
-                        }
-                        public Map<String, Object> getEventType() throws ExprValidationException {
-                            return null;
-                        }
-                    };
-                }
-                else {
+                final Object providedProperty = allProperties.get(writeable.getPropertyName());
+                if (providedProperty instanceof ExprNode) {
+                    ExprNode exprNode = (ExprNode) providedProperty;
                     ExprNode validated = ExprNodeUtility.validateSimpleGetSubtree(exprNode, context.getStatementContext(), null);
                     final ExprEvaluator exprEvaluator = validated.getExprEvaluator();
                     final TypeWidener widener = TypeWidenerFactory.getCheckPropertyAssignType(validated.toExpressionString(), exprEvaluator.getType(),
-                                                writeable.getType(), writeable.getPropertyName());
+                            writeable.getType(), writeable.getPropertyName());
                     if (widener != null) {
                         evaluators[index] = new ExprEvaluator() {
                             public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
@@ -125,6 +113,32 @@ public class BeaconSource implements DataFlowSourceOperator {
                     else {
                         evaluators[index] = exprEvaluator;
                     }
+                }
+                else if (providedProperty == null) {
+                    evaluators[index] = new ExprEvaluator() {
+                        public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
+                            return null;
+                        }
+                        public Class getType() {
+                            return null;
+                        }
+                        public Map<String, Object> getEventType() throws ExprValidationException {
+                            return null;
+                        }
+                    };
+                }
+                else {
+                    evaluators[index] = new ExprEvaluator() {
+                        public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
+                            return providedProperty;
+                        }
+                        public Class getType() {
+                            return providedProperty.getClass();
+                        }
+                        public Map<String, Object> getEventType() throws ExprValidationException {
+                            return null;
+                        }
+                    };
                 }
                 index++;
             }

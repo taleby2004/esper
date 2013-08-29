@@ -65,6 +65,8 @@ public class TestFileSourceLineGraphs extends TestCase
             options.addParameterURI("FileSource/file", filename);
             EPDataFlowInstance instance = epService.getEPRuntime().getDataFlowRuntime().instantiate("MyEOFEventFileReader",options);
             instance.run();
+            assertEquals(1, instance.getParameters().size());
+            assertEquals(filename, instance.getParameters().get("FileSource/file"));
         }
 
         EPAssertionUtil.assertPropsPerRowAnyOrder(listener.getNewDataListFlattened(), "filename,cnt".split(","),

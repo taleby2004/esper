@@ -14,8 +14,11 @@ package com.espertech.esper.regression.dataflow;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.dataflow.EPDataFlowInstance;
 import com.espertech.esper.client.dataflow.EPDataFlowInstantiationOptions;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.dataflow.util.DefaultSupportCaptureOp;
 import com.espertech.esper.dataflow.util.DefaultSupportGraphOpProvider;
+import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.util.EventRepresentationEnum;
 import junit.framework.TestCase;
@@ -65,6 +68,8 @@ public class TestDataFlowOpBeaconSource extends TestCase {
     }
 
     public void testBeaconFields() throws Exception {
+        /*
+        TODO
         runAssertionFields(EventRepresentationEnum.MAP, true);
         runAssertionFields(EventRepresentationEnum.OBJECTARRAY, true);
         runAssertionFields(EventRepresentationEnum.MAP, false);
@@ -98,7 +103,25 @@ public class TestDataFlowOpBeaconSource extends TestCase {
                 "  }";
         epService.getEPAdministrator().createEPL(epl);
         epService.getEPRuntime().getDataFlowRuntime().instantiate("MyDataFlow");
-        
+        */
+
+        // test options-provided beacon field
+        epService.getEPAdministrator().getConfiguration().addEventType(SupportBean.class);
+        String eplMinimal = "create dataflow MyGraph " +
+                "BeaconSource -> outstream<SupportBean> {iterations:1} " +
+                "EventBusSink(outstream) {}";
+        epService.getEPAdministrator().createEPL(eplMinimal);
+
+        EPDataFlowInstantiationOptions options = new EPDataFlowInstantiationOptions();
+        options.addParameterURI("BeaconSource/theString", "E1");
+        EPDataFlowInstance instance = epService.getEPRuntime().getDataFlowRuntime().instantiate("MyGraph", options);
+
+        SupportUpdateListener listener = new SupportUpdateListener();
+        epService.getEPAdministrator().createEPL("select * from SupportBean").addListener(listener);
+        instance.run();
+        Thread.sleep(500);  // TODO
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "theString".split(","), new Object[]{"E1"});
+
         // invalid: no output stream
         SupportDataFlowAssertionUtil.tryInvalidInstantiate(epService, "DF1", "create dataflow DF1 BeaconSource {}",
                 "Failed to instantiate data flow 'DF1': Failed initialization for operator 'BeaconSource': BeaconSource operator requires one output stream but produces 0 streams");

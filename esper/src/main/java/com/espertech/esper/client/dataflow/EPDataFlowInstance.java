@@ -11,6 +11,8 @@
 
 package com.espertech.esper.client.dataflow;
 
+import java.util.Map;
+
 /**
  * Data flow instanve.
  */
@@ -76,4 +78,10 @@ public interface EPDataFlowInstance {
      * @return instance if
      */
     public String getInstanceId();
+
+    /**
+     * Returns runtime parameters provided at instantiation time, or null if none have been provided.
+     * @return runtime parameters
+     */
+    public Map<String, Object> getParameters();
 }

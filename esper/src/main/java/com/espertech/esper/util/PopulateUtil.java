@@ -28,6 +28,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URI;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -177,10 +178,37 @@ public class PopulateUtil {
                     throw new ExprValidationException("Failed to set field '" + annotatedField.getName() + "': " + e.getMessage(), e);
                 }
             }
+
+            for (Method method : annotatedMethods) {
+                DataFlowOpParameter anno = (DataFlowOpParameter) JavaClassHelper.getAnnotations(DataFlowOpParameter.class, method.getDeclaredAnnotations()).get(0);
+                if (anno.all()) {
+                    if (method.getParameterTypes().length == 2 && method.getParameterTypes()[0] == String.class && method.getParameterTypes()[1] == Object.class) {
+                        for (Map.Entry<String, Object> entry : optionalParameterURIs.entrySet()) {
+                            String[] elements = URIUtil.parsePathElements(URI.create(entry.getKey()));
+                            if (elements.length < 2) {
+                                throw new ExprValidationException("Failed to parse URI '" + entry.getKey() + "', expected " +
+                                        "'operator_name/property_name' format" );
+                            }
+                            if (elements[0].equals(operatorName)) {
+                                try {
+                                    method.invoke(top, new Object[] {elements[1], entry.getValue()});
+                                }
+                                catch (IllegalAccessException e) {
+                                    throw new ExprValidationException("Illegal access invoking method for property '" + entry.getKey() + "' for class " + applicableClass.getName() + " method " + method.getName(), e);
+                                }
+                                catch (InvocationTargetException e) {
+                                    throw new ExprValidationException("Exception invoking method for property '" + entry.getKey() + "' for class " + applicableClass.getName() + " method " + method.getName() + ": " + e.getTargetException().getMessage(), e);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         // third pass: if a parameter provider is provided, use that
         if (optionalParameterProvider != null) {
+
             for (Field annotatedField : annotatedFields) {
                 try {
                     annotatedField.setAccessible(true);

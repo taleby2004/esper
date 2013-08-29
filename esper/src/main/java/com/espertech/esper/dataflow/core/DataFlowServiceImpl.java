@@ -17,7 +17,6 @@ import com.espertech.esper.client.EventPropertyDescriptor;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.annotation.AuditEnum;
 import com.espertech.esper.client.dataflow.*;
-import com.espertech.esper.collection.Pair;
 import com.espertech.esper.core.context.util.AgentInstanceContext;
 import com.espertech.esper.core.service.EPRuntimeEventSender;
 import com.espertech.esper.core.service.EPServicesContext;
@@ -270,7 +269,7 @@ public class DataFlowServiceImpl implements DataFlowService {
         }
 
         boolean auditStates = AuditEnum.DATAFLOW_TRANSITION.getAudit(statementContext.getAnnotations()) != null;
-        return new EPDataFlowInstanceImpl(servicesContext.getEngineURI(), statementContext.getStatementName(), auditStates, dataFlowName, options.getDataFlowInstanceUserObject(), options.getDataFlowInstanceId(), EPDataFlowState.INSTANTIATED, sourceRunnables, operators, operatorBuildOrder, startDesc.getStatisticsProvider());
+        return new EPDataFlowInstanceImpl(servicesContext.getEngineURI(), statementContext.getStatementName(), auditStates, dataFlowName, options.getDataFlowInstanceUserObject(), options.getDataFlowInstanceId(), EPDataFlowState.INSTANTIATED, sourceRunnables, operators, operatorBuildOrder, startDesc.getStatisticsProvider(), options.getParametersURIs());
     }
 
     private Map<String, EventType> resolveTypes(CreateDataFlowDesc desc, StatementContext statementContext, EPServicesContext servicesContext)

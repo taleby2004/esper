@@ -42,12 +42,13 @@ public class EPDataFlowInstanceImpl implements EPDataFlowInstance, CompletionLis
     private final Map<Integer, Pair<Object, Boolean>> operators;
     private final Set<Integer> operatorBuildOrder;
     private final EPDataFlowInstanceStatistics statisticsProvider;
+    private final Map<String, Object> parameters;
 
     private List<CountDownLatch> joinedThreadLatches;
     private List<Thread> threads;
     private Thread runCurrentThread;
 
-    public EPDataFlowInstanceImpl(String engineURI, String statementName, boolean audit, String dataFlowName, Object userObject, String instanceId, EPDataFlowState state, List<GraphSourceRunnable> sourceRunnables, Map<Integer, Object> operators, Set<Integer> operatorBuildOrder, EPDataFlowInstanceStatistics statisticsProvider) {
+    public EPDataFlowInstanceImpl(String engineURI, String statementName, boolean audit, String dataFlowName, Object userObject, String instanceId, EPDataFlowState state, List<GraphSourceRunnable> sourceRunnables, Map<Integer, Object> operators, Set<Integer> operatorBuildOrder, EPDataFlowInstanceStatistics statisticsProvider, Map<String, Object> parameters) {
         this.engineURI = engineURI;
         this.statementName = statementName;
         this.audit = audit;
@@ -62,6 +63,7 @@ public class EPDataFlowInstanceImpl implements EPDataFlowInstance, CompletionLis
         this.operatorBuildOrder = operatorBuildOrder;
         this.statisticsProvider = statisticsProvider;
         setState(state);
+        this.parameters = parameters;
     }
 
     public String getDataFlowName() {
@@ -78,6 +80,10 @@ public class EPDataFlowInstanceImpl implements EPDataFlowInstance, CompletionLis
 
     public String getInstanceId() {
         return instanceId;
+    }
+
+    public Map<String, Object> getParameters() {
+        return parameters;
     }
 
     public synchronized EPDataFlowInstanceCaptive startCaptive() {
