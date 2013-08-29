@@ -77,7 +77,7 @@ public class StatementMetadataFactoryDefault implements StatementMetadataFactory
             statementType = StatementType.CREATE_SCHEMA;
         }
         else if (statementSpec.getCreateDataFlowDesc() != null) {
-            statementType = StatementType.CREATE_GRAPH;
+            statementType = StatementType.CREATE_DATAFLOW;
         }
         else if (statementSpec.getCreateExpressionDesc() != null) {
             statementType = StatementType.CREATE_EXPRESSION;

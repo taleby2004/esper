@@ -59,7 +59,7 @@ public enum StatementType
     /**
      * Create-graph statement.
      */
-    CREATE_GRAPH,
+    CREATE_DATAFLOW,
 
     /**
      * Create-expression statement.
