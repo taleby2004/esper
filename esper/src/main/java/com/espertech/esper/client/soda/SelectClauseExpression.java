@@ -19,6 +19,7 @@ public class SelectClauseExpression implements SelectClauseElement
 
     private Expression expression;
     private String asName;
+    private boolean annotatedByEventFlag;
 
     /**
      * Ctor.
@@ -82,6 +83,14 @@ public class SelectClauseExpression implements SelectClauseElement
         this.asName = asName;
     }
 
+    public boolean isAnnotatedByEventFlag() {
+        return annotatedByEventFlag;
+    }
+
+    public void setAnnotatedByEventFlag(boolean annotatedByEventFlag) {
+        this.annotatedByEventFlag = annotatedByEventFlag;
+    }
+
     /**
      * Renders the element in textual representation.
      * @param writer to output to
@@ -89,6 +98,9 @@ public class SelectClauseExpression implements SelectClauseElement
     public void toEPLElement(StringWriter writer)
     {
         expression.toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
+        if (annotatedByEventFlag) {
+            writer.write(" @eventbean");
+        }
         if (asName != null)
         {
             writer.write(" as ");

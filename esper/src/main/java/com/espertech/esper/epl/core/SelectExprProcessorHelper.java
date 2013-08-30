@@ -175,10 +175,58 @@ public class SelectExprProcessorHelper
         Object[] expressionReturnTypes = new Object[selectionList.size()];
         for (int i = 0; i < selectionList.size(); i++)
         {
-            ExprNode expr = selectionList.get(i).getSelectExpression();
+            //Select selectionList.get(i);
+            SelectClauseExprCompiledSpec spec = selectionList.get(i);
+            ExprNode expr = spec.getSelectExpression();
             exprNodes[i] = expr;
             exprEvaluators[i] = expr.getExprEvaluator();
             Map<String, Object> eventTypeExpr = exprEvaluators[i].getEventType();
+
+            if (expr instanceof ExprEvaluatorEnumeration && spec.isEvents()) {
+                final ExprEvaluatorEnumeration enumEval = (ExprEvaluatorEnumeration) expr;
+                final EventType eventTypeSingle = enumEval.getEventTypeSingle(eventAdapterService, statementId);
+                if (eventTypeSingle != null) {
+                    ExprEvaluator evaluatorFragment = new ExprEvaluator() {
+                        public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext) {
+                            return enumEval.evaluateGetEventBean(eventsPerStream, isNewData, exprEvaluatorContext);
+                        }
+                        public Class getType(){
+                            return eventTypeSingle.getUnderlyingType();
+                        }
+                        public Map<String, Object> getEventType() {
+                            return null;
+                        }
+                    };
+                    expressionReturnTypes[i] = eventTypeSingle;
+                    exprEvaluators[i] = evaluatorFragment;
+                    continue;
+                }
+
+                final EventType eventTypeColl = enumEval.getEventTypeCollection(eventAdapterService);
+                if (eventTypeColl != null) {
+                    ExprEvaluator evaluatorFragment = new ExprEvaluator() {
+                        public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext) {
+                            // the protocol is EventBean[]
+                            Object result = enumEval.evaluateGetROCollectionEvents(eventsPerStream, isNewData, exprEvaluatorContext);
+                            if (result != null && result instanceof Collection) {
+                                Collection<EventBean> events = (Collection<EventBean>) result;
+                                return events.toArray(new EventBean[events.size()]);
+                            }
+                            return enumEval.evaluateGetROCollectionEvents(eventsPerStream, isNewData, exprEvaluatorContext);
+                        }
+                        public Class getType(){
+                            return JavaClassHelper.getArrayType(eventTypeColl.getUnderlyingType());
+                        }
+                        public Map<String, Object> getEventType() {
+                            return null;
+                        }
+                    };
+                    expressionReturnTypes[i] = new EventType[]{eventTypeColl};
+                    exprEvaluators[i] = evaluatorFragment;
+                    continue;
+                }
+            }
+
             if (eventTypeExpr == null) {
                 expressionReturnTypes[i] = exprEvaluators[i].getType();
             }

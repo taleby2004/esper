@@ -1232,7 +1232,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             {
                 SelectClauseExprRawSpec rawExpr = (SelectClauseExprRawSpec) raw;
                 rawExpr.getSelectExpression().accept(visitor);
-                selectElements.add(new SelectClauseExprCompiledSpec(rawExpr.getSelectExpression(), rawExpr.getOptionalAsName(), rawExpr.getOptionalAsName()));
+                selectElements.add(new SelectClauseExprCompiledSpec(rawExpr.getSelectExpression(), rawExpr.getOptionalAsName(), rawExpr.getOptionalAsName(), rawExpr.isEvents()));
             }
             else if (raw instanceof SelectClauseStreamRawSpec)
             {
@@ -1297,7 +1297,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
                 }
 
                 // Add any properties to the new select clause for use by consumers to the statement itself
-                newSelectClauseSpecRaw.add(new SelectClauseExprRawSpec(new ExprIdentNodeImpl(selectElement.getAssignedName()), null));
+                newSelectClauseSpecRaw.add(new SelectClauseExprRawSpec(new ExprIdentNodeImpl(selectElement.getAssignedName()), null, false));
                 hasProperties = true;
             }
         }

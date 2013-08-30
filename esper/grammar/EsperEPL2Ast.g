@@ -463,9 +463,14 @@ selectionList
 	
 selectionListElement
 	:	w=WILDCARD_SELECT { leaveNode($w); }
-	|	^(e=SELECTION_ELEMENT_EXPR valueExpr (IDENT)? { leaveNode($e); } )
+	|	^(e=SELECTION_ELEMENT_EXPR valueExpr (IDENT)? selectionListElementAnno? { leaveNode($e); } )
 	|	^(s=SELECTION_STREAM IDENT (IDENT)? { leaveNode($s); } )
 	;
+	
+selectionListElementAnno
+	:	^(ATCHAR IDENT)
+	;
+
 		
 outerJoin
 	:	^(tl=LEFT_OUTERJOIN_EXPR ON outerJoinIdent? { leaveNode($tl); } )

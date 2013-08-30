@@ -1373,13 +1373,25 @@ public class EPLTreeWalker extends EsperEPL2Ast
 
         // Get list element name
         String optionalName = null;
-        if (node.getChildCount() > 1)
+        if (node.getChildCount() > 1 && node.getChild(1).getType() == IDENT)
         {
             optionalName = node.getChild(1).getText();
         }
 
+        boolean eventsAnnotation = false;
+        Tree atChar = ASTUtil.findFirstNode(node, ATCHAR);
+        if (atChar != null) {
+            String annotation = atChar.getChild(0).getText().trim().toLowerCase();
+            if (annotation.equals("eventbean") || annotation.equals("eventbean")) {
+                eventsAnnotation = true;
+            }
+            else {
+                throw new ASTWalkException("Failed to recognize select-expression annotation '" + annotation + "', expected 'eventbean'");
+            }
+        }
+
         // Add as selection element
-        statementSpec.getSelectClauseSpec().add(new SelectClauseExprRawSpec(exprNode, optionalName));
+        statementSpec.getSelectClauseSpec().add(new SelectClauseExprRawSpec(exprNode, optionalName, eventsAnnotation));
     }
 
     private void leavePropertySelectionElement(Tree node) throws ASTWalkException
@@ -1407,7 +1419,7 @@ public class EPLTreeWalker extends EsperEPL2Ast
         {
             propertySelectRaw = new ArrayList<SelectClauseElementRaw>();
         }
-        this.propertySelectRaw.add(new SelectClauseExprRawSpec(exprNode, optionalName));
+        this.propertySelectRaw.add(new SelectClauseExprRawSpec(exprNode, optionalName, false));
     }
 
     private void leavePropertySelectionStream(Tree node) throws ASTWalkException

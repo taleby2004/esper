@@ -1275,7 +1275,9 @@ public class StatementSpecMapper
             {
                 SelectClauseExprRawSpec rawSpec = (SelectClauseExprRawSpec) raw;
                 Expression expression = unmapExpressionDeep(rawSpec.getSelectExpression(), unmapContext);
-                elements.add(new SelectClauseExpression(expression, rawSpec.getOptionalAsName()));
+                SelectClauseExpression selectExpr = new SelectClauseExpression(expression, rawSpec.getOptionalAsName());
+                selectExpr.setAnnotatedByEventFlag(rawSpec.isEvents());
+                elements.add(selectExpr);
             }
             else
             {
@@ -1618,7 +1620,7 @@ public class StatementSpecMapper
                 SelectClauseExpression selectExpr = (SelectClauseExpression) element;
                 Expression expr = selectExpr.getExpression();
                 ExprNode exprNode = mapExpressionDeep(expr, mapContext);
-                SelectClauseExprRawSpec rawElement = new SelectClauseExprRawSpec(exprNode, selectExpr.getAsName());
+                SelectClauseExprRawSpec rawElement = new SelectClauseExprRawSpec(exprNode, selectExpr.getAsName(), selectExpr.isAnnotatedByEventFlag());
                 result.add(rawElement);
             }
             else if (element instanceof SelectClauseStreamWildcard)

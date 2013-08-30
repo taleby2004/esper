@@ -514,7 +514,7 @@ public class EPStatementStartMethodOnTrigger extends EPStatementStartMethodBase
                                     resultName = exprCompiled.toExpressionString();
                                 }
                             }
-                            compiledSelect.add(new SelectClauseExprCompiledSpec(exprCompiled, resultName, exprSpec.getOptionalAsName()));
+                            compiledSelect.add(new SelectClauseExprCompiledSpec(exprCompiled, resultName, exprSpec.getOptionalAsName(), exprSpec.isEvents()));
                             EPStatementStartMethodHelperValidate.validateNoAggregations(exprCompiled, "Expression in a merge-selection may not utilize aggregation functions");
                         }
                         else if (raw instanceof SelectClauseElementWildcard)

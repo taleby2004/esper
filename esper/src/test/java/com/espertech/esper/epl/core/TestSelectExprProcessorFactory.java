@@ -41,8 +41,8 @@ public class TestSelectExprProcessorFactory extends TestCase
         SelectClauseElementCompiled[] selectionList = new SelectClauseElementCompiled[2];
         ExprNode identNode = SupportExprNodeFactory.makeIdentNode("doubleBoxed", "s0");
         ExprNode mathNode = SupportExprNodeFactory.makeMathNode();
-        selectionList[0] = new SelectClauseExprCompiledSpec(identNode, "result", "result");
-        selectionList[1] = new SelectClauseExprCompiledSpec(mathNode, "result", "result");
+        selectionList[0] = new SelectClauseExprCompiledSpec(identNode, "result", "result", false);
+        selectionList[1] = new SelectClauseExprCompiledSpec(mathNode, "result", "result", false);
 
         try
         {
@@ -68,7 +68,7 @@ public class TestSelectExprProcessorFactory extends TestCase
     {
         SelectClauseElementCompiled[] selectionList = new SelectClauseElementCompiled[1];
         ExprNode identNode = SupportExprNodeFactory.makeIdentNode("doubleBoxed", "s0");
-        selectionList[0] = new SelectClauseExprCompiledSpec(identNode, "result", null);
+        selectionList[0] = new SelectClauseExprCompiledSpec(identNode, "result", null, false);
         SelectExprProcessor processor = SelectExprProcessorFactory.getProcessor(Collections.<Integer>emptyList(), selectionList, false, null, null,
                 new SupportStreamTypeSvc3Stream(), SupportEventAdapterService.getService(), statementResultService, null, selectExprEventTypeRegistry, null, null, null, null, null, null, null, null, null, new Configuration(), null);
         assertTrue(processor != null);
@@ -78,15 +78,15 @@ public class TestSelectExprProcessorFactory extends TestCase
     {
         // try valid case
         SelectClauseElementCompiled[] elements = new SelectClauseElementCompiled[4];
-        elements[0] = new SelectClauseExprCompiledSpec(null, "xx", null);
-        elements[1] = new SelectClauseExprCompiledSpec(null, "yy", null);
+        elements[0] = new SelectClauseExprCompiledSpec(null, "xx", null, false);
+        elements[1] = new SelectClauseExprCompiledSpec(null, "yy", null, false);
         elements[2] = new SelectClauseStreamCompiledSpec("win", null);
         elements[3] = new SelectClauseStreamCompiledSpec("s2", "abc");
 
         SelectExprProcessorFactory.verifyNameUniqueness(elements);
 
         // try invalid case
-        elements = (SelectClauseElementCompiled[]) CollectionUtil.arrayExpandAddSingle(elements, new SelectClauseExprCompiledSpec(null, "yy", null));
+        elements = (SelectClauseElementCompiled[]) CollectionUtil.arrayExpandAddSingle(elements, new SelectClauseExprCompiledSpec(null, "yy", null, false));
         try
         {
             SelectExprProcessorFactory.verifyNameUniqueness(elements);
@@ -99,7 +99,7 @@ public class TestSelectExprProcessorFactory extends TestCase
 
         // try invalid case
         elements = new SelectClauseElementCompiled[2];
-        elements[0] = new SelectClauseExprCompiledSpec(null, "abc", null);
+        elements[0] = new SelectClauseExprCompiledSpec(null, "abc", null, false);
         elements[1] = new SelectClauseStreamCompiledSpec("s0", "abc");
         try
         {

@@ -20,6 +20,7 @@ public class SelectClauseExprRawSpec implements SelectClauseElementRaw
 {
     private ExprNode selectExpression;
     private String optionalAsName;
+    private boolean isEvents;
     private static final long serialVersionUID = 2613265291858800221L;
 
     /**
@@ -27,10 +28,11 @@ public class SelectClauseExprRawSpec implements SelectClauseElementRaw
      * @param selectExpression - the expression node to evaluate for matching events
      * @param optionalAsName - the name of the item, null if not name supplied
      */
-    public SelectClauseExprRawSpec(ExprNode selectExpression, String optionalAsName)
+    public SelectClauseExprRawSpec(ExprNode selectExpression, String optionalAsName, boolean isEvents)
     {
         this.selectExpression = selectExpression;
         this.optionalAsName = optionalAsName;
+        this.isEvents = isEvents;
     }
 
     /**
@@ -49,5 +51,9 @@ public class SelectClauseExprRawSpec implements SelectClauseElementRaw
     public String getOptionalAsName()
     {
         return optionalAsName;
+    }
+
+    public boolean isEvents() {
+        return isEvents;
     }
 }

@@ -9,6 +9,7 @@ Major API or EPL changes
   - Support for parameterized fire-and-forget queries
   - Support for fire-and-forget queries to consider the "in" opertator for index lookup
   - Support for having-clause to have subquery
+  - Support for explicitly selecting eventbean instances of expressions (ESPER-732)
 
 Bug fixes
   - Fixed Issue ESPER-733 Passing aggregate scalars to global script

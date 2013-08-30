@@ -1293,12 +1293,60 @@ select default.MyEvent.myProperty from MyEvent</programlisting>
 				When selecting nested, indexed, mapped or dynamic properties in a <literal>select</literal> clause with <literal>distinct</literal>, it is relevant to know that the comparison uses hash code and the Java <literal>equals</literal> semantics.
 			</para>
 		</sect2>
+
 		<sect2 xml:id="epl-transposefunc">
 			<title>Transposing an Expression Result to a Stream</title>
 			
 			<para>
 			   For transposing an instance of a Java object returned by an expression to a stream use the transpose function as described in <xref linkend="functionreference-transpose"/>.
 			</para>
+		</sect2>
+
+		<sect2 xml:id="epl-selecteventbean">
+			<title>Selecting EventBean instead of Underlying Event</title>
+			
+			<para>
+				By default, for certain select-clause expressions that output events or a collection of events,
+				the engine outputs the underlying event objects. With outputs we refer to the data passed to listeners, 
+				subscribers and inserted-into into another stream via insert-into.			   
+			</para>
+
+			<para>
+				The select-clause expressions for which underlying event objects are output by default are:
+			</para>
+			
+			<itemizedlist>
+				<ns:listitem>
+					Event Aggregation Functions (including extension API)
+				</ns:listitem>
+				<ns:listitem>
+					The <literal>previous</literal> family of single-row functions
+				</ns:listitem>
+				<ns:listitem>
+					Subselects that select events
+				</ns:listitem>
+				<ns:listitem>
+					Declared expressions and enumeration methods that operate on any of the above
+				</ns:listitem>
+			</itemizedlist>
+
+			<para>
+				To have the engine output <literal>EventBean</literal> instance(s) instead, add <literal>@eventbean</literal>
+				to the relevant expressions of the <literal>select</literal>-clause.
+			</para>
+
+			<para>
+				The sample EPL shown below outputs current data window contents as <literal>EventBean</literal> instances
+				into the stream <literal>OutStream</literal>, thereby statements consuming the stream may operate on such instances:
+			</para>
+			<programlisting>insert into OutStream 
+select prevwindow(s0) @eventbean as win 
+from MyEvent.win:length(2) as s0</programlisting>
+			
+			<para>
+				The next EPL consumes the stream and selects the last event:
+			</para>
+			<programlisting>select win.lastOf() from OutStream</programlisting>
 		</sect2>
 
     </sect1>

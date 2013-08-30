@@ -1188,14 +1188,25 @@ selectionList
 	;
 
 selectionListElement
-  @init { String identifier = null; } 
 	:   	s=STAR
 		-> WILDCARD_SELECT[$s]
 	|	(streamSelector) => streamSelector
-	|	expression (AS i=keywordAllowedIdent { identifier = i.getTree().toString(); } )?
-		-> {identifier != null}? ^(SELECTION_ELEMENT_EXPR expression IDENT[identifier])
-		-> {identifier == null}? ^(SELECTION_ELEMENT_EXPR expression)
-		-> ^(SELECTION_ELEMENT_EXPR expression)
+	|	selectionListElementExpr
+	;
+	
+selectionListElementExpr 
+	@init { String identifier = null; } 
+	:
+		expression 
+		selectionListElementAnno?
+		(AS i=keywordAllowedIdent { identifier = i.getTree().toString(); } )?
+		-> {identifier != null}? ^(SELECTION_ELEMENT_EXPR expression IDENT[identifier] selectionListElementAnno?)
+		-> ^(SELECTION_ELEMENT_EXPR expression selectionListElementAnno?)
+	;
+
+selectionListElementAnno 
+	:	ATCHAR i=IDENT 
+		-> ^(ATCHAR $i)
 	;
 	
 streamSelector

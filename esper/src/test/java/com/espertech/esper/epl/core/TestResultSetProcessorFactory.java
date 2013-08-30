@@ -124,7 +124,7 @@ public class TestResultSetProcessorFactory extends TestCase
         //      or one or more non-aggregated event properties are not in the group by (output per event)
         SelectClauseElementCompiled[] selectList = SupportSelectExprFactory.makeAggregateMixed();
         ExprNode identNode = SupportExprNodeFactory.makeIdentNode("theString", "s0");
-        selectList = (SelectClauseElementCompiled[]) CollectionUtil.arrayExpandAddSingle(selectList, new SelectClauseExprCompiledSpec(identNode, null, null));
+        selectList = (SelectClauseElementCompiled[]) CollectionUtil.arrayExpandAddSingle(selectList, new SelectClauseExprCompiledSpec(identNode, null, null, false));
 
         groupByList.add(SupportExprNodeFactory.makeIdentNode("doubleBoxed", "s0"));
         StatementSpecCompiled spec = makeSpec(new SelectClauseSpecCompiled(selectList, false), null, groupByList, null, null, orderByList);
@@ -164,7 +164,7 @@ public class TestResultSetProcessorFactory extends TestCase
         groupByList.add(SupportExprNodeFactory.makeSumAggregateNode());
 
         SelectClauseElementCompiled[] selectList = new SelectClauseElementCompiled[] {
-                new SelectClauseExprCompiledSpec(SupportExprNodeFactory.makeSumAggregateNode(), null, null)
+                new SelectClauseExprCompiledSpec(SupportExprNodeFactory.makeSumAggregateNode(), null, null, false)
         };
 
         try

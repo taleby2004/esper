@@ -188,7 +188,7 @@ public class StatementLifecycleSvcUtil {
             if (raw instanceof SelectClauseExprRawSpec)
             {
                 SelectClauseExprRawSpec rawExpr = (SelectClauseExprRawSpec) raw;
-                selectElements.add(new SelectClauseExprCompiledSpec(rawExpr.getSelectExpression(), rawExpr.getOptionalAsName(), rawExpr.getOptionalAsName()));
+                selectElements.add(new SelectClauseExprCompiledSpec(rawExpr.getSelectExpression(), rawExpr.getOptionalAsName(), rawExpr.getOptionalAsName(), rawExpr.isEvents()));
             }
             else if (raw instanceof SelectClauseStreamRawSpec)
             {
