@@ -994,6 +994,11 @@ following conditions occurs, whichever occurs first: the data window has collect
 					The next example creates a view that retains the last event per symbol and feed.
 				</para>
 				<programlisting><![CDATA[select * from StockTickEvent.std:unique(symbol, feed)]]></programlisting>
+				
+				<para>
+					When using <literal>unique</literal> the engine plans queries applying an implicit unique index, where applicable. 
+					Specify <literal>@Hint('DISABLE_UNIQUE_IMPLICIT_IDX')</literal> to force the engine to plan queries using a non-unique index.
+				</para>				
 			</sect2>
 
 			<sect2 xml:id="view-std-groupwin" >
@@ -1276,6 +1281,10 @@ select * from Market.std:groupwin(ticker).win:length(1000000).std:merge(ticker)
 				</para>
 				<programlisting><![CDATA[select * from ReferenceData.std:firstunique(category)]]></programlisting>
 				
+				<para>
+					When using <literal>firstunique</literal> the engine plans queries applying an implicit unique index, where applicable. 
+					Specify <literal>@Hint('DISABLE_UNIQUE_IMPLICIT_IDX')</literal> to force the engine to plan queries using a non-unique index.
+				</para>				
 			</sect2>
 	   </sect1>
   

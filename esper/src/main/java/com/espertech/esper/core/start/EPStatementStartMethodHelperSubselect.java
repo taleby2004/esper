@@ -392,7 +392,7 @@ public class EPStatementStartMethodHelperSubselect
             // determine unique keys, if any
             Set<String> optionalUniqueProps = null;
             if (viewFactoryChain.getDataWindowViewFactoryCount() > 0) {
-                optionalUniqueProps = ViewServiceHelper.getUniqueCandidateProperties(viewFactoryChain.getViewFactoryChain());
+                optionalUniqueProps = ViewServiceHelper.getUniqueCandidateProperties(viewFactoryChain.getViewFactoryChain(), annotations);
             }
             if (filterStreamSpec instanceof NamedWindowConsumerStreamSpec) {
                 NamedWindowConsumerStreamSpec namedSpec = (NamedWindowConsumerStreamSpec) filterStreamSpec;

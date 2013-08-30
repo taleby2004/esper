@@ -10,6 +10,7 @@ package com.espertech.esper.view;
 
 import com.espertech.esper.client.annotation.Audit;
 import com.espertech.esper.client.annotation.AuditEnum;
+import com.espertech.esper.client.annotation.HintEnum;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
 import com.espertech.esper.core.service.StatementContext;
@@ -26,6 +27,7 @@ import com.espertech.esper.view.window.RelativeAccessByEventNIndexMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.lang.annotation.Annotation;
 import java.util.*;
 
 /**
@@ -33,7 +35,8 @@ import java.util.*;
  */
 public class ViewServiceHelper
 {
-    public static Set<String> getUniqueCandidateProperties(List<ViewFactory> viewFactory) {
+    public static Set<String> getUniqueCandidateProperties(List<ViewFactory> viewFactory, Annotation[] annotations) {
+        boolean disableUniqueImplicit = HintEnum.DISABLE_UNIQUE_IMPLICIT_IDX.getHint(annotations) != null;
         if (viewFactory == null || viewFactory.isEmpty()) {
             return null;
         }
@@ -43,7 +46,7 @@ public class ViewServiceHelper
             if (groupedCriteria == null) {
                 return null;
             }
-            if (viewFactory.get(1) instanceof DataWindowViewFactoryUniqueCandidate) {
+            if (viewFactory.get(1) instanceof DataWindowViewFactoryUniqueCandidate && !disableUniqueImplicit) {
                 DataWindowViewFactoryUniqueCandidate uniqueFactory = (DataWindowViewFactoryUniqueCandidate) viewFactory.get(1);
                 Set<String> uniqueCandidates = uniqueFactory.getUniquenessCandidatePropertyNames();
                 if (uniqueCandidates != null) {
@@ -53,7 +56,7 @@ public class ViewServiceHelper
             }
             return null;
         }
-        else if (viewFactory.get(0) instanceof DataWindowViewFactoryUniqueCandidate) {
+        else if (viewFactory.get(0) instanceof DataWindowViewFactoryUniqueCandidate && !disableUniqueImplicit) {
             DataWindowViewFactoryUniqueCandidate uniqueFactory = (DataWindowViewFactoryUniqueCandidate) viewFactory.get(0);
             return uniqueFactory.getUniquenessCandidatePropertyNames();
         }

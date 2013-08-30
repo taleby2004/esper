@@ -240,7 +240,7 @@ public class EPStatementStartMethodSelectUtil
         }
 
         // Add uniqueness information useful for joins
-        joinAnalysisResult.addUniquenessInfo(unmaterializedViewChain);
+        joinAnalysisResult.addUniquenessInfo(unmaterializedViewChain, statementSpec.getAnnotations());
 
         // Validate sub-select views
         SubSelectStrategyCollection subSelectStrategyCollection = EPStatementStartMethodHelperSubselect.planSubSelect(services, statementContext, queryPlanLogging, subSelectStreamDesc, streamNames, streamEventTypes, eventTypeNames, stopCallbacks, statementSpec.getAnnotations(), statementSpec.getDeclaredExpressions(), contextPropertyRegistry);

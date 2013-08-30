@@ -82,7 +82,12 @@ public enum HintEnum
     /**
      * For use everywhere where indexes are used (subquery, joins, fire-and-forget, onl-select etc.), index hint.
      */
-    INDEX("INDEX", false, false, true);
+    INDEX("INDEX", false, false, true),
+
+    /**
+     * For use everywhere where unique data window are used
+     */
+    DISABLE_UNIQUE_IMPLICIT_IDX("DISABLE_UNIQUE_IMPLICIT_IDX", false, false, false);
 
     private final String value;
     private final boolean acceptsParameters;

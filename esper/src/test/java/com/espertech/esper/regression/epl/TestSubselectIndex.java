@@ -15,6 +15,7 @@ import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.annotation.Hint;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean;
@@ -61,7 +62,7 @@ public class TestSubselectIndex extends TestCase implements IndexBackingTableInf
                 EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"EY", null});
             }
         };
-        runAssertion("s2,i2", "", BACKING_UNINDEXED, assertNoWhere);
+        runAssertion(false, "s2,i2", "", BACKING_UNINDEXED, assertNoWhere);
 
         // test no where clause with unique on multiple props, exact specification of where-clause
         IndexAssertionEventSend assertSendEvents = new IndexAssertionEventSend() {
@@ -74,25 +75,29 @@ public class TestSubselectIndex extends TestCase implements IndexBackingTableInf
                 EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"EX", "E3"});
             }
         };
-        runAssertion("d2,i2", "where ssb2.i2 = ssb1.i1 and ssb2.d2 = ssb1.d1", BACKING_MULTI_UNIQUE, assertSendEvents);
-        runAssertion("d2,i2", "where ssb2.d2 = ssb1.d1 and ssb2.i2 = ssb1.i1", BACKING_MULTI_UNIQUE, assertSendEvents);
-        runAssertion("d2,i2", "where ssb2.l2 = ssb1.l1 and ssb2.d2 = ssb1.d1 and ssb2.i2 = ssb1.i1", BACKING_MULTI_UNIQUE, assertSendEvents);
-        runAssertion("d2,i2", "where ssb2.l2 = ssb1.l1 and ssb2.i2 = ssb1.i1", BACKING_MULTI_DUPS, assertSendEvents);
-        runAssertion("d2,i2", "where ssb2.d2 = ssb1.d1", BACKING_SINGLE_DUPS, assertSendEvents);
-        runAssertion("d2,i2", "where ssb2.i2 = ssb1.i1 and ssb2.d2 = ssb1.d1 and ssb2.l2 between 1 and 1000", BACKING_MULTI_UNIQUE, assertSendEvents);
-        runAssertion("d2,i2", "where ssb2.d2 = ssb1.d1 and ssb2.l2 between 1 and 1000", BACKING_COMPOSITE, assertSendEvents);
-        runAssertion("i2,d2,l2", "where ssb2.l2 = ssb1.l1 and ssb2.d2 = ssb1.d1", BACKING_MULTI_DUPS, assertSendEvents);
-        runAssertion("i2,d2,l2", "where ssb2.l2 = ssb1.l1 and ssb2.i2 = ssb1.i1 and ssb2.d2 = ssb1.d1", BACKING_MULTI_UNIQUE, assertSendEvents);
-        runAssertion("d2,l2,i2", "where ssb2.l2 = ssb1.l1 and ssb2.i2 = ssb1.i1 and ssb2.d2 = ssb1.d1", BACKING_MULTI_UNIQUE, assertSendEvents);
-        runAssertion("d2,l2,i2", "where ssb2.l2 = ssb1.l1 and ssb2.i2 = ssb1.i1 and ssb2.d2 = ssb1.d1 and ssb2.s2 between 'E3' and 'E4'", BACKING_MULTI_UNIQUE, assertSendEvents);
-        runAssertion("l2", "where ssb2.l2 = ssb1.l1", BACKING_SINGLE_UNIQUE, assertSendEvents);
-        runAssertion("l2", "where ssb2.l2 = ssb1.l1 and ssb1.i1 between 1 and 20", BACKING_SINGLE_UNIQUE, assertSendEvents);
+        runAssertion(false, "d2,i2", "where ssb2.i2 = ssb1.i1 and ssb2.d2 = ssb1.d1", BACKING_MULTI_UNIQUE, assertSendEvents);
+        runAssertion(false, "d2,i2", "where ssb2.d2 = ssb1.d1 and ssb2.i2 = ssb1.i1", BACKING_MULTI_UNIQUE, assertSendEvents);
+        runAssertion(false, "d2,i2", "where ssb2.l2 = ssb1.l1 and ssb2.d2 = ssb1.d1 and ssb2.i2 = ssb1.i1", BACKING_MULTI_UNIQUE, assertSendEvents);
+        runAssertion(false, "d2,i2", "where ssb2.l2 = ssb1.l1 and ssb2.i2 = ssb1.i1", BACKING_MULTI_DUPS, assertSendEvents);
+        runAssertion(false, "d2,i2", "where ssb2.d2 = ssb1.d1", BACKING_SINGLE_DUPS, assertSendEvents);
+        runAssertion(false, "d2,i2", "where ssb2.i2 = ssb1.i1 and ssb2.d2 = ssb1.d1 and ssb2.l2 between 1 and 1000", BACKING_MULTI_UNIQUE, assertSendEvents);
+        runAssertion(false, "d2,i2", "where ssb2.d2 = ssb1.d1 and ssb2.l2 between 1 and 1000", BACKING_COMPOSITE, assertSendEvents);
+        runAssertion(false, "i2,d2,l2", "where ssb2.l2 = ssb1.l1 and ssb2.d2 = ssb1.d1", BACKING_MULTI_DUPS, assertSendEvents);
+        runAssertion(false, "i2,d2,l2", "where ssb2.l2 = ssb1.l1 and ssb2.i2 = ssb1.i1 and ssb2.d2 = ssb1.d1", BACKING_MULTI_UNIQUE, assertSendEvents);
+        runAssertion(false, "d2,l2,i2", "where ssb2.l2 = ssb1.l1 and ssb2.i2 = ssb1.i1 and ssb2.d2 = ssb1.d1", BACKING_MULTI_UNIQUE, assertSendEvents);
+        runAssertion(false, "d2,l2,i2", "where ssb2.l2 = ssb1.l1 and ssb2.i2 = ssb1.i1 and ssb2.d2 = ssb1.d1 and ssb2.s2 between 'E3' and 'E4'", BACKING_MULTI_UNIQUE, assertSendEvents);
+        runAssertion(false, "l2", "where ssb2.l2 = ssb1.l1", BACKING_SINGLE_UNIQUE, assertSendEvents);
+        runAssertion(true, "l2", "where ssb2.l2 = ssb1.l1", BACKING_SINGLE_DUPS, assertSendEvents);
+        runAssertion(false, "l2", "where ssb2.l2 = ssb1.l1 and ssb1.i1 between 1 and 20", BACKING_SINGLE_UNIQUE, assertSendEvents);
     }
 
-    private void runAssertion(String uniqueFields, String whereClause, String backingTable, IndexAssertionEventSend assertion) {
+    private void runAssertion(boolean disableImplicitUniqueIdx, String uniqueFields, String whereClause, String backingTable, IndexAssertionEventSend assertion) {
         String eplUnique = INDEX_CALLBACK_HOOK + "select s1 as c0, " +
                 "(select s2 from SSB2.std:unique(" + uniqueFields + ") as ssb2 " + whereClause + ") as c1 " +
                 "from SSB1 as ssb1";
+        if (disableImplicitUniqueIdx) {
+            eplUnique = "@Hint('DISABLE_UNIQUE_IMPLICIT_IDX')" + eplUnique;
+        }
         EPStatement stmtUnique = epService.getEPAdministrator().createEPL(eplUnique);
         stmtUnique.addListener(listener);
 

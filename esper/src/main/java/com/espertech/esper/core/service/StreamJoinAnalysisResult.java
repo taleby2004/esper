@@ -15,6 +15,7 @@ import com.espertech.esper.epl.virtualdw.VirtualDWView;
 import com.espertech.esper.view.ViewFactoryChain;
 import com.espertech.esper.view.ViewServiceHelper;
 
+import java.lang.annotation.Annotation;
 import java.util.Set;
 
 /**
@@ -183,10 +184,10 @@ public class StreamJoinAnalysisResult
         return uniqueKeys;
     }
 
-    public void addUniquenessInfo(ViewFactoryChain[] unmaterializedViewChain) {
+    public void addUniquenessInfo(ViewFactoryChain[] unmaterializedViewChain, Annotation[] annotations) {
         for (int i = 0; i < unmaterializedViewChain.length; i++) {
             if (unmaterializedViewChain[i].getDataWindowViewFactoryCount() > 0) {
-                Set<String> uniquenessProps = ViewServiceHelper.getUniqueCandidateProperties(unmaterializedViewChain[i].getViewFactoryChain());
+                Set<String> uniquenessProps = ViewServiceHelper.getUniqueCandidateProperties(unmaterializedViewChain[i].getViewFactoryChain(), annotations);
                 if (uniquenessProps != null) {
                     uniqueKeys[i] = new String[1][];
                     uniqueKeys[i][0] = uniquenessProps.toArray(new String[uniquenessProps.size()]);
