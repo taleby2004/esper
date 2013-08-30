@@ -16,6 +16,7 @@ import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.PropertyAccessException;
 import com.espertech.esper.client.dataflow.EPDataFlowSignalFinalMarker;
 import com.espertech.esper.client.dataflow.EPDataFlowSignalWindowMarker;
+import com.espertech.esper.client.util.DateTime;
 import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.dataflow.annotations.DataFlowContext;
 import com.espertech.esper.dataflow.annotations.DataFlowOpProvideSignal;
@@ -34,10 +35,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.EOFException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @DataFlowOperator
 @DataFlowOpProvideSignal
@@ -50,6 +48,7 @@ public class FileSourceCSV implements DataFlowSourceOperator {
     private final boolean hasTitleLine;
     private final Integer numLoops;
     private final String[] propertyNames;
+    private final String dateFormat;
 
     private StatementContext statementContext;
     private EventType outputEventType;
@@ -63,12 +62,13 @@ public class FileSourceCSV implements DataFlowSourceOperator {
 
     private CSVReader reader;
 
-    public FileSourceCSV(AdapterInputSource adapterInputSource, boolean hasHeaderLine, boolean hasTitleLine, Integer numLoops, String[] propertyNames) {
+    public FileSourceCSV(AdapterInputSource adapterInputSource, boolean hasHeaderLine, boolean hasTitleLine, Integer numLoops, String[] propertyNames, String dateFormat) {
         this.adapterInputSource = adapterInputSource;
         this.hasHeaderLine = hasHeaderLine;
         this.hasTitleLine = hasTitleLine;
         this.numLoops = numLoops;
         this.propertyNames = propertyNames;
+        this.dateFormat = dateFormat;
     }
 
     public DataFlowOpInitializeResult initialize(DataFlowOpInitializateContext context) throws Exception {
@@ -81,10 +81,10 @@ public class FileSourceCSV implements DataFlowSourceOperator {
         // use event type's full list of properties
         if (!hasTitleLine) {
             if (propertyNames != null) {
-                parseMake = setupProperties(false, propertyNames, outputEventType, context.getStatementContext());
+                parseMake = setupProperties(false, propertyNames, outputEventType, context.getStatementContext(), dateFormat);
             }
             else {
-                parseMake = setupProperties(false, outputEventType.getPropertyNames(), outputEventType, context.getStatementContext());
+                parseMake = setupProperties(false, outputEventType.getPropertyNames(), outputEventType, context.getStatementContext(), dateFormat);
             }
         }
 
@@ -102,7 +102,7 @@ public class FileSourceCSV implements DataFlowSourceOperator {
             if (firstRow) {
                 // determine the parsers from the title line
                 if (hasTitleLine && parseMake == null) {
-                    parseMake = setupProperties(true, nextRecord, outputEventType, statementContext);
+                    parseMake = setupProperties(true, nextRecord, outputEventType, statementContext, dateFormat);
                 }
 
                 if (hasTitleLine || hasHeaderLine) {
@@ -159,7 +159,7 @@ public class FileSourceCSV implements DataFlowSourceOperator {
         }
     }
 
-    private static ParseMakePropertiesDesc setupProperties(boolean requireOneMatch, String[] propertyNamesOffered, EventType outputEventType, StatementContext statementContext) {
+    private static ParseMakePropertiesDesc setupProperties(boolean requireOneMatch, String[] propertyNamesOffered, EventType outputEventType, StatementContext statementContext, final String dateFormat) {
         Set<WriteablePropertyDescriptor> writeables = statementContext.getEventAdapterService().getWriteableProperties(outputEventType, false);
 
         List<Integer> indexesList = new ArrayList<Integer>();
@@ -178,7 +178,28 @@ public class FileSourceCSV implements DataFlowSourceOperator {
             if (propertyType == null) {
                 continue;
             }
-            SimpleTypeParser parser = SimpleTypeParserFactory.getParser(propertyType);
+            SimpleTypeParser parser;
+            if (propertyType == Date.class || propertyType == Calendar.class) {
+                final String df = dateFormat != null ? dateFormat : DateTime.DEFAULT_XMLLIKE_DATE_FORMAT;
+                if (propertyType == Date.class) {
+                    parser = new SimpleTypeParser() {
+                        public Object parse(String text) {
+                            return DateTime.toDate(text, df);
+                        }
+                    };
+                }
+                else {
+                    parser = new SimpleTypeParser() {
+                        public Object parse(String text) {
+                            return DateTime.toCalendar(text, df);
+                        }
+                    };
+                }
+            }
+            else {
+                parser = SimpleTypeParserFactory.getParser(propertyType);
+            }
+
             WriteablePropertyDescriptor writable = EventTypeUtility.findWritable(propertyName, writeables);
             if (writable == null) {
                 continue;

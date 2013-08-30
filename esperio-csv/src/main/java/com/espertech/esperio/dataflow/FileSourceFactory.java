@@ -55,6 +55,9 @@ public class FileSourceFactory implements DataFlowOperatorFactory {
     @DataFlowOpParameter
     private String propertyNameFile;
 
+    @DataFlowOpParameter
+    private String dateFormat;
+
     public DataFlowSourceOperator create() {
 
         AdapterInputSource inputSource;
@@ -74,7 +77,7 @@ public class FileSourceFactory implements DataFlowOperatorFactory {
         }
 
         if (format == null || format.equals("csv")) {
-            return new FileSourceCSV(inputSource, hasHeaderLine, hasTitleLine, numLoops, propertyNames);
+            return new FileSourceCSV(inputSource, hasHeaderLine, hasTitleLine, numLoops, propertyNames, dateFormat);
         }
         else if (format.equals("line")) {
             return new FileSourceLineUnformatted(inputSource, file, propertyNameLine, propertyNameFile);

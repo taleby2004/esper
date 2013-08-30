@@ -14,12 +14,16 @@ import com.espertech.esper.client.dataflow.EPDataFlowInstance;
 import com.espertech.esper.client.dataflow.EPDataFlowInstantiationException;
 import com.espertech.esper.client.dataflow.EPDataFlowInstantiationOptions;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.util.DateTime;
 import com.espertech.esper.dataflow.util.DefaultSupportCaptureOp;
 import com.espertech.esper.dataflow.util.DefaultSupportGraphOpProvider;
 import com.espertech.esper.util.EventRepresentationEnum;
 import com.espertech.esperio.dataflow.FileSourceFactory;
 import junit.framework.TestCase;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -133,6 +137,35 @@ public class TestFileSourceGraphs extends TestCase
         assertTrue(received.get(0).isEmpty());
     }
 
+    public void testDateFormat()
+    {
+        // no date format specified
+        long testtime = DateTime.parseDefaultMSec("2012-01-30T08:43:32.116");
+        epService.getEPAdministrator().getConfiguration().addEventType("MyOAType",
+                "p0,p1".split(","), new Object[] {Date.class, Calendar.class});
+        String graph = "create dataflow ReadCSV " +
+                "FileSource -> mystream<MyOAType> { file: 'regression/dateprocessing_one.csv', classpathFile: true, hasTitleLine: false}" +
+                "DefaultSupportCaptureOp(mystream) {}";
+        List<List<Object>> received = runDataFlow(graph);
+        assertEquals(1, received.size());
+        Object[] data = (Object[]) received.get(0).get(0);
+        assertEquals(testtime, ((Date) data[0]).getTime());
+        assertEquals(testtime, ((Calendar) data[1]).getTimeInMillis());
+
+        // with date format specified
+        testtime = DateTime.toMillisec("20120320084332000", "yyyyMMDDHHmmssSSS");
+        epService.getEPAdministrator().getConfiguration().addEventType("MyOAType",
+                "p0,p1".split(","), new Object[] {Date.class, Calendar.class});
+        graph = "create dataflow ReadCSV " +
+                "FileSource -> mystream<MyOAType> { file: 'regression/dateprocessing_two.csv', classpathFile: true, hasTitleLine: false, dateFormat: 'yyyyMMDDHHmmssSSS'}" +
+                "DefaultSupportCaptureOp(mystream) {}";
+        received = runDataFlow(graph);
+        assertEquals(1, received.size());
+        data = (Object[]) received.get(0).get(0);
+        assertEquals(testtime, ((Date) data[0]).getTime());
+        assertEquals(testtime, ((Calendar) data[1]).getTimeInMillis());
+    }
+
     public void testInvalid() {
         String graph;
 
@@ -205,12 +238,13 @@ public class TestFileSourceGraphs extends TestCase
     }
 
     private List<List<Object>> runDataFlow(String epl) {
-        epService.getEPAdministrator().createEPL(epl);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
 
         DefaultSupportCaptureOp<Object> outputOp = new DefaultSupportCaptureOp<Object>();
         EPDataFlowInstance instance = epService.getEPRuntime().getDataFlowRuntime().instantiate("ReadCSV",
                 new EPDataFlowInstantiationOptions().operatorProvider(new DefaultSupportGraphOpProvider(outputOp)));
         instance.run();
+        stmt.destroy();
         return outputOp.getAndReset();
     }
 

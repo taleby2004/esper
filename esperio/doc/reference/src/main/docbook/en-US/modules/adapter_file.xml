@@ -174,6 +174,18 @@
 							<entry>An instance of <literal>AdapterInputSource</literal> if a file name cannot be provided.</entry>
 						</row>
 						<row>
+							<entry>classpathFile</entry>
+							<entry>Boolean indicator whether the file is found in a classpath directory, false by default.</entry>
+						</row>
+						<row>
+							<entry>dateFormat</entry>
+							<entry>The format to use when parsing dates; the default is <literal>SimpleDateFormat</literal> of <literal>yyyy-MM-dd'T'HH:mm:ss.SSS</literal> for <literal>Date</literal> and <literal>Calendar</literal> type properties.</entry>
+						</row>
+						<row>
+							<entry>format</entry>
+							<entry>Specify <literal>csv</literal> (the default) for comma-separate value or <literal>line</literal> for single-line.</entry>
+						</row>
+						<row>
 							<entry>hasTitleLine</entry>
 							<entry>For use with the <literal>csv</literal> format, boolean indicator whether a title line exists that the operator should read and parse to obtain event property names.</entry>
 						</row>
@@ -182,20 +194,12 @@
 							<entry>For use with the <literal>csv</literal> format, boolean indicator whether a header line exists that the operator should skip.</entry>
 						</row>
 						<row>
-							<entry>classpathFile</entry>
-							<entry>Boolean indicator whether the file is found in a classpath directory, false by default.</entry>
-						</row>
-						<row>
 							<entry>numLoops</entry>
 							<entry>For use with the <literal>csv</literal> format, number of loops, an integer value that instructs the engine to restart reading the file upon encountering EOF, defaults to zero.</entry>
 						</row>
 						<row>
 							<entry>propertyNames</entry>
 							<entry>For use with the <literal>csv</literal> format, string array with a list of property names in the same order they appear in the file.</entry>
-						</row>
-						<row>
-							<entry>format</entry>
-							<entry>Specify <literal>csv</literal> (the default) for comma-separate value or <literal>line</literal> for single-line.</entry>
 						</row>
 						<row>
 							<entry>propertyNameLine</entry>
@@ -231,7 +235,7 @@
     propertyNames: ['sensor','temp','updtime'], 
     numLoops: 3
   }
-  EventBusSource(sensorstream){}]]></programlisting>			
+  EventBusSink(sensorstream){}]]></programlisting>			
 			<para>
 				The data flow above configures the <literal>FileSource</literal> operator to read the file <literal>sensor_events.csv</literal>, populate the <literal>sensor</literal>, <literal>temp</literal> and <literal>updtime</literal> properties of the <literal>TemperatureEventStream</literal> event type (type definition not shown here) and make the output events available within the data flow under the name <literal>sensorstream</literal>.
 			</para>
