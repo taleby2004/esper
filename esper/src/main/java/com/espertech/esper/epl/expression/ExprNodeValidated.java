@@ -13,8 +13,6 @@ package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.client.EventBean;
 
-import java.util.Map;
-
 /**
  * A placeholder for another expression node that has been validated already.
  */
@@ -54,10 +52,6 @@ public class ExprNodeValidated extends ExprNodeBase implements ExprEvaluator
             return inner.equalsNode(((ExprNodeValidated) node).inner);
         }
         return inner.equalsNode(node);
-    }
-
-    public Map<String, Object> getEventType() {
-        return null;
     }
 
     public void validate(ExprValidationContext validationContext) throws ExprValidationException

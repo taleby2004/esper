@@ -1277,6 +1277,10 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         }
     }
 
+    public boolean isExternalClockingEnabled() {
+        return isUsingExternalClocking;
+    }
+
     /**
      * Destroy for destroying an engine instance: sets references to null and clears thread-locals
      */

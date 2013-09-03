@@ -13,8 +13,6 @@ package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.util.JavaClassHelper;
 
-import java.util.Map;
-
 public abstract class ExprDotEvalPropertyExprBase implements ExprEvaluator {
 
     protected final String statementName;
@@ -33,10 +31,6 @@ public abstract class ExprDotEvalPropertyExprBase implements ExprEvaluator {
 
     public Class getType() {
         return propertyType;
-    }
-
-    public Map<String, Object> getEventType() throws ExprValidationException {
-        return null;
     }
 
     protected String getWarningText(String expectedType, Object received) {

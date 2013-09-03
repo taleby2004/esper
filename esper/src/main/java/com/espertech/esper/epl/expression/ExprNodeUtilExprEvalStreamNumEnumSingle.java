@@ -11,7 +11,6 @@ package com.espertech.esper.epl.expression;
 import com.espertech.esper.client.EventBean;
 
 import java.util.Collection;
-import java.util.Map;
 
 public class ExprNodeUtilExprEvalStreamNumEnumSingle implements ExprEvaluator {
     private final ExprEvaluatorEnumeration enumeration;
@@ -28,7 +27,4 @@ public class ExprNodeUtilExprEvalStreamNumEnumSingle implements ExprEvaluator {
         return Collection.class;
     }
 
-    public Map<String, Object> getEventType() throws ExprValidationException {
-        return null;
-    }
 }

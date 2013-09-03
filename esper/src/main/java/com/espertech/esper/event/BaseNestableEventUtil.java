@@ -50,8 +50,8 @@ public class BaseNestableEventUtil
         Object valueMap = Array.get(value, index);
         if (!(valueMap instanceof Map))
         {
-            if (value instanceof EventBean) {
-                return getter.get((EventBean) value);
+            if (valueMap instanceof EventBean) {
+                return getter.get((EventBean) valueMap);
             }
             return null;
         }
@@ -93,8 +93,8 @@ public class BaseNestableEventUtil
         Object valueArray = Array.get(value, index);
         if (!(valueArray instanceof Object[]))
         {
-            if (value instanceof EventBean) {
-                return getter.get((EventBean) value);
+            if (valueArray instanceof EventBean) {
+                return getter.get((EventBean) valueArray);
             }
             return null;
         }

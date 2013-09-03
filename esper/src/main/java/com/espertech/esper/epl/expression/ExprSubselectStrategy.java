@@ -9,15 +9,6 @@
 package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventType;
-import com.espertech.esper.core.context.stmt.AIRegistrySubselectMultiPerm;
-import com.espertech.esper.epl.core.StreamTypeService;
-import com.espertech.esper.epl.lookup.SubordTableLookupStrategy;
-import com.espertech.esper.epl.spec.StatementSpecCompiled;
-import com.espertech.esper.epl.spec.StatementSpecRaw;
-import com.espertech.esper.util.CollectionUtil;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.util.Collection;
 

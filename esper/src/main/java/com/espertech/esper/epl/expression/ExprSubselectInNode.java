@@ -14,7 +14,7 @@ import com.espertech.esper.epl.spec.StatementSpecRaw;
 import com.espertech.esper.event.EventAdapterService;
 
 import java.util.Collection;
-import java.util.Map;
+import java.util.LinkedHashMap;
 
 /**
  * Represents a subselect in an expression tree.
@@ -67,7 +67,15 @@ public class ExprSubselectInNode extends ExprSubselectNode
         return subselectEvalStrategy.evaluate(eventsPerStream, isNewData, matchingEvents, exprEvaluatorContext);
     }
 
-    public Map<String, Object> getEventType() {
+    public LinkedHashMap<String, Object> typableGetRowProperties() {
+        return null;
+    }
+
+    public Object[] evaluateTypableSingle(EventBean[] eventsPerStream, boolean isNewData, Collection<EventBean> matchingEvents, ExprEvaluatorContext exprEvaluatorContext) {
+        return null;
+    }
+
+    public Object[][] evaluateTypableMulti(EventBean[] eventsPerStream, boolean isNewData, Collection<EventBean> matchingEvents, ExprEvaluatorContext exprEvaluatorContext) {
         return null;
     }
 
@@ -80,6 +88,10 @@ public class ExprSubselectInNode extends ExprSubselectNode
     }
 
     public Class getComponentTypeCollection() throws ExprValidationException {
+        return null;
+    }
+
+    public EventBean evaluateGetEventBean(EventBean[] eventsPerStream, boolean isNewData, Collection<EventBean> matchingEvents, ExprEvaluatorContext exprEvaluatorContext) {
         return null;
     }
 

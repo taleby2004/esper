@@ -12,8 +12,6 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.epl.enummethod.dot.ExprDotStaticMethodWrap;
 import com.espertech.esper.epl.variable.VariableReader;
 
-import java.util.Map;
-
 public class ExprDotEvalVariable implements ExprEvaluator
 {
     private final VariableReader variableReader;
@@ -37,10 +35,6 @@ public class ExprDotEvalVariable implements ExprEvaluator
         else {
             return chainEval[chainEval.length - 1].getTypeInfo().getSingleValueType();
         }
-    }
-
-    public Map<String, Object> getEventType() {
-        return null;
     }
 
     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)

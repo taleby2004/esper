@@ -12,8 +12,6 @@ import com.espertech.esper.client.EventBean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.Map;
-
 public class ExprDotEvalStreamEventBean implements ExprEvaluator
 {
     private static final Log log = LogFactory.getLog(ExprDotEvalStreamEventBean.class);
@@ -29,10 +27,6 @@ public class ExprDotEvalStreamEventBean implements ExprEvaluator
     public Class getType()
     {
         return evaluators[evaluators.length - 1].getTypeInfo().getSingleValueType();
-    }
-
-    public Map<String, Object> getEventType() {
-        return null;
     }
 
     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)

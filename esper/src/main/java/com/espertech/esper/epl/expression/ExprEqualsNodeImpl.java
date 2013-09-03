@@ -209,9 +209,6 @@ public class ExprEqualsNodeImpl extends ExprNodeBase implements ExprEqualsNode
             return Boolean.class;
         }
 
-        public Map<String, Object> getEventType() throws ExprValidationException {
-            return null;
-        }
     }
 
     public static class ExprEqualsEvaluatorEquals implements ExprEvaluator {
@@ -241,9 +238,6 @@ public class ExprEqualsNodeImpl extends ExprNodeBase implements ExprEqualsNode
             return Boolean.class;
         }
 
-        public Map<String, Object> getEventType() throws ExprValidationException {
-            return null;
-        }
     }
 
     public static class ExprEqualsEvaluatorIs implements ExprEvaluator {
@@ -272,8 +266,5 @@ public class ExprEqualsNodeImpl extends ExprNodeBase implements ExprEqualsNode
             return Boolean.class;
         }
 
-        public Map<String, Object> getEventType() throws ExprValidationException {
-            return null;
-        }
     }
 }

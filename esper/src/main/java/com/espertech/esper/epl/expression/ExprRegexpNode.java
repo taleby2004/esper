@@ -12,7 +12,6 @@ import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.util.JavaClassHelper;
 
-import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -41,10 +40,6 @@ public class ExprRegexpNode extends ExprNodeBase implements ExprEvaluator
     @Override
     public ExprEvaluator getExprEvaluator() {
         return this;
-    }
-
-    public Map<String, Object> getEventType() {
-        return null;
     }
 
     public void validate(ExprValidationContext validationContext) throws ExprValidationException

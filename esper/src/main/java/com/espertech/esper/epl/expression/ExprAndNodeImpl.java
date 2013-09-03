@@ -11,8 +11,6 @@ package com.espertech.esper.epl.expression;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.util.JavaClassHelper;
 
-import java.util.Map;
-
 /**
  * Represents an And-condition.
  */
@@ -54,10 +52,6 @@ public class ExprAndNodeImpl extends ExprNodeBase implements ExprEvaluator, Expr
     public boolean isConstantResult()
     {
         return false;
-    }
-
-    public Map<String, Object> getEventType() {
-        return null;
     }
 
     public Class getType()

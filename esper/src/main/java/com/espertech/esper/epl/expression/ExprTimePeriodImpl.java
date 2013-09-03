@@ -20,7 +20,6 @@ import org.apache.commons.logging.LogFactory;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayDeque;
-import java.util.Map;
 
 /**
  * Expression representing a time period.
@@ -181,10 +180,6 @@ public class ExprTimePeriodImpl extends ExprNodeBase implements ExprEvaluator, E
             list.add(new TimePeriodAdderMSec());
         }
         adders = list.toArray(new TimePeriodAdder[list.size()]);
-    }
-
-    public Map<String, Object> getEventType() {
-        return null;
     }
 
     private void validate(ExprNode expression) throws ExprValidationException

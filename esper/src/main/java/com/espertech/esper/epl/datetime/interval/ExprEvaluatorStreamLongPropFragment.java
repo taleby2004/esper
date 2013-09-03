@@ -15,9 +15,6 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
-import com.espertech.esper.epl.expression.ExprValidationException;
-
-import java.util.Map;
 
 public class ExprEvaluatorStreamLongPropFragment implements ExprEvaluator {
 
@@ -47,7 +44,4 @@ public class ExprEvaluatorStreamLongPropFragment implements ExprEvaluator {
         return Long.class;
     }
 
-    public Map<String, Object> getEventType() throws ExprValidationException {
-        return null;
-    }
 }

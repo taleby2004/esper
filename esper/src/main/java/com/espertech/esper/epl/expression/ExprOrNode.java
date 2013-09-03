@@ -11,8 +11,6 @@ package com.espertech.esper.epl.expression;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.util.JavaClassHelper;
 
-import java.util.Map;
-
 /**
  * Represents an OR expression in a filter expression tree.
  */
@@ -54,10 +52,6 @@ public class ExprOrNode extends ExprNodeBase implements ExprEvaluator
     public boolean isConstantResult()
     {
         return false;
-    }
-
-    public Map<String, Object> getEventType() {
-        return null;
     }
 
     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)

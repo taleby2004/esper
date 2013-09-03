@@ -14,8 +14,6 @@ import com.espertech.esper.epl.agg.service.AggregationResultFuture;
 import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.util.JavaClassHelper;
 
-import java.util.Map;
-
 /**
  * Base expression node that represents an aggregation function such as 'sum' or 'count'.
  * <p>
@@ -81,11 +79,6 @@ public abstract class ExprAggregateNodeBase extends ExprNodeBase implements Expr
     public boolean isConstantResult()
     {
         return false;
-    }
-
-    @Override
-    public Map<String, Object> getEventType() {
-        return null;
     }
 
     public void validate(ExprValidationContext validationContext) throws ExprValidationException

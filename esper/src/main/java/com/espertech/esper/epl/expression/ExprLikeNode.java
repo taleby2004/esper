@@ -12,8 +12,6 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.util.LikeUtil;
 
-import java.util.Map;
-
 /**
  * Represents the like-clause in an expression tree.
  */
@@ -90,10 +88,6 @@ public class ExprLikeNode extends ExprNodeBase implements ExprEvaluator
     public boolean isConstantResult()
     {
         return false;
-    }
-
-    public Map<String, Object> getEventType() {
-        return null;
     }
 
     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)

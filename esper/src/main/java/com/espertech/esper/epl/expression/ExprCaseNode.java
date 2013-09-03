@@ -16,21 +16,18 @@ import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.util.SimpleNumberCoercer;
 import com.espertech.esper.util.SimpleNumberCoercerFactory;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Represents the case-when-then-else control flow function is an expression tree.
  */
-public class ExprCaseNode extends ExprNodeBase implements ExprEvaluator
+public class ExprCaseNode extends ExprNodeBase implements ExprEvaluator, ExprEvaluatorTypableReturn
 {
     private static final long serialVersionUID = 792538321520346459L;
 
     private final boolean isCase2;
     private Class resultType;
-    private transient Map<String, Object> mapResultType;
+    private transient LinkedHashMap<String, Object> mapResultType;
     private boolean isNumericResult;
     private boolean mustCoerce;
 
@@ -93,20 +90,31 @@ public class ExprCaseNode extends ExprNodeBase implements ExprEvaluator
 
         // Determine type of each result (then-node and else node) child node expression
         List<Class> childTypes = new LinkedList<Class>();
-        List<Map<String, Object>> childMapTypes = new LinkedList<Map<String, Object>>();
+        List<LinkedHashMap<String, Object>> childMapTypes = new LinkedList<LinkedHashMap<String, Object>>();
         for (UniformPair<ExprEvaluator> pair : whenThenNodeList)
         {
-            if (pair.getSecond().getEventType() != null) {
-                childMapTypes.add(pair.getSecond().getEventType());
-                continue;
+            if (pair.getSecond() instanceof ExprEvaluatorTypableReturn) {
+                ExprEvaluatorTypableReturn typableReturn = (ExprEvaluatorTypableReturn) pair.getSecond();
+                LinkedHashMap<String, Object> rowProps = typableReturn.getRowProperties();
+                if (rowProps != null) {
+                    childMapTypes.add(rowProps);
+                    continue;
+                }
             }
             childTypes.add(pair.getSecond().getType());
 
         }
         if (optionalElseExprNode != null)
         {
-            if (optionalElseExprNode.getEventType() != null) {
-                childMapTypes.add(optionalElseExprNode.getEventType());
+            if (optionalElseExprNode instanceof ExprEvaluatorTypableReturn) {
+                ExprEvaluatorTypableReturn typableReturn = (ExprEvaluatorTypableReturn) optionalElseExprNode;
+                LinkedHashMap<String, Object> rowProps = typableReturn.getRowProperties();
+                if (rowProps != null) {
+                    childMapTypes.add(rowProps);
+                }
+                else {
+                    childTypes.add(optionalElseExprNode.getType());
+                }
             }
             else {
                 childTypes.add(optionalElseExprNode.getType());
@@ -169,7 +177,7 @@ public class ExprCaseNode extends ExprNodeBase implements ExprEvaluator
         return resultType;
     }
 
-    public Map<String, Object> getEventType() {
+    public LinkedHashMap<String, Object> getRowProperties() throws ExprValidationException {
         return mapResultType;
     }
 
@@ -183,6 +191,25 @@ public class ExprCaseNode extends ExprNodeBase implements ExprEvaluator
         {
             return evaluateCaseSyntax2(eventsPerStream, isNewData, exprEvaluatorContext);
         }
+    }
+
+    public Boolean isMultirow() {
+        return mapResultType == null ? null : false;
+    }
+
+    public Object[] evaluateTypableSingle(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
+        Map<String, Object> map = (Map<String, Object>) evaluate(eventsPerStream, isNewData, context);
+        Object[] row = new Object[map.size()];
+        int index = -1;
+        for (Map.Entry<String, Object> entry : mapResultType.entrySet()) {
+            index++;
+            row[index] = map.get(entry.getKey());
+        }
+        return row;
+    }
+
+    public Object[][] evaluateTypableMulti(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
+        return null;    // always single-row
     }
 
     public boolean equalsNode(ExprNode node_)

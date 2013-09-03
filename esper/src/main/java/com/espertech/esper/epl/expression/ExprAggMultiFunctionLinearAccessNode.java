@@ -71,9 +71,6 @@ public class ExprAggMultiFunctionLinearAccessNode extends ExprAggregateNodeBase 
                 {
                     return returnType;
                 }
-                public Map<String, Object> getEventType() {
-                    return null;
-                }
             };
             istreamOnly = getIstreamOnly(streamTypeService, 0);
             if ((stateType == AggregationStateType.WINDOW) && istreamOnly && !streamTypeService.isOnDemandStreams()) {
@@ -107,9 +104,6 @@ public class ExprAggMultiFunctionLinearAccessNode extends ExprAggregateNodeBase 
                 public Class getType()
                 {
                     return returnType;
-                }
-                public Map<String, Object> getEventType() {
-                    return null;
                 }
             };
             this.addChildNodeToFront(new ExprStreamUnderlyingNodeImpl(streamWildcard, false, streamNum, resultType));

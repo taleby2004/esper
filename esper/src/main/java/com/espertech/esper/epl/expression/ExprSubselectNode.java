@@ -17,12 +17,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
  * Represents a subselect in an expression tree.
  */
-public abstract class ExprSubselectNode extends ExprNodeBase implements ExprEvaluator, ExprEvaluatorEnumeration
+public abstract class ExprSubselectNode extends ExprNodeBase implements ExprEvaluator, ExprEvaluatorEnumeration, ExprEvaluatorTypableReturn
 {
     public static final ExprSubselectNode[] EMPTY_SUBSELECT_ARRAY = new ExprSubselectNode[0];
     private static final long serialVersionUID = -2469169635913155764L;
@@ -68,10 +69,15 @@ public abstract class ExprSubselectNode extends ExprNodeBase implements ExprEval
     public abstract Object evaluate(EventBean[] eventsPerStream, boolean isNewData, Collection<EventBean> matchingEvents, ExprEvaluatorContext exprEvaluatorContext);
     public abstract Collection<EventBean> evaluateGetCollEvents(EventBean[] eventsPerStream, boolean isNewData, Collection<EventBean> matchingEvents, ExprEvaluatorContext exprEvaluatorContext);
     public abstract Collection evaluateGetCollScalar(EventBean[] eventsPerStream, boolean isNewData, Collection<EventBean> matchingEvents, ExprEvaluatorContext exprEvaluatorContext);
+    public abstract EventBean evaluateGetEventBean(EventBean[] eventsPerStream, boolean isNewData, Collection<EventBean> matchingEvents, ExprEvaluatorContext exprEvaluatorContext);
 
     public abstract boolean isAllowMultiColumnSelect();
 
     public abstract void validateSubquery(ExprValidationContext validationContext) throws ExprValidationException;
+
+    public abstract LinkedHashMap<String, Object> typableGetRowProperties() throws ExprValidationException;
+    public abstract Object[] evaluateTypableSingle(EventBean[] eventsPerStream, boolean isNewData, Collection<EventBean> matchingEvents, ExprEvaluatorContext exprEvaluatorContext);
+    public abstract Object[][] evaluateTypableMulti(EventBean[] eventsPerStream, boolean isNewData, Collection<EventBean> matchingEvents, ExprEvaluatorContext exprEvaluatorContext);
 
     /**
      * Ctor.
@@ -142,8 +148,31 @@ public abstract class ExprSubselectNode extends ExprNodeBase implements ExprEval
         return evaluateGetCollScalar(eventsPerStream, isNewData, matchingEvents, exprEvaluatorContext);
     }
 
+    public EventBean evaluateGetEventBean(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
+        Collection<EventBean> matchingEvents = evaluateMatching(eventsPerStream, context);
+        return evaluateGetEventBean(eventsPerStream, isNewData, matchingEvents, context);
+    }
+
     private Collection<EventBean> evaluateMatching(EventBean[] eventsPerStream, ExprEvaluatorContext exprEvaluatorContext) {
         return strategy.evaluateMatching(eventsPerStream, exprEvaluatorContext);
+    }
+
+    public LinkedHashMap<String, Object> getRowProperties() throws ExprValidationException {
+        return typableGetRowProperties();
+    }
+
+    public Boolean isMultirow() {
+        return true;   // subselect can always return multiple rows
+    }
+
+    public Object[] evaluateTypableSingle(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
+        Collection<EventBean> matching = strategy.evaluateMatching(eventsPerStream, context);
+        return evaluateTypableSingle(eventsPerStream, isNewData, matching, context);
+    }
+
+    public Object[][] evaluateTypableMulti(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
+        Collection<EventBean> matching = strategy.evaluateMatching(eventsPerStream, context);
+        return evaluateTypableMulti(eventsPerStream, isNewData, matching, context);
     }
 
     /**

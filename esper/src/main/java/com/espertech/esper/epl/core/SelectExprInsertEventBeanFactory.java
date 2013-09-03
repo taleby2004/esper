@@ -215,9 +215,6 @@ public class SelectExprInsertEventBeanFactory
                             return returnType;
                         }
 
-                        public Map<String, Object> getEventType() {
-                            return null;
-                        }
                     };
                 }
                 // handle case where the select-clause contains an fragment array
@@ -249,9 +246,6 @@ public class SelectExprInsertEventBeanFactory
                             return componentReturnType;
                         }
 
-                        public Map<String, Object> getEventType() {
-                            return null;
-                        }
                     };
                 }
                 else if (!(columnType instanceof Class))
@@ -328,9 +322,6 @@ public class SelectExprInsertEventBeanFactory
                         {
                             return propertyType;
                         }
-                        public Map<String, Object> getEventType() {
-                            return null;
-                        }
                     };
                     break;
                 }
@@ -403,9 +394,6 @@ public class SelectExprInsertEventBeanFactory
                         return returnType;
                     }
 
-                    public Map<String, Object> getEventType() {
-                        return null;
-                    }
                 };
                 ctorTypes[i] = returnType;
                 continue;
@@ -438,9 +426,6 @@ public class SelectExprInsertEventBeanFactory
                         return componentReturnType;
                     }
 
-                    public Map<String, Object> getEventType() {
-                        return null;
-                    }
                 };
                 continue;
             }
@@ -514,9 +499,6 @@ public class SelectExprInsertEventBeanFactory
                     return returnType;
                 }
 
-                public Map<String, Object> getEventType() {
-                    return null;
-                }
             };
 
             // add
@@ -698,8 +680,5 @@ public class SelectExprInsertEventBeanFactory
             return returnType;
         }
 
-        public Map<String, Object> getEventType() throws ExprValidationException {
-            return null;
-        }
     }
 }

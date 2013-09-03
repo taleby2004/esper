@@ -13,6 +13,7 @@ package com.espertech.esper.epl.core;
 
 import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.ConfigurationEngineDefaults;
+import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.core.service.StatementEventTypeRefImpl;
 import com.espertech.esper.core.service.StatementResultService;
 import com.espertech.esper.core.service.StatementResultServiceImpl;
@@ -26,6 +27,7 @@ import com.espertech.esper.epl.spec.SelectClauseStreamCompiledSpec;
 import com.espertech.esper.support.epl.SupportExprNodeFactory;
 import com.espertech.esper.support.epl.SupportStreamTypeSvc3Stream;
 import com.espertech.esper.support.event.SupportEventAdapterService;
+import com.espertech.esper.support.view.SupportStatementContextFactory;
 import com.espertech.esper.util.CollectionUtil;
 import junit.framework.TestCase;
 
@@ -69,8 +71,9 @@ public class TestSelectExprProcessorFactory extends TestCase
         SelectClauseElementCompiled[] selectionList = new SelectClauseElementCompiled[1];
         ExprNode identNode = SupportExprNodeFactory.makeIdentNode("doubleBoxed", "s0");
         selectionList[0] = new SelectClauseExprCompiledSpec(identNode, "result", null, false);
+        StatementContext statementContext = SupportStatementContextFactory.makeContext();
         SelectExprProcessor processor = SelectExprProcessorFactory.getProcessor(Collections.<Integer>emptyList(), selectionList, false, null, null,
-                new SupportStreamTypeSvc3Stream(), SupportEventAdapterService.getService(), statementResultService, null, selectExprEventTypeRegistry, null, null, null, null, null, null, null, null, null, new Configuration(), null);
+                new SupportStreamTypeSvc3Stream(), SupportEventAdapterService.getService(), statementResultService, null, selectExprEventTypeRegistry, statementContext.getMethodResolutionService(), null, null, null, null, null, null, null, null, new Configuration(), null);
         assertTrue(processor != null);
     }
 

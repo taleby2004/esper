@@ -15,9 +15,6 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventPropertyGetterIndexed;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
-import com.espertech.esper.epl.expression.ExprValidationException;
-
-import java.util.Map;
 
 public class PropertyExprEvaluatorNonLambdaIndexed implements ExprEvaluator {
 
@@ -46,7 +43,4 @@ public class PropertyExprEvaluatorNonLambdaIndexed implements ExprEvaluator {
         return returnType;
     }
 
-    public Map<String, Object> getEventType() throws ExprValidationException {
-        return null;
-    }
 }

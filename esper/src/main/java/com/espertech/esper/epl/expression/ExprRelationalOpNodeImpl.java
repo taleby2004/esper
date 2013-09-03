@@ -12,8 +12,6 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.type.RelationalOpEnum;
 import com.espertech.esper.util.JavaClassHelper;
 
-import java.util.Map;
-
 /**
  * Represents a lesser or greater then (</<=/>/>=) expression in a filter expression tree.
  */
@@ -41,10 +39,6 @@ public class ExprRelationalOpNodeImpl extends ExprNodeBase implements ExprEvalua
     public boolean isConstantResult()
     {
         return false;
-    }
-
-    public Map<String, Object> getEventType() {
-        return null;
     }
 
     /**

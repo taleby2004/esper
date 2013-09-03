@@ -13,7 +13,6 @@ import com.espertech.esper.util.*;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Map;
 
 /**
  * Represents the CAST(expression, type) function is an expression tree.
@@ -47,10 +46,6 @@ public class ExprCastNode extends ExprNodeBase implements ExprEvaluator
     public String getClassIdentifier()
     {
         return classIdentifier;
-    }
-
-    public Map<String, Object> getEventType() {
-        return null;
     }
 
     public void validate(ExprValidationContext validationContext) throws ExprValidationException

@@ -15,6 +15,7 @@ import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.collection.MultiKey;
 import com.espertech.esper.collection.UniformPair;
+import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.core.service.StatementEventTypeRefImpl;
 import com.espertech.esper.epl.core.eval.SelectExprStreamDesc;
 import com.espertech.esper.support.bean.SupportBean;
@@ -22,6 +23,7 @@ import com.espertech.esper.support.epl.SupportSelectExprFactory;
 import com.espertech.esper.support.epl.SupportStreamTypeSvc1Stream;
 import com.espertech.esper.support.event.SupportEventAdapterService;
 import com.espertech.esper.support.event.SupportEventBeanFactory;
+import com.espertech.esper.support.view.SupportStatementContextFactory;
 import junit.framework.TestCase;
 
 import java.util.Collections;
@@ -38,8 +40,9 @@ public class TestResultSetProcessorSimple extends TestCase
     public void setUp() throws Exception
     {
         SelectExprEventTypeRegistry selectExprEventTypeRegistry = new SelectExprEventTypeRegistry("abc", new StatementEventTypeRefImpl());
+        StatementContext statementContext = SupportStatementContextFactory.makeContext();
 
-        SelectExprProcessorHelper factory = new SelectExprProcessorHelper(Collections.<Integer>emptyList(), SupportSelectExprFactory.makeNoAggregateSelectList(), Collections.<SelectExprStreamDesc>emptyList(), null, false, new SupportStreamTypeSvc1Stream(), SupportEventAdapterService.getService(), null, selectExprEventTypeRegistry, null, null, null, new Configuration());
+        SelectExprProcessorHelper factory = new SelectExprProcessorHelper(Collections.<Integer>emptyList(), SupportSelectExprFactory.makeNoAggregateSelectList(), Collections.<SelectExprStreamDesc>emptyList(), null, false, new SupportStreamTypeSvc1Stream(), SupportEventAdapterService.getService(), null, selectExprEventTypeRegistry, statementContext.getMethodResolutionService(), null, null, new Configuration());
         selectExprProcessor = factory.getEvaluator();
         orderByProcessor = null;
 

@@ -30,7 +30,6 @@ import com.espertech.esper.util.JavaClassHelper;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
-import java.util.Map;
 
 public class ExprDotEvalDTFactory {
 
@@ -149,9 +148,6 @@ public class ExprDotEvalDTFactory {
                         return TimePeriod.class;
                     }
 
-                    public Map<String, Object> getEventType() throws ExprValidationException {
-                        return null;
-                    }
                 };
             }
             else {

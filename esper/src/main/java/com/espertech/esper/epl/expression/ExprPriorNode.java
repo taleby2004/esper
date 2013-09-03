@@ -10,8 +10,6 @@ package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.client.EventBean;
 
-import java.util.Map;
-
 /**
  * Represents the 'prior' prior event function in an expression node tree.
  */
@@ -27,10 +25,6 @@ public class ExprPriorNode extends ExprNodeBase implements ExprEvaluator
     @Override
     public ExprEvaluator getExprEvaluator() {
         return this;
-    }
-
-    public Map<String, Object> getEventType() {
-        return null;
     }
 
     public int getStreamNumber() {

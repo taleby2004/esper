@@ -22,8 +22,8 @@ import java.util.Collections;
 import java.util.Map;
 
 public enum EventRepresentationEnum {
-    OBJECTARRAY("@eventbeanRepresentation(array=true)", Object[].class, " objectarray"),
-    MAP("@eventbeanRepresentation(array=false)", Map.class, " map"),
+    OBJECTARRAY("@EventRepresentation(array=true)", Object[].class, " objectarray"),
+    MAP("@EventRepresentation(array=false)", Map.class, " map"),
     DEFAULT(null, null, "");
 
     private final String annotationText;

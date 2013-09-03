@@ -17,7 +17,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.Collection;
-import java.util.Map;
+import java.util.LinkedHashMap;
 
 /**
  * Represents a subselect in an expression tree.
@@ -45,10 +45,6 @@ public class ExprSubselectAllSomeAnyNode extends ExprSubselectNode
         isNot = not;
         isAll = all;
         this.relationalOp = relationalOpEnum;
-    }
-
-    public Map<String, Object> getEventType() {
-        return null;
     }
 
     /**
@@ -93,6 +89,18 @@ public class ExprSubselectAllSomeAnyNode extends ExprSubselectNode
         return evalStrategy.evaluate(eventsPerStream, isNewData, matchingEvents, exprEvaluatorContext);
     }
 
+    public LinkedHashMap<String, Object> typableGetRowProperties() {
+        return null;
+    }
+
+    public Object[] evaluateTypableSingle(EventBean[] eventsPerStream, boolean isNewData, Collection<EventBean> matchingEvents, ExprEvaluatorContext exprEvaluatorContext) {
+        return null;
+    }
+
+    public Object[][] evaluateTypableMulti(EventBean[] eventsPerStream, boolean isNewData, Collection<EventBean> matchingEvents, ExprEvaluatorContext exprEvaluatorContext) {
+        return null;
+    }
+
     public Collection<EventBean> evaluateGetCollEvents(EventBean[] eventsPerStream, boolean isNewData, Collection<EventBean> matchingEvents, ExprEvaluatorContext context) {
         return null;
     }
@@ -106,6 +114,10 @@ public class ExprSubselectAllSomeAnyNode extends ExprSubselectNode
     }
 
     public Class getComponentTypeCollection() throws ExprValidationException {
+        return null;
+    }
+
+    public EventBean evaluateGetEventBean(EventBean[] eventsPerStream, boolean isNewData, Collection<EventBean> matchingEvents, ExprEvaluatorContext exprEvaluatorContext) {
         return null;
     }
 

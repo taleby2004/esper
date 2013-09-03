@@ -19,7 +19,6 @@ import com.espertech.esper.filter.FilterSpecLookupable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Represents an invocation of a plug-in single-row function  in the expression tree.
@@ -162,9 +161,6 @@ public class ExprPlugInSingleRowNode extends ExprNodeBase implements ExprNodeInn
                     return staticMethodDesc.getFastMethod().getReturnType();
                 }
 
-                public Map<String, Object> getEventType() throws ExprValidationException {
-                    return null;
-                }
             };
         }
 	}

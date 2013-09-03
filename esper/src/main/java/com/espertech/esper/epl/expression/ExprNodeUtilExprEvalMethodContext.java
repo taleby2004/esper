@@ -11,8 +11,6 @@ package com.espertech.esper.epl.expression;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.hook.EPLMethodInvocationContext;
 
-import java.util.Map;
-
 public class ExprNodeUtilExprEvalMethodContext implements ExprEvaluator {
 
     private final String functionName;
@@ -30,7 +28,4 @@ public class ExprNodeUtilExprEvalMethodContext implements ExprEvaluator {
         return EPLMethodInvocationContext.class;
     }
 
-    public Map<String, Object> getEventType() throws ExprValidationException {
-        return null;
-    }
 }

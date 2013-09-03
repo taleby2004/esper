@@ -10,8 +10,6 @@ package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.client.EventBean;
 
-import java.util.Map;
-
 public class ExprNodeUtilExprEvalStreamNumEvent implements ExprEvaluator {
     private final int streamNum;
 
@@ -27,7 +25,4 @@ public class ExprNodeUtilExprEvalStreamNumEvent implements ExprEvaluator {
         return EventBean.class;
     }
 
-    public Map<String, Object> getEventType() throws ExprValidationException {
-        return null;
-    }
 }

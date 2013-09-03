@@ -11,8 +11,6 @@ package com.espertech.esper.epl.expression;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 
-import java.util.Map;
-
 /**
  * Represents an stream selector that returns the streams underlying event, or null if undefined.
  */
@@ -57,10 +55,6 @@ public class ExprStreamUnderlyingNodeImpl extends ExprNodeBase implements ExprEv
     public String getStreamName()
     {
         return streamName;
-    }
-
-    public Map<String, Object> getEventType() {
-        return null;
     }
 
     public void validate(ExprValidationContext validationContext) throws ExprValidationException

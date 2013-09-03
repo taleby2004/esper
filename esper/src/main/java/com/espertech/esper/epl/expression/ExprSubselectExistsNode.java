@@ -16,7 +16,7 @@ import com.espertech.esper.epl.spec.StatementSpecRaw;
 import com.espertech.esper.client.EventBean;
 
 import java.util.Collection;
-import java.util.Map;
+import java.util.LinkedHashMap;
 
 /**
  * Represents an exists-subselect in an expression tree.
@@ -38,10 +38,6 @@ public class ExprSubselectExistsNode extends ExprSubselectNode
     public Class getType()
     {
         return Boolean.class;
-    }
-
-    public Map<String, Object> getEventType() {
-        return null;
     }
 
     public void validateSubquery(ExprValidationContext validationContext) throws ExprValidationException
@@ -83,7 +79,23 @@ public class ExprSubselectExistsNode extends ExprSubselectNode
         return false;
     }
 
+    public LinkedHashMap<String, Object> typableGetRowProperties() {
+        return null;
+    }
+
+    public Object[] evaluateTypableSingle(EventBean[] eventsPerStream, boolean isNewData, Collection<EventBean> matchingEvents, ExprEvaluatorContext exprEvaluatorContext) {
+        return null;
+    }
+
+    public Object[][] evaluateTypableMulti(EventBean[] eventsPerStream, boolean isNewData, Collection<EventBean> matchingEvents, ExprEvaluatorContext exprEvaluatorContext) {
+        return null;
+    }
+
     public Collection<EventBean> evaluateGetCollEvents(EventBean[] eventsPerStream, boolean isNewData, Collection<EventBean> matchingEvents, ExprEvaluatorContext context) {
+        return null;
+    }
+
+    public EventBean evaluateGetEventBean(EventBean[] eventsPerStream, boolean isNewData, Collection<EventBean> matchingEvents, ExprEvaluatorContext exprEvaluatorContext) {
         return null;
     }
 

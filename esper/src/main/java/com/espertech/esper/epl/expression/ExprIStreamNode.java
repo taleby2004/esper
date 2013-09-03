@@ -10,8 +10,6 @@ package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.client.EventBean;
 
-import java.util.Map;
-
 /**
  * Represents the RSTREAM() function in an expression tree.
  */
@@ -47,10 +45,6 @@ public class ExprIStreamNode extends ExprNodeBase implements ExprEvaluator
     public Class getType()
     {
         return Boolean.class;
-    }
-
-    public Map<String, Object> getEventType() {
-        return null;
     }
 
     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)

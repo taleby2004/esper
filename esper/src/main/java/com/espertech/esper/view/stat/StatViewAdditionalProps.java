@@ -82,9 +82,6 @@ public class StatViewAdditionalProps
                         return type;
                     }
 
-                    public Map<String, Object> getEventType() {
-                        return null;
-                    }
                 };
                 lastValueExpr.add(exprEvaluator);
             }

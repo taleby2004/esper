@@ -14,8 +14,6 @@ package com.espertech.esper.support.epl;
 import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.client.EventBean;
 
-import java.util.Map;
-
 public class SupportBoolExprNode extends ExprNodeBase implements ExprEvaluator
 {
     private boolean evaluateResult;
@@ -36,10 +34,6 @@ public class SupportBoolExprNode extends ExprNodeBase implements ExprEvaluator
     public Class getType()
     {
         return Boolean.class;
-    }
-
-    public Map<String, Object> getEventType() {
-        return null;
     }
 
     public boolean isConstantResult()

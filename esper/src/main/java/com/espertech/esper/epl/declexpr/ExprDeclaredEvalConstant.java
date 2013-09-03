@@ -11,9 +11,6 @@ package com.espertech.esper.epl.declexpr;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
-import com.espertech.esper.epl.expression.ExprValidationException;
-
-import java.util.Map;
 
 public class ExprDeclaredEvalConstant implements ExprEvaluator {
     private final Class returnType;
@@ -32,7 +29,4 @@ public class ExprDeclaredEvalConstant implements ExprEvaluator {
         return value;
     }
 
-    public Map<String, Object> getEventType() throws ExprValidationException {
-        return null;
-    }
 }

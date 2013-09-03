@@ -14,8 +14,6 @@ package com.espertech.esper.epl.expression;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventPropertyGetter;
 
-import java.util.Map;
-
 public class ExprIdentNodeEvaluatorContext implements ExprIdentNodeEvaluator {
 
     private final int streamNum;
@@ -45,10 +43,6 @@ public class ExprIdentNodeEvaluatorContext implements ExprIdentNodeEvaluator {
 
     public Class getType() {
         return resultType;
-    }
-
-    public Map<String, Object> getEventType() throws ExprValidationException {
-        return null;
     }
 
     public EventPropertyGetter getGetter() {

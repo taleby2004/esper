@@ -14,8 +14,6 @@ package com.espertech.esper.support.epl;
 import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.client.EventBean;
 
-import java.util.Map;
-
 public class SupportExprNode extends ExprNodeBase implements ExprEvaluator
 {
     private static int validateCount;
@@ -45,10 +43,6 @@ public class SupportExprNode extends ExprNodeBase implements ExprEvaluator
     {
         this.value = value;
         this.type = type;
-    }
-
-    public Map<String, Object> getEventType() {
-        return null;
     }
 
     public ExprEvaluator getExprEvaluator()

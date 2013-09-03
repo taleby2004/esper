@@ -10,8 +10,6 @@ package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.client.EventBean;
 
-import java.util.Map;
-
 /**
  * Represents a simple Math (+/-/divide/*) in a filter expression tree.
  */
@@ -32,10 +30,6 @@ public class ExprConcatNode extends ExprNodeBase implements ExprEvaluator
     public ExprEvaluator getExprEvaluator()
     {
         return this;
-    }
-
-    public Map<String, Object> getEventType() {
-        return null;
     }
 
     public void validate(ExprValidationContext validationContext) throws ExprValidationException

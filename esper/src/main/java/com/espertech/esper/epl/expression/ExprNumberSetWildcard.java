@@ -14,8 +14,6 @@ package com.espertech.esper.epl.expression;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.type.WildcardParameter;
 
-import java.util.Map;
-
 /**
  * Expression for use within crontab to specify a wildcard.
  */
@@ -37,10 +35,6 @@ public class ExprNumberSetWildcard extends ExprNodeBase implements ExprEvaluator
     public boolean isConstantResult()
     {
         return true;
-    }
-
-    public Map<String, Object> getEventType() {
-        return null;
     }
 
     public boolean equalsNode(ExprNode node)

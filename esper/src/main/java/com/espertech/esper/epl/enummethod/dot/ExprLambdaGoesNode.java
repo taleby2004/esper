@@ -12,7 +12,6 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.epl.expression.*;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Represents the case-when-then-else control flow function is an expression tree.
@@ -38,10 +37,6 @@ public class ExprLambdaGoesNode extends ExprNodeBase implements ExprEvaluator, E
     public ExprEvaluator getExprEvaluator()
     {
         return this;
-    }
-
-    public Map<String, Object> getEventType() {
-        return null;
     }
 
     public void validate(ExprValidationContext validationContext) throws ExprValidationException {

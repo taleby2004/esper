@@ -41,10 +41,6 @@ public class ExprInstanceofNode extends ExprNodeBase implements ExprEvaluator
         return this;
     }
 
-    public Map<String, Object> getEventType() {
-        return null;
-    }
-
     public void validate(ExprValidationContext validationContext) throws ExprValidationException
     {
         if (this.getChildNodes().length != 1)

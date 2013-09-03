@@ -21,7 +21,7 @@ import com.espertech.esper.support.epl.SupportStaticMethodLib;
 import com.espertech.esper.support.util.SupportModelHelper;
 import junit.framework.TestCase;
 
-public class TestSelectExprEvents extends TestCase {
+public class TestSelectExprEventBeanAnnotation extends TestCase {
 
     private EPServiceProvider epService;
     private SupportUpdateListener listener;

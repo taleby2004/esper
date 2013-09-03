@@ -350,4 +350,10 @@ public interface EPRuntime
      * @return data flow runtime
      */
     public EPDataFlowRuntime getDataFlowRuntime();
+
+    /**
+     * Returns true for external clocking, false for internal clocking.
+     * @return clocking indicator
+     */
+    public boolean isExternalClockingEnabled();
 }

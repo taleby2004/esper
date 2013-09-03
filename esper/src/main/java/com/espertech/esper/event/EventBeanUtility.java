@@ -18,6 +18,7 @@ import com.espertech.esper.collection.MultiKeyUntypedEventPair;
 import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
+import com.espertech.esper.epl.expression.ExprSubselectRowNode;
 import com.espertech.esper.util.JavaClassHelper;
 
 import java.io.PrintWriter;
@@ -30,6 +31,32 @@ import java.util.*;
  */
 public class EventBeanUtility
 {
+    public static EventBean[] allocatePerStreamShift(EventBean[] eventsPerStream) {
+        EventBean[] evalEvents = new EventBean[eventsPerStream.length + 1];
+        System.arraycopy(eventsPerStream, 0, evalEvents, 1, eventsPerStream.length);
+        return evalEvents;
+    }
+
+    public static Object getNonemptyFirstEventUnderlying(Collection<EventBean> matchingEvents) {
+        if (matchingEvents instanceof List) {
+            return ((List<EventBean>) matchingEvents).get(0).getUnderlying();
+        }
+        if (matchingEvents instanceof Deque) {
+            return ((Deque<EventBean>) matchingEvents).getFirst().getUnderlying();
+        }
+        return matchingEvents.iterator().next().getUnderlying();
+    }
+
+    public static EventBean getNonemptyFirstEvent(Collection<EventBean> matchingEvents) {
+        if (matchingEvents instanceof List) {
+            return ((List<EventBean>) matchingEvents).get(0);
+        }
+        if (matchingEvents instanceof Deque) {
+            return ((Deque<EventBean>) matchingEvents).getFirst();
+        }
+        return matchingEvents.iterator().next();
+    }
+
     public static EventPropertyGetter getAssertPropertyGetter(EventType type, String propertyName) {
         EventPropertyGetter getter = type.getGetter(propertyName);
         if (getter == null) {

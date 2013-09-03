@@ -18,7 +18,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.Map;
 
 /**
  * Represents the between-clause function in an expression tree.
@@ -84,10 +83,6 @@ public class ExprBetweenNodeImpl extends ExprNodeBase implements ExprEvaluator, 
     public boolean isNotBetween()
     {
         return isNotBetween;
-    }
-
-    public Map<String, Object> getEventType() {
-        return null;
     }
 
     public void validate(ExprValidationContext validationContext) throws ExprValidationException

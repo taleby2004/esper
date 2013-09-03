@@ -10,8 +10,6 @@ package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.client.EventBean;
 
-import java.util.Map;
-
 /**
  * Represents a constant in an expressiun tree.
  */
@@ -77,10 +75,6 @@ public class ExprConstantNodeImpl extends ExprNodeBase implements ExprConstantNo
     public boolean isConstantResult()
     {
         return true;
-    }
-
-    public Map<String, Object> getEventType() {
-        return null;
     }
 
     /**

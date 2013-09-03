@@ -13,7 +13,6 @@ import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.client.EventType;
 
 import java.util.Arrays;
-import java.util.Map;
 
 /**
  * Represents an stream property identifier in a filter expressiun tree.
@@ -32,10 +31,6 @@ public class ExprContextPropertyNode extends ExprNodeBase implements ExprEvaluat
     public ExprEvaluator getExprEvaluator()
     {
         return this;
-    }
-
-    public Map<String, Object> getEventType() {
-        return null;
     }
 
     public String getPropertyName() {

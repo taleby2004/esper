@@ -26,7 +26,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.Collection;
-import java.util.Map;
 
 public abstract class ExprNodeScriptEvalBase implements ExprEvaluator, ExprEvaluatorEnumeration {
 
@@ -52,10 +51,6 @@ public abstract class ExprNodeScriptEvalBase implements ExprEvaluator, ExprEvalu
         else {
             coercer = null;
         }
-    }
-
-    public Map<String, Object> getEventType() throws ExprValidationException {
-        return null;
     }
 
     public Class getType() {

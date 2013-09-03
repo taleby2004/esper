@@ -1347,6 +1347,12 @@ from MyEvent.win:length(2) as s0</programlisting>
 				The next EPL consumes the stream and selects the last event:
 			</para>
 			<programlisting>select win.lastOf() from OutStream</programlisting>
+			
+			<para>
+				It is not necessary to use <literal>@eventbean</literal> if an event type by the same name (<literal>OutStream</literal> in the example) is already declared 
+				and a property exist on the type by the same name (<literal>win</literal> in this example) and the type of the property is the event type (<literal>MyEvent</literal> in the example) 
+				returned by the expression. This is further described in <xref linkend="insert-into-reconcile"/>.
+			</para>
 		</sect2>
 
     </sect1>
@@ -3015,8 +3021,61 @@ from PurchaseOrder.std:lastevent() as order, ServiceEvent:std:lastevent() as ser
 				You can transpose an object returned as an expression result into a stream using the <literal>transpose</literal> function as described further in <xref linkend="functionreference-transpose"/>.
 			</para>			
 		</sect2>
+
+		<sect2 xml:id="insert-into-reconcile">
+			<title>Select Clause Expression And Inserted-Into Column Event Type</title>
+
+			<para>
+				When you declare the inserted-into event type in advance to the statement that inserts, the engine compares the inserted-into event type information to the return type of expressions in the select clause.
+				The comparison uses the column alias assigned to each select clause expression using the <literal>as</literal> keyword.
+			</para>			
+			
+			<para>
+				When the inserted-into column type is an event type and when using a subquery or the <literal>new</literal> operator, 
+				the engine compares column names assigned to subquery columns or <literal>new</literal> operator columns.
+			</para>			
+
+			<para>
+			    For example, assume a <literal>PurchaseOrder</literal> event type that has a property called <literal>items</literal> that consists of <literal>Item</literal> rows:
+			</para>
+			<programlisting>create schema Item(name string, price double)</programlisting>			
+			<programlisting>create schema PurchaseOrder(orderId string, items Item[])</programlisting>			
+			
+			<para>
+				Declare a statement that inserts into the <literal>PurchaseOrder</literal> stream:
+			</para>
+			<programlisting>insert into PurchaseOrder 
+select '001' as orderId, new {name='i1', price=10} as items
+from TriggerEvent</programlisting>		
+			
+			<para>
+				The alias assigned to the first and second expression in the select clause, namely <literal>orderId</literal> and <literal>items</literal>,
+				both match the event property names of the <literal>Purchase Order</literal> event type. The column names provided to the <literal>new</literal> operator 
+				also both match the event property names of the <literal>Item</literal> event type.
+			</para>
+			
+			<para>
+				When the event type declares the column as a single value (and not an array) and when the select clause expression produces a multiple rows, 
+				the engine only populate the first row.
+			</para>
+
+			<para>
+			    Consider a <literal>PurchaseOrder</literal> event type that has a property called <literal>item</literal> that consists of a single <literal>Item</literal> event:
+			</para>
+			<programlisting>create schema PurchaseOrder(orderId string, items Item)</programlisting>			
+			
+			<para>
+				The sample subquery below populates only the very first event, discarding remaining subquery result events, since the <literal>items</literal> property above is declared as holding a single <literal>Item</literal>-typed event only (versus <literal>Item[]</literal> to hold multiple <literal>Item</literal>-typed events).
+			</para>
+			<programlisting>insert into PurchaseOrder select 
+(select 'i1' as name, 10 as price from HistoryEvent.win:length(2)) as items 
+from TriggerEvent</programlisting>		
+			
+			<para>
+				Consider using a subquery with filter, or one of the enumeration methods to select a specific subquery result row.
+			</para>
+		</sect2>
 	</sect1>
-	
 
     <sect1 xml:id="epl-subqueries">
         <title>Subqueries</title>

@@ -12,8 +12,6 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.util.CoercionException;
 import com.espertech.esper.util.JavaClassHelper;
 
-import java.util.Map;
-
 /**
  * Represents the COALESCE(a,b,...) function is an expression tree.
  */
@@ -81,10 +79,6 @@ public class ExprCoalesceNode extends ExprNodeBase implements ExprEvaluator
     public Class getType()
     {
         return resultType;
-    }
-
-    public Map<String, Object> getEventType() {
-        return null;
     }
 
     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)

@@ -70,10 +70,6 @@ public class ExprNumberSetList extends ExprNodeBase implements ExprEvaluator
         return (node instanceof ExprNumberSetList);
     }
 
-    public Map<String, Object> getEventType() {
-        return null;
-    }
-
     public void validate(ExprValidationContext validationContext) throws ExprValidationException
     {
         // all nodes must either be int, frequency or range

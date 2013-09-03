@@ -11,16 +11,12 @@
 
 package com.espertech.esper.epl.expression;
 
-import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.schedule.TimeProvider;
 import com.espertech.esper.type.CronOperatorEnum;
 import com.espertech.esper.type.CronParameter;
 import com.espertech.esper.util.JavaClassHelper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import java.util.Map;
 
 /**
  * Expression for a parameter within a crontab.
@@ -74,10 +70,6 @@ public class ExprNumberSetCronParam extends ExprNodeBase implements ExprEvaluato
             return true;
         }
         return this.getChildNodes()[0].isConstantResult();
-    }
-
-    public Map<String, Object> getEventType() {
-        return null;
     }
 
     public boolean equalsNode(ExprNode node)

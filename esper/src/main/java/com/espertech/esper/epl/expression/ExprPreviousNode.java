@@ -14,7 +14,6 @@ import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.util.JavaClassHelper;
 
 import java.util.Collection;
-import java.util.Map;
 
 /**
  * Represents the 'prev' previous event function in an expression node tree.
@@ -41,10 +40,6 @@ public class ExprPreviousNode extends ExprNodeBase implements ExprEvaluator, Exp
     public ExprEvaluator getExprEvaluator()
     {
         return this;
-    }
-
-    public Map<String, Object> getEventType() {
-        return null;
     }
 
     public void setEvaluator(ExprPreviousEvalStrategy evaluator) {

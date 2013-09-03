@@ -33,5 +33,4 @@ public interface ExprEvaluator
      */
     public Class getType();
 
-    public Map<String, Object> getEventType() throws ExprValidationException;
 }

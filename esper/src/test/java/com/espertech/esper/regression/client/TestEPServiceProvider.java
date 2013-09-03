@@ -50,6 +50,7 @@ public class TestEPServiceProvider extends TestCase
     {
         assertEquals("default", EPServiceProviderManager.getDefaultProvider().getURI());
         EPServiceProvider engineDefault = EPServiceProviderManager.getDefaultProvider();
+        assertTrue(engineDefault.getEPRuntime().isExternalClockingEnabled());
 
         EPServiceProvider engine = EPServiceProviderManager.getProvider("default");
         assertSame(engineDefault, engine);

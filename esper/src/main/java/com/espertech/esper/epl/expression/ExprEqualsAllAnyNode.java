@@ -73,10 +73,6 @@ public class ExprEqualsAllAnyNode extends ExprNodeBase implements ExprEvaluator
         return isAll;
     }
 
-    public Map<String, Object> getEventType() {
-        return null;
-    }
-
     public void validate(ExprValidationContext validationContext) throws ExprValidationException
     {
         // Must have 2 child nodes

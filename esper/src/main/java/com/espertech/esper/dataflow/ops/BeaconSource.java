@@ -105,9 +105,6 @@ public class BeaconSource implements DataFlowSourceOperator {
                             public Class getType() {
                                 return null;
                             }
-                            public Map<String, Object> getEventType() throws ExprValidationException {
-                                return null;
-                            }
                         };
                     }
                     else {
@@ -122,9 +119,6 @@ public class BeaconSource implements DataFlowSourceOperator {
                         public Class getType() {
                             return null;
                         }
-                        public Map<String, Object> getEventType() throws ExprValidationException {
-                            return null;
-                        }
                     };
                 }
                 else {
@@ -134,9 +128,6 @@ public class BeaconSource implements DataFlowSourceOperator {
                         }
                         public Class getType() {
                             return providedProperty.getClass();
-                        }
-                        public Map<String, Object> getEventType() throws ExprValidationException {
-                            return null;
                         }
                     };
                 }
@@ -169,9 +160,6 @@ public class BeaconSource implements DataFlowSourceOperator {
                     return value;
                 }
                 public Class getType() {
-                    return null;
-                }
-                public Map<String, Object> getEventType() throws ExprValidationException {
                     return null;
                 }
             };

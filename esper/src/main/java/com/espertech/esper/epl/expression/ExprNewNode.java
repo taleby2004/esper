@@ -16,17 +16,18 @@ import org.apache.commons.logging.LogFactory;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
  * Represents the bit-wise operators in an expression tree.
  */
-public class ExprNewNode extends ExprNodeBase implements ExprEvaluator {
+public class ExprNewNode extends ExprNodeBase implements ExprEvaluatorTypableReturn {
 
     private static final long serialVersionUID = -210293632565665600L;
 
     private final String[] columnNames;
-    private transient Map<String, Object> eventType;
+    private transient LinkedHashMap<String, Object> eventType;
     private transient ExprEvaluator[] evaluators;
     private boolean isAllConstants;
 
@@ -45,7 +46,7 @@ public class ExprNewNode extends ExprNodeBase implements ExprEvaluator {
 
     public void validate(ExprValidationContext validationContext) throws ExprValidationException
     {
-        eventType = new HashMap<String, Object>();
+        eventType = new LinkedHashMap<String, Object>();
         evaluators = ExprNodeUtility.getEvaluators(this.getChildNodes());
 
         for (int i = 0; i < columnNames.length; i++) {
@@ -53,12 +54,16 @@ public class ExprNewNode extends ExprNodeBase implements ExprEvaluator {
             if (eventType.containsKey(columnNames[i])) {
                 throw new ExprValidationException("Failed to validate new-keyword property names, property '" + columnNames[i] + "' has already been declared");
             }
-            Map<String, Object> eventTypeResult = evaluators[i].getEventType();
-            Class classResult = JavaClassHelper.getBoxedType(evaluators[i].getType());
+
+            Map<String, Object> eventTypeResult = null;
+            if (evaluators[i] instanceof ExprEvaluatorTypableReturn) {
+                eventTypeResult = ((ExprEvaluatorTypableReturn) evaluators[i]).getRowProperties();
+            }
             if (eventTypeResult != null) {
                 eventType.put(columnNames[i], eventTypeResult);
             }
             else {
+                Class classResult = JavaClassHelper.getBoxedType(evaluators[i].getType());
                 eventType.put(columnNames[i], classResult);
             }
         }
@@ -78,7 +83,7 @@ public class ExprNewNode extends ExprNodeBase implements ExprEvaluator {
         return Map.class;
     }
 
-    public Map<String, Object> getEventType() {
+    public LinkedHashMap<String, Object> getRowProperties() throws ExprValidationException {
         return eventType;
     }
 
@@ -89,6 +94,22 @@ public class ExprNewNode extends ExprNodeBase implements ExprEvaluator {
             props.put(columnNames[i], evaluators[i].evaluate(eventsPerStream, isNewData, exprEvaluatorContext));
         }
         return props;
+    }
+
+    public Boolean isMultirow() {
+        return false;   // New itself can only return a single row
+    }
+
+    public Object[] evaluateTypableSingle(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
+        Object[] rows = new Object[columnNames.length];
+        for (int i = 0; i < columnNames.length; i++) {
+            rows[i] = evaluators[i].evaluate(eventsPerStream, isNewData, context);
+        }
+        return rows;
+    }
+
+    public Object[][] evaluateTypableMulti(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
+        return null;
     }
 
     public boolean equalsNode(ExprNode node)

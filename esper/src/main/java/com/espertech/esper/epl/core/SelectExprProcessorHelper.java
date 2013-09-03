@@ -9,6 +9,7 @@
 package com.espertech.esper.epl.core;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.util.ExpressionReturnType;
 import com.espertech.esper.epl.core.eval.*;
 import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.epl.spec.CreateSchemaDesc;
@@ -22,9 +23,7 @@ import com.espertech.esper.event.map.MapEventType;
 import com.espertech.esper.event.vaevent.ValueAddEventProcessor;
 import com.espertech.esper.event.vaevent.ValueAddEventService;
 import com.espertech.esper.event.vaevent.VariantEventType;
-import com.espertech.esper.util.CollectionUtil;
-import com.espertech.esper.util.EventRepresentationUtil;
-import com.espertech.esper.util.JavaClassHelper;
+import com.espertech.esper.util.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -169,91 +168,58 @@ public class SelectExprProcessorHelper
         	}
         }
 
+        // Obtain insert-into per-column type information, when available
+        ExpressionReturnType[] insertIntoTargetsPerCol = determineInsertedEventTypeTargets(insertIntoDesc, eventAdapterService, selectionList);
+
         // Get expression nodes
         ExprEvaluator[] exprEvaluators = new ExprEvaluator[selectionList.size()];
         ExprNode[] exprNodes = new ExprNode[selectionList.size()];
         Object[] expressionReturnTypes = new Object[selectionList.size()];
         for (int i = 0; i < selectionList.size(); i++)
         {
-            //Select selectionList.get(i);
             SelectClauseExprCompiledSpec spec = selectionList.get(i);
             ExprNode expr = spec.getSelectExpression();
+            ExprEvaluator evaluator = expr.getExprEvaluator();
             exprNodes[i] = expr;
-            exprEvaluators[i] = expr.getExprEvaluator();
-            Map<String, Object> eventTypeExpr = exprEvaluators[i].getEventType();
 
-            if (expr instanceof ExprEvaluatorEnumeration && spec.isEvents()) {
-                final ExprEvaluatorEnumeration enumEval = (ExprEvaluatorEnumeration) expr;
-                final EventType eventTypeSingle = enumEval.getEventTypeSingle(eventAdapterService, statementId);
-                if (eventTypeSingle != null) {
-                    ExprEvaluator evaluatorFragment = new ExprEvaluator() {
-                        public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext) {
-                            return enumEval.evaluateGetEventBean(eventsPerStream, isNewData, exprEvaluatorContext);
-                        }
-                        public Class getType(){
-                            return eventTypeSingle.getUnderlyingType();
-                        }
-                        public Map<String, Object> getEventType() {
-                            return null;
-                        }
-                    };
-                    expressionReturnTypes[i] = eventTypeSingle;
-                    exprEvaluators[i] = evaluatorFragment;
+            // if there is insert-into specification, use that
+            if (insertIntoDesc != null) {
+                // handle insert-into, with well-defined target event-typed column, and enumeration
+                TypeAndFunctionPair pair = handleInsertIntoEnumeration(spec.getProvidedName(), insertIntoTargetsPerCol[i], evaluator, methodResolutionService.getEngineImportService());
+                if (pair != null) {
+                    expressionReturnTypes[i] = pair.getType();
+                    exprEvaluators[i] = pair.getFunction();
                     continue;
                 }
 
-                final EventType eventTypeColl = enumEval.getEventTypeCollection(eventAdapterService);
-                if (eventTypeColl != null) {
-                    ExprEvaluator evaluatorFragment = new ExprEvaluator() {
-                        public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext) {
-                            // the protocol is EventBean[]
-                            Object result = enumEval.evaluateGetROCollectionEvents(eventsPerStream, isNewData, exprEvaluatorContext);
-                            if (result != null && result instanceof Collection) {
-                                Collection<EventBean> events = (Collection<EventBean>) result;
-                                return events.toArray(new EventBean[events.size()]);
-                            }
-                            return enumEval.evaluateGetROCollectionEvents(eventsPerStream, isNewData, exprEvaluatorContext);
-                        }
-                        public Class getType(){
-                            return JavaClassHelper.getArrayType(eventTypeColl.getUnderlyingType());
-                        }
-                        public Map<String, Object> getEventType() {
-                            return null;
-                        }
-                    };
-                    expressionReturnTypes[i] = new EventType[]{eventTypeColl};
-                    exprEvaluators[i] = evaluatorFragment;
+                // handle insert-into with well-defined target event-typed column, and typable expression
+                pair = handleInsertIntoTypableExpression(insertIntoTargetsPerCol[i], evaluator, methodResolutionService.getEngineImportService());
+                if (pair != null) {
+                    expressionReturnTypes[i] = pair.getType();
+                    exprEvaluators[i] = pair.getFunction();
                     continue;
                 }
             }
 
-            if (eventTypeExpr == null) {
-                expressionReturnTypes[i] = exprEvaluators[i].getType();
+            // handle @eventbean annotation, i.e. well-defined type through enumeration
+            TypeAndFunctionPair pair = handleAtEventbeanEnumeration(spec.isEvents(), evaluator);
+            if (pair != null) {
+                expressionReturnTypes[i] = pair.getType();
+                exprEvaluators[i] = pair.getFunction();
+                continue;
             }
-            else {
-                final ExprEvaluator innerExprEvaluator = expr.getExprEvaluator();
-                final EventType mapType = eventAdapterService.createAnonymousMapType(statementId + "_innereval_" + CollectionUtil.toString(assignedTypeNumberStack, "_") + "_" + i, eventTypeExpr);
-                ExprEvaluator evaluatorFragment = new ExprEvaluator() {
-                    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
-                    {
-                        Map<String, Object> values = (Map<String, Object>) innerExprEvaluator.evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
-                        if (values == null) {
-                            values = Collections.emptyMap();
-                        }
-                        return eventAdapterService.adapterForTypedMap(values, mapType);
-                    }
-                    public Class getType()
-                    {
-                        return Map.class;
-                    }
-                    public Map<String, Object> getEventType() {
-                        return null;
-                    }
-                };
 
-                expressionReturnTypes[i] = mapType;
-                exprEvaluators[i] = evaluatorFragment;
+            // handle typeable return, i.e. typable multi-column return without provided target type
+            pair = handleTypableExpression(evaluator, i);
+            if (pair != null) {
+                expressionReturnTypes[i] = pair.getType();
+                exprEvaluators[i] = pair.getFunction();
+                continue;
             }
+
+            // assign normal expected return type
+            exprEvaluators[i] = evaluator;
+            expressionReturnTypes[i] = exprEvaluators[i].getType();
         }
 
         // Get column names
@@ -369,10 +335,6 @@ public class SelectExprProcessorHelper
                     {
                         return returnType;
                     }
-                    @Override
-                    public Map<String, Object> getEventType() {
-                        return null;
-                    }
                 };
                 exprEvaluators[i] = evaluatorFragment;
             }
@@ -397,10 +359,6 @@ public class SelectExprProcessorHelper
                     public Class getType()
                     {
                         return returnType;
-                    }
-                    @Override
-                    public Map<String, Object> getEventType() {
-                        return null;
                     }
                 };
                 exprEvaluators[i] = evaluatorFragment;
@@ -429,9 +387,6 @@ public class SelectExprProcessorHelper
                         return returnType;
                     }
 
-                    public Map<String, Object> getEventType() {
-                        return null;
-                    }
                 };
 
                 exprEvaluators[i] = evaluatorFragment;
@@ -474,9 +429,6 @@ public class SelectExprProcessorHelper
                     return returnType;
                 }
 
-                public Map<String, Object> getEventType() {
-                    return null;
-                }
             };
 
             exprEvaluators[i] = evaluator;
@@ -952,6 +904,380 @@ public class SelectExprProcessorHelper
         }
     }
 
+    private ExpressionReturnType[] determineInsertedEventTypeTargets(InsertIntoDesc insertIntoDesc, EventAdapterService eventAdapterService, List<SelectClauseExprCompiledSpec> selectionList) {
+        ExpressionReturnType[] targets = new ExpressionReturnType[selectionList.size()];
+        if (insertIntoDesc == null) {
+            return targets;
+        }
+
+        EventType targetType = eventAdapterService.getExistsTypeByName(insertIntoDesc.getEventTypeName());
+        if (targetType == null) {
+            return targets;
+        }
+
+        for (int i = 0; i < selectionList.size(); i++) {
+            SelectClauseExprCompiledSpec expr = selectionList.get(i);
+            if (expr.getProvidedName() == null) {
+                continue;
+            }
+
+            EventPropertyDescriptor desc = targetType.getPropertyDescriptor(expr.getProvidedName());
+            if (desc == null) {
+                continue;
+            }
+
+            if (!desc.isFragment()) {
+                continue;
+            }
+
+            FragmentEventType fragmentEventType = targetType.getFragmentType(expr.getProvidedName());
+            if (fragmentEventType == null) {
+                continue;
+            }
+
+            if (fragmentEventType.isIndexed()) {
+                targets[i] = ExpressionReturnType.collectionOfEvents(fragmentEventType.getFragmentType());
+            }
+            else {
+                targets[i] = ExpressionReturnType.singleEvent(fragmentEventType.getFragmentType());
+            }
+        }
+
+        return targets;
+    }
+
+    private TypeAndFunctionPair handleTypableExpression(ExprEvaluator exprEvaluator, int expressionNum)
+            throws ExprValidationException
+    {
+        if (!(exprEvaluator instanceof ExprEvaluatorTypableReturn)) {
+            return null;
+        }
+
+        final ExprEvaluatorTypableReturn typable = (ExprEvaluatorTypableReturn) exprEvaluator;
+        LinkedHashMap<String, Object> eventTypeExpr = typable.getRowProperties();
+        if (eventTypeExpr == null) {
+            return null;
+        }
+
+        final EventType mapType = eventAdapterService.createAnonymousMapType(statementId + "_innereval_" + CollectionUtil.toString(assignedTypeNumberStack, "_") + "_" + expressionNum, eventTypeExpr);
+        final ExprEvaluator innerEvaluator = exprEvaluator;
+        ExprEvaluator evaluatorFragment = new ExprEvaluator() {
+            public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
+            {
+                Map<String,Object> values = (Map<String,Object>) innerEvaluator.evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
+                if (values == null) {
+                    return eventAdapterService.adapterForTypedMap(Collections.<String, Object>emptyMap(), mapType);
+                }
+                return eventAdapterService.adapterForTypedMap(values, mapType);
+            }
+            public Class getType()
+            {
+                return Map.class;
+            }
+        };
+
+        return new TypeAndFunctionPair(mapType, evaluatorFragment);
+    }
+
+    private TypeAndFunctionPair handleInsertIntoEnumeration(String insertIntoColName, ExpressionReturnType insertIntoTarget, ExprEvaluator exprEvaluator, EngineImportService engineImportService)
+            throws ExprValidationException
+    {
+        if (!(exprEvaluator instanceof ExprEvaluatorEnumeration)
+                || insertIntoTarget == null
+                || (insertIntoTarget.getSingleEventEventType() == null && insertIntoTarget.getCollOfEventEventType() == null)) {
+            return null;
+        }
+
+        final ExprEvaluatorEnumeration enumeration = (ExprEvaluatorEnumeration) exprEvaluator;
+        final EventType eventTypeSingle = enumeration.getEventTypeSingle(eventAdapterService, statementId);
+        final EventType eventTypeColl = enumeration.getEventTypeCollection(eventAdapterService);
+        final EventType sourceType = eventTypeSingle != null ? eventTypeSingle : eventTypeColl;
+        if (eventTypeColl == null && eventTypeSingle == null) {
+            return null;    // enumeration is untyped events (select-clause provided to subquery or 'new' operator)
+        }
+
+        // check type info
+        final EventType targetType = insertIntoTarget.getSingleEventEventType() != null ? insertIntoTarget.getSingleEventEventType() : insertIntoTarget.getCollOfEventEventType();
+        checkTypeCompatible(insertIntoColName, targetType, sourceType);
+
+        // handle collection target - produce EventBean[]
+        if (insertIntoTarget.getCollOfEventEventType() != null) {
+            if (eventTypeColl != null) {
+                ExprEvaluator evaluatorFragment = new ExprEvaluator() {
+                    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext) {
+                        Collection<EventBean> events = enumeration.evaluateGetROCollectionEvents(eventsPerStream, isNewData, exprEvaluatorContext);
+                        if (events == null) {
+                            return null;
+                        }
+                        return events.toArray(new EventBean[events.size()]);
+                    }
+                    public Class getType() {
+                        return JavaClassHelper.getArrayType(targetType.getUnderlyingType());
+                    }
+                };
+                return new TypeAndFunctionPair(new EventType[] {targetType}, evaluatorFragment);
+            }
+            ExprEvaluator evaluatorFragment = new ExprEvaluator() {
+                public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext) {
+                    EventBean event = enumeration.evaluateGetEventBean(eventsPerStream, isNewData, exprEvaluatorContext);
+                    if (event == null) {
+                        return null;
+                    }
+                    return new EventBean[] {event};
+                }
+                public Class getType() {
+                    return JavaClassHelper.getArrayType(targetType.getUnderlyingType());
+                }
+            };
+            return new TypeAndFunctionPair(new EventType[] {targetType}, evaluatorFragment);
+        }
+
+        // handle single-bean target
+        // handle single-source
+        if (eventTypeSingle != null) {
+            ExprEvaluator evaluatorFragment = new ExprEvaluator() {
+                public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext) {
+                    return enumeration.evaluateGetEventBean(eventsPerStream, isNewData, exprEvaluatorContext);
+                }
+                public Class getType() {
+                    return targetType.getUnderlyingType();
+                }
+            };
+            return new TypeAndFunctionPair(targetType, evaluatorFragment);
+        }
+
+        // handle collection-source by taking the first
+        ExprEvaluator evaluatorFragment = new ExprEvaluator() {
+            public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext) {
+                Collection<EventBean> events = enumeration.evaluateGetROCollectionEvents(eventsPerStream, isNewData, exprEvaluatorContext);
+                if (events == null || events.size() == 0) {
+                    return null;
+                }
+                return EventBeanUtility.getNonemptyFirstEvent(events);
+            }
+            public Class getType() {
+                return targetType.getUnderlyingType();
+            }
+        };
+        return new TypeAndFunctionPair(targetType, evaluatorFragment);
+    }
+
+    private void checkTypeCompatible(String insertIntoCol, EventType targetType, EventType selectedType)
+        throws ExprValidationException {
+        if (!EventTypeUtility.isTypeOrSubTypeOf(targetType, selectedType)) {
+            throw new ExprValidationException(
+                    "Incompatible type detected attempting to insert into column '" +
+                insertIntoCol + "' type '" + targetType.getName() + "' compared to selected type '" + selectedType.getName() + "'");
+        }
+    }
+
+    private TypeAndFunctionPair handleInsertIntoTypableExpression(ExpressionReturnType insertIntoTarget, ExprEvaluator exprEvaluator, EngineImportService engineImportService)
+            throws ExprValidationException
+    {
+        if (!(exprEvaluator instanceof ExprEvaluatorTypableReturn)
+            || insertIntoTarget == null
+            || (insertIntoTarget.getSingleEventEventType() == null && insertIntoTarget.getCollOfEventEventType() == null)) {
+            return null;
+        }
+
+        final EventType targetType = insertIntoTarget.getSingleEventEventType() != null ? insertIntoTarget.getSingleEventEventType() : insertIntoTarget.getCollOfEventEventType();
+        final ExprEvaluatorTypableReturn typable = (ExprEvaluatorTypableReturn) exprEvaluator;
+        if (typable.isMultirow() == null) { // not typable after all
+            return null;
+        }
+        LinkedHashMap<String, Object> eventTypeExpr = typable.getRowProperties();
+        if (eventTypeExpr == null) {
+            return null;
+        }
+
+        Set<WriteablePropertyDescriptor> writables = eventAdapterService.getWriteableProperties(targetType, false);
+        List<WriteablePropertyDescriptor> written = new ArrayList<WriteablePropertyDescriptor>();
+        List<Map.Entry<String, Object>> writtenOffered = new ArrayList<Map.Entry<String, Object>>();
+
+        // from Map<String, Object> determine properties and type widening that may be required
+        for (Map.Entry<String, Object> offeredProperty : eventTypeExpr.entrySet()) {
+            WriteablePropertyDescriptor writable = EventTypeUtility.findWritable(offeredProperty.getKey(), writables);
+            if (writable == null) {
+                throw new ExprValidationException("Failed to find property '" + offeredProperty.getKey() + "' among properties for target event type '" + targetType.getName() + "'");
+            }
+            written.add(writable);
+            writtenOffered.add(offeredProperty);
+        }
+
+        // determine widening and column type compatibility
+        final TypeWidener[] wideners = new TypeWidener[written.size()];
+        for (int i = 0; i < written.size(); i++) {
+            Class expected = written.get(i).getType();
+            Map.Entry<String, Object> provided = writtenOffered.get(i);
+            if (provided.getValue() instanceof Class) {
+                wideners[i] = TypeWidenerFactory.getCheckPropertyAssignType(provided.getKey(), (Class) provided.getValue(),
+                        expected, written.get(i).getPropertyName());
+            }
+        }
+        final boolean hasWideners = !CollectionUtil.isAllNullArray(wideners);
+
+        // obtain factory
+        WriteablePropertyDescriptor[] writtenArray = written.toArray(new WriteablePropertyDescriptor[written.size()]);
+        EventBeanManufacturer manufacturer;
+        try {
+            manufacturer = eventAdapterService.getManufacturer(targetType, writtenArray, engineImportService, false);
+        }
+        catch (EventBeanManufactureException e) {
+            throw new ExprValidationException("Failed to obtain eventbean factory: " + e.getMessage(), e);
+        }
+
+        // handle collection
+        final EventBeanManufacturer factory = manufacturer;
+        if (insertIntoTarget.getCollOfEventEventType() != null && typable.isMultirow()) {
+            ExprEvaluator evaluatorFragment = new ExprEvaluator() {
+                public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
+                {
+                    Object[][] rows = typable.evaluateTypableMulti(eventsPerStream, isNewData, exprEvaluatorContext);
+                    if (rows == null) {
+                        return null;
+                    }
+                    if (rows.length == 0) {
+                        return new EventBean[0];
+                    }
+                    if (hasWideners) {
+                        applyWideners(rows, wideners);
+                    }
+                    EventBean[] events = new EventBean[rows.length];
+                    for (int i = 0; i < events.length; i++) {
+                        events[i] = factory.make(rows[i]);
+                    }
+                    return events;
+                }
+                public Class getType()
+                {
+                    return JavaClassHelper.getArrayType(targetType.getUnderlyingType());
+                }
+            };
+
+            return new TypeAndFunctionPair(new EventType[] {targetType}, evaluatorFragment);
+        }
+        else if (insertIntoTarget.getCollOfEventEventType() != null && !typable.isMultirow()) {
+            ExprEvaluator evaluatorFragment = new ExprEvaluator() {
+                public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
+                {
+                    Object[] row = typable.evaluateTypableSingle(eventsPerStream, isNewData, exprEvaluatorContext);
+                    if (row == null) {
+                        return null;
+                    }
+                    if (hasWideners) {
+                        applyWideners(row, wideners);
+                    }
+                    return new EventBean[] {factory.make(row)};
+                }
+                public Class getType()
+                {
+                    return JavaClassHelper.getArrayType(targetType.getUnderlyingType());
+                }
+            };
+            return new TypeAndFunctionPair(new EventType[] {targetType}, evaluatorFragment);
+        }
+        else if (insertIntoTarget.getSingleEventEventType() != null && !typable.isMultirow()) {
+            ExprEvaluator evaluatorFragment = new ExprEvaluator() {
+                public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
+                {
+                    Object[] row = typable.evaluateTypableSingle(eventsPerStream, isNewData, exprEvaluatorContext);
+                    if (row == null) {
+                        return null;
+                    }
+                    if (hasWideners) {
+                        applyWideners(row, wideners);
+                    }
+                    return factory.make(row);
+                }
+                public Class getType()
+                {
+                    return JavaClassHelper.getArrayType(targetType.getUnderlyingType());
+                }
+            };
+            return new TypeAndFunctionPair(targetType, evaluatorFragment);
+        }
+
+        // we are discarding all but the first row
+        ExprEvaluator evaluatorFragment = new ExprEvaluator() {
+            public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
+            {
+                Object[][] rows = typable.evaluateTypableMulti(eventsPerStream, isNewData, exprEvaluatorContext);
+                if (rows == null) {
+                    return null;
+                }
+                if (rows.length == 0) {
+                    return new EventBean[0];
+                }
+                if (hasWideners) {
+                    applyWideners(rows[0], wideners);
+                }
+                return factory.make(rows[0]);
+            }
+            public Class getType()
+            {
+                return JavaClassHelper.getArrayType(targetType.getUnderlyingType());
+            }
+        };
+        return new TypeAndFunctionPair(targetType, evaluatorFragment);
+    }
+
+    private void applyWideners(Object[] row, TypeWidener[] wideners) {
+        for (int i = 0; i < wideners.length; i++) {
+            if (wideners[i] != null) {
+                row[i] = wideners[i].widen(row[i]);
+            }
+        }
+    }
+
+    private void applyWideners(Object[][] rows, TypeWidener[] wideners) {
+        for (Object[] row : rows) {
+            applyWideners(row, wideners);
+        }
+    }
+
+    private TypeAndFunctionPair handleAtEventbeanEnumeration(boolean isEventBeans, ExprEvaluator evaluator)
+            throws ExprValidationException
+    {
+        if (!(evaluator instanceof ExprEvaluatorEnumeration) || !isEventBeans) {
+            return null;
+        }
+
+        final ExprEvaluatorEnumeration enumEval = (ExprEvaluatorEnumeration) evaluator;
+        final EventType eventTypeSingle = enumEval.getEventTypeSingle(eventAdapterService, statementId);
+        if (eventTypeSingle != null) {
+            ExprEvaluator evaluatorFragment = new ExprEvaluator() {
+                public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext) {
+                    return enumEval.evaluateGetEventBean(eventsPerStream, isNewData, exprEvaluatorContext);
+                }
+                public Class getType(){
+                    return eventTypeSingle.getUnderlyingType();
+                }
+            };
+            return new TypeAndFunctionPair(eventTypeSingle, evaluatorFragment);
+        }
+
+        final EventType eventTypeColl = enumEval.getEventTypeCollection(eventAdapterService);
+        if (eventTypeColl != null) {
+            ExprEvaluator evaluatorFragment = new ExprEvaluator() {
+                public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext) {
+                    // the protocol is EventBean[]
+                    Object result = enumEval.evaluateGetROCollectionEvents(eventsPerStream, isNewData, exprEvaluatorContext);
+                    if (result != null && result instanceof Collection) {
+                        Collection<EventBean> events = (Collection<EventBean>) result;
+                        return events.toArray(new EventBean[events.size()]);
+                    }
+                    return enumEval.evaluateGetROCollectionEvents(eventsPerStream, isNewData, exprEvaluatorContext);
+                }
+                public Class getType(){
+                    return JavaClassHelper.getArrayType(eventTypeColl.getUnderlyingType());
+                }
+            };
+            return new TypeAndFunctionPair(new EventType[]{eventTypeColl}, evaluatorFragment);
+        }
+
+        return null;
+    }
+
     // Determine which properties provided by the Map must be downcast from EventBean to Object
     private static Set<String> getEventBeanToObjectProps(Map<String, Object> selPropertyTypes, EventType resultEventType) {
 
@@ -994,6 +1320,24 @@ public class SelectExprProcessorHelper
              (insertIntoDesc.getColumnNames().size() != selectionList.size()) )
         {
             throw new ExprValidationException("Number of supplied values in the select clause does not match insert-into clause");
+        }
+    }
+
+    private static class TypeAndFunctionPair {
+        private final Object type;
+        private final ExprEvaluator function;
+
+        private TypeAndFunctionPair(Object type, ExprEvaluator function) {
+            this.type = type;
+            this.function = function;
+        }
+
+        public Object getType() {
+            return type;
+        }
+
+        public ExprEvaluator getFunction() {
+            return function;
         }
     }
 }

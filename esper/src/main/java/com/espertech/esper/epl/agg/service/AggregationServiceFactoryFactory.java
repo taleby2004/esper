@@ -90,9 +90,6 @@ public class AggregationServiceFactoryFactory
                         {
                             return null;
                         }
-                        public Map<String, Object> getEventType() {
-                            return null;
-                        }
                     };
                 }
 
@@ -233,9 +230,6 @@ public class AggregationServiceFactoryFactory
                             public Class getType() {
                                 return returnType;
                             }
-                            public Map<String, Object> getEventType() {
-                                return null;
-                            }
                         };
                     }
                     else {
@@ -253,9 +247,6 @@ public class AggregationServiceFactoryFactory
                         }
                         public Class getType()
                         {
-                            return null;
-                        }
-                        public Map<String, Object> getEventType() {
                             return null;
                         }
                     };
@@ -354,9 +345,6 @@ public class AggregationServiceFactoryFactory
             public Class getType()
             {
                 return Object[].class;
-            }
-            public Map<String, Object> getEventType() {
-                return null;
             }
         };
     }

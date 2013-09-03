@@ -10,8 +10,6 @@ package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.client.EventBean;
 
-import java.util.Map;
-
 /**
  * Represents the EXISTS(property) function in an expression tree.
  */
@@ -45,10 +43,6 @@ public class ExprPropertyExistsNode extends ExprNodeBase implements ExprEvaluato
         }
 
         identNode = (ExprIdentNode) this.getChildNodes()[0];
-    }
-
-    public Map<String, Object> getEventType() {
-        return null;
     }
 
     public boolean isConstantResult()

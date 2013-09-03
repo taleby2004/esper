@@ -55,10 +55,6 @@ public class ExprInNodeImpl extends ExprNodeBase implements ExprEvaluator, ExprI
         return isNotIn;
     }
 
-    public Map<String, Object> getEventType() {
-        return null;
-    }
-
     public void validate(ExprValidationContext validationContext) throws ExprValidationException
     {
         if (this.getChildNodes().length < 2)

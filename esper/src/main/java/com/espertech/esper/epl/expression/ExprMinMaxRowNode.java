@@ -17,7 +17,6 @@ import com.espertech.esper.util.SimpleNumberCoercerFactory;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Map;
 
 /**
  * Represents the MAX(a,b) and MIN(a,b) functions is an expression tree.
@@ -42,10 +41,6 @@ public class ExprMinMaxRowNode extends ExprNodeBase implements ExprEvaluator
     public ExprEvaluator getExprEvaluator()
     {
         return this;
-    }
-
-    public Map<String, Object> getEventType() {
-        return null;
     }
 
     /**

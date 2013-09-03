@@ -133,10 +133,6 @@ public class ExprTypeofNode extends ExprNodeBase
             return String.class;
         }
 
-        @Override
-        public Map<String, Object> getEventType() throws ExprValidationException {
-            return null;
-        }
     }
 
     public static class FragmentTypeEval implements ExprEvaluator {
@@ -175,10 +171,6 @@ public class ExprTypeofNode extends ExprNodeBase
             return String.class;
         }
 
-        @Override
-        public Map<String, Object> getEventType() throws ExprValidationException {
-            return null;
-        }
     }
 
     private static class InnerEvaluator implements ExprEvaluator {
@@ -186,11 +178,6 @@ public class ExprTypeofNode extends ExprNodeBase
 
         public InnerEvaluator(ExprEvaluator evaluator) {
             this.evaluator = evaluator;
-        }
-
-        @Override
-        public Map<String, Object> getEventType() throws ExprValidationException {
-            return null;
         }
 
         @Override

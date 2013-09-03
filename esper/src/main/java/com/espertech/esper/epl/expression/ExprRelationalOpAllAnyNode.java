@@ -57,10 +57,6 @@ public class ExprRelationalOpAllAnyNode extends ExprNodeBase implements ExprEval
         return false;
     }
 
-    public Map<String, Object> getEventType() {
-        return null;
-    }
-
     /**
      * Returns true for ALL, false for ANY.
      * @return indicator all or any

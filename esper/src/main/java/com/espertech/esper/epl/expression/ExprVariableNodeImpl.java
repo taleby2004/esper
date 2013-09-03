@@ -18,8 +18,6 @@ import com.espertech.esper.epl.variable.VariableReader;
 import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.event.EventTypeSPI;
 
-import java.util.Map;
-
 /**
  * Represents a variable in an expression tree.
  */
@@ -85,10 +83,6 @@ public class ExprVariableNodeImpl extends ExprNodeBase implements ExprEvaluator,
     public String getVariableName()
     {
         return variableName;
-    }
-
-    public Map<String, Object> getEventType() {
-        return null;
     }
 
     public void validate(ExprValidationContext validationContext) throws ExprValidationException

@@ -19,7 +19,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Map;
 
 public class ExprDotEvalStaticMethod implements ExprEvaluator, EventPropertyGetter
 {
@@ -72,10 +71,6 @@ public class ExprDotEvalStaticMethod implements ExprEvaluator, EventPropertyGett
         else {
             return chainEval[chainEval.length - 1].getTypeInfo().getSingleValueType();
         }
-    }
-
-    public Map<String, Object> getEventType() {
-        return null;
     }
 
     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)

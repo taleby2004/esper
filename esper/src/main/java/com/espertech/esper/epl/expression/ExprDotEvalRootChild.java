@@ -14,7 +14,6 @@ import com.espertech.esper.client.util.ExpressionReturnType;
 import com.espertech.esper.event.EventAdapterService;
 
 import java.util.Collection;
-import java.util.Map;
 
 public class ExprDotEvalRootChild implements ExprEvaluator, ExprEvaluatorEnumeration
 {
@@ -91,10 +90,6 @@ public class ExprDotEvalRootChild implements ExprEvaluator, ExprEvaluatorEnumera
 
     public Class getComponentTypeCollection() throws ExprValidationException {
         return innerEvaluator.getComponentTypeCollection();
-    }
-
-    public Map<String, Object> getEventType() throws ExprValidationException {
-        return null;
     }
 
     public EventType getEventTypeSingle(EventAdapterService eventAdapterService, String statementId) throws ExprValidationException {

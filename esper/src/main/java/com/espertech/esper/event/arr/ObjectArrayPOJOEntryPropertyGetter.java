@@ -46,6 +46,9 @@ public class ObjectArrayPOJOEntryPropertyGetter extends BaseNativePropertyGetter
         }
 
         // Object within the map
+        if (value instanceof EventBean) {
+            return entryGetter.get((EventBean)value);
+        }
         return entryGetter.getBeanProp(value);
     }
 

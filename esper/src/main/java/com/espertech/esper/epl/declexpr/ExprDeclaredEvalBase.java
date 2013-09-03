@@ -11,17 +11,14 @@ package com.espertech.esper.epl.declexpr;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.core.service.ExpressionResultCacheEntry;
-import com.espertech.esper.epl.expression.ExprEvaluator;
-import com.espertech.esper.epl.expression.ExprEvaluatorContext;
-import com.espertech.esper.epl.expression.ExprEvaluatorEnumeration;
-import com.espertech.esper.epl.expression.ExprValidationException;
+import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.epl.spec.ExpressionDeclItem;
 import com.espertech.esper.event.EventAdapterService;
 
 import java.util.Collection;
-import java.util.Map;
+import java.util.LinkedHashMap;
 
-public abstract class ExprDeclaredEvalBase implements ExprEvaluator, ExprEvaluatorEnumeration {
+public abstract class ExprDeclaredEvalBase implements ExprEvaluatorTypableReturn, ExprEvaluatorEnumeration {
     private final ExprEvaluator innerEvaluator;
     private final ExprEvaluatorEnumeration innerEvaluatorLambda;
     private final ExpressionDeclItem prototype;
@@ -45,12 +42,30 @@ public abstract class ExprDeclaredEvalBase implements ExprEvaluator, ExprEvaluat
         return innerEvaluator;
     }
 
-    public Map<String, Object> getEventType() throws ExprValidationException {
-        return innerEvaluator.getEventType();
-    }
-
     public Class getType() {
         return innerEvaluator.getType();
+    }
+
+    public LinkedHashMap<String, Object> getRowProperties() throws ExprValidationException {
+        if (innerEvaluator instanceof ExprEvaluatorTypableReturn) {
+            return ((ExprEvaluatorTypableReturn) innerEvaluator).getRowProperties();
+        }
+        return null;
+    }
+
+    public Boolean isMultirow() {
+        if (innerEvaluator instanceof ExprEvaluatorTypableReturn) {
+            return ((ExprEvaluatorTypableReturn) innerEvaluator).isMultirow();
+        }
+        return null;
+    }
+
+    public Object[] evaluateTypableSingle(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
+        return ((ExprEvaluatorTypableReturn) innerEvaluator).evaluateTypableSingle(eventsPerStream, isNewData, context);
+    }
+
+    public Object[][] evaluateTypableMulti(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
+        return ((ExprEvaluatorTypableReturn) innerEvaluator).evaluateTypableMulti(eventsPerStream, isNewData, context);
     }
 
     public final Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {

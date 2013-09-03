@@ -38,6 +38,7 @@ public class TestViewTimeBatchMean extends TestCase
         config.getEngineDefaults().getThreading().setInternalTimerEnabled(true);
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
+        assertFalse(epService.getEPRuntime().isExternalClockingEnabled());
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
     }
 

@@ -19,7 +19,6 @@ import com.espertech.esper.epl.spec.SelectClauseExprCompiledSpec;
 import com.espertech.esper.epl.spec.SelectClauseStreamCompiledSpec;
 
 import java.util.ArrayList;
-import java.util.Map;
 
 /**
  * Works in conjunction with {@link SelectExprResultProcessor} to present
@@ -77,9 +76,6 @@ public class BindProcessor
                             return returnType;
                         }
 
-                        public Map<String, Object> getEventType() {
-                            return null;
-                        }
                     });
                     types.add(returnType);
                     columnNames.add(streamNames[streamNum]);
@@ -112,9 +108,6 @@ public class BindProcessor
                         return returnType;
                     }
 
-                    public Map<String, Object> getEventType() {
-                        return null;
-                    }
                 });
                 types.add(returnType);
                 columnNames.add(streamNames[streamSpec.getStreamNumber()]);

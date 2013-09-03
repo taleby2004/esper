@@ -144,10 +144,6 @@ public class ExprArrayNode extends ExprNodeBase implements ExprEvaluator, ExprEv
         return Array.newInstance(arrayReturnType, 0).getClass();
     }
 
-    public Map<String, Object> getEventType() {
-        return null;
-    }
-
     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
     {
         if (constantResult != null)
