@@ -258,6 +258,16 @@ public class TestSchema extends TestCase
         runAssertionColDefPlain(EventRepresentationEnum.DEFAULT);
         runAssertionColDefPlain(EventRepresentationEnum.OBJECTARRAY);
         runAssertionColDefPlain(EventRepresentationEnum.MAP);
+
+        // test property classname, either simple or fully-qualified.
+        epService.getEPAdministrator().getConfiguration().addImport("java.beans.EventHandler");
+        epService.getEPAdministrator().getConfiguration().addImport("java.sql.*");
+        epService.getEPAdministrator().createEPL("create schema MySchema (f1 Timestamp, f2 java.beans.BeanDescriptor, f3 EventHandler)");
+
+        EventType eventType = epService.getEPAdministrator().getConfiguration().getEventType("MySchema");
+        assertEquals(java.sql.Timestamp.class, eventType.getPropertyType("f1"));
+        assertEquals(java.beans.BeanDescriptor.class, eventType.getPropertyType("f2"));
+        assertEquals(java.beans.EventHandler.class, eventType.getPropertyType("f3"));
     }
 
     private void runAssertionColDefPlain(EventRepresentationEnum eventRepresentationEnum) throws Exception

@@ -76,7 +76,7 @@ public class EventTypeUtility {
         return getNestablePropertyDescriptor(fragmentEventType.getFragmentType(), stack);
     }
 
-    public static LinkedHashMap<String, Object> buildType(List<ColumnDesc> columns, EventAdapterService eventAdapterService, Set<String> copyFrom) throws ExprValidationException {
+    public static LinkedHashMap<String, Object> buildType(List<ColumnDesc> columns, EventAdapterService eventAdapterService, Set<String> copyFrom, EngineImportService engineImportService) throws ExprValidationException {
         LinkedHashMap<String, Object> typing = new LinkedHashMap<String, Object>();
         Set<String> columnNames = new HashSet<String>();
         for (ColumnDesc column : columns) {
@@ -92,11 +92,40 @@ public class EventTypeUtility {
                 typing.put(column.getName(), plain);
             }
             else {
-                if (column.isArray()) {
-                    typing.put(column.getName(), column.getType() + "[]");
+                // try imports first
+                Class resolved = null;
+                try {
+                    resolved = engineImportService.resolveClass(column.getType());
                 }
+                catch (EngineImportException e) {
+                    // expected
+                }
+
+                // resolve from classpath when not found
+                if (resolved == null) {
+                    try {
+                        resolved = JavaClassHelper.getClassForName(column.getType());
+                    }
+                    catch (ClassNotFoundException e) {
+                        // expected
+                    }
+                }
+
+                // Handle resolved classes here
+                if (resolved != null) {
+                    if (column.isArray()) {
+                        resolved = Array.newInstance(resolved, 0).getClass();
+                    }
+                    typing.put(column.getName(), resolved);
+                }
+                // Event types fall into here
                 else {
-                    typing.put(column.getName(), column.getType());
+                    if (column.isArray()) {
+                        typing.put(column.getName(), column.getType() + "[]");
+                    }
+                    else {
+                        typing.put(column.getName(), column.getType());
+                    }
                 }
             }
         }
@@ -1003,7 +1032,7 @@ public class EventTypeUtility {
         EventType eventType;
         if (spec.getTypes().isEmpty()) {
             boolean useMap = EventRepresentationUtil.isMap(annotations, configSnapshot, spec.getAssignedType());
-            Map<String, Object> typing = EventTypeUtility.buildType(spec.getColumns(), eventAdapterService, spec.getCopyFrom());
+            Map<String, Object> typing = EventTypeUtility.buildType(spec.getColumns(), eventAdapterService, spec.getCopyFrom(), engineImportService);
             Map<String, Object> compiledTyping = EventTypeUtility.compileMapTypeProperties(typing, eventAdapterService);
 
             ConfigurationEventTypeWithSupertype config;

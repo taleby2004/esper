@@ -1280,7 +1280,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         LinkedHashMap<String, Object> properties;
         boolean hasProperties = false;
         if ((columns != null) && (!columns.isEmpty())) {
-            properties = EventTypeUtility.buildType(columns, null, null);
+            properties = EventTypeUtility.buildType(columns, statementContext.getEventAdapterService(), null, statementContext.getMethodResolutionService().getEngineImportService());
             hasProperties = true;
         }
         else {

@@ -26,6 +26,7 @@ Bug fixes
   - Fixed Issue ESPER-744 parse error in prepared statement for count(*,filter_expr)
   - Fixed Issue ESPER-746 Self-Join between derived value streams provides incorrect result
   - Fixed Issue ESPER-747 Cron timer is skipping months
+  - Fixed Issue ESPER-748 create schema fails with fully qualified property type name
   - Fixed Issue ESPER-749 split stream with "output all" not working with prepared statement
   - Fixed Issue ESPER-750 @audit miscounts pattern instances with "not"
   - Fixed Issue ESPER-751 StackOverflow when routing new event during high volume processing
