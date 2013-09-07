@@ -39,7 +39,7 @@ public class StatementSpecCompiled
     private InsertIntoDesc insertIntoDesc;
     private SelectClauseStreamSelectorEnum selectStreamDirEnum;
     private SelectClauseSpecCompiled selectClauseSpec;
-    private final StreamSpecCompiled[] streamSpecs;
+    private StreamSpecCompiled[] streamSpecs;
     private final OuterJoinDesc[] outerJoinDescList;
     private ExprNode filterExprRootNode;
     private final ExprNode[] groupByExpressions;
@@ -211,6 +211,14 @@ public class StatementSpecCompiled
     public StreamSpecCompiled[] getStreamSpecs()
     {
         return streamSpecs;
+    }
+
+    /**
+     * Sets the FROM-clause stream definitions.
+     * @param streamSpecs list of stream specifications
+     */
+    public void setStreamSpecs(StreamSpecCompiled[] streamSpecs) {
+        this.streamSpecs = streamSpecs;
     }
 
     /**

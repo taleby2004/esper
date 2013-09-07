@@ -61,7 +61,7 @@ public class TestInvalidSyntaxMsg extends TestCase
                    "Unexpected end of input near '[' at line 1 column 26, please check the relational data join within the from clause [select * from A, sql:mydb [\"]");
 
         tryCompile("select * google",
-                   "Incorrect syntax near 'google' expecting 'from' but found an identifier at line 1 column 9 [select * google]");
+                   "Incorrect syntax near 'google' expecting end of input but found an identifier at line 1 column 9 [select * google]");
 
         tryCompile("insert into into",
                    "Incorrect syntax near 'into' (a reserved keyword) at line 1 column 12, please check the insert-into clause [insert into into]");

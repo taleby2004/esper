@@ -46,7 +46,8 @@ public abstract class EPPreparedExecuteSingleStream implements EPPreparedExecute
     protected final EPPreparedExecuteSingleStreamExec executor;
     protected final StatementContext statementContext;
 
-    public abstract EPPreparedExecuteSingleStreamExec getExecutor(FilterSpecCompiled filter, String aliasName);
+    public abstract EPPreparedExecuteSingleStreamExec getExecutor(FilterSpecCompiled filter, String aliasName)
+            throws ExprValidationException;
 
     /**
      * Ctor.

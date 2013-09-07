@@ -2990,7 +2990,7 @@ from OrderStream.win:time(30 sec) group by customerId</programlisting>
 from PurchaseOrder.std:lastevent() as order, ServiceEvent:std:lastevent() as service</programlisting>			
 
 			<para>
-				When using the stream name (or tag in patterns) in the select clause, the engine produces composite events: One or more of the properties of the composite event are events themselves.
+				When using the stream name (or tag in patterns) in the select-clause, the engine produces composite events: One or more of the properties of the composite event are events themselves.
 			</para>
 
 			<para>
@@ -3023,11 +3023,11 @@ from PurchaseOrder.std:lastevent() as order, ServiceEvent:std:lastevent() as ser
 		</sect2>
 
 		<sect2 xml:id="insert-into-reconcile">
-			<title>Select Clause Expression And Inserted-Into Column Event Type</title>
+			<title>Select-Clause Expression And Inserted-Into Column Event Type</title>
 
 			<para>
-				When you declare the inserted-into event type in advance to the statement that inserts, the engine compares the inserted-into event type information to the return type of expressions in the select clause.
-				The comparison uses the column alias assigned to each select clause expression using the <literal>as</literal> keyword.
+				When you declare the inserted-into event type in advance to the statement that inserts, the engine compares the inserted-into event type information to the return type of expressions in the select-clause.
+				The comparison uses the column alias assigned to each select-clause expression using the <literal>as</literal> keyword.
 			</para>			
 			
 			<para>
@@ -3049,13 +3049,13 @@ select '001' as orderId, new {name='i1', price=10} as items
 from TriggerEvent</programlisting>		
 			
 			<para>
-				The alias assigned to the first and second expression in the select clause, namely <literal>orderId</literal> and <literal>items</literal>,
+				The alias assigned to the first and second expression in the select-clause, namely <literal>orderId</literal> and <literal>items</literal>,
 				both match the event property names of the <literal>Purchase Order</literal> event type. The column names provided to the <literal>new</literal> operator 
 				also both match the event property names of the <literal>Item</literal> event type.
 			</para>
 			
 			<para>
-				When the event type declares the column as a single value (and not an array) and when the select clause expression produces a multiple rows, 
+				When the event type declares the column as a single value (and not an array) and when the select-clause expression produces a multiple rows, 
 				the engine only populate the first row.
 			</para>
 
@@ -4546,7 +4546,7 @@ create window <emphasis>window_name</emphasis>.<emphasis>view_specifications</em
   select symbol, volume, price from OrderEvent]]></programlisting>
 
 				<para>
-					In an alternate form, the <literal>as</literal> keyword can be used to rename columns, and constants may occur in the select clause as well:
+					In an alternate form, the <literal>as</literal> keyword can be used to rename columns, and constants may occur in the select-clause as well:
 				</para>
 				<programlisting><![CDATA[create window OrdersTimeWindow.win:time(30 sec) as 
   select symbol as sym, volume as vol, price, 1 as alertId from OrderEvent]]></programlisting>
@@ -4710,6 +4710,55 @@ from ServiceOrderEvent as order]]></programlisting>
 					Note that the <literal>this</literal> proprerty must exist on the event and must return the event class itself (JavaBean events only). The property type of the additional <literal>priceTotal</literal> column is the property type of the existing <literal>price</literal> property.
 				</para>
 			</sect3>
+		</sect2>
+
+		<sect2 xml:id="named_insertfaf" revision="1">
+			<title>Inserting Into Named Windows Using Fire-And-Forget Queries</title>
+			
+			<indexterm><primary>insert</primary></indexterm>
+			<indexterm><primary>named window</primary><secondary>inserting into</secondary></indexterm>
+			<indexterm><primary>EPL</primary><secondary>named window</secondary><tertiary>inserting into</tertiary></indexterm>
+
+			<para>
+				Your application can insert rows into a named window using on-demand (fire-and-forget, non-continuous) queries as described in <xref linkend="api-ondemand"/>.
+			</para>
+
+			<para>
+				The syntax for the <literal>insert into</literal> clause is as follows: 
+			</para>
+			<synopsis>insert into <emphasis>window_name</emphasis> [(<emphasis>property_names</emphasis>)]
+select <emphasis>value_expressions</emphasis></synopsis>
+				
+			<para>
+				The <emphasis>window_name</emphasis> is the name of the named window to insert events into.
+			</para>
+			
+			<para>
+				After the named window name you can optionally provide a comma-separated list of event property names. 
+				When providing property names, the order of expressions in the select-clause must match the order of property names specified (select-clause property names are ignored).
+				When not providing property names, the select-clause expressions must name the event properties to be inserted into by assigning a property name.
+			</para>
+				
+			<para>
+				It follows the <literal>select</literal> keyword and a list of value expressions that provide values for the event properties of the event to be inserted into the named window.
+			</para>
+
+			<para>
+				The example code snippet inserts a new order event into the <literal>OrdersWindow</literal> named window:
+			</para>
+			<programlisting><![CDATA[String query = 
+  "insert into OrdersWindow(orderId, symbol, price) select '001', 'GE', 100";
+epService.getEPRuntime().executeQuery(query);]]></programlisting>
+
+			<para>
+				If you do not specify event property names, the select-clause expressions must name the event property names.
+			</para>
+
+			<para>
+				The following EPL inserts the same values as above but specifies property names as part of the select-clause expressions:
+			</para>
+			<programlisting><![CDATA[insert into OrdersWindow
+select '001' as orderId, 'GE' as symbol, 100 as price]]></programlisting>
 		</sect2>
 
 		<sect2 xml:id="named_selecting" revision="1">
@@ -5395,7 +5444,7 @@ merge [into] <emphasis>window_name</emphasis> [as <emphasis>stream_name</emphasi
 			</para>
 
 			<para>
-			    After <literal>insert</literal> follows, optionally, the <literal>into</literal> keyword followed by the stream name or named window to insert-into. If no <literal>into</literal> and stream name is specified, the insert applies to the current named window. It follows an optional list of columns inserted. It follows the required <literal>select</literal> keyword and one or more select clause expressions. The wildcard (<literal>*</literal>) is available in the select clause as well. It follows an optional where-clause that may return Boolean false to indicate that the action should not be applied. 
+			    After <literal>insert</literal> follows, optionally, the <literal>into</literal> keyword followed by the stream name or named window to insert-into. If no <literal>into</literal> and stream name is specified, the insert applies to the current named window. It follows an optional list of columns inserted. It follows the required <literal>select</literal> keyword and one or more select-clause expressions. The wildcard (<literal>*</literal>) is available in the select-clause as well. It follows an optional where-clause that may return Boolean false to indicate that the action should not be applied. 
 			</para>
 
 			<para>
@@ -6604,10 +6653,10 @@ select * from MediaOrder[books.book.review]]]></programlisting>
 		</para>
 
 		<sect2 xml:id="epl-containedeventselect-select" revision="1">
-			<title>Select Clause in a Contained-Event Selection</title>
+			<title>Select-Clause in a Contained-Event Selection</title>
 
 			<para>
-				 The optional <literal>select</literal> clause provides control over which fields are available in output events. The expressions in the select clause apply only to the properties available underneath the property in the <literal>from</literal> clause, and the properties of the enclosing event.
+				 The optional <literal>select</literal> clause provides control over which fields are available in output events. The expressions in the select-clause apply only to the properties available underneath the property in the <literal>from</literal> clause, and the properties of the enclosing event.
 			</para>
 
 			<para>
@@ -6664,7 +6713,7 @@ select * from MediaOrder[select orderId, bookId from books.book][review]]]]></pr
 			<para>
 				The following query is not a valid query, since the order id and book id are not part of the contained-event selection:
 			</para>
-			<programlisting><![CDATA[// Invalid select clause: orderId and bookId not produced.
+			<programlisting><![CDATA[// Invalid select-clause: orderId and bookId not produced.
 select orderId, bookId from MediaOrder[books.book][review]]]></programlisting>
 
 			<para>

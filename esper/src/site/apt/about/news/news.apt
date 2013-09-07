@@ -11,7 +11,9 @@ News
   * Support for fire-and-forget queries to consider the "in" opertator for index lookup
   
   * Support for having-clause to have subquery
-  
+    
+  * Support for fire-and-forget queries that insert-into a named window
+
   * Please review changelog.txt for additional information.
 
   []

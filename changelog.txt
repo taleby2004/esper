@@ -10,7 +10,7 @@ Major API or EPL changes
   - Support for fire-and-forget queries to consider the "in" opertator for index lookup
   - Support for having-clause to have subquery
   - Support for explicitly selecting eventbean instances of expressions (ESPER-732)
-  - Support for reconciling select clause expression with inserted-into column event type
+  - Support for fire-and-forget queries that insert-into a named window
 
 Bug fixes
   - Fixed Issue ESPER-733 Passing aggregate scalars to global script

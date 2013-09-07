@@ -362,7 +362,7 @@ variantList
 selectExpr
 	:	(insertIntoExpr)?
 		selectClause 
-		fromClause
+		(fromClause)?
 		(matchRecogClause)?
 		(whereClause[true])?
 		(groupByClause)?

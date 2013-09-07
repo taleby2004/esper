@@ -71,7 +71,7 @@ public class TestInvalidView extends TestCase
         assertEquals("Incorrect syntax near 'day' (a reserved keyword) at line 1 column 40, please check the where clause [select * from MyEvent, MyEvent2 where a.day=b.day]", exceptionText);
 
         exceptionText = getSyntaxExceptionView("select * * from " + EVENT_NUM);
-        assertEquals("Incorrect syntax near '*' expecting 'from' but found a star '*' at line 1 column 9 [select * * from com.espertech.esper.support.bean.SupportBean_N]", exceptionText);
+        assertEquals("Incorrect syntax near '*' expecting end of input but found a star '*' at line 1 column 9 [select * * from com.espertech.esper.support.bean.SupportBean_N]", exceptionText);
 
         // keyword in select clause
         exceptionText = getSyntaxExceptionView("select day from MyEvent, MyEvent2");

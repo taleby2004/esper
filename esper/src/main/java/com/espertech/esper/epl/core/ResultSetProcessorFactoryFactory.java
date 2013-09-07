@@ -104,27 +104,7 @@ public class ResultSetProcessorFactoryFactory
         ExprEvaluatorContextStatement evaluatorContextStmt = new ExprEvaluatorContextStatement(stmtContext);
         ExprValidationContext validationContext = new ExprValidationContext(typeService, stmtContext.getMethodResolutionService(), viewResourceDelegate, stmtContext.getSchedulingService(), stmtContext.getVariableService(),evaluatorContextStmt, stmtContext.getEventAdapterService(), stmtContext.getStatementName(), stmtContext.getStatementId(), stmtContext.getAnnotations(), stmtContext.getContextDescriptor());
 
-        for (int i = 0; i < selectClauseSpec.getSelectExprList().length; i++)
-        {
-            // validate element
-            SelectClauseElementCompiled element = selectClauseSpec.getSelectExprList()[i];
-            if (element instanceof SelectClauseExprCompiledSpec)
-            {
-                SelectClauseExprCompiledSpec expr = (SelectClauseExprCompiledSpec) element;
-                ExprNode validatedExpression = ExprNodeUtility.getValidatedSubtree(expr.getSelectExpression(), validationContext);
-
-                // determine an element name if none assigned
-                String asName = expr.getAssignedName();
-                if (asName == null)
-                {
-                    asName = validatedExpression.toExpressionString();
-                }
-
-                expr.setAssignedName(asName);
-                expr.setSelectExpression(validatedExpression);
-                namedSelectionList.add(expr);
-            }
-        }
+        assignSelectClauseNames(selectClauseSpec, namedSelectionList, validationContext);
         boolean isUsingWildcard = selectClauseSpec.isUsingWildcard();
 
         // Validate stream selections, if any (such as stream.*)
@@ -455,6 +435,32 @@ public class ResultSetProcessorFactoryFactory
         log.debug(".getProcessor Using ResultSetProcessorAggregateGrouped");
         ResultSetProcessorAggregateGroupedFactory factory = new ResultSetProcessorAggregateGroupedFactory(selectExprProcessor, groupByEval, optionHavingEval, isSelectRStream, isUnidirectional, outputLimitSpec, orderByProcessorFactory != null);
         return new ResultSetProcessorFactoryDesc(factory, orderByProcessorFactory, aggregationServiceFactory);
+    }
+
+    private static void assignSelectClauseNames(SelectClauseSpecCompiled selectClauseSpec, List<SelectClauseExprCompiledSpec> namedSelectionList, ExprValidationContext validationContext)
+        throws ExprValidationException
+    {
+        for (int i = 0; i < selectClauseSpec.getSelectExprList().length; i++)
+        {
+            // validate element
+            SelectClauseElementCompiled element = selectClauseSpec.getSelectExprList()[i];
+            if (element instanceof SelectClauseExprCompiledSpec)
+            {
+                SelectClauseExprCompiledSpec expr = (SelectClauseExprCompiledSpec) element;
+                ExprNode validatedExpression = ExprNodeUtility.getValidatedSubtree(expr.getSelectExpression(), validationContext);
+
+                // determine an element name if none assigned
+                String asName = expr.getAssignedName();
+                if (asName == null)
+                {
+                    asName = validatedExpression.toExpressionString();
+                }
+
+                expr.setAssignedName(asName);
+                expr.setSelectExpression(validatedExpression);
+                namedSelectionList.add(expr);
+            }
+        }
     }
 
     private static void validateHaving(Set<Pair<Integer, String>> propertiesGroupedBy,

@@ -62,6 +62,40 @@ public class TestNamedWindowExecuteQuery extends TestCase implements IndexBackin
         listener = null;
     }
 
+    public void testFAFInsert() {        
+        EPStatement stmt = epService.getEPAdministrator().getStatement("TheWindow");
+        String[] propertyNames = "theString,intPrimitive".split(",");
+
+        // try column name provided with insert-into
+        String epl = "insert into MyWindow (theString, intPrimitive) select 'a', 1";
+        EPOnDemandQueryResult resultOne = epService.getEPRuntime().executeQuery(epl);
+        assertFAFInsertResult(resultOne, new Object[]{"a", 1}, propertyNames, stmt);
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), propertyNames, new Object[][] {{"a", 1}});
+
+        // try SODA and column name not provided with insert-into
+        String eplTwo = "insert into MyWindow select 'b' as theString, 2 as intPrimitive";
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(eplTwo);
+        EPOnDemandQueryResult resultTwo = epService.getEPRuntime().executeQuery(model);
+        assertFAFInsertResult(resultTwo, new Object[]{"b", 2}, propertyNames, stmt);
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), propertyNames, new Object[][] {{"a", 1}, {"b", 2}});
+
+        // create unique index, insert duplicate row
+        epService.getEPAdministrator().createEPL("create unique index I1 on MyWindow (theString)");
+        try {
+            String eplThree = "insert into MyWindow (theString) select 'a' as theString";
+            epService.getEPRuntime().executeQuery(eplThree);
+        }
+        catch (EPException ex) {
+            assertEquals("Error executing statement: Unique index violation, index 'I1' is a unique index and key 'a' already exists [insert into MyWindow (theString) select 'a' as theString]", ex.getMessage());
+        }
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), propertyNames, new Object[][] {{"a", 1}, {"b", 2}});
+
+        // try second no-column-provided version
+        EPStatement windowTwo = epService.getEPAdministrator().createEPL("create window WindowTwo.win:keepall() as (p0 string, p1 int)");
+        epService.getEPRuntime().executeQuery("insert into WindowTwo select 'a' as p0, 1 as p1");
+        EPAssertionUtil.assertPropsPerRow(windowTwo.iterator(), "p0,p1".split(","), new Object[][] {{"a", 1}});
+    }
+
     public void testParameterizedQuery() {
 
         for (int i = 0; i < 10; i++) {
@@ -649,14 +683,23 @@ public class TestNamedWindowExecuteQuery extends TestCase implements IndexBackin
         epl = "select * from MyWindow output every 10 seconds";
         tryInvalid(epl, "Error executing statement: Output rate limiting is not a supported feature of on-demand queries [select * from MyWindow output every 10 seconds]");
 
-        epl = "insert into AStream select * from MyWindow";
-        tryInvalid(epl, "Error executing statement: Insert-into is not a supported feature of on-demand queries [insert into AStream select * from MyWindow]");
-
         epl = "select * from pattern [every MyWindow]";
         tryInvalid(epl, "Error executing statement: On-demand queries require named windows and do not allow event streams or patterns [select * from pattern [every MyWindow]]");
 
         epl = "select prev(1, theString) from MyWindow";
         tryInvalid(epl, "Error executing statement: Previous function cannot be used in this context [select prev(1, theString) from MyWindow]");
+
+        epl = "insert into MyWindow select 1";
+        tryInvalid(epl, "Error executing statement: Column '1' could not be assigned to any of the properties of the underlying type (missing column names, event property, setter method or constructor?) [insert into MyWindow select 1]");
+
+        epl = "insert into MyWindow(intPrimitive) select 'a'";
+        tryInvalid(epl, "Error executing statement: Invalid assignment of column 'intPrimitive' of type 'java.lang.String' to event property 'intPrimitive' typed as 'int', column and parameter types mismatch [insert into MyWindow(intPrimitive) select 'a']");
+
+        epl = "insert into MyWindow(intPrimitive, theString) select 1";
+        tryInvalid(epl, "Error executing statement: Number of supplied values in the select clause does not match insert-into clause [insert into MyWindow(intPrimitive, theString) select 1]");
+
+        epl = "insert into MyWindow select 1 as intPrimitive from MyWindow";
+        tryInvalid(epl, "Error executing statement: Insert-into fire-and-forget query can only consist of an insert-into clause and a select-clause [insert into MyWindow select 1 as intPrimitive from MyWindow]");
     }
 
     private void tryInvalid(String epl, String message)
@@ -731,6 +774,12 @@ public class TestNamedWindowExecuteQuery extends TestCase implements IndexBackin
         SupportBean bean = new SupportBean(theString, intPrimitive);
         bean.setLongPrimitive(longPrimitive);
         return bean;
+    }
+
+    private void assertFAFInsertResult(EPOnDemandQueryResult resultOne, Object[] objects, String[] propertyNames, EPStatement stmt) {
+        assertSame(resultOne.getEventType(), stmt.getEventType());
+        assertEquals(1, resultOne.getArray().length);
+        EPAssertionUtil.assertPropsPerRow(resultOne.getArray(), propertyNames, new Object[][] {objects});
     }
 
     public static void doubleInt(SupportBean bean) {

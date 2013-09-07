@@ -46,10 +46,6 @@ public class EPPreparedExecuteMethodHelper
         {
             throw new ExprValidationException("Output rate limiting is not a supported feature of on-demand queries");
         }
-        if (statementSpec.getInsertIntoDesc() != null)
-        {
-            throw new ExprValidationException("Insert-into is not a supported feature of on-demand queries");
-        }
     }
 
     public static Collection<Integer> getAgentInstanceIds(NamedWindowProcessor processor, ContextPartitionSelector selector, ContextManagementService contextManagementService, String contextName) {

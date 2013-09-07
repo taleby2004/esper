@@ -742,7 +742,7 @@ contextExpr
 selectExpr
 	:	(INSERT! insertIntoExpr)?
 		SELECT! selectClause
-		FROM! fromClause
+		(FROM! fromClause)?
 		matchRecog?
 		(WHERE! whereClause)?
 		(GROUP! BY! groupByListExpr)?

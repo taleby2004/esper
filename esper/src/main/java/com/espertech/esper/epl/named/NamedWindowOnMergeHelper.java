@@ -102,18 +102,7 @@ public class NamedWindowOnMergeHelper
         if (triggeringStreamName == null) {
             triggeringStreamName = UuidGenerator.generate();
         }
-        List<SelectClauseElementCompiled> selectNoWildcard = new ArrayList<SelectClauseElementCompiled>();
-        for (SelectClauseElementCompiled element : selectClause)
-        {
-            if (!(element instanceof SelectClauseElementWildcard))
-            {
-                selectNoWildcard.add(element);
-                continue;
-            }
-            SelectClauseStreamCompiledSpec streamSelect = new SelectClauseStreamCompiledSpec(triggeringStreamName, null);
-            streamSelect.setStreamNumber(1);
-            selectNoWildcard.add(streamSelect);
-        }
+        List<SelectClauseElementCompiled> selectNoWildcard = compileSelectNoWildcard(triggeringStreamName, selectClause);
 
         // Set up event types for select-clause evaluation: The first type does not contain anything as its the named window row which is not present for insert
         EventType dummyTypeNoProperties = new MapEventType(EventTypeMetadata.createAnonymous("merge_named_window_insert"), "merge_named_window_insert", 0, null, Collections.<String, Object>emptyMap(), null, null, null);
@@ -133,6 +122,22 @@ public class NamedWindowOnMergeHelper
         InternalEventRouter routerToUser = streamName.equals(namedWindowName) ? null : internalEventRouter;
         boolean audit = AuditEnum.INSERT.getAudit(statementContext.getAnnotations()) != null;
         return new NamedWindowOnMergeActionIns(filterEval, insertHelper, routerToUser, statementContext.getEpStatementHandle(), statementContext.getInternalEventEngineRouteDest(), audit);
+    }
+
+    public static List<SelectClauseElementCompiled> compileSelectNoWildcard(String triggeringStreamName, List<SelectClauseElementCompiled> selectClause) {
+        List<SelectClauseElementCompiled> selectNoWildcard = new ArrayList<SelectClauseElementCompiled>();
+        for (SelectClauseElementCompiled element : selectClause)
+        {
+            if (!(element instanceof SelectClauseElementWildcard))
+            {
+                selectNoWildcard.add(element);
+                continue;
+            }
+            SelectClauseStreamCompiledSpec streamSelect = new SelectClauseStreamCompiledSpec(triggeringStreamName, null);
+            streamSelect.setStreamNumber(1);
+            selectNoWildcard.add(streamSelect);
+        }
+        return selectNoWildcard;
     }
 
     public List<NamedWindowOnMergeMatch> getMatched() {

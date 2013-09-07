@@ -22,10 +22,7 @@ import com.espertech.esper.collection.DualWorkQueue;
 import com.espertech.esper.collection.ThreadWorkQueue;
 import com.espertech.esper.core.context.util.EPStatementAgentInstanceHandle;
 import com.espertech.esper.core.context.util.EPStatementAgentInstanceHandleComparator;
-import com.espertech.esper.core.start.EPPreparedExecuteMethod;
-import com.espertech.esper.core.start.EPPreparedExecuteMethodQuery;
-import com.espertech.esper.core.start.EPPreparedExecuteSingleStreamDelete;
-import com.espertech.esper.core.start.EPPreparedExecuteSingleStreamUpdate;
+import com.espertech.esper.core.start.*;
 import com.espertech.esper.core.thread.*;
 import com.espertech.esper.epl.annotation.AnnotationUtil;
 import com.espertech.esper.epl.declexpr.ExprDeclaredNode;
@@ -1566,7 +1563,10 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
             }
 
             StatementSpecCompiled compiledSpec = StatementLifecycleSvcImpl.compile(spec, epl, statementContext, true, annotations, visitor.getSubselects(), Collections.<ExprDeclaredNode>emptyList(), services);
-            if (compiledSpec.getFireAndForgetSpec() == null) {   // null indicates a select-statement, same as continuous query
+            if (compiledSpec.getInsertIntoDesc() != null) {
+                return new EPPreparedExecuteInsertInto(compiledSpec, services, statementContext);
+            }
+            else if (compiledSpec.getFireAndForgetSpec() == null) {   // null indicates a select-statement, same as continuous query
                 return new EPPreparedExecuteMethodQuery(compiledSpec, services, statementContext);
             }
             else if (compiledSpec.getFireAndForgetSpec() instanceof FireAndForgetSpecDelete) {

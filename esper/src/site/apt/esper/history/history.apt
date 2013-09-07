@@ -34,6 +34,8 @@ Version 4.10.0
   
   * Support for having-clause to have subquery
   
+  * Support for fire-and-forget queries that insert-into a named window
+
   * Please review changelog.txt for additional information.
 
   []
