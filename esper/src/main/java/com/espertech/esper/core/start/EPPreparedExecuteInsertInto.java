@@ -30,17 +30,6 @@ public class EPPreparedExecuteInsertInto extends EPPreparedExecuteSingleStream
 {
     public EPPreparedExecuteInsertInto(StatementSpecCompiled statementSpec, EPServicesContext services, StatementContext statementContext) throws ExprValidationException {
         super(associatedFromClause(statementSpec), services, statementContext);
-
-        if (statementSpec.getFilterRootNode() != null ||
-            statementSpec.getStreamSpecs().length > 0 ||
-            statementSpec.getHavingExprRootNode() != null ||
-            statementSpec.getOutputLimitSpec() != null ||
-            statementSpec.getForClauseSpec() != null ||
-            statementSpec.getMatchRecognizeSpec() != null ||
-            statementSpec.getOrderByList().length > 0 ||
-            statementSpec.getRowLimitSpec() != null) {
-            throw new ExprValidationException("Insert-into fire-and-forget query can only consist of an insert-into clause and a select-clause");
-        }
     }
 
     public EPPreparedExecuteSingleStreamExec getExecutor(FilterSpecCompiled filter, String aliasName) throws ExprValidationException {
@@ -74,7 +63,18 @@ public class EPPreparedExecuteInsertInto extends EPPreparedExecuteSingleStream
         return new EPPreparedExecuteSingleStreamExecInsert(exprEvaluatorContextStatement, insertHelper);
     }
 
-    private static StatementSpecCompiled associatedFromClause(StatementSpecCompiled statementSpec) {
+    private static StatementSpecCompiled associatedFromClause(StatementSpecCompiled statementSpec) throws ExprValidationException {
+        if (statementSpec.getFilterRootNode() != null ||
+                statementSpec.getStreamSpecs().length > 0 ||
+                statementSpec.getHavingExprRootNode() != null ||
+                statementSpec.getOutputLimitSpec() != null ||
+                statementSpec.getForClauseSpec() != null ||
+                statementSpec.getMatchRecognizeSpec() != null ||
+                statementSpec.getOrderByList().length > 0 ||
+                statementSpec.getRowLimitSpec() != null) {
+            throw new ExprValidationException("Insert-into fire-and-forget query can only consist of an insert-into clause and a select-clause");
+        }
+
         String namedWindowName = statementSpec.getInsertIntoDesc().getEventTypeName();
         NamedWindowConsumerStreamSpec namedWindowStream = new NamedWindowConsumerStreamSpec(namedWindowName, null, new ViewSpec[0], Collections.<ExprNode>emptyList(),
                 new StreamSpecOptions(), null);
