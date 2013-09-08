@@ -15,7 +15,7 @@ Event Processing with Esper and NEsper
 	Big Data processing engine for medium to high-velocity and high-variety data.
 
 
-New - Cloud Application for EPL Learning: {{{http://esper-epl-tryout.appspot.com}Esper EPL Online}}
+Esper Provides An Online Application for EPL Learning: {{{http://esper-epl-tryout.appspot.com}Esper EPL Online}}
 	
 	
 Technology Introduction
@@ -52,15 +52,17 @@ Esper Enterprise Edition Feature Summary
 
 	* Highly scalable, elastic, distributable and fault tolerant event processing
 
-	* Rich web-based multi-window GUI based on Apache Flex for design and management of EPL statements and CEP engine in general
+	* GUI for design and management of EPL statements and CEP engine in general (JavaScript and HTML 5)
 
-	* Real-time continuously-updating displays (charts, timeline, gauge, grids) that are interactive, composable, configurable and easy to integrate
+	* Real-time continuously-updating displays; jQuery plug-in, dashboard builder, JavaScript API
 
-	* Data distribution service for efficient 3-tier data fan-out from CEP engine(s) to browsers
+	* REST Web Services for CEP engine and push management
+	
+	* Efficient 3-tier push fan-out from CEP engine(s) to browsers
 	
 	* Hot deployment of EPL modules and event-driven applications
 	
-	* Integration with distributed caches: Oracle Coherence, VMware GemFire, GigaSpaces XAP, Hazelcast, Infinispan, Terracotta, IBM WebSphere eXtreme Scale
+	* Integration with common distributed caches
 	
 	* {{{http://www.espertech.com/products/esperee.php}Info and Download}} and {{{http://www.espertech.com/resources/sd_esperhqscreenshots.html}Screenshots}}
 
@@ -304,20 +306,15 @@ Core Esper Features
     
     * Actions can be Java methods and can also be declarative through the use of data flows such as for event I/O
 
+    * Many examples
+
+    	* J2EE and non-J2EE, from many different domains
+    
+    	* Java Messaging Service (JMS) server shell demonstrates a multi-threaded JMS server with dynamic statement management using Java Management Extensions (JMX)
+    	
+    	[]
     []		
     
-* Excellent documentation 
-
-* Many examples
-
-    * J2EE and non-J2EE, from many different domains
-    
-    * Java Messaging Service (JMS) server shell demonstrates a multi-threaded JMS server with dynamic statement management using Java Management Extensions (JMX)
-
-* Supportive user and developer community
-	  
-* Performance tested
-
 
 Typical Uses
 
@@ -354,11 +351,3 @@ Summary
 
 =====================
 =====================
-	We are happy to use licenses of {{{http://www.jetbrains.com/idea/?java_esper}IntelliJ IDEA}}, {{{http://www.jetbrains.com/resharper/?java_esper}ReSharper}}, and {{{http://www.jetbrains.com/profiler/?java_esper}dotTrace}} through the {{{http://www.jetbrains.com/devnet/index.html?java_esper}JetBrains Open Source Program}}
-	
-
-	YourKit is kindly supporting open source projects with its full-featured Java Profiler.
-	YourKit, LLC is creator of innovative and intelligent tools for profiling Java and .NET applications. 
-	Take a look at YourKit's leading software products: 
-	{{{http://www.yourkit.com/java/profiler/index.jsp}YourKit Java Profiler}} and
-	{{{http://www.yourkit.com/.net/profiler/index.jsp}YourKit .NET Profiler}}.

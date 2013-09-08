@@ -289,8 +289,8 @@ div.note h2, div.note p, div.tip h2, div.tip p, div.caution h2, div.caution p, d
 
 #title a.site_href {
     display:block;
-    height:72px;
-    width:300px;
+    height:70px;
+    width:289px;
     float:left;
     background:url(../images/espertech_logo.png) top left no-repeat;
 }

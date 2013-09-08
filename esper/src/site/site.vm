@@ -386,7 +386,7 @@ google.setOnLoadCallback(OnLoad, true);
 			</div>
 			<table border="0" width="95%">
 				<tr><td width="203px">
-					<img src="$relativePath/images/espertech_logo_transparent.png"/>
+					<img src="$relativePath/images/espertech_logo.gif" height="56" width="203"/>
 				</td><td width="380px">
 					<h2>Event Stream Intelligence: <small>Esper & NEsper</small></h2>
 				</td>
@@ -452,7 +452,7 @@ pageTracker._trackPageview();
 </script>
 
 <!-- IntelliJ IDEA -->
-<a href="http://www.jetbrains.com/idea/features/code_analysis.html" style="display:block; background:#0d3a9e url(http://www.jetbrains.com/idea/opensource/img/all/banners/idea468x60_blue.gif) no-repeat 10px 50%; border:solid 1px #0d3a9e; margin:0;padding:0;text-decoration:none;text-indent:0;letter-spacing:-0.001em; width:466px; height:58px" alt="Java IDE with unparalleled java code analyzer (600+ built-in inspections)" title="Java IDE with unparalleled java code analyzer (600+ built-in inspections)"><span style="margin: 5px 0 0 52px;padding: 0;float: left;font-size: 12px;cursor:pointer;  background-image:none;border:0;color: #acc4f9; font-family: trebuchet ms,arial,sans-serif;font-weight: normal;text-align:left;">Addicted to</span><span style="margin:0 0 0 205px;padding:18px 0 2px 0; line-height:13px;font-size:13px;cursor:pointer;  background-image:none;border:0;display:block; width:255px; color: #acc4f9; font-family: trebuchet ms,arial,sans-serif;font-weight: normal;text-align:left;">Java IDE with unparalleled java code <br/>analyzer (600+ built-in inspections)</span></a>
+<!-- <a href="http://www.jetbrains.com/idea/features/code_analysis.html" style="display:block; background:#0d3a9e url(http://www.jetbrains.com/idea/opensource/img/all/banners/idea468x60_blue.gif) no-repeat 10px 50%; border:solid 1px #0d3a9e; margin:0;padding:0;text-decoration:none;text-indent:0;letter-spacing:-0.001em; width:466px; height:58px" alt="Java IDE with unparalleled java code analyzer (600+ built-in inspections)" title="Java IDE with unparalleled java code analyzer (600+ built-in inspections)"><span style="margin: 5px 0 0 52px;padding: 0;float: left;font-size: 12px;cursor:pointer;  background-image:none;border:0;color: #acc4f9; font-family: trebuchet ms,arial,sans-serif;font-weight: normal;text-align:left;">Addicted to</span><span style="margin:0 0 0 205px;padding:18px 0 2px 0; line-height:13px;font-size:13px;cursor:pointer;  background-image:none;border:0;display:block; width:255px; color: #acc4f9; font-family: trebuchet ms,arial,sans-serif;font-weight: normal;text-align:left;">Java IDE with unparalleled java code <br/>analyzer (600+ built-in inspections)</span></a> -->
 
 </body>
 <!--
