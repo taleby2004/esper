@@ -18,6 +18,12 @@ import org.apache.commons.logging.LogFactory;
 
 import java.io.IOException;
 
+/**
+ * Reads a {@link java.io.Serializable} from {@link java.io.DataInput} and emits the resulting object.
+ * <p>
+ *     The input must carry an int-typed number of bytes followed by the serialized object.
+ * </p>
+ */
 public class DataInputToObjectCollectorSerializable implements DataInputToObjectCollector {
     private static final Log log = LogFactory.getLog(DataInputToObjectCollectorSerializable.class);
 

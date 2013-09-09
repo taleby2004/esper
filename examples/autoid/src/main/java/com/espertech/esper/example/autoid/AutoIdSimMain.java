@@ -138,7 +138,7 @@ public class AutoIdSimMain implements Runnable {
 
     private String generateEvent()
     {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append(XML_ROOT);
 
         String sensorId = SENSOR_IDS[RANDOM.nextInt(SENSOR_IDS.length)];

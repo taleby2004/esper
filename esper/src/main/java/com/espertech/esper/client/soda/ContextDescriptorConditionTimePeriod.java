@@ -31,6 +31,7 @@ public class ContextDescriptorConditionTimePeriod implements ContextDescriptorCo
     /**
      * Ctor.
      * @param timePeriod time period expression
+     * @param now indicator whether "now"
      */
     public ContextDescriptorConditionTimePeriod(Expression timePeriod, boolean now) {
         this.timePeriod = timePeriod;
@@ -53,10 +54,18 @@ public class ContextDescriptorConditionTimePeriod implements ContextDescriptorCo
         this.timePeriod = timePeriod;
     }
 
+    /**
+     * Returns "now" indicator
+     * @return "now" indicator
+     */
     public boolean isNow() {
         return now;
     }
 
+    /**
+     * Sets "now" indicator
+     * @param now "now" indicator
+     */
     public void setNow(boolean now) {
         this.now = now;
     }

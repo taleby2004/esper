@@ -249,7 +249,7 @@ public class ExprNodeUtility {
     throws ExprValidationException
     {
         // Reconstruct the original string
-        StringBuffer mappedProperty = new StringBuffer(identNode.getUnresolvedPropertyName());
+        StringBuilder mappedProperty = new StringBuilder(identNode.getUnresolvedPropertyName());
         if(identNode.getStreamOrPropertyName() != null)
         {
             mappedProperty.insert(0, identNode.getStreamOrPropertyName() + '.');

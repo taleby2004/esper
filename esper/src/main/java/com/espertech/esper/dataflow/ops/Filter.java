@@ -76,7 +76,7 @@ public class Filter implements DataFlowOpLifecycle {
             log.debug("Received row for filtering: " + Arrays.toString((Object[]) row));
         }
 
-        if (!(row instanceof EventBean)) {
+        if (!(row instanceof EventBeanSPI)) {
             theEvent.setUnderlying(row);
         }
         else {

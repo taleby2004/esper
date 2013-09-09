@@ -84,7 +84,7 @@ public class ResultSetProcessorFactoryFactory
         if (log.isDebugEnabled())
         {
             log.debug(".getProcessor Getting processor for " +
-                    " selectionList=" + selectClauseSpec.getSelectExprList() +
+                    " selectionList=" + Arrays.toString(selectClauseSpec.getSelectExprList()) +
                     " groupByNodes=" + Arrays.toString(groupByNodes) +
                     " optionalHavingNode=" + optionalHavingNode);
         }

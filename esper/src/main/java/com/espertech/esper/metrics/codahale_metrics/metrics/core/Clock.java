@@ -42,7 +42,6 @@ public abstract class Clock {
      *
      * @return the default {@link Clock} instance
      *
-     * @see com.yammer.metrics.core.Clock.UserTimeClock
      */
     public static Clock defaultClock() {
         return DEFAULT;

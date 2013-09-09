@@ -201,7 +201,7 @@ public class MethodResolver
 			return bestMatch;
 		}
 
-        StringBuffer parameters = new StringBuffer();
+        StringBuilder parameters = new StringBuilder();
         if(paramTypes != null && paramTypes.length != 0)
         {
             String appendString = "";
@@ -413,7 +413,7 @@ public class MethodResolver
         }
         else
         {
-            StringBuffer parameters = new StringBuffer();
+            StringBuilder parameters = new StringBuilder();
             String message = "Constructor not found for " + declaringClass.getSimpleName() + " taking ";
             if(paramTypes != null && paramTypes.length != 0)
             {

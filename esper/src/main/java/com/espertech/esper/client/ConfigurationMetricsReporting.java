@@ -158,7 +158,7 @@ public class ConfigurationMetricsReporting implements Serializable
     /**
      * Set to true to have the the engine register JMX mbeans, with the platform mbean server,
      * that provide key engine metrics.
-     * @param jmxEngineMetrics
+     * @param jmxEngineMetrics indicator whether enabled or not
      */
     public void setJmxEngineMetrics(boolean jmxEngineMetrics) {
         this.jmxEngineMetrics = jmxEngineMetrics;

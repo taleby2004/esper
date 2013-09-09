@@ -71,9 +71,6 @@ public final class StatementContext
     /**
      * Constructor.
      * @param stmtEngineServices is the engine services for the statement
-     * @param statementId is the statement is assigned for the statement for which this context exists
-     * @param statementName is the statement name
-     * @param expression is the EPL or pattern expression used
      * @param schedulingService implementation for schedule registration
      * @param scheduleBucket is for ordering scheduled callbacks within the view statements
      * @param epStatementHandle is the statements-own handle for use in registering callbacks with services

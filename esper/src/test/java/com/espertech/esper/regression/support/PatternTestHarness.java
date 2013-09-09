@@ -385,7 +385,7 @@ public class PatternTestHarness implements SupportBeanConstants
         int index = 0;
         for (EventDescriptor desc : events)
         {
-            StringBuffer buffer = new StringBuffer();
+            StringBuilder buffer = new StringBuilder();
             int count = 0;
 
             for (Map.Entry<String, Object> entry : desc.getEventProperties().entrySet())

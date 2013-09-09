@@ -117,7 +117,7 @@ public class TestExprMinMaxRowNode extends TestCase
         nodeMin.addChildNode(new SupportExprNode(new Double(doubleValue)));
         if (floatValue != null)
         {
-            nodeMin.addChildNode(new SupportExprNode(new Float(floatValue)));
+            nodeMin.addChildNode(new SupportExprNode(floatValue));
         }
         nodeMin.validate(ExprValidationContextFactory.makeEmpty());
     }

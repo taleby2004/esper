@@ -316,7 +316,7 @@ public class GroupByViewImpl extends ViewSupport implements CloneableView, Group
             return theEvent;
         }
         else if (holder instanceof Deque) {
-            ArrayDeque<EventBean> deque = (ArrayDeque<EventBean>) holder;
+            Deque<EventBean> deque = (Deque<EventBean>) holder;
             deque.add(theEvent);
             return deque;
         }

@@ -12,14 +12,16 @@
 package com.espertech.esper.client.dataflow.io;
 
 import com.espertech.esper.util.SerializerUtil;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.io.IOException;
 
+/**
+ * Writes a {@link java.io.Serializable} object to {@link java.io.DataOutput}.
+ * <p>
+ *     The output contains the byte array length integer followed by the byte array of the serialized object.
+ * </p>
+ */
 public class ObjectToDataOutputCollectorSerializable implements ObjectToDataOutputCollector {
-
-    private static final Log log = LogFactory.getLog(ObjectToDataOutputCollectorSerializable.class);
 
     public void collect(ObjectToDataOutputCollectorContext context) throws IOException {
         byte[] bytes = SerializerUtil.objectToByteArr(context.getEvent());

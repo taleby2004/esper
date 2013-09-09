@@ -83,10 +83,18 @@ public class SelectClauseExpression implements SelectClauseElement
         this.asName = asName;
     }
 
+    /**
+     * Returns indicator whether annotated as "@eventbean"
+     * @return "@eventbean" indicator
+     */
     public boolean isAnnotatedByEventFlag() {
         return annotatedByEventFlag;
     }
 
+    /**
+     * Sets indicator whether annotated as "@eventbean"
+     * @param annotatedByEventFlag "@eventbean" indicator
+     */
     public void setAnnotatedByEventFlag(boolean annotatedByEventFlag) {
         this.annotatedByEventFlag = annotatedByEventFlag;
     }

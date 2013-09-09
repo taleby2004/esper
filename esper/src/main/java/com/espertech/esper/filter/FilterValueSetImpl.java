@@ -11,6 +11,7 @@ package com.espertech.esper.filter;
 import com.espertech.esper.client.EventType;
 
 import java.io.StringWriter;
+import java.util.Arrays;
 
 /**
  * Container for filter values for use by the {@link FilterService} to filter and distribute incoming events.
@@ -52,7 +53,7 @@ public class FilterValueSetImpl implements FilterValueSet
     public String toString() {
         return "FilterValueSetImpl{" +
                 "eventType=" + eventType.getName() +
-                ", parameters=" + parameters +
+                ", parameters=" + Arrays.toString(parameters) +
                 '}';
     }
 

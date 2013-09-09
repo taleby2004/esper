@@ -36,10 +36,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.net.URI;
-import java.util.ArrayDeque;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Implementation for isolated runtime.
@@ -163,7 +160,7 @@ public class EPRuntimeIsolatedImpl implements EPRuntimeIsolatedSPI, InternalEven
 
         if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
         {
-            log.debug(".sendEvent Processing event " + objectarray);
+            log.debug(".sendEvent Processing event " + Arrays.toString(objectarray));
         }
 
         // Process event

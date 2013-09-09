@@ -86,7 +86,7 @@ public class TestJoinSetComposerImpl extends TestCase
     private String toString(Set<MultiKey<EventBean>> events)
     {
         String delimiter = "";
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
 
         for (MultiKey<EventBean> key : events)
         {
@@ -100,7 +100,7 @@ public class TestJoinSetComposerImpl extends TestCase
     private String toString(EventBean[] events)
     {
         String delimiter = "";
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         for (EventBean theEvent : events)
         {
             buf.append(delimiter);

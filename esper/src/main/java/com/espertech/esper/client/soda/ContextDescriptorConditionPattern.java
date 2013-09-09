@@ -33,6 +33,7 @@ public class ContextDescriptorConditionPattern implements ContextDescriptorCondi
      * Ctor.
      * @param pattern pattern expression
      * @param inclusive if the events of the pattern should be included in the contextual statements
+     * @param now indicator whether "now"
      */
     public ContextDescriptorConditionPattern(PatternExpr pattern, boolean inclusive, boolean now) {
         this.pattern = pattern;
@@ -72,10 +73,18 @@ public class ContextDescriptorConditionPattern implements ContextDescriptorCondi
         this.inclusive = inclusive;
     }
 
+    /**
+     * Returns "now" indicator
+     * @return "now" indicator
+     */
     public boolean isNow() {
         return now;
     }
 
+    /**
+     * Sets "now" indicator
+     * @param now "now" indicator
+     */
     public void setNow(boolean now) {
         this.now = now;
     }

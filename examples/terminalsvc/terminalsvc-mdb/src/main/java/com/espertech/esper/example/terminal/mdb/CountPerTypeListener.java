@@ -22,7 +22,7 @@ public class CountPerTypeListener implements UpdateListener
 
     public void update(EventBean[] newEvents, EventBean[] oldEvents)
     {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
 
         for (int i = 0; i < newEvents.length; i++)
         {

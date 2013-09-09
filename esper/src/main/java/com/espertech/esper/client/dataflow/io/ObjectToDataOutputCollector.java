@@ -13,6 +13,14 @@ package com.espertech.esper.client.dataflow.io;
 
 import java.io.IOException;
 
+/**
+ * Receives an object and writes to {@link java.io.DataOutput}.
+ */
 public interface ObjectToDataOutputCollector {
+    /**
+     * Write the received object to {@link java.io.DataOutput}.
+     * @param context the object and output
+     * @throws IOException when the write operation failed
+     */
     public void collect(ObjectToDataOutputCollectorContext context) throws IOException;
 }
