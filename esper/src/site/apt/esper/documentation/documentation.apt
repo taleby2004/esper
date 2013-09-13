@@ -1,0 +1,166 @@
+Documentation
+~~~~~~~~~~~~~~
+
+	Links to reference documentation and API JavaDocs can be found here.
+
+* Esper and EsperIO 4.10.0
+	
+	<<Esper Reference documentation>> : {{{../../esper-4.10.0/doc/reference/en-US/pdf/esper_reference.pdf}PDF print version}} \
+ 		{{{../../esper-4.10.0/doc/reference/en-US/html/index.html}Online HTML}} \
+ 		{{{../../esper-4.10.0/doc/reference/en-US/html_single/index.html}Single page HTML}}
+
+	<<Esper API JavaDoc>> : {{{../../esper-4.10.0/doc/api/index.html}API JavaDoc}}
+
+	<<EsperIO Reference documentation>> : {{{../../esperio-4.10.0/doc/reference/en-US/pdf/esper_adapter_reference.pdf}PDF print version}} \
+ 		{{{../../esperio-4.10.0/doc/reference/en-US/html/index.html}Online HTML}} \
+ 		{{{../../esperio-4.10.0/doc/reference/en-US/html_single/index.html}Single page HTML}}
+
+	<<EsperIO API JavaDoc>> : {{{../../esperio-4.10.0/doc/api/index.html}API JavaDoc}}
+
+
+* Esper and EsperIO 4.9.0
+	
+	<<Esper Reference documentation>> : {{{../../esper-4.9.0/doc/reference/en-US/pdf/esper_reference.pdf}PDF print version}} \
+ 		{{{../../esper-4.9.0/doc/reference/en-US/html/index.html}Online HTML}} \
+ 		{{{../../esper-4.9.0/doc/reference/en-US/html_single/index.html}Single page HTML}}
+
+	<<Esper API JavaDoc>> : {{{../../esper-4.9.0/doc/api/index.html}API JavaDoc}}
+
+	<<EsperIO Reference documentation>> : {{{../../esperio-4.9.0/doc/reference/en-US/pdf/esper_adapter_reference.pdf}PDF print version}} \
+ 		{{{../../esperio-4.9.0/doc/reference/en-US/html/index.html}Online HTML}} \
+ 		{{{../../esperio-4.9.0/doc/reference/en-US/html_single/index.html}Single page HTML}}
+
+	<<EsperIO API JavaDoc>> : {{{../../esperio-4.9.0/doc/api/index.html}API JavaDoc}}
+	
+
+* Esper and EsperIO 4.8.0
+	
+	<<Esper Reference documentation>> : {{{../../esper-4.8.0/doc/reference/en-US/pdf/esper_reference.pdf}PDF print version}} \
+ 		{{{../../esper-4.8.0/doc/reference/en-US/html/index.html}Online HTML}} \
+ 		{{{../../esper-4.8.0/doc/reference/en-US/html_single/index.html}Single page HTML}}
+
+	<<Esper API JavaDoc>> : {{{../../esper-4.8.0/doc/api/index.html}API JavaDoc}}
+
+	<<EsperIO Reference documentation>> : {{{../../esperio-4.8.0/doc/reference/en-US/pdf/esper_adapter_reference.pdf}PDF print version}} \
+ 		{{{../../esperio-4.8.0/doc/reference/en-US/html/index.html}Online HTML}} \
+ 		{{{../../esperio-4.8.0/doc/reference/en-US/html_single/index.html}Single page HTML}}
+
+	<<EsperIO API JavaDoc>> : {{{../../esperio-4.8.0/doc/api/index.html}API JavaDoc}}
+
+
+* Esper and EsperIO 4.7.0
+	
+	<<Esper Reference documentation>> : {{{../../esper-4.7.0/doc/reference/en-US/pdf/esper_reference.pdf}PDF print version}} \
+ 		{{{../../esper-4.7.0/doc/reference/en-US/html/index.html}Online HTML}} \
+ 		{{{../../esper-4.7.0/doc/reference/en-US/html_single/index.html}Single page HTML}}
+
+	<<Esper API JavaDoc>> : {{{../../esper-4.7.0/doc/api/index.html}API JavaDoc}}
+
+	<<EsperIO Reference documentation>> : {{{../../esperio-4.7.0/doc/reference/en-US/pdf/esper_adapter_reference.pdf}PDF print version}} \
+ 		{{{../../esperio-4.7.0/doc/reference/en-US/html/index.html}Online HTML}} \
+ 		{{{../../esperio-4.7.0/doc/reference/en-US/html_single/index.html}Single page HTML}}
+
+	<<EsperIO API JavaDoc>> : {{{../../esperio-4.7.0/doc/api/index.html}API JavaDoc}}
+
+* Esper and EsperIO 4.6.0
+	
+	<<Esper Reference documentation>> : {{{../../esper-4.6.0/doc/reference/en-US/pdf/esper_reference.pdf}PDF print version}} \
+ 		{{{../../esper-4.6.0/doc/reference/en-US/html/index.html}Online HTML}} \
+ 		{{{../../esper-4.6.0/doc/reference/en-US/html_single/index.html}Single page HTML}}
+
+	<<Esper API JavaDoc>> : {{{../../esper-4.6.0/doc/api/index.html}API JavaDoc}}
+
+	<<EsperIO Reference documentation>> : {{{../../esperio-4.6.0/doc/reference/en-US/pdf/esper_adapter_reference.pdf}PDF print version}} \
+ 		{{{../../esperio-4.6.0/doc/reference/en-US/html/index.html}Online HTML}} \
+ 		{{{../../esperio-4.6.0/doc/reference/en-US/html_single/index.html}Single page HTML}}
+
+	<<EsperIO API JavaDoc>> : {{{../../esperio-4.6.0/doc/api/index.html}API JavaDoc}}
+
+* Esper and EsperIO 4.5.0
+	
+	<<Esper Reference documentation>> : {{{../../esper-4.5.0/doc/reference/en/pdf/esper_reference.pdf}PDF print version}} \
+ 		{{{../../esper-4.5.0/doc/reference/en/html/index.html}Online HTML}} \
+ 		{{{../../esper-4.5.0/doc/reference/en/html_single/index.html}Single page HTML}}
+
+	<<Esper API JavaDoc>> : {{{../../esper-4.5.0/doc/api/index.html}API JavaDoc}}
+
+	<<EsperIO Reference documentation>> : {{{../../esperio-4.5.0/doc/reference/en/pdf/esper_adapter_reference.pdf}PDF print version}} \
+ 		{{{../../esperio-4.5.0/doc/reference/en/html/index.html}Online HTML}} \
+ 		{{{../../esperio-4.5.0/doc/reference/en/html_single/index.html}Single page HTML}}
+
+	<<EsperIO API JavaDoc>> : {{{../../esperio-4.5.0/doc/api/index.html}API JavaDoc}}
+
+* Esper and EsperIO 4.4.0
+	
+	<<Esper Reference documentation>> : {{{../../esper-4.4.0/doc/reference/en/pdf/esper_reference.pdf}PDF print version}} \
+ 		{{{../../esper-4.4.0/doc/reference/en/html/index.html}Online HTML}} \
+ 		{{{../../esper-4.4.0/doc/reference/en/html_single/index.html}Single page HTML}}
+
+	<<Esper API JavaDoc>> : Please download the distribution.
+
+	<<EsperIO Reference documentation>> : {{{../../esperio-4.4.0/doc/reference/en/pdf/esper_adapter_reference.pdf}PDF print version}} \
+ 		{{{../../esperio-4.4.0/doc/reference/en/html/index.html}Online HTML}} \
+ 		{{{../../esperio-4.4.0/doc/reference/en/html_single/index.html}Single page HTML}}
+
+	<<EsperIO API JavaDoc>> : Please download the distribution.
+
+
+* Esper and EsperIO 4.3.0
+	
+	<<Esper Reference documentation>> : {{{../../esper-4.3.0/doc/reference/en/pdf/esper_reference.pdf}PDF print version}} \
+ 		{{{../../esper-4.3.0/doc/reference/en/html/index.html}Online HTML}} \
+ 		{{{../../esper-4.3.0/doc/reference/en/html_single/index.html}Single page HTML}}
+
+	<<Esper API JavaDoc>> : Please download the distribution.
+
+	<<EsperIO Reference documentation>> : {{{../../esperio-4.3.0/doc/reference/en/pdf/esper_adapter_reference.pdf}PDF print version}} \
+ 		{{{../../esperio-4.3.0/doc/reference/en/html/index.html}Online HTML}} \
+ 		{{{../../esperio-4.3.0/doc/reference/en/html_single/index.html}Single page HTML}}
+
+	<<EsperIO API JavaDoc>> : Please download the distribution.
+
+* Esper and EsperIO 4.2.0
+	
+	<<Esper Reference documentation>> : {{{../../esper-4.2.0/doc/reference/en/pdf/esper_reference.pdf}PDF print version}} \
+ 		{{{../../esper-4.2.0/doc/reference/en/html/index.html}Online HTML}} \
+ 		{{{../../esper-4.2.0/doc/reference/en/html_single/index.html}Single page HTML}}
+
+	<<Esper API JavaDoc>> : Please download the distribution.
+
+	<<EsperIO Reference documentation>> : {{{../../esperio-4.2.0/doc/reference/en/pdf/esper_adapter_reference.pdf}PDF print version}} \
+ 		{{{../../esperio-4.2.0/doc/reference/en/html/index.html}Online HTML}} \
+ 		{{{../../esperio-4.2.0/doc/reference/en/html_single/index.html}Single page HTML}}
+
+	<<EsperIO API JavaDoc>> : Please download the distribution.
+
+* Esper and EsperIO 4.1.0
+	
+	<<Esper Reference documentation>> : {{{../../esper-4.1.0/doc/reference/en/pdf/esper_reference.pdf}PDF print version}} \
+ 		{{{../../esper-4.1.0/doc/reference/en/html/index.html}Online HTML}} \
+ 		{{{../../esper-4.1.0/doc/reference/en/html_single/index.html}Single page HTML}}
+
+	<<Esper API JavaDoc>> : Please download the distribution.
+
+	<<EsperIO Reference documentation>> : {{{../../esperio-4.1.0/doc/reference/en/pdf/esper_adapter_reference.pdf}PDF print version}} \
+ 		{{{../../esperio-4.1.0/doc/reference/en/html/index.html}Online HTML}} \
+ 		{{{../../esperio-4.1.0/doc/reference/en/html_single/index.html}Single page HTML}}
+
+	<<EsperIO API JavaDoc>> : Please download the distribution.
+
+* Esper and EsperIO 4.0.0
+	
+	<<Esper Reference documentation>> : {{{../../esper-4.0.0/doc/reference/en/pdf/esper_reference.pdf}PDF print version}} \
+ 		{{{../../esper-4.0.0/doc/reference/en/html/index.html}Online HTML}} \
+ 		{{{../../esper-4.0.0/doc/reference/en/html_single/index.html}Single page HTML}}
+
+	<<Esper API JavaDoc>> : Please download the distribution.
+
+	<<EsperIO Reference documentation>> : {{{../../esperio-4.0.0/doc/reference/en/pdf/esper_adapter_reference.pdf}PDF print version}} \
+ 		{{{../../esperio-4.0.0/doc/reference/en/html/index.html}Online HTML}} \
+ 		{{{../../esperio-4.0.0/doc/reference/en/html_single/index.html}Single page HTML}}
+
+	<<EsperIO API JavaDoc>> : Please download the distribution.
+
+* Esper and EsperIO 3.5.0 and older
+	
+	Please download the distribution.
